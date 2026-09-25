@@ -13,6 +13,14 @@ if [ ! -f /var/www/html/.env ]; then
     cp /var/www/html/.env.example /var/www/html/.env
 fi
 
+# Configure APP_URL (using Render's automatic external URL if present)
+if [ -n "${RENDER_EXTERNAL_URL}" ]; then
+    APP_URL="${RENDER_EXTERNAL_URL}"
+fi
+if [ -n "${APP_URL}" ]; then
+    sed -i "s|^APP_URL=.*|APP_URL=${APP_URL}|" /var/www/html/.env
+fi
+
 # Ensure APP_KEY is set (generate automatically if missing)
 if [ -n "${APP_KEY}" ]; then
     sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" /var/www/html/.env
