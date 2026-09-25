@@ -62,6 +62,12 @@ if [ "${SKIP_MIGRATIONS}" != "true" ]; then
     php artisan migrate --force || echo "Warning: Migration failed. Check DB connection settings."
 fi
 
+# Seed accounts and default data (CHO, Midwife, BHW, Patients)
+if [ "${SKIP_SEED}" != "true" ]; then
+    echo "Seeding database accounts and data..."
+    php artisan db:seed --force || echo "Warning: Seeding encountered a warning or was already seeded."
+fi
+
 # Clear any cached config so runtime environment variables are active
 php artisan config:clear || true
 php artisan route:clear || true

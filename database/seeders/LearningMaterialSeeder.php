@@ -12,6 +12,10 @@ class LearningMaterialSeeder extends Seeder
      */
     public function run(): void
     {
+        if (LearningMaterial::where('material_type', 'article')->exists()) {
+            return;
+        }
+
         // Articles
         LearningMaterial::create([
             'title' => 'Healthy Pregnancy Tips',
