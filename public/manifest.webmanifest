@@ -1,0 +1,32 @@
+{
+  "name": "ReproCare — Maternal & Reproductive Health",
+  "short_name": "ReproCare",
+  "description": "Community-based maternal and reproductive health tracking for BHWs, midwives, RHU and CHO.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FDF2F8",
+  "theme_color": "#EC4899",
+  "categories": ["health", "medical"],
+  "icons": [
+    {
+      "src": "/images/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/images/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

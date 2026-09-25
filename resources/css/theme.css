@@ -1,0 +1,197 @@
+@import 'design-tokens.css';
+
+/* Shared color layer, loaded after legacy page styles. No layout overrides. */
+:root, .rc-appearance-preview {
+    --bs-body-color:var(--color-text); --bs-body-bg:var(--color-bg);
+    --bs-secondary-color:var(--color-text-muted); --bs-border-color:var(--color-border);
+    --bs-link-color:var(--color-primary-text); --bs-link-hover-color:var(--color-primary-text);
+}
+:root[data-theme][data-bs-theme] body, :root[data-theme][data-bs-theme] body .main-content { background-color:var(--color-bg) !important; color:var(--color-text); }
+:root[data-theme][data-bs-theme] body :is(.navbar,.sidebar,.dropdown-menu,.modal-content,.offcanvas,.card,.pref-card,.settings-nav,.public-header) {
+    background-color:var(--color-surface) !important; color:var(--color-text); border-color:var(--color-border) !important;
+}
+:root[data-theme][data-bs-theme] body :is(h1,h2,h3,h4,h5,h6,.text-dark,.text-body) { color:var(--color-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.text-muted,.text-secondary,.empty-state,.form-text) { color:var(--color-text-muted) !important; }
+:root[data-theme][data-bs-theme] body :is(.bg-white,.bg-light) { background-color:var(--color-surface) !important; }
+:root[data-theme][data-bs-theme] body :is(.card-header,.card-footer,.modal-header,.modal-footer) { background-color:var(--color-surface); border-color:var(--color-border) !important; }
+:root[data-theme][data-bs-theme] body a:not(.btn):not(.button):not(.nav-link):not(.dropdown-item):not(.public-brand):not(.navbar-brand):not(.settings-nav-item):not(.women-dock-link) { color:var(--color-primary-text); }
+:root[data-theme][data-bs-theme] body a:not(.btn):not(.button):hover { text-decoration-color:var(--color-primary-text); }
+:root[data-theme][data-bs-theme] body .text-primary { color:var(--color-primary-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.btn-primary,.btn-dark,.btn-black-pill,.btn-circle-action,.button-primary,.an-button) {
+    color:var(--color-primary-on) !important; background:var(--color-primary) !important;
+    border-color:var(--color-primary) !important; box-shadow:none;
+}
+:root[data-theme][data-bs-theme] body :is(.btn-primary,.btn-dark,.btn-black-pill,.btn-circle-action,.button-primary,.an-button):is(:hover,:active,:focus-visible) {
+    color:var(--color-primary-on-hover) !important; background:var(--color-primary-hover) !important; border-color:var(--color-primary-hover) !important;
+}
+:root[data-theme][data-bs-theme] body :is(.btn-secondary,.button-secondary) { color:var(--color-secondary-on) !important; background:var(--color-secondary) !important; border-color:var(--color-secondary) !important; }
+:root[data-theme][data-bs-theme] body :is(.btn-secondary,.button-secondary):is(:hover,:active) { color:var(--color-secondary-on-hover) !important; background:var(--color-secondary-hover) !important; border-color:var(--color-secondary-hover) !important; }
+
+/* ── System-wide table action buttons: one standard everywhere.
+   Usage: wrap an icon-only button group in .tbl-actions (never on groups
+   containing text-labeled buttons). Gives identical 38px boxes, centered
+   icons, and vertically centered rows in every module. */
+:root[data-theme][data-bs-theme] body :is(.table-responsive,.modern-table-wrap,.table-scroll,.print-scroll) :is(td) { vertical-align:middle; }
+:root[data-theme][data-bs-theme] body .tbl-actions { display:inline-flex; align-items:center; justify-content:center; gap:.5rem; flex-wrap:wrap; }
+:root[data-theme][data-bs-theme] body .tbl-actions form { margin:0; }
+:root[data-theme][data-bs-theme] body .tbl-actions .btn { width:38px; height:38px; padding:0; border-radius:12px; display:inline-flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+:root[data-theme][data-bs-theme] body .tbl-actions .btn > i { line-height:1; }
+
+/* ── Dark-pill CTA family → theme-aware accent green + guaranteed white text.
+   Beats the global anchor-color rule above (which was repainting these labels
+   primary-text). Hue follows the CHO accent picker; color-mix deepens it so
+   white text keeps contrast. Plain-var fallback first for old browsers. */
+:root[data-theme][data-bs-theme] body :is(a.rc-btn-pink,button.rc-btn-pink,.rc-send,.forum-composer-btn,.create-publish-btn,.ck-btn-dark,.ho-dark-btn,.usr-apply-btn,.ds-filter-btn,.ds-view-btn,.arch-restore-btn,.cycle-nav-dark,.mark-all-btn:hover,.pp-clear-btn:hover) {
+    color:var(--color-white) !important; background:var(--color-accent) !important; background:color-mix(in srgb, var(--color-accent) 75%, black) !important;
+    border-color:var(--color-accent) !important;
+}
+:root[data-theme][data-bs-theme] body :is(a.rc-btn-pink,button.rc-btn-pink,.rc-send,.forum-composer-btn,.create-publish-btn,.ck-btn-dark,.ho-dark-btn,.usr-apply-btn,.ds-filter-btn,.ds-view-btn,.arch-restore-btn,.cycle-nav-dark,.mark-all-btn:hover,.pp-clear-btn:hover):is(:hover,:active,:focus-visible) {
+    color:var(--color-white) !important; background:var(--color-accent-hover) !important; background:color-mix(in srgb, var(--color-accent-hover) 70%, black) !important;
+    border-color:var(--color-accent-hover) !important;
+}
+:root[data-theme][data-bs-theme] body :is(a.rc-btn-pink,button.rc-btn-pink,.rc-send,.forum-composer-btn,.create-publish-btn,.ck-btn-dark,.ho-dark-btn,.usr-apply-btn,.ds-filter-btn,.ds-view-btn,.arch-restore-btn,.cycle-nav-dark,.mark-all-btn:hover,.pp-clear-btn:hover) :is(i,svg,span) { color:var(--color-white) !important; }
+/* Light ghost buttons that are anchors (e.g. Trash): restore intended ink text. */
+:root[data-theme][data-bs-theme] body a.rc-btn-ghost { color:var(--color-text) !important; }
+:root[data-theme][data-bs-theme] body a.rc-btn-ghost :is(i,svg) { color:var(--color-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.btn-outline-primary,.btn-soft-purple,.btn-lavender-pill,.btn-outline,.an-topic) { color:var(--color-primary-text) !important; background:var(--color-primary-soft) !important; border-color:var(--color-primary-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.btn-outline-primary,.btn-soft-purple,.btn-lavender-pill,.an-topic):is(:hover,.active) { color:var(--color-primary-on) !important; background:var(--color-primary) !important; }
+:root[data-theme][data-bs-theme] body :is(.btn-outline-secondary,.an-quiet-button) { color:var(--color-secondary-text) !important; background:var(--color-surface) !important; border-color:var(--color-secondary-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.btn-outline-secondary,.an-quiet-button):hover { color:var(--color-secondary-text) !important; background:var(--color-secondary-soft) !important; }
+:root[data-theme][data-bs-theme] body :is(.sidebar .nav-link,.nav-tabs .nav-link,.nav-pills .nav-link,.settings-nav-item,.women-dock-link,.dropdown-item) { color:var(--color-text-muted); }
+:root[data-theme][data-bs-theme] body :is(.sidebar .nav-link,.nav-tabs .nav-link,.nav-pills .nav-link,.settings-nav-item,.women-dock-link,.dropdown-item):hover { background:var(--color-primary-soft) !important; color:var(--color-primary-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.sidebar .nav-link,.nav-tabs .nav-link,.nav-pills .nav-link,.settings-nav-item,.women-dock-link,.dropdown-item).active {
+    background:var(--color-primary-soft) !important; color:var(--color-primary-text) !important; border-color:var(--color-primary) !important;
+    box-shadow:inset 3px 0 0 var(--color-primary);
+}
+:root[data-theme][data-bs-theme] body :is(.sidebar .nav-link,.settings-nav-item,.women-dock-link).active i { color:var(--color-primary-text) !important; }
+/* Sidebar selected page: near-charcoal pill, darker on hover (all staff portals, both themes).
+   Doubled class outranks the generic tint above; this block must stay after it. */
+:root[data-theme][data-bs-theme] body .sidebar .nav-link.active.active { background:#171B22 !important; background-color:#171B22 !important; color:#FFFFFF !important; border-color:transparent !important; box-shadow:0 4px 14px rgb(16 24 40 / .25); }
+:root[data-theme][data-bs-theme] body .sidebar .nav-link.active.active i { color:#FFFFFF !important; }
+:root[data-theme][data-bs-theme] body .sidebar .nav-link.active.active:hover { background:#10131A !important; background-color:#10131A !important; color:#FFFFFF !important; }
+:root[data-theme][data-bs-theme] body .sidebar .nav-link.active.active:hover i { color:#FFFFFF !important; }
+:root[data-theme][data-bs-theme] body :is(.navbar-brand,.public-brand,.fb-hero-logo) { color:var(--color-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.brand-accent,.navbar-brand .brand-care,.public-brand .brand-accent,.fb-hero-logo span span) { color:#F06292 !important; }
+:root[data-theme][data-bs-theme] body :is(.form-control,.form-select,.input-group-text,.clinical-input) {
+    color:var(--color-text) !important; background-color:var(--color-surface) !important; border-color:var(--color-input-border) !important;
+}
+:root[data-theme][data-bs-theme] body :is(input,textarea)::placeholder { color:var(--color-text-muted) !important; opacity:1; }
+:root[data-theme][data-bs-theme] body :is(input,select,textarea):focus { border-color:var(--color-primary-text) !important; box-shadow:0 0 0 3px var(--focus-ring) !important; }
+:root[data-theme][data-bs-theme] body :is(input,textarea)[readonly], :root[data-theme][data-bs-theme] body :is(input,select,textarea):disabled { background-color:var(--color-surface-soft) !important; color:var(--color-text-muted) !important; }
+:root[data-theme][data-bs-theme] body :is(input[type="radio"],input[type="checkbox"]) { accent-color:var(--color-primary); }
+:root[data-theme][data-bs-theme] body .form-check-input:checked, :root[data-theme][data-bs-theme] body input:checked + .rc-track { background-color:var(--color-primary) !important; border-color:var(--color-primary-text) !important; }
+:root[data-theme][data-bs-theme] body :focus-visible { outline:2px solid var(--color-primary-text) !important; outline-offset:3px; }
+:root[data-theme][data-bs-theme] body .table { --bs-table-bg:var(--color-surface); --bs-table-color:var(--color-text); --bs-table-striped-bg:var(--color-surface-soft); --bs-table-striped-color:var(--color-text); --bs-table-hover-bg:var(--color-primary-soft); --bs-table-hover-color:var(--color-text); border-color:var(--color-border); }
+:root[data-theme][data-bs-theme] body .table :is(th,td) { color:var(--color-text); border-color:var(--color-border) !important; }
+:root[data-theme][data-bs-theme] body .table thead th { color:var(--color-text-muted); background:var(--color-surface-soft); }
+:root[data-theme][data-bs-theme] body .page-link { color:var(--color-primary-text) !important; background:var(--color-surface) !important; border-color:var(--color-border) !important; }
+:root[data-theme][data-bs-theme] body .page-item.active .page-link { color:var(--color-primary-on) !important; background:var(--color-primary) !important; border-color:var(--color-primary) !important; }
+:root[data-theme][data-bs-theme] body .page-item.disabled .page-link { color:var(--color-text-muted) !important; background:var(--color-surface-soft) !important; }
+:root[data-theme][data-bs-theme] body .page-link:hover { background:var(--color-primary-soft) !important; }
+:root[data-theme][data-bs-theme] body :is(.badge.bg-secondary,.badge-secondary,.pill-badge-purple) { color:var(--color-secondary-text) !important; background:var(--color-secondary-soft) !important; }
+:root[data-theme][data-bs-theme] body :is(.badge.bg-primary,.badge-primary) { color:var(--color-primary-text) !important; background:var(--color-primary-soft) !important; }
+
+/* Calm surfaces replace saturated hero/card gradients without changing geometry. */
+:root[data-theme][data-bs-theme] body .main-content .page-hero { background:var(--color-secondary-soft) !important; color:var(--color-text) !important; border-color:var(--color-border) !important; box-shadow:var(--shadow-sm) !important; }
+:root[data-theme][data-bs-theme] body .main-content .page-hero::before, :root[data-theme][data-bs-theme] body .main-content .page-hero::after { background-image:none !important; }
+:root[data-theme][data-bs-theme] body .main-content .page-hero :is(h1,h2,h3,p,.page-hero-title,.page-hero-subtitle,.page-hero-desc) { color:var(--color-text) !important; }
+:root[data-theme][data-bs-theme] body :is(.metric-card-primary,.metric-card-indigo) { background:var(--color-primary-soft) !important; color:var(--color-primary-text) !important; }
+:root[data-theme][data-bs-theme] body .metric-card-rose { background:var(--color-pink-soft) !important; color:var(--color-pink-text) !important; }
+:root[data-theme][data-bs-theme] body .metric-card-cyan { background:var(--color-info-soft) !important; color:var(--color-info-text) !important; }
+:root[data-theme][data-bs-theme] body .metric-card-green { background:var(--color-success-soft) !important; color:var(--color-success-text) !important; }
+:root[data-theme][data-bs-theme] body .metric-card-amber { background:var(--color-warning-soft) !important; color:var(--color-warning-text) !important; }
+:root[data-theme][data-bs-theme] body .metric-card :is(.metric-card-value,.metric-card-note,.metric-card-title,.text-white) { color:inherit !important; }
+
+/* Appearance controls are the only new UI; all existing spacing is retained. */
+.appearance-group { margin:0 0 1.5rem; padding:0; border:0; min-width:0; }
+.appearance-group legend { float:none; font-size:.9rem; font-weight:700; margin-bottom:.65rem; }
+.appearance-options { display:flex; flex-wrap:wrap; gap:.65rem; }
+.appearance-choice { display:flex; align-items:center; gap:.6rem; padding:.75rem; border:1px solid var(--color-input-border); background:var(--color-surface); border-radius:12px; cursor:pointer; }
+.appearance-choice:has(input:checked) { border-color:var(--color-primary-text); box-shadow:0 0 0 1px var(--color-primary-text); background:var(--color-primary-soft); }
+.appearance-choice input { width:1rem; height:1rem; margin:0; padding:0; }
+.appearance-choice strong { font-size:.82rem; }
+.appearance-choice small { display:block; font-size:.72rem; color:var(--color-text-muted); }
+.appearance-choice small[hidden] { display:none; }
+.appearance-swatch { width:1.4rem; height:1.4rem; border-radius:50%; background:var(--swatch); border:1px solid var(--color-input-border); }
+.appearance-choice.is-incompatible { opacity:.65; cursor:not-allowed; border-style:dashed; }
+.rc-appearance-preview { display:flex; border:1px solid var(--color-border); border-radius:14px; overflow:hidden; color:var(--color-text); background:var(--color-bg); }
+.appearance-preview-nav { width:26%; min-width:110px; padding:1rem; background:var(--color-surface); border-right:1px solid var(--color-border); display:flex; flex-direction:column; gap:.85rem; }
+.appearance-preview-brand span { color:var(--color-pink-text); }
+.appearance-preview-active { background:var(--color-primary-soft); color:var(--color-primary-text); padding:.5rem; border-radius:8px; box-shadow:inset 3px 0 var(--color-primary); }
+.appearance-preview-body { flex:1; min-width:0; padding:1.25rem; }
+.appearance-preview-muted { color:var(--color-text-muted); font-size:.82rem; }
+.appearance-preview-card { background:var(--color-surface); border:1px solid var(--color-border); padding:1rem; border-radius:12px; }
+.appearance-preview-badge { display:inline-block; padding:.25rem .6rem; border-radius:20px; color:var(--color-secondary-text); background:var(--color-secondary-soft); border-left:3px solid var(--color-accent); }
+@media(max-width:575px) { .rc-appearance-preview { flex-direction:column; } .appearance-preview-nav { width:auto; flex-direction:row; flex-wrap:wrap; border-right:0; border-bottom:1px solid var(--color-border); } }
+
+/* Fixed success meaning, independent of brand selection. */
+:root[data-theme][data-bs-theme] body :is(.text-success) {color:var(--color-success-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.badge.bg-success,.badge-success,.alert-success,.risk-low,.badge-low,.pill-badge-green,.public-alert-success) {color:var(--color-success-text) !important;background:var(--color-success-soft) !important;border-color:var(--color-success-border) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-success) {background:var(--color-success) !important;color:var(--color-success-on) !important;border-color:var(--color-success) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-success):hover {background:var(--color-success-text) !important;color:var(--color-surface) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-success) {background:var(--color-surface) !important;color:var(--color-success-text) !important;border-color:var(--color-success-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-success):hover {background:var(--color-success-soft) !important;}
+:root[data-theme][data-bs-theme] body .bg-success:not(.badge) {background-color:var(--color-success) !important;}
+
+/* Fixed warning meaning, independent of brand selection. */
+:root[data-theme][data-bs-theme] body :is(.text-warning) {color:var(--color-warning-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.badge.bg-warning,.badge-warning,.alert-warning,.risk-medium,.risk-moderate,.badge-medium,.pill-badge-amber,.public-alert-warning) {color:var(--color-warning-text) !important;background:var(--color-warning-soft) !important;border-color:var(--color-warning-border) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-warning) {background:var(--color-warning) !important;color:var(--color-warning-on) !important;border-color:var(--color-warning) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-warning):hover {background:var(--color-warning-text) !important;color:var(--color-surface) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-warning) {background:var(--color-surface) !important;color:var(--color-warning-text) !important;border-color:var(--color-warning-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-warning):hover {background:var(--color-warning-soft) !important;}
+:root[data-theme][data-bs-theme] body .bg-warning:not(.badge) {background-color:var(--color-warning) !important;}
+
+/* Fixed danger meaning, independent of brand selection. */
+:root[data-theme][data-bs-theme] body :is(.text-danger) {color:var(--color-danger-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.badge.bg-danger,.badge-danger,.alert-danger,.risk-high,.risk-critical,.badge-high,.badge-critical,.pill-badge-red,.public-alert-danger) {color:var(--color-danger-text) !important;background:var(--color-danger-soft) !important;border-color:var(--color-danger-border) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-danger) {background:var(--color-danger) !important;color:var(--color-danger-on) !important;border-color:var(--color-danger) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-danger):hover {background:var(--color-danger-text) !important;color:var(--color-surface) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-danger) {background:var(--color-surface) !important;color:var(--color-danger-text) !important;border-color:var(--color-danger-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-danger):hover {background:var(--color-danger-soft) !important;}
+:root[data-theme][data-bs-theme] body .bg-danger:not(.badge) {background-color:var(--color-danger) !important;}
+
+/* ReproCare wordmark: designed Baloo 2 letterforms, fixed black + pink brand.
+   Attribute-free fallback first (correct pre-JS/no-JS), themed gates above win after boot. */
+body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span,
+body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
+    font-family:'Baloo 2', 'Plus Jakarta Sans', sans-serif;
+    font-weight:800;
+    letter-spacing:0;
+    color:var(--color-ink);
+}
+body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
+    /* Keep the "Care" half of the wordmark a clear, recognizable pink. */
+    color:#F06292;
+}
+[data-theme="dark"] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span {
+    color:var(--color-white);
+}
+[data-theme="dark"] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
+    color:#F48FB1;
+}
+:root[data-theme][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span,
+:root[data-theme][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
+    font-family:'Baloo 2', 'Plus Jakarta Sans', sans-serif !important;
+    font-weight:800 !important;
+    letter-spacing:0 !important;
+    color:var(--color-ink) !important;
+}
+:root[data-theme][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
+    color:#F06292 !important;
+}
+:root[data-theme="dark"][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span {
+    color:var(--color-white) !important;
+}
+:root[data-theme="dark"][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
+    color:#F48FB1 !important;
+}
+
+/* Fixed info meaning, independent of brand selection. */
+:root[data-theme][data-bs-theme] body :is(.text-info) {color:var(--color-info-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.badge.bg-info,.badge-info,.alert-info,.pill-badge-blue,.public-alert-info) {color:var(--color-info-text) !important;background:var(--color-info-soft) !important;border-color:var(--color-info-border) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-info) {background:var(--color-info) !important;color:var(--color-info-on) !important;border-color:var(--color-info) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-info):hover {background:var(--color-info-text) !important;color:var(--color-surface) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-info) {background:var(--color-surface) !important;color:var(--color-info-text) !important;border-color:var(--color-info-text) !important;}
+:root[data-theme][data-bs-theme] body :is(.btn-outline-info):hover {background:var(--color-info-soft) !important;}
+:root[data-theme][data-bs-theme] body .bg-info:not(.badge) {background-color:var(--color-info) !important;}

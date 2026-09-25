@@ -1,0 +1,221 @@
+CREATE TABLE IF NOT EXISTS "migrations"(
+  "id" integer primary key autoincrement not null,
+  "migration" varchar not null,
+  "batch" integer not null
+);
+CREATE TABLE IF NOT EXISTS "users"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "email" varchar not null,
+  "email_verified_at" datetime,
+  "password" varchar not null,
+  "remember_token" varchar,
+  "created_at" datetime,
+  "updated_at" datetime,
+  "role" varchar check("role" in('midwife', 'bhw', 'user')) not null default 'user',
+  "address" varchar,
+  "barangay" varchar
+);
+CREATE UNIQUE INDEX "users_email_unique" on "users"("email");
+CREATE TABLE IF NOT EXISTS "password_reset_tokens"(
+  "email" varchar not null,
+  "token" varchar not null,
+  "created_at" datetime,
+  primary key("email")
+);
+CREATE TABLE IF NOT EXISTS "sessions"(
+  "id" varchar not null,
+  "user_id" integer,
+  "ip_address" varchar,
+  "user_agent" text,
+  "payload" text not null,
+  "last_activity" integer not null,
+  primary key("id")
+);
+CREATE INDEX "sessions_user_id_index" on "sessions"("user_id");
+CREATE INDEX "sessions_last_activity_index" on "sessions"("last_activity");
+CREATE TABLE IF NOT EXISTS "cache"(
+  "key" varchar not null,
+  "value" text not null,
+  "expiration" integer not null,
+  primary key("key")
+);
+CREATE INDEX "cache_expiration_index" on "cache"("expiration");
+CREATE TABLE IF NOT EXISTS "cache_locks"(
+  "key" varchar not null,
+  "owner" varchar not null,
+  "expiration" integer not null,
+  primary key("key")
+);
+CREATE INDEX "cache_locks_expiration_index" on "cache_locks"("expiration");
+CREATE TABLE IF NOT EXISTS "jobs"(
+  "id" integer primary key autoincrement not null,
+  "queue" varchar not null,
+  "payload" text not null,
+  "attempts" integer not null,
+  "reserved_at" integer,
+  "available_at" integer not null,
+  "created_at" integer not null
+);
+CREATE INDEX "jobs_queue_index" on "jobs"("queue");
+CREATE TABLE IF NOT EXISTS "job_batches"(
+  "id" varchar not null,
+  "name" varchar not null,
+  "total_jobs" integer not null,
+  "pending_jobs" integer not null,
+  "failed_jobs" integer not null,
+  "failed_job_ids" text not null,
+  "options" text,
+  "cancelled_at" integer,
+  "created_at" integer not null,
+  "finished_at" integer,
+  primary key("id")
+);
+CREATE TABLE IF NOT EXISTS "failed_jobs"(
+  "id" integer primary key autoincrement not null,
+  "uuid" varchar not null,
+  "connection" text not null,
+  "queue" text not null,
+  "payload" text not null,
+  "exception" text not null,
+  "failed_at" datetime not null default CURRENT_TIMESTAMP
+);
+CREATE UNIQUE INDEX "failed_jobs_uuid_unique" on "failed_jobs"("uuid");
+CREATE TABLE IF NOT EXISTS "midwives"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "email" varchar not null,
+  "contact" varchar not null,
+  "address" text not null,
+  "barangay" varchar not null,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE UNIQUE INDEX "midwives_email_unique" on "midwives"("email");
+CREATE TABLE IF NOT EXISTS "bhw"(
+  "id" integer primary key autoincrement not null,
+  "name" varchar not null,
+  "email" varchar not null,
+  "contact" varchar not null,
+  "address" text not null,
+  "barangay" varchar not null,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE UNIQUE INDEX "bhw_email_unique" on "bhw"("email");
+CREATE TABLE IF NOT EXISTS "pregnancies"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "lmp" date not null,
+  "edd" date not null,
+  "aog" integer not null,
+  "gravida" integer not null,
+  "para" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "menstruation_records"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "start_date" date not null,
+  "end_date" date not null,
+  "symptoms" text,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "checkups"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "midwife_id" integer not null,
+  "scheduled_date" date not null,
+  "purpose" varchar not null,
+  "status" varchar check("status" in('Scheduled', 'Completed', 'Missed')) not null default 'Scheduled',
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade,
+  foreign key("midwife_id") references "midwives"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "health_records"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "bp" varchar not null,
+  "weight" numeric not null,
+  "heart_rate" integer not null,
+  "temperature" numeric not null,
+  "notes" text,
+  "risk_level" varchar check("risk_level" in('Low', 'Medium', 'High')) not null default 'Low',
+  "created_by_role" varchar check("created_by_role" in('midwife', 'bhw')) not null,
+  "recorded_by_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade,
+  foreign key("recorded_by_id") references "recorded_bies"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "learning_materials"(
+  "id" integer primary key autoincrement not null,
+  "title" varchar not null,
+  "content" text not null,
+  "material_type" varchar check("material_type" in('article', 'link', 'file')) not null default 'article',
+  "link_url" varchar,
+  "created_at" datetime,
+  "updated_at" datetime
+);
+CREATE TABLE IF NOT EXISTS "forum_posts"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "content" text not null,
+  "status" varchar check("status" in('active', 'deleted')) not null default 'active',
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "forum_comments"(
+  "id" integer primary key autoincrement not null,
+  "post_id" integer not null,
+  "user_id" integer not null,
+  "content" text not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("post_id") references "forum_posts"("id") on delete cascade,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE TABLE IF NOT EXISTS "forum_likes"(
+  "id" integer primary key autoincrement not null,
+  "post_id" integer not null,
+  "user_id" integer not null,
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("post_id") references "forum_posts"("id") on delete cascade,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+CREATE UNIQUE INDEX "forum_likes_post_id_user_id_unique" on "forum_likes"(
+  "post_id",
+  "user_id"
+);
+CREATE TABLE IF NOT EXISTS "notifications"(
+  "id" integer primary key autoincrement not null,
+  "user_id" integer not null,
+  "message" varchar not null,
+  "is_read" tinyint(1) not null default '0',
+  "created_at" datetime,
+  "updated_at" datetime,
+  foreign key("user_id") references "users"("id") on delete cascade
+);
+
+INSERT INTO migrations VALUES(1,'0001_01_01_000000_create_users_table',1);
+INSERT INTO migrations VALUES(2,'0001_01_01_000001_create_cache_table',1);
+INSERT INTO migrations VALUES(3,'0001_01_01_000002_create_jobs_table',1);
+INSERT INTO migrations VALUES(4,'2026_03_26_141707_modify_users_table_add_roles',2);
+INSERT INTO migrations VALUES(5,'2026_03_26_141712_create_midwives_table',2);
+INSERT INTO migrations VALUES(6,'2026_03_26_141843_create_bhw_table',2);
+INSERT INTO migrations VALUES(7,'2026_03_26_141916_create_pregnancies_table',2);
+INSERT INTO migrations VALUES(8,'2026_03_26_141918_create_menstruation_records_table',2);
+INSERT INTO migrations VALUES(9,'2026_03_26_141920_create_checkups_table',2);
+INSERT INTO migrations VALUES(10,'2026_03_26_141921_create_health_records_table',2);
+INSERT INTO migrations VALUES(11,'2026_03_26_141923_create_learning_materials_table',2);
+INSERT INTO migrations VALUES(12,'2026_03_26_141924_create_forum_posts_table',2);
+INSERT INTO migrations VALUES(13,'2026_03_26_141928_create_forum_comments_table',2);
+INSERT INTO migrations VALUES(14,'2026_03_26_141930_create_forum_likes_table',2);
+INSERT INTO migrations VALUES(15,'2026_03_26_141932_create_notifications_table',2);

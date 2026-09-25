@@ -1,0 +1,503 @@
+// ReproCare Visual Entity Relationship Diagram
+// View this at: https://dbdiagram.io/
+// Copy paste this entire file into the editor
+// Generated from live database on April 20, 2026
+// Reflects normalized structure with explicit foreign keys
+
+// ============================================
+// ROLE TABLES (Normalized - Separate tables per role)
+// ============================================
+
+Table women {
+  id bigint [pk, increment]
+  name varchar [not null]
+  email varchar [unique, not null]
+  email_verified_at timestamp
+  password varchar [not null]
+  remember_token varchar(100)
+  feeding_method varchar
+  family_planning_method varchar
+  vitamins varchar
+  medical_history longtext
+  address varchar
+  barangay varchar
+  date_of_birth date
+  phone varchar
+  profile_image varchar
+  status enum [not null, default: 'pending', note: 'pending|approved|suspended']
+  rejection_reason varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table midwives {
+  id bigint [pk, increment]
+  name varchar [not null]
+  email varchar [unique, not null]
+  email_verified_at timestamp
+  password varchar [not null]
+  remember_token varchar(100)
+  license_number varchar
+  specialization varchar
+  assigned_barangays longtext
+  license_expiry date
+  address varchar
+  barangay varchar
+  date_of_birth date
+  phone varchar
+  profile_image varchar
+  status enum [not null, default: 'approved', note: 'approved|pending|suspended']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table bhws {
+  id bigint [pk, increment]
+  name varchar [not null]
+  email varchar [unique, not null]
+  email_verified_at timestamp
+  password varchar [not null]
+  remember_token varchar(100)
+  assigned_barangay varchar
+  certification_number varchar
+  certification_date date
+  address varchar
+  barangay varchar
+  date_of_birth date
+  phone varchar
+  profile_image varchar
+  status enum [not null, default: 'approved', note: 'approved|pending|suspended']
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// REPRODUCTIVE HEALTH MODULE
+// ============================================
+
+Table pregnancies {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  lmp date [note: 'Last Menstrual Period']
+  edd date [note: 'Expected Due Date']
+  aog int [note: 'Age of Gestation']
+  gravida int
+  para int
+  is_high_risk boolean [default: false]
+  notes text
+  ended_at date
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table menstruation_records {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  start_date date
+  end_date date
+  flow_type varchar [note: 'normal|heavy|irregular']
+  notes text
+  basal_temp decimal
+  cervical_mucus varchar
+  ovulation_test varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table menstruation_dailies {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  date date
+  is_period boolean [default: false]
+  basal_temp decimal
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table cycles {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  period_start_date date
+  period_end_date date
+  flow_intensity varchar [note: 'light|medium|heavy']
+  cycle_length int
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table fertility_logs {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  log_date date
+  cervical_mucus varchar [note: 'dry|sticky|creamy|watery|egg_white']
+  basal_body_temp decimal
+  ovulation_test varchar [note: 'negative|positive']
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// CARE MANAGEMENT MODULE
+// ============================================
+
+Table checkups {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  midwife_id bigint
+  scheduled_by_id bigint
+  scheduled_by_midwife_id bigint
+  scheduled_by_bhw_id bigint
+  scheduled_date date
+  actual_date date
+  purpose varchar
+  notes text
+  status enum [note: 'scheduled|completed|missed|cancelled|Rescheduled']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table health_records {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  recorded_by_midwife_id bigint
+  recorded_by_bhw_id bigint
+  bp varchar [note: 'Blood Pressure']
+  weight decimal
+  heart_rate int
+  temperature decimal
+  hemoglobin decimal
+  gestational_age int
+  immunization_status varchar
+  contraceptive_use varchar
+  lab_results varchar
+  notes text
+  risk_level enum [note: 'Low|Medium|High']
+  recommendations text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table preventive_interventions {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  risk_level enum [note: 'Low|Medium|High']
+  trigger_reason text
+  recommendations text
+  intervention_type varchar
+  status enum [note: 'triggered|in_progress|completed|cancelled']
+  triggered_at timestamp
+  completed_at timestamp
+  notes text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table health_records_archived {
+  id bigint [pk, increment]
+  woman_id bigint [not null]
+  bp varchar [note: 'Blood Pressure']
+  weight decimal
+  heart_rate int
+  temperature decimal
+  notes text
+  risk_level enum [note: 'Low|Medium|High']
+  created_by_role varchar [note: 'midwife|bhw']
+  recorded_by_id bigint
+  recorded_by_midwife_id bigint
+  recorded_by_bhw_id bigint
+  created_at timestamp
+  updated_at timestamp
+  archived_at timestamp
+  archived_reason varchar
+}
+
+// ============================================
+// COMMUNITY MODULE
+// ============================================
+
+Table forum_posts {
+  id bigint [pk, increment]
+  woman_id bigint
+  midwife_id bigint
+  bhw_id bigint
+  content text
+  post_image varchar
+  status enum [note: 'active|deleted']
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table forum_comments {
+  id bigint [pk, increment]
+  woman_id bigint
+  midwife_id bigint
+  bhw_id bigint
+  post_id bigint [not null]
+  content text
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table forum_likes {
+  id bigint [pk, increment]
+  woman_id bigint
+  midwife_id bigint
+  bhw_id bigint
+  post_id bigint [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table messages {
+  id bigint [pk, increment]
+  sender_woman_id bigint
+  sender_midwife_id bigint
+  sender_bhw_id bigint
+  receiver_woman_id bigint
+  receiver_midwife_id bigint
+  receiver_bhw_id bigint
+  subject varchar
+  body text
+  is_read boolean [default: false]
+  read_at timestamp
+  reply_to_id bigint
+  scheduled_at timestamp
+  is_sent boolean [default: false]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table notifications {
+  id bigint [pk, increment]
+  woman_id bigint
+  midwife_id bigint
+  bhw_id bigint
+  title varchar
+  type varchar [note: 'info|warning|danger|success']
+  message text
+  action_url varchar
+  is_read boolean [default: false]
+  read_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// LEARNING / REFERENCE MODULE
+// ============================================
+
+Table learning_materials {
+  id bigint [pk, increment]
+  title varchar
+  content text
+  material_type_new varchar
+  category varchar [note: 'general|nutrition|warning-signs|family-planning|postpartum|pregnancy-guide']
+  material_type varchar [note: 'article|link|file|video|quiz']
+  link_url varchar
+  video_url varchar
+  quiz_data text
+  week_number tinyint
+  image varchar
+  file varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table symptoms {
+  id bigint [pk, increment]
+  name varchar [unique]
+  category varchar
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table menstruation_record_symptoms {
+  id bigint [pk, increment]
+  menstruation_record_id bigint [not null]
+  symptom_id bigint [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+Table menstruation_daily_symptoms {
+  id bigint [pk, increment]
+  menstruation_daily_id bigint [not null]
+  symptom_id bigint [not null]
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// REPORTING MODULE
+// ============================================
+
+Table bhw_monthly_reports {
+  id bigint [pk, increment]
+  bhw_id bigint [not null]
+  title varchar
+  description text
+  report_month int
+  report_year int
+  filters text [note: 'JSON']
+  total_records int
+  status enum [note: 'draft|completed']
+  printed_at timestamp
+  created_at timestamp
+  updated_at timestamp
+}
+
+// ============================================
+// SYSTEM TABLES (Laravel Framework)
+// ============================================
+
+Table migrations {
+  id int [pk, increment]
+  migration varchar [not null]
+  batch int [not null]
+}
+
+Table cache {
+  key varchar [pk]
+  value text [not null]
+  expiration int
+}
+
+Table cache_locks {
+  key varchar [pk]
+  owner varchar [not null]
+  expiration int
+}
+
+Table password_reset_tokens {
+  email varchar [pk]
+  token varchar [not null]
+  created_at timestamp
+}
+
+Table sessions {
+  id varchar [pk]
+  user_id bigint
+  ip_address varchar(45)
+  user_agent text
+  payload longtext [not null]
+  last_activity int [not null]
+}
+
+// ============================================
+// RELATIONSHIPS (Explicit connections)
+// ============================================
+
+// Women to Reproductive Health (1:N)
+Ref: pregnancies.woman_id > women.id
+Ref: menstruation_records.woman_id > women.id
+Ref: menstruation_dailies.woman_id > women.id
+Ref: cycles.woman_id > women.id
+Ref: fertility_logs.woman_id > women.id
+Ref: checkups.woman_id > women.id
+Ref: health_records.woman_id > women.id
+Ref: preventive_interventions.woman_id > women.id
+Ref: health_records_archived.woman_id > women.id
+
+// Midwives to Care Management (1:N)
+Ref: checkups.midwife_id > midwives.id
+Ref: checkups.scheduled_by_midwife_id > midwives.id
+Ref: health_records.recorded_by_midwife_id > midwives.id
+Ref: health_records_archived.recorded_by_midwife_id > midwives.id
+
+// BHWs to Care Management (1:N)
+Ref: checkups.scheduled_by_bhw_id > bhws.id
+Ref: health_records.recorded_by_bhw_id > bhws.id
+Ref: health_records_archived.recorded_by_bhw_id > bhws.id
+Ref: bhw_monthly_reports.bhw_id > bhws.id
+
+// Forum Posts (Multi-role)
+Ref: forum_posts.woman_id > women.id
+Ref: forum_posts.midwife_id > midwives.id
+Ref: forum_posts.bhw_id > bhws.id
+Ref: forum_comments.post_id > forum_posts.id
+Ref: forum_likes.post_id > forum_posts.id
+
+// Forum Comments (Multi-role)
+Ref: forum_comments.woman_id > women.id
+Ref: forum_comments.midwife_id > midwives.id
+Ref: forum_comments.bhw_id > bhws.id
+
+// Forum Likes (Multi-role)
+Ref: forum_likes.woman_id > women.id
+Ref: forum_likes.midwife_id > midwives.id
+Ref: forum_likes.bhw_id > bhws.id
+
+// Messages (Multi-role sender/receiver)
+Ref: messages.sender_woman_id > women.id
+Ref: messages.sender_midwife_id > midwives.id
+Ref: messages.sender_bhw_id > bhws.id
+Ref: messages.receiver_woman_id > women.id
+Ref: messages.receiver_midwife_id > midwives.id
+Ref: messages.receiver_bhw_id > bhws.id
+Ref: messages.reply_to_id > messages.id
+
+// Notifications (Multi-role)
+Ref: notifications.woman_id > women.id
+Ref: notifications.midwife_id > midwives.id
+Ref: notifications.bhw_id > bhws.id
+
+// Symptoms (M:N)
+Ref: menstruation_record_symptoms.menstruation_record_id > menstruation_records.id
+Ref: menstruation_record_symptoms.symptom_id > symptoms.id
+Ref: menstruation_daily_symptoms.menstruation_daily_id > menstruation_dailies.id
+Ref: menstruation_daily_symptoms.symptom_id > symptoms.id
+
+// ============================================
+// TABLE GROUPS (for visual organization)
+// ============================================
+
+TableGroup role_tables {
+  women
+  midwives
+  bhws
+}
+
+TableGroup reproductive_health {
+  pregnancies
+  menstruation_records
+  menstruation_dailies
+  cycles
+  fertility_logs
+}
+
+TableGroup care_management {
+  checkups
+  health_records
+  preventive_interventions
+  health_records_archived
+}
+
+TableGroup community {
+  forum_posts
+  forum_comments
+  forum_likes
+  messages
+  notifications
+}
+
+TableGroup learning_reference {
+  learning_materials
+  symptoms
+  menstruation_record_symptoms
+  menstruation_daily_symptoms
+}
+
+TableGroup reporting {
+  bhw_monthly_reports
+}
+
+TableGroup system {
+  migrations
+  cache
+  cache_locks
+  password_reset_tokens
+  sessions
+}

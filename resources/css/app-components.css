@@ -1,0 +1,352 @@
+/* ------------------------------------------------------------
+   Base Styles
+   ------------------------------------------------------------ */
+body {
+    font-family:var(--font-sans);
+    font-size:var(--font-size-base);
+    color:var(--color-text);
+    background-color:var(--bg-main);
+    margin:0;
+    line-height:1.55;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family:var(--font-heading);
+    color:var(--color-deep);
+    font-weight:700;
+    line-height:1.25;
+    letter-spacing:-0.02em;
+}
+
+/* ── BUTTONS (Modern Pill & Squircle Styling) ── */
+.btn {
+    border-radius:var(--rounded-pill);
+    font-family:var(--font-heading);
+    font-weight:600;
+    transition:all var(--transition-base);
+}
+
+.btn-primary {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--spacing-2);
+    padding:0.65rem 1.4rem;
+    font-size:var(--font-size-sm);
+    color:var(--color-on-solid);
+    background:linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
+    border:none;
+    border-radius:var(--rounded-pill);
+    box-shadow:var(--shadow-glow);
+    cursor:pointer;
+    text-decoration:none;
+}
+.btn-primary:hover {
+    background:linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-primary) 100%);
+    box-shadow:0 10px 28px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 38%, transparent);
+    transform:translateY(-2px);
+    color:var(--color-on-solid);
+}
+
+/* Sleek Pitch-Black Pill Button (from OneBank "Learn more" & Aether active tab) */
+.btn-dark, .btn-black-pill {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--spacing-2);
+    padding:0.65rem 1.45rem;
+    font-size:var(--font-size-sm);
+    font-weight:700;
+    color:var(--color-on-solid) !important;
+    background:var(--color-dark-contrast) !important;
+    border:none;
+    border-radius:var(--rounded-pill);
+    box-shadow:0 4px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent);
+    cursor:pointer;
+    text-decoration:none;
+    transition:all var(--transition-base);
+}
+.btn-dark:hover, .btn-black-pill:hover {
+    background:var(--color-dark-contrast-hover) !important;
+    transform:translateY(-2px);
+    box-shadow:0 8px 22px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 30%, transparent);
+}
+
+/* Soft Lavender Tint Pill Button (from OneBank "Transfer") */
+.btn-soft-purple, .btn-lavender-pill {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--spacing-2);
+    padding:0.6rem 1.35rem;
+    font-size:var(--font-size-sm);
+    font-weight:700;
+    color:var(--color-primary-text);
+    background:var(--color-primary-subtle);
+    border:1px solid var(--color-lavender);
+    border-radius:var(--rounded-pill);
+    cursor:pointer;
+    text-decoration:none;
+    transition:all var(--transition-fast);
+}
+.btn-soft-purple:hover, .btn-lavender-pill:hover {
+    background:var(--color-lavender);
+    color:var(--color-primary-dark);
+    transform:translateY(-1px);
+}
+
+/* Circular Action Button (from Ai Aether stat cards) */
+.btn-circle-action {
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    background:var(--color-dark-contrast);
+    color:var(--color-on-solid);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.85rem;
+    border:none;
+    cursor:pointer;
+    transition:all var(--transition-fast);
+    text-decoration:none;
+    box-shadow:0 3px 10px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent);
+}
+.btn-circle-action:hover {
+    transform:scale(1.08) translate(1px, -1px);
+    background:var(--color-primary);
+    color:var(--color-on-solid);
+}
+
+.btn-secondary {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--spacing-2);
+    padding:0.6rem 1.25rem;
+    font-size:var(--font-size-sm);
+    font-weight:600;
+    color:var(--color-deep);
+    background:var(--color-surface);
+    border:1px solid var(--color-gray-200);
+    border-radius:var(--rounded-pill);
+    cursor:pointer;
+    box-shadow:var(--shadow-sm);
+    text-decoration:none;
+}
+.btn-secondary:hover {
+    border-color:var(--color-primary);
+    color:var(--color-primary-text);
+    transform:translateY(-1px);
+}
+
+.btn-outline {
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:var(--spacing-2);
+    padding:0.6rem 1.25rem;
+    font-size:var(--font-size-sm);
+    font-weight:600;
+    color:var(--color-primary-text);
+    background:transparent;
+    border:1.5px solid var(--color-primary);
+    border-radius:var(--rounded-pill);
+    cursor:pointer;
+    transition:all var(--transition-fast);
+    text-decoration:none;
+}
+.btn-outline:hover {
+    background:var(--color-primary-subtle);
+}
+
+/* ── CARDS (Generous Rounded Squircle & Ambient Shadow) ── */
+.card {
+    background:var(--bg-card);
+    border:1px solid var(--color-gray-200);
+    border-radius:var(--rounded-lg);
+    padding:var(--spacing-5);
+    box-shadow:var(--shadow-sm);
+    transition:all var(--transition-base);
+}
+.card:hover {
+    border-color:var(--color-lavender);
+    box-shadow:var(--shadow-md);
+}
+
+/* ── PASTEL STAT CARDS (Direct from Ai Aether Reference) ── */
+.stat-card-peach {
+    background:var(--pastel-peach-bg);
+    border:1px solid var(--pastel-peach-border);
+    border-radius:var(--rounded-lg);
+    padding:1.5rem;
+    position:relative;
+    transition:all var(--transition-base);
+}
+.stat-card-peach:hover {
+    transform:translateY(-3px);
+    box-shadow:var(--shadow-md);
+}
+
+.stat-card-blue {
+    background:var(--pastel-blue-bg);
+    border:1px solid var(--pastel-blue-border);
+    border-radius:var(--rounded-lg);
+    padding:1.5rem;
+    position:relative;
+    transition:all var(--transition-base);
+}
+.stat-card-blue:hover {
+    transform:translateY(-3px);
+    box-shadow:var(--shadow-md);
+}
+
+.stat-card-lavender {
+    background:var(--pastel-lavender-bg);
+    border:1px solid var(--pastel-lavender-border);
+    border-radius:var(--rounded-lg);
+    padding:1.5rem;
+    position:relative;
+    transition:all var(--transition-base);
+}
+.stat-card-lavender:hover {
+    transform:translateY(-3px);
+    box-shadow:var(--shadow-md);
+}
+
+.stat-card-mint {
+    background:var(--pastel-mint-bg);
+    border:1px solid var(--pastel-mint-border);
+    border-radius:var(--rounded-lg);
+    padding:1.5rem;
+    position:relative;
+    transition:all var(--transition-base);
+}
+.stat-card-mint:hover {
+    transform:translateY(-3px);
+    box-shadow:var(--shadow-md);
+}
+
+/* ── CAPSULE PILL BAR CHARTS (from OneBank & Ai Aether) ── */
+.capsule-chart-container {
+    display:flex;
+    align-items:flex-end;
+    gap:12px;
+    height:160px;
+    padding:1rem 0;
+}
+.capsule-bar {
+    flex:1;
+    background:var(--color-lavender);
+    border-radius:var(--rounded-pill);
+    transition:all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position:relative;
+    min-height:14px;
+}
+.capsule-bar.active {
+    background:var(--color-primary);
+    box-shadow:0 4px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent);
+}
+.capsule-bar.striped {
+    background:repeating-linear-gradient(
+        45deg,
+        var(--color-primary),
+        var(--color-primary) 6px,
+        var(--color-primary-light) 6px,
+        var(--color-primary-light) 12px
+    );
+}
+.capsule-bar:hover {
+    transform:scaleY(1.05);
+    background:var(--color-primary-light);
+}
+
+/* Floating Tooltip Pill on Capsule Bar */
+.capsule-tooltip {
+    position:absolute;
+    top:-34px;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--color-dark-contrast);
+    color:var(--color-on-solid);
+    font-size:0.72rem;
+    font-weight:700;
+    padding:3px 10px;
+    border-radius:var(--rounded-pill);
+    white-space:nowrap;
+    box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent);
+}
+
+/* ── INPUTS & FORMS ── */
+input, select, textarea {
+    width:100%;
+    padding:0.7rem 1.1rem;
+    border:1.5px solid var(--color-gray-200);
+    border-radius:var(--rounded);
+    background:var(--color-surface);
+    color:var(--color-text);
+    font-size:var(--font-size-base);
+    transition:all var(--transition-fast);
+}
+input:focus, select:focus, textarea:focus {
+    outline:none;
+    border-color:var(--color-primary);
+    background:var(--color-surface);
+    box-shadow:0 0 0 4px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 14%, transparent);
+}
+
+/* ── BADGES & STATUS PILLS ── */
+.badge, .pill-badge {
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    border-radius:var(--rounded-pill);
+    padding:0.35rem 0.85rem;
+    font-size:0.75rem;
+    font-weight:700;
+    letter-spacing:0.02em;
+}
+
+.pill-badge-purple { background:var(--color-primary-subtle); color:var(--color-primary-text); }
+.pill-badge-green  { background:var(--color-success-soft); color:var(--color-success-text); }
+.pill-badge-amber  { background:var(--color-warning-soft); color:var(--color-warning-text); }
+.pill-badge-red    { background:var(--color-danger-soft); color:var(--color-danger-text); }
+.pill-badge-blue   { background:var(--color-info-soft); color:var(--color-info-text); }
+
+/* ── TABLES ── */
+.table {
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0;
+    margin-bottom:var(--spacing-4);
+}
+.table th {
+    background:var(--color-gray-100);
+    color:var(--color-text-muted);
+    font-size:0.75rem;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.05em;
+    padding:0.9rem 1.2rem;
+    border:none;
+}
+.table th:first-child { border-radius:var(--rounded) 0 0 var(--rounded); }
+.table th:last-child  { border-radius:0 var(--rounded) var(--rounded) 0; }
+
+.table td {
+    padding:1rem 1.2rem;
+    border-bottom:1px solid var(--color-gray-200);
+    font-size:var(--font-size-sm);
+    color:var(--color-text);
+    vertical-align:middle;
+}
+.table tbody tr:hover td {
+    background:var(--color-gray-50);
+}
+
+/* ── UTILITY HELPERS ── */
+.text-center { text-align:center; }
+.mt-1 { margin-top:var(--spacing-1); }
+.mt-2 { margin-top:var(--spacing-2); }
+.mb-1 { margin-bottom:var(--spacing-1); }
+.mb-2 { margin-bottom:var(--spacing-2); }

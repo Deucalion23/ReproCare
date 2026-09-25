@@ -1,0 +1,21 @@
+@import 'design-tokens.css';
+@import 'app-components.css';
+
+/* Tailwind v4 — utilities only (preflight intentionally omitted so the
+   Bootstrap-based portal design system keeps its base styles). */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+
+/* Class-based dark mode driven by the global rc_theme state:
+   layouts/app.blade.php keeps <html class="dark"> in sync with
+   data-theme="dark", so `dark:` variants work across all portals. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Bootstrap compatibility: Tailwind's utilities layer redefines
+   `.collapse` (visibility) and `.table` (display), which would break
+   Bootstrap's collapse plugin and table rendering. Restore Bootstrap
+   behavior after the utilities import. */
+.collapse:not(.show) { display: none; visibility: visible; }
+.collapse.show { display: block; visibility: visible; }
+.collapsing { visibility: visible; }
+.table { display: table; }

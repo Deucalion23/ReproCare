@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(database_export.bat)",
+      "Bash(php *)"
+    ]
+  },
+  "$version": 3
+}
