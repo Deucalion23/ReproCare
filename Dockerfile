@@ -25,34 +25,29 @@ FROM php:8.2-apache
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV PORT=80
 
-# Install required system packages & libraries for PHP extensions
+# Install system utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     curl \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libonig-dev \
-    libxml2-dev \
-    libzip-dev \
-    libicu-dev \
-    libpq-dev \
     zip \
     unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) \
-        pdo_mysql \
-        pdo_pgsql \
-        pdo_sqlite \
-        mbstring \
-        exif \
-        pcntl \
-        bcmath \
-        gd \
-        zip \
-        intl \
-        opcache \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Install official PHP extension installer helper
+COPY --from=mlocati/php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+# Install PHP extensions required by Laravel
+RUN install-php-extensions \
+    pdo_mysql \
+    pdo_pgsql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip \
+    intl \
+    opcache
 
 # Enable Apache mod_rewrite for Laravel routing
 RUN a2enmod rewrite
