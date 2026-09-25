@@ -470,11 +470,12 @@
         $latestRecord = $healthRecords->first();
         $totalRecords = $healthRecords->total();
         
-        // Compute averages/latest
-        $latestBp = $latestRecord->bp ?? '—';
-        $latestWeight = $latestRecord->weight ? $latestRecord->weight . ' kg' : '—';
-        $latestHeartRate = $latestRecord->heart_rate ? $latestRecord->heart_rate . ' bpm' : '—';
-        $latestTemp = $latestRecord->temperature ? $latestRecord->temperature . ' °C' : '—';
+        // Compute averages/latest ($latestRecord is null when the user has
+        // no health records yet — e.g. fresh production accounts).
+        $latestBp = $latestRecord?->bp ?? '—';
+        $latestWeight = $latestRecord?->weight ? $latestRecord->weight . ' kg' : '—';
+        $latestHeartRate = $latestRecord?->heart_rate ? $latestRecord->heart_rate . ' bpm' : '—';
+        $latestTemp = $latestRecord?->temperature ? $latestRecord->temperature . ' °C' : '—';
     @endphp
 
     {{-- ── Hero Section (Styled like Pregnancy Page) ── --}}
