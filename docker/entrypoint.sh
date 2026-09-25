@@ -7,6 +7,23 @@ echo "Configuring Apache to listen on port ${PORT}..."
 sed -i "s/Listen 80/Listen ${PORT}/g" /etc/apache2/ports.conf
 sed -i "s/<VirtualHost \*:80>/<VirtualHost \*:${PORT}>/g" /etc/apache2/sites-available/000-default.conf
 
+# Ensure .env file exists
+if [ ! -f /var/www/html/.env ]; then
+    echo "Creating .env from .env.example..."
+    cp /var/www/html/.env.example /var/www/html/.env
+fi
+
+# Ensure APP_KEY is set (generate automatically if missing)
+if [ -n "${APP_KEY}" ]; then
+    sed -i "s|^APP_KEY=.*|APP_KEY=${APP_KEY}|" /var/www/html/.env
+fi
+
+CURRENT_KEY=$(grep -E "^APP_KEY=" /var/www/html/.env | cut -d '=' -f2-)
+if [ -z "${CURRENT_KEY}" ] && [ -z "${APP_KEY}" ]; then
+    echo "APP_KEY is missing. Generating application key..."
+    php artisan key:generate --force
+fi
+
 # Ensure storage, cache, and database directories exist and have proper permissions
 mkdir -p /var/www/html/storage/framework/cache/data \
          /var/www/html/storage/framework/sessions \
@@ -18,29 +35,30 @@ mkdir -p /var/www/html/storage/framework/cache/data \
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-# Handle SQLite database file if SQLite is configured
+# Handle SQLite database and parent directory permissions
 if [ "${DB_CONNECTION}" = "sqlite" ] || [ -z "${DB_CONNECTION}" ]; then
     if [ ! -f /var/www/html/database/database.sqlite ]; then
         echo "Creating database.sqlite file..."
         touch /var/www/html/database/database.sqlite
     fi
     chown www-data:www-data /var/www/html/database/database.sqlite
-    chmod 664 /var/www/html/database/database.sqlite
+    chmod 666 /var/www/html/database/database.sqlite
 fi
 
-# Run migrations automatically if RUN_MIGRATIONS is set to true
-if [ "${RUN_MIGRATIONS}" = "true" ]; then
+# Ensure storage symlink exists
+php artisan storage:link || true
+
+# Run database migrations automatically so required tables (users, sessions, cache) exist
+if [ "${SKIP_MIGRATIONS}" != "true" ]; then
     echo "Running database migrations..."
-    php artisan migrate --force
+    php artisan migrate --force || echo "Warning: Migration failed. Check DB connection settings."
 fi
 
-# Optimize Laravel cache if APP_KEY is present
-if [ -n "${APP_KEY}" ]; then
-    echo "Caching routes, views, and configurations..."
-    php artisan config:cache || true
-    php artisan route:cache || true
-    php artisan view:cache || true
-fi
+# Clear any cached config so runtime environment variables are active
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
 
+echo "Starting Apache web server..."
 # Execute the main container command (apache2-foreground)
 exec "$@"

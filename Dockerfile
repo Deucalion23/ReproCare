@@ -24,6 +24,7 @@ FROM php:8.2-apache
 # Set Apache and container environment variables
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 ENV PORT=80
+ENV LOG_CHANNEL=stderr
 
 # Install system utilities
 RUN apt-get update && apt-get install -y --no-install-recommends \
