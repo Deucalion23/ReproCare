@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,46 +12,70 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Add new specific foreign key columns (only missing ones)
         Schema::table('notifications', function (Blueprint $table) {
-            // Add new specific foreign key columns
-            $table->unsignedBigInteger('woman_id')->nullable()->after('id');
-            $table->unsignedBigInteger('midwife_id')->nullable()->after('woman_id');
-            $table->unsignedBigInteger('bhw_id')->nullable()->after('midwife_id');
-
-            // Add foreign key constraints
-            $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
-            $table->foreign('midwife_id')->references('id')->on('midwives')->onDelete('cascade');
-            $table->foreign('bhw_id')->references('id')->on('bhws')->onDelete('cascade');
-
-            // Add indexes
-            $table->index('woman_id');
-            $table->index('midwife_id');
-            $table->index('bhw_id');
+            foreach (['woman_id', 'midwife_id', 'bhw_id'] as $column) {
+                if (!Schema::hasColumn('notifications', $column)) {
+                    $table->unsignedBigInteger($column)->nullable();
+                }
+            }
         });
 
-        // Migrate data from polymorphic columns to specific columns
-        DB::statement("
-            UPDATE notifications n
-            SET n.woman_id = n.user_id
-            WHERE n.user_type = 'App\\\\Models\\\\Woman' OR n.user_type = 'App\\\\Models\\\\Patient'
-        ");
+        // Add foreign key constraints + indexes (best effort)
+        foreach ([
+            ['woman_id', 'women'],
+            ['midwife_id', 'midwives'],
+            ['bhw_id', 'bhws'],
+        ] as [$column, $on]) {
+            if (!Schema::hasColumn('notifications', $column) || !Schema::hasTable($on)) {
+                continue;
+            }
+            try {
+                Schema::table('notifications', function (Blueprint $table) use ($column, $on) {
+                    $table->foreign($column)->references('id')->on($on)->onDelete('cascade');
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('notifications', function (Blueprint $table) use ($column) {
+                    $table->index($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
 
-        DB::statement("
-            UPDATE notifications n
-            SET n.midwife_id = n.user_id
-            WHERE n.user_type = 'App\\\\Models\\\\Midwife'
-        ");
-
-        DB::statement("
-            UPDATE notifications n
-            SET n.bhw_id = n.user_id
-            WHERE n.user_type = 'App\\\\Models\\\\Bhw'
-        ");
+        // Migrate data from polymorphic columns to specific columns (portable —
+        // original MySQL "UPDATE .. alias SET alias.col" does not parse elsewhere).
+        $moves = [
+            ['woman_id', ['App\\Models\\Woman', 'App\\Models\\Patient']],
+            ['midwife_id', ['App\\Models\\Midwife']],
+            ['bhw_id', ['App\\Models\\Bhw']],
+        ];
+        foreach ($moves as [$target, $types]) {
+            if (!Schema::hasColumn('notifications', $target) || !Schema::hasColumn('notifications', 'user_id') || !Schema::hasColumn('notifications', 'user_type')) {
+                continue;
+            }
+            try {
+                DB::table('notifications')->whereIn('user_type', $types)->update([$target => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Drop polymorphic columns
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropColumn(['user_id', 'user_type']);
-        });
+        $drop = [];
+        foreach (['user_id', 'user_type'] as $column) {
+            if (Schema::hasColumn('notifications', $column)) {
+                $drop[] = $column;
+            }
+        }
+        if (!empty($drop)) {
+            try {
+                Schema::table('notifications', function (Blueprint $table) use ($drop) {
+                    $table->dropColumn($drop);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

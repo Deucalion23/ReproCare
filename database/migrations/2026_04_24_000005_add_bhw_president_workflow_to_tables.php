@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -23,7 +24,7 @@ return new class extends Migration
         // Add foreign key only if users table exists
         if (Schema::hasTable('users')) {
             Schema::table('checkups', function (Blueprint $table) {
-                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'checkups' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+                $foreignKeys = $this->existingForeignKeys('checkups');
                 if (Schema::hasColumn('checkups', 'bhw_president_id') && !in_array('checkups_bhw_president_id_foreign', $foreignKeys)) {
                     $table->foreign('bhw_president_id')->references('id')->on('users')->onDelete('set null');
                 }
@@ -44,7 +45,7 @@ return new class extends Migration
         // Add foreign key only if users table exists
         if (Schema::hasTable('users')) {
             Schema::table('health_records', function (Blueprint $table) {
-                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'health_records' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+                $foreignKeys = $this->existingForeignKeys('health_records');
                 if (Schema::hasColumn('health_records', 'bhw_president_id') && !in_array('health_records_bhw_president_id_foreign', $foreignKeys)) {
                     $table->foreign('bhw_president_id')->references('id')->on('users')->onDelete('set null');
                 }
@@ -61,7 +62,7 @@ return new class extends Migration
                     $table->index('registered_by_bhw_president_id');
                 }
 
-                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'users' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+                $foreignKeys = $this->existingForeignKeys('users');
                 if (Schema::hasColumn('users', 'purok_id') && !in_array('users_purok_id_foreign', $foreignKeys)) {
                     $table->foreign('purok_id')->references('id')->on('puroks')->onDelete('set null');
                 }
@@ -79,7 +80,7 @@ return new class extends Migration
     {
         try {
             Schema::table('users', function (Blueprint $table) {
-                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'users' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+                $foreignKeys = $this->existingForeignKeys('users');
                 if (in_array('users_registered_by_bhw_president_id_foreign', $foreignKeys)) {
                     $table->dropForeign(['registered_by_bhw_president_id']);
                 }
@@ -100,7 +101,7 @@ return new class extends Migration
 
         try {
             Schema::table('health_records', function (Blueprint $table) {
-                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'health_records' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+                $foreignKeys = $this->existingForeignKeys('health_records');
                 if (in_array('health_records_bhw_president_id_foreign', $foreignKeys)) {
                     $table->dropForeign(['bhw_president_id']);
                 }
@@ -118,7 +119,7 @@ return new class extends Migration
 
         try {
             Schema::table('checkups', function (Blueprint $table) {
-                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'checkups' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+                $foreignKeys = $this->existingForeignKeys('checkups');
                 if (in_array('checkups_bhw_president_id_foreign', $foreignKeys)) {
                     $table->dropForeign(['bhw_president_id']);
                 }
@@ -132,6 +133,22 @@ return new class extends Migration
             });
         } catch (\Exception $e) {
             // Table doesn't exist or columns don't exist
+        }
+    }
+
+    /**
+     * MySQL-only FK introspection helper. Returns [] on pgsql/sqlite so the
+     * caller falls back to best-effort Schema attempts.
+     */
+    protected function existingForeignKeys(string $table): array
+    {
+        if (DB::getDriverName() !== 'mysql') {
+            return [];
+        }
+        try {
+            return collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = ? AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'", [$table]))->pluck('CONSTRAINT_NAME')->toArray();
+        } catch (\Throwable $e) {
+            return [];
         }
     }
 };

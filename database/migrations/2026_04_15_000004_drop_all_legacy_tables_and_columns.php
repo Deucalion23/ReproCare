@@ -22,19 +22,58 @@ return new class extends Migration
         $this->dropCheckupMidwifeFK();
 
         // Step 3: Drop checkups.midwife_id column
-        Schema::table('checkups', function (Blueprint $table) {
-            $table->dropColumn('midwife_id');
-        });
+        try {
+            if (Schema::hasTable('checkups') && Schema::hasColumn('checkups', 'midwife_id')) {
+                // Drop FK + index first (required on mysql/pgsql before DROP COLUMN)
+                Schema::table('checkups', function (Blueprint $table) {
+                    try {
+                        $table->dropForeign(['midwife_id']);
+                    } catch (\Throwable $e) {
+                    }
+                    try {
+                        $table->dropIndex('idx_checkups_midwife_id');
+                    } catch (\Throwable $e) {
+                    }
+                    try {
+                        $table->dropIndex(['midwife_id']);
+                    } catch (\Throwable $e) {
+                    }
+                });
+                try {
+                    Schema::table('checkups', function (Blueprint $table) {
+                        $table->dropColumn('midwife_id');
+                    });
+                } catch (\Throwable $e) {
+                    // SQLite cannot DROP a column used in a FOREIGN KEY — rename it
+                    // away so later migrations can re-add a clean `midwife_id`.
+                    // The final repair migration removes the leftover on Postgres.
+                    if (DB::getDriverName() === 'sqlite' && Schema::hasColumn('checkups', 'midwife_id')) {
+                        Schema::table('checkups', function (Blueprint $table) {
+                            $table->renameColumn('midwife_id', 'midwife_id_legacy_drop');
+                        });
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+        }
 
         // Step 4: Drop health_records.created_by_role (redundant - computed from recorded_by_id)
-        Schema::table('health_records', function (Blueprint $table) {
-            $table->dropColumn('created_by_role');
-        });
+        try {
+            if (Schema::hasTable('health_records') && Schema::hasColumn('health_records', 'created_by_role')) {
+                Schema::table('health_records', function (Blueprint $table) {
+                    $table->dropColumn('created_by_role');
+                });
+            }
+        } catch (\Throwable $e) {
+        }
 
         // Step 5: Drop legacy views
-        DB::statement('DROP VIEW IF EXISTS midwives_legacy');
-        DB::statement('DROP VIEW IF EXISTS bhw_legacy');
-        DB::statement('DROP VIEW IF EXISTS health_records_enriched');
+        foreach (['midwives_legacy', 'bhw_legacy', 'health_records_enriched'] as $view) {
+            try {
+                DB::statement("DROP VIEW IF EXISTS {$view}");
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Step 6: Drop midwives table (data migrated to users)
         Schema::dropIfExists('midwives');
@@ -43,11 +82,26 @@ return new class extends Migration
         Schema::dropIfExists('bhw');
 
         // Step 8: Clean up legacy tracking columns from users
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropIndex('idx_users_legacy_midwife_id');
-            $table->dropIndex('idx_users_legacy_bhw_id');
-            $table->dropColumn(['legacy_midwife_id', 'legacy_bhw_id']);
-        });
+        try {
+            Schema::table('users', function (Blueprint $table) {
+                foreach (['idx_users_legacy_midwife_id', 'idx_users_legacy_bhw_id'] as $index) {
+                    try {
+                        $table->dropIndex($index);
+                    } catch (\Throwable $e) {
+                    }
+                }
+                $drop = [];
+                foreach (['legacy_midwife_id', 'legacy_bhw_id'] as $col) {
+                    if (Schema::hasColumn('users', $col)) {
+                        $drop[] = $col;
+                    }
+                }
+                if (!empty($drop)) {
+                    $table->dropColumn($drop);
+                }
+            });
+        } catch (\Throwable $e) {
+        }
 
         // Step 9: Fix bhw_monthly_reports.bhw_id CASCADE to RESTRICT
         $this->fixBhwMonthlyReportsCascade();
@@ -86,19 +140,26 @@ return new class extends Migration
      */
     protected function dropCheckupMidwifeFK(): void
     {
-        // Check if FK exists
-        $fkExists = DB::select("
-            SELECT CONSTRAINT_NAME 
-            FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE 
-            WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = 'checkups'
-            AND COLUMN_NAME = 'midwife_id'
-            AND REFERENCED_TABLE_NAME IS NOT NULL
-        ");
+        // MySQL-only introspection; on pgsql/sqlite Laravel handles FKs via Schema.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+        try {
+            // Check if FK exists
+            $fkExists = DB::select("
+                SELECT CONSTRAINT_NAME
+                FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE
+                WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME = 'checkups'
+                AND COLUMN_NAME = 'midwife_id'
+                AND REFERENCED_TABLE_NAME IS NOT NULL
+            ");
 
-        if (count($fkExists) > 0) {
-            $constraintName = $fkExists[0]->CONSTRAINT_NAME;
-            DB::statement("ALTER TABLE checkups DROP FOREIGN KEY {$constraintName}");
+            if (count($fkExists) > 0) {
+                $constraintName = $fkExists[0]->CONSTRAINT_NAME;
+                DB::statement("ALTER TABLE checkups DROP FOREIGN KEY {$constraintName}");
+            }
+        } catch (\Throwable $e) {
         }
     }
 
@@ -107,8 +168,12 @@ return new class extends Migration
      */
     protected function fixBhwMonthlyReportsCascade(): void
     {
-        // Check current FK rule
-        $fkRules = DB::select("
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+        try {
+            // Check current FK rule
+            $fkRules = DB::select("
             SELECT rc.DELETE_RULE, kcu.CONSTRAINT_NAME
             FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE kcu
             JOIN INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS rc 
@@ -136,6 +201,8 @@ return new class extends Migration
                 
                 \Log::info("Changed bhw_monthly_reports.bhw_id FK from CASCADE to RESTRICT");
             }
+        }
+        } catch (\Throwable $e) {
         }
     }
 };

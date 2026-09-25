@@ -12,6 +12,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // MySQL only — on pgsql/sqlite the column is already VARCHAR-compatible.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         Schema::table('learning_materials', function (Blueprint $table) {
             // Modify category to varchar(100) to support all categories (prenatal-care, hcw-training, etc.)
             DB::statement("ALTER TABLE `learning_materials` MODIFY COLUMN `category` VARCHAR(100) NOT NULL DEFAULT 'general'");
@@ -23,6 +27,9 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         Schema::table('learning_materials', function (Blueprint $table) {
             DB::statement("ALTER TABLE `learning_materials` MODIFY COLUMN `category` ENUM('general', 'nutrition', 'warning-signs', 'family-planning', 'postpartum', 'pregnancy-guide') NOT NULL DEFAULT 'general'");
         });

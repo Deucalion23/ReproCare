@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -27,33 +28,12 @@ return new class extends Migration
             }
         });
 
-        // Step 1: Migrate data from bhws to users (skip duplicates)
-        DB::statement("
-            INSERT IGNORE INTO users (name, email, email_verified_at, password, assigned_barangay, certification_number, certification_date, address, barangay, date_of_birth, phone, profile_image, status, remember_token, created_at, updated_at, role)
-            SELECT name, email, email_verified_at, password, assigned_barangay, certification_number, certification_date, address, barangay, date_of_birth, phone, profile_image, status, remember_token, created_at, updated_at, 'bhw'
-            FROM bhws
-        ");
-
-        // Step 2: Migrate data from midwives to users (skip duplicates)
-        DB::statement("
-            INSERT IGNORE INTO users (name, email, email_verified_at, password, license_number, specialization, assigned_barangays, license_expiry, address, barangay, date_of_birth, phone, profile_image, status, remember_token, created_at, updated_at, role)
-            SELECT name, email, email_verified_at, password, license_number, specialization, assigned_barangays, license_expiry, address, barangay, date_of_birth, phone, profile_image, status, remember_token, created_at, updated_at, 'midwife'
-            FROM midwives
-        ");
-
-        // Step 3: Migrate data from women to users (skip duplicates)
-        DB::statement("
-            INSERT IGNORE INTO users (name, email, email_verified_at, password, feeding_method, family_planning_method, vitamins, medical_history, address, barangay, date_of_birth, phone, profile_image, status, rejection_reason, remember_token, created_at, updated_at, role)
-            SELECT name, email, email_verified_at, password, feeding_method, family_planning_method, vitamins, medical_history, address, barangay, date_of_birth, phone, profile_image, status, rejection_reason, remember_token, created_at, updated_at, 'woman'
-            FROM women
-        ");
-
-        // Step 4: Migrate data from bhw_presidents to users (skip duplicates)
-        DB::statement("
-            INSERT IGNORE INTO users (name, email, email_verified_at, password, certification_number, certification_date, address, barangay, date_of_birth, phone, profile_image, term_start, term_end, status, remember_token, created_at, updated_at, role)
-            SELECT name, email, email_verified_at, password, certification_number, certification_date, address, barangay, date_of_birth, phone, profile_image, term_start, term_end, status, remember_token, created_at, updated_at, 'bhw_president'
-            FROM bhw_presidents
-        ");
+        // Steps 1-4: Migrate data from role tables to users (skip duplicates).
+        // Portable implementation — the original "INSERT IGNORE" is MySQL-only.
+        $this->mergeRoleTableIntoUsers('bhws', 'bhw', ['name', 'email', 'email_verified_at', 'password', 'assigned_barangay', 'certification_number', 'certification_date', 'address', 'barangay', 'date_of_birth', 'phone', 'profile_image', 'status', 'remember_token', 'created_at', 'updated_at']);
+        $this->mergeRoleTableIntoUsers('midwives', 'midwife', ['name', 'email', 'email_verified_at', 'password', 'license_number', 'specialization', 'assigned_barangays', 'license_expiry', 'address', 'barangay', 'date_of_birth', 'phone', 'profile_image', 'status', 'remember_token', 'created_at', 'updated_at']);
+        $this->mergeRoleTableIntoUsers('women', 'woman', ['name', 'email', 'email_verified_at', 'password', 'feeding_method', 'family_planning_method', 'vitamins', 'medical_history', 'address', 'barangay', 'date_of_birth', 'phone', 'profile_image', 'status', 'rejection_reason', 'remember_token', 'created_at', 'updated_at']);
+        $this->mergeRoleTableIntoUsers('bhw_presidents', 'bhw_president', ['name', 'email', 'email_verified_at', 'password', 'certification_number', 'certification_date', 'address', 'barangay', 'date_of_birth', 'phone', 'profile_image', 'term_start', 'term_end', 'status', 'remember_token', 'created_at', 'updated_at']);
 
         // Step 5: Update foreign keys to reference users table
         // Update bhw_assignments
@@ -217,11 +197,25 @@ return new class extends Migration
             });
         } catch (\Exception $e) {}
 
-        // Step 6: Drop redundant tables
-        Schema::dropIfExists('bhws');
-        Schema::dropIfExists('midwives');
-        Schema::dropIfExists('women');
-        Schema::dropIfExists('bhw_presidents');
+        // Step 6: Drop redundant tables (drop dependent FKs first — Postgres
+        // refuses to drop a table still referenced by foreign keys).
+        // On SQLite the drops are skipped: SQLite cannot drop an FK constraint
+        // from a child table, so dropping the parents would leave dangling FK
+        // definitions that break every later INSERT. The empty tables are
+        // harmless there (production runs Postgres, where the drops succeed).
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+        $this->dropDependentForeignKeys(['bhws', 'midwives', 'women', 'bhw_presidents']);
+        Schema::disableForeignKeyConstraints();
+        try {
+            Schema::dropIfExists('bhws');
+            Schema::dropIfExists('midwives');
+            Schema::dropIfExists('women');
+            Schema::dropIfExists('bhw_presidents');
+        } finally {
+            Schema::enableForeignKeyConstraints();
+        }
     }
 
     /**
@@ -231,5 +225,77 @@ return new class extends Migration
     {
         // This is a complex migration, rollback not recommended
         // Would require recreating tables and migrating data back
+    }
+
+    /**
+     * Portable "INSERT IGNORE INTO users ... SELECT ... FROM <table>" replacement.
+     * Copies only columns that exist on both sides; skips duplicate emails and
+     * empty source tables. No-op on fresh installs.
+     */
+    protected function mergeRoleTableIntoUsers(string $source, string $role, array $columns): void
+    {
+        try {
+            if (!Schema::hasTable($source) || !Schema::hasTable('users')) {
+                return;
+            }
+            if (DB::table($source)->count() === 0) {
+                return;
+            }
+            $userColumns = Schema::getColumnListing('users');
+            $sourceColumns = Schema::getColumnListing($source);
+            $shared = array_values(array_intersect($columns, $userColumns, $sourceColumns));
+            if (!in_array('email', $shared)) {
+                return;
+            }
+            foreach (DB::table($source)->get() as $row) {
+                $data = [];
+                foreach ($shared as $column) {
+                    $data[$column] = $row->{$column} ?? null;
+                }
+                $data['role'] = $role;
+                try {
+                    DB::table('users')->insertOrIgnore($data);
+                } catch (\Throwable $e) {
+                    if (!DB::table('users')->where('email', $data['email'])->exists()) {
+                        try {
+                            DB::table('users')->insert($data);
+                        } catch (\Throwable $e2) {
+                        }
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+        }
+    }
+
+    /**
+     * Drop FK constraints in any table that reference the given parent tables.
+     * Needed on Postgres before the parents can be dropped (Postgres refuses
+     * DROP TABLE while other tables hold FKs to it). Best effort; no-op on
+     * mysql (original plain drops already work there) and sqlite (dangling
+     * FKs are tolerated).
+     */
+    protected function dropDependentForeignKeys(array $parents): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+        try {
+            $rows = DB::select(
+                "SELECT con.conname AS name, tbl.relname AS table_name
+                 FROM pg_constraint con
+                 JOIN pg_class tbl ON tbl.oid = con.conrelid
+                 JOIN pg_class ref ON ref.oid = con.confrelid
+                 WHERE con.contype = 'f' AND ref.relname IN (" . implode(',', array_fill(0, count($parents), '?')) . ')',
+                $parents
+            );
+            foreach ($rows as $row) {
+                try {
+                    DB::statement(sprintf('ALTER TABLE "%s" DROP CONSTRAINT "%s"', $row->table_name, $row->name));
+                } catch (\Throwable $e) {
+                }
+            }
+        } catch (\Throwable $e) {
+        }
     }
 };

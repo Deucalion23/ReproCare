@@ -12,14 +12,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Step 1: Add pregnancy_id column (nullable)
-        Schema::table('checkups', function (Blueprint $table) {
-            $table->unsignedBigInteger('pregnancy_id')->nullable()->after('user_id');
-        });
+        // Step 1: Add pregnancy_id column (nullable). No ->after(): checkups
+        // has no user_id column at this point (MySQL errors on AFTER missing).
+        if (!Schema::hasColumn('checkups', 'pregnancy_id')) {
+            Schema::table('checkups', function (Blueprint $table) {
+                $table->unsignedBigInteger('pregnancy_id')->nullable();
+            });
+        }
 
         // Step 2: Populate pregnancy_id for existing checkups
-        // For each checkup, find the active pregnancy for that user at the time
-        $checkups = DB::table('checkups')->whereNotNull('user_id')->get();
+        // For each checkup, find the active pregnancy for that user at the time.
+        // Skipped when the legacy user_id column is gone (fresh installs).
+        if (!Schema::hasColumn('checkups', 'user_id') || !Schema::hasColumn('pregnancies', 'user_id')) {
+            $checkups = collect();
+        } else {
+            $checkups = DB::table('checkups')->whereNotNull('user_id')->get();
+        }
 
         foreach ($checkups as $checkup) {
             // Find the pregnancy that was active at the time of the checkup
@@ -41,10 +49,13 @@ return new class extends Migration
             }
         }
 
-        // Step 3: Add foreign key constraint
-        Schema::table('checkups', function (Blueprint $table) {
-            $table->foreign('pregnancy_id')->references('id')->on('pregnancies')->onDelete('set null');
-        });
+        // Step 3: Add foreign key constraint (best effort)
+        try {
+            Schema::table('checkups', function (Blueprint $table) {
+                $table->foreign('pregnancy_id')->references('id')->on('pregnancies')->onDelete('set null');
+            });
+        } catch (\Throwable $e) {
+        }
     }
 
     /**

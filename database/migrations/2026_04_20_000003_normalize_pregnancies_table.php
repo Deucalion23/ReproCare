@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,28 +12,53 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pregnancies', function (Blueprint $table) {
-            // Add new specific foreign key column
-            $table->unsignedBigInteger('woman_id')->nullable()->after('id');
+        if (!Schema::hasColumn('pregnancies', 'woman_id')) {
+            Schema::table('pregnancies', function (Blueprint $table) {
+                // Add new specific foreign key column
+                $table->unsignedBigInteger('woman_id')->nullable();
+            });
+        }
 
-            // Add foreign key constraint
-            $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
+        // Add foreign key constraint + index (best effort)
+        try {
+            Schema::table('pregnancies', function (Blueprint $table) {
+                $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table('pregnancies', function (Blueprint $table) {
+                $table->index('woman_id');
+            });
+        } catch (\Throwable $e) {
+        }
 
-            // Add indexes
-            $table->index('woman_id');
-        });
-
-        // Migrate data from polymorphic columns to specific columns
-        DB::statement("
-            UPDATE pregnancies p
-            SET p.woman_id = p.patient_id
-            WHERE p.patient_type = 'App\\\\Models\\\\Woman' OR p.patient_type = 'App\\\\Models\\\\Patient'
-        ");
+        // Migrate data from polymorphic columns to specific columns.
+        // Plain UPDATE without table alias: valid on mysql/pgsql/sqlite.
+        try {
+            DB::statement("
+                UPDATE pregnancies
+                SET woman_id = patient_id
+                WHERE patient_type = 'App\\\\Models\\\\Woman' OR patient_type = 'App\\\\Models\\\\Patient'
+            ");
+        } catch (\Throwable $e) {
+        }
 
         // Drop polymorphic columns
-        Schema::table('pregnancies', function (Blueprint $table) {
-            $table->dropColumn(['patient_id', 'patient_type']);
-        });
+        $drop = [];
+        foreach (['patient_id', 'patient_type'] as $column) {
+            if (Schema::hasColumn('pregnancies', $column)) {
+                $drop[] = $column;
+            }
+        }
+        if (!empty($drop)) {
+            try {
+                Schema::table('pregnancies', function (Blueprint $table) use ($drop) {
+                    $table->dropColumn($drop);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

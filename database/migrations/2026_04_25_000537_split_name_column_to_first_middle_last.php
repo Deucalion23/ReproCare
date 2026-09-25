@@ -13,33 +13,47 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('first_name')->after('id');
-            $table->string('middle_initial')->nullable()->after('first_name');
-            $table->string('last_name')->after('middle_initial');
+            if (!Schema::hasColumn('users', 'first_name')) {
+                $table->string('first_name')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'middle_initial')) {
+                $table->string('middle_initial')->nullable();
+            }
+            if (!Schema::hasColumn('users', 'last_name')) {
+                $table->string('last_name')->nullable();
+            }
         });
 
-        // Migrate existing data: split name into first_name, middle_initial, last_name
-        DB::statement("UPDATE users SET 
-            first_name = SUBSTRING_INDEX(name, ' ', 1),
-            last_name = CASE 
-                WHEN LOCATE(' ', name) > 0 THEN SUBSTRING_INDEX(SUBSTRING_INDEX(name, ' ', -2), ' ', 1)
-                ELSE ''
-            END,
-            middle_initial = CASE 
-                WHEN (LENGTH(name) - LENGTH(REPLACE(name, ' ', ''))) >= 2 THEN UPPER(SUBSTRING(SUBSTRING_INDEX(SUBSTRING_INDEX(name, ' ', -2), ' ', 1), 1, 1))
-                ELSE NULL
-            END
-        WHERE name IS NOT NULL AND name != ''");
-
-        // Update last_name to get the actual last word
-        DB::statement("UPDATE users SET 
-            last_name = SUBSTRING_INDEX(name, ' ', -1)
-        WHERE name IS NOT NULL AND name != ''");
+        // Migrate existing data: split name into first_name, middle_initial, last_name.
+        // Portable PHP-side implementation (original used MySQL-only
+        // SUBSTRING_INDEX/LOCATE). Skipped when there is nothing to migrate.
+        try {
+            if (Schema::hasColumn('users', 'name')) {
+                $rows = DB::table('users')->whereNotNull('name')->where('name', '!=', '')->select('id', 'name')->get();
+                foreach ($rows as $row) {
+                    $parts = preg_split('/\s+/', trim($row->name));
+                    $first = $parts[0] ?? '';
+                    $last = count($parts) > 1 ? end($parts) : '';
+                    $middle = count($parts) > 2 ? strtoupper(substr($parts[1], 0, 1)) : null;
+                    DB::table('users')->where('id', $row->id)->update([
+                        'first_name' => $first,
+                        'last_name' => $last,
+                        'middle_initial' => $middle,
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
+        }
 
         // Drop the old name column
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('name');
-        });
+        if (Schema::hasColumn('users', 'name')) {
+            try {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->dropColumn('name');
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

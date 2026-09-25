@@ -9,9 +9,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Step 1: Add cho and rhu to the role enum
-        // MariaDB requires rebuilding the enum
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('cho', 'rhu', 'midwife', 'bhw', 'bhw_president', 'user') NULL");
+        // Step 1: Add cho and rhu to the role enum (MySQL only — on
+        // pgsql/sqlite the column is VARCHAR and accepts any value)
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('cho', 'rhu', 'midwife', 'bhw', 'bhw_president', 'user') NULL");
+        }
+
+        // The singular assigned_barangay has no CREATE migration in history
+        // (local databases got it from a dump restore) — ensure it first.
+        if (!Schema::hasColumn('users', 'assigned_barangay')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('assigned_barangay')->nullable();
+            });
+        }
 
         // Step 2: Add CHO / RHU specific fields
         Schema::table('users', function (Blueprint $table) {
@@ -33,23 +43,25 @@ return new class extends Migration
             }
         });
 
-        // Add foreign keys safely
-        Schema::table('users', function (Blueprint $table) {
-            $existing = collect(DB::select("
-                SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE
-                WHERE TABLE_NAME = 'users' AND CONSTRAINT_SCHEMA = DATABASE()
-                AND CONSTRAINT_NAME LIKE '%foreign'
-            "))->pluck('CONSTRAINT_NAME')->toArray();
-
-            if (!in_array('users_registered_by_rhu_id_foreign', $existing) && Schema::hasColumn('users', 'registered_by_rhu_id')) {
-                $table->foreign('registered_by_rhu_id')->references('id')->on('users')->onDelete('set null');
-                $table->index('registered_by_rhu_id');
+        // Add foreign keys safely (best effort — the information_schema
+        // introspection is MySQL-only)
+        foreach (['registered_by_rhu_id', 'registered_by_cho_id'] as $column) {
+            if (!Schema::hasColumn('users', $column)) {
+                continue;
             }
-            if (!in_array('users_registered_by_cho_id_foreign', $existing) && Schema::hasColumn('users', 'registered_by_cho_id')) {
-                $table->foreign('registered_by_cho_id')->references('id')->on('users')->onDelete('set null');
-                $table->index('registered_by_cho_id');
+            try {
+                Schema::table('users', function (Blueprint $table) use ($column) {
+                    $table->foreign($column)->references('id')->on('users')->onDelete('set null');
+                });
+            } catch (\Throwable $e) {
             }
-        });
+            try {
+                Schema::table('users', function (Blueprint $table) use ($column) {
+                    $table->index($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     public function down(): void

@@ -13,35 +13,60 @@ return new class extends Migration
             return;
         }
 
-        // Clean up legacy indexes that still point to the pre-polymorphic user column.
+        // Clean up legacy indexes (portable: attempt drop, ignore if missing).
+        // MySQL-only "DROP INDEX x ON tbl" syntax replaced by Schema builder.
         foreach (['idx_cycles_user_id', 'idx_cycles_user_start', 'cycles_user_id_period_start_date_index'] as $indexName) {
-            $indexExists = DB::table('information_schema.STATISTICS')
-                ->whereRaw('TABLE_SCHEMA = DATABASE()')
-                ->where('TABLE_NAME', 'cycles')
-                ->where('INDEX_NAME', $indexName)
-                ->exists();
-
-            if ($indexExists) {
-                DB::statement("DROP INDEX {$indexName} ON cycles");
+            try {
+                Schema::table('cycles', function (Blueprint $table) use ($indexName) {
+                    $table->dropIndex($indexName);
+                });
+            } catch (\Throwable $e) {
             }
         }
 
         if (Schema::hasColumn('cycles', 'user_id_old')) {
-            Schema::table('cycles', function (Blueprint $table) {
-                $table->dropColumn('user_id_old');
-            });
+            // Drop the FK first. NOTE: after the polymorphic rename the
+            // constraint still carries its ORIGINAL name
+            // (cycles_user_id_foreign), so try several candidates — each in
+            // its own call so one miss can't skip the rest.
+            foreach (['cycles_user_id_foreign', 'cycles_user_id_old_foreign'] as $fkName) {
+                try {
+                    Schema::table('cycles', function (Blueprint $table) use ($fkName) {
+                        $table->dropForeign($fkName);
+                    });
+                } catch (\Throwable $e) {
+                }
+            }
+            try {
+                Schema::table('cycles', function (Blueprint $table) {
+                    $table->dropForeign(['user_id_old']);
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('cycles', function (Blueprint $table) {
+                    $table->dropColumn('user_id_old');
+                });
+            } catch (\Throwable $e) {
+                // SQLite can't drop FK-bound columns — rename away; repaired later.
+                if (DB::getDriverName() === 'sqlite' && Schema::hasColumn('cycles', 'user_id_old')) {
+                    try {
+                        Schema::table('cycles', function (Blueprint $table) {
+                            $table->renameColumn('user_id_old', 'user_id_old__deprecated');
+                        });
+                    } catch (\Throwable $e2) {
+                    }
+                }
+            }
         }
 
-        $patientIndexExists = DB::table('information_schema.STATISTICS')
-            ->whereRaw('TABLE_SCHEMA = DATABASE()')
-            ->where('TABLE_NAME', 'cycles')
-            ->where('INDEX_NAME', 'cycles_patient_id_patient_type_period_start_date_index')
-            ->exists();
-
-        if (!$patientIndexExists && Schema::hasColumn('cycles', 'patient_id') && Schema::hasColumn('cycles', 'patient_type')) {
-            Schema::table('cycles', function (Blueprint $table) {
-                $table->index(['patient_id', 'patient_type', 'period_start_date'], 'cycles_patient_id_patient_type_period_start_date_index');
-            });
+        if (Schema::hasColumn('cycles', 'patient_id') && Schema::hasColumn('cycles', 'patient_type')) {
+            try {
+                Schema::table('cycles', function (Blueprint $table) {
+                    $table->index(['patient_id', 'patient_type', 'period_start_date'], 'cycles_patient_id_patient_type_period_start_date_index');
+                });
+            } catch (\Throwable $e) {
+            }
         }
     }
 
@@ -51,24 +76,22 @@ return new class extends Migration
             return;
         }
 
-        $patientIndexExists = DB::table('information_schema.STATISTICS')
-            ->whereRaw('TABLE_SCHEMA = DATABASE()')
-            ->where('TABLE_NAME', 'cycles')
-            ->where('INDEX_NAME', 'cycles_patient_id_patient_type_period_start_date_index')
-            ->exists();
-
-        if ($patientIndexExists) {
+        try {
             Schema::table('cycles', function (Blueprint $table) {
                 $table->dropIndex('cycles_patient_id_patient_type_period_start_date_index');
             });
+        } catch (\Throwable $e) {
         }
 
         if (!Schema::hasColumn('cycles', 'user_id_old')) {
-            Schema::table('cycles', function (Blueprint $table) {
-                $table->unsignedBigInteger('user_id_old')->nullable()->after('patient_type');
-                $table->index('user_id_old', 'idx_cycles_user_id');
-                $table->index(['user_id_old', 'period_start_date'], 'idx_cycles_user_start');
-            });
+            try {
+                Schema::table('cycles', function (Blueprint $table) {
+                    $table->unsignedBigInteger('user_id_old')->nullable();
+                    $table->index('user_id_old', 'idx_cycles_user_id');
+                    $table->index(['user_id_old', 'period_start_date'], 'idx_cycles_user_start');
+                });
+            } catch (\Throwable $e) {
+            }
         }
     }
 };

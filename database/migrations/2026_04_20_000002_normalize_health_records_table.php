@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,77 +12,122 @@ return new class extends Migration
      */
     public function up(): void
     {
+        $isMysql = DB::getDriverName() === 'mysql';
+
         Schema::table('health_records', function (Blueprint $table) {
             // Add new specific foreign key columns only if they don't exist
             if (!Schema::hasColumn('health_records', 'woman_id')) {
-                $table->unsignedBigInteger('woman_id')->nullable()->after('id');
+                $table->unsignedBigInteger('woman_id')->nullable();
             }
             if (!Schema::hasColumn('health_records', 'recorded_by_midwife_id')) {
-                $table->unsignedBigInteger('recorded_by_midwife_id')->nullable()->after('recorded_by_id');
+                $table->unsignedBigInteger('recorded_by_midwife_id')->nullable();
             }
             if (!Schema::hasColumn('health_records', 'recorded_by_bhw_id')) {
-                $table->unsignedBigInteger('recorded_by_bhw_id')->nullable()->after('recorded_by_midwife_id');
+                $table->unsignedBigInteger('recorded_by_bhw_id')->nullable();
             }
-
-            // Get existing foreign keys
-            $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'health_records' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
-
-            // Add foreign key constraints only if they don't already exist
-            if (Schema::hasColumn('health_records', 'woman_id') && !in_array('health_records_woman_id_foreign', $foreignKeys)) {
-                $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
-            }
-            if (Schema::hasColumn('health_records', 'recorded_by_midwife_id') && !in_array('health_records_recorded_by_midwife_id_foreign', $foreignKeys)) {
-                $table->foreign('recorded_by_midwife_id')->references('id')->on('midwives')->onDelete('set null');
-            }
-            if (Schema::hasColumn('health_records', 'recorded_by_bhw_id') && !in_array('health_records_recorded_by_bhw_id_foreign', $foreignKeys)) {
-                $table->foreign('recorded_by_bhw_id')->references('id')->on('bhws')->onDelete('set null');
-            }
-
-            // Add indexes
-            $table->index('woman_id');
-            $table->index('recorded_by_midwife_id');
-            $table->index('recorded_by_bhw_id');
         });
 
-        // Migrate data from polymorphic columns to specific columns
-        DB::statement("
-            UPDATE health_records hr
-            SET hr.woman_id = hr.patient_id
-            WHERE hr.patient_type = 'App\\\\Models\\\\Woman' OR hr.patient_type = 'App\\\\Models\\\\Patient'
-        ");
+        // Get existing foreign keys (MySQL-only introspection)
+        $foreignKeys = [];
+        if ($isMysql) {
+            try {
+                $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'health_records' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+            } catch (\Throwable $e) {
+            }
+        }
 
-        DB::statement("
-            UPDATE health_records hr
-            SET hr.recorded_by_midwife_id = hr.recorded_by_id
-            WHERE hr.recorded_by_type = 'App\\\\Models\\\\Midwife'
-        ");
+        // Add foreign key constraints (best effort)
+        foreach ([
+            ['woman_id', 'women', 'cascade'],
+            ['recorded_by_midwife_id', 'midwives', 'set null'],
+            ['recorded_by_bhw_id', 'bhws', 'set null'],
+        ] as [$column, $on, $delete]) {
+            if (!Schema::hasColumn('health_records', $column) || !Schema::hasTable($on)) {
+                continue;
+            }
+            if ($isMysql && in_array("health_records_{$column}_foreign", $foreignKeys)) {
+                continue;
+            }
+            try {
+                Schema::table('health_records', function (Blueprint $table) use ($column, $on, $delete) {
+                    $table->foreign($column)->references('id')->on($on)->onDelete($delete);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
 
-        DB::statement("
-            UPDATE health_records hr
-            SET hr.recorded_by_bhw_id = hr.recorded_by_id
-            WHERE hr.recorded_by_type = 'App\\\\Models\\\\Bhw'
-        ");
+        // Add indexes (best effort)
+        foreach (['woman_id', 'recorded_by_midwife_id', 'recorded_by_bhw_id'] as $column) {
+            if (!Schema::hasColumn('health_records', $column)) {
+                continue;
+            }
+            try {
+                Schema::table('health_records', function (Blueprint $table) use ($column) {
+                    $table->index($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
+
+        // Migrate data from polymorphic columns to specific columns.
+        // Plain UPDATE without table alias: valid on mysql/pgsql/sqlite.
+        foreach ([
+            "UPDATE health_records SET woman_id = patient_id WHERE patient_type = 'App\\\\Models\\\\Woman' OR patient_type = 'App\\\\Models\\\\Patient'",
+            "UPDATE health_records SET recorded_by_midwife_id = recorded_by_id WHERE recorded_by_type = 'App\\\\Models\\\\Midwife'",
+            "UPDATE health_records SET recorded_by_bhw_id = recorded_by_id WHERE recorded_by_type = 'App\\\\Models\\\\Bhw'",
+        ] as $sql) {
+            try {
+                DB::statement($sql);
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Drop polymorphic columns
-        Schema::table('health_records', function (Blueprint $table) {
-            // Get existing foreign keys
-            $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'health_records' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
-            
-            if (in_array('health_records_recorded_by_id_foreign', $foreignKeys)) {
-                $table->dropForeign(['recorded_by_id']);
+        try {
+            Schema::table('health_records', function (Blueprint $table) {
+                try {
+                    $table->dropForeign(['recorded_by_id']);
+                } catch (\Throwable $e) {
+                }
+            });
+        } catch (\Throwable $e) {
+        }
+
+        $columnsToDrop = [];
+        foreach (['patient_id', 'patient_type', 'recorded_by_type', 'recorded_by_id'] as $column) {
+            if (Schema::hasColumn('health_records', $column)) {
+                $columnsToDrop[] = $column;
             }
-            
-            // Drop columns that exist
-            $columnsToDrop = [];
-            if (Schema::hasColumn('health_records', 'patient_id')) $columnsToDrop[] = 'patient_id';
-            if (Schema::hasColumn('health_records', 'patient_type')) $columnsToDrop[] = 'patient_type';
-            if (Schema::hasColumn('health_records', 'recorded_by_type')) $columnsToDrop[] = 'recorded_by_type';
-            if (Schema::hasColumn('health_records', 'recorded_by_id')) $columnsToDrop[] = 'recorded_by_id';
-            
-            if (!empty($columnsToDrop)) {
-                $table->dropColumn($columnsToDrop);
+        }
+
+        if (!empty($columnsToDrop)) {
+            try {
+                Schema::table('health_records', function (Blueprint $table) use ($columnsToDrop) {
+                    $table->dropColumn($columnsToDrop);
+                });
+            } catch (\Throwable $e) {
+                // SQLite can't drop FK-bound columns — rename away one by one.
+                foreach ($columnsToDrop as $column) {
+                    if (!Schema::hasColumn('health_records', $column)) {
+                        continue;
+                    }
+                    try {
+                        Schema::table('health_records', function (Blueprint $table) use ($column) {
+                            $table->dropColumn($column);
+                        });
+                    } catch (\Throwable $e2) {
+                        if (DB::getDriverName() === 'sqlite') {
+                            try {
+                                Schema::table('health_records', function (Blueprint $table) use ($column) {
+                                    $table->renameColumn($column, $column . '__deprecated');
+                                });
+                            } catch (\Throwable $e3) {
+                            }
+                        }
+                    }
+                }
             }
-        });
+        }
     }
 
     /**

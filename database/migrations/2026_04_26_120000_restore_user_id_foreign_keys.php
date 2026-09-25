@@ -12,60 +12,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Clean up orphaned data before adding foreign keys
-        DB::statement("DELETE FROM checkups WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)");
-        DB::statement("DELETE FROM health_records WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)");
-        DB::statement("DELETE FROM menstruation_dailies WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)");
-        DB::statement("DELETE FROM forum_likes WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)");
-        DB::statement("DELETE FROM fertility_logs WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)");
-
-        // Restore foreign key for checkups.user_id (if not exists)
-        if (!Schema::hasColumn('checkups', 'user_id')) {
-            // Skip if column doesn't exist
-        } else {
+        // Clean up orphaned data before adding foreign keys (only for tables
+        // that actually still have a user_id column).
+        foreach (['checkups', 'health_records', 'menstruation_dailies', 'forum_likes', 'fertility_logs'] as $table) {
+            if (!Schema::hasTable($table) || !Schema::hasColumn($table, 'user_id')) {
+                continue;
+            }
             try {
-                Schema::table('checkups', function (Blueprint $table) {
-                    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                DB::statement("DELETE FROM {$table} WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)");
+            } catch (\Throwable $e) {
+            }
+        }
+
+        // Restore foreign keys (only where the column exists; best effort).
+        foreach (['checkups', 'health_records', 'menstruation_dailies', 'forum_likes', 'fertility_logs'] as $table) {
+            if (!Schema::hasTable($table) || !Schema::hasColumn($table, 'user_id')) {
+                continue;
+            }
+            try {
+                Schema::table($table, function (Blueprint $tableBlueprint) {
+                    $tableBlueprint->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 });
             } catch (\Exception $e) {
                 // FK already exists, skip
             }
-        }
-
-        // Restore foreign key for health_records.user_id (if not exists)
-        try {
-            Schema::table('health_records', function (Blueprint $table) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
-        } catch (\Exception $e) {
-            // FK already exists, skip
-        }
-
-        // Restore foreign key for menstruation_dailies.user_id (if not exists)
-        try {
-            Schema::table('menstruation_dailies', function (Blueprint $table) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
-        } catch (\Exception $e) {
-            // FK already exists, skip
-        }
-
-        // Restore foreign key for forum_likes.user_id (if not exists)
-        try {
-            Schema::table('forum_likes', function (Blueprint $table) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
-        } catch (\Exception $e) {
-            // FK already exists, skip
-        }
-
-        // Add foreign key for fertility_logs.user_id (if not exists)
-        try {
-            Schema::table('fertility_logs', function (Blueprint $table) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
-        } catch (\Exception $e) {
-            // FK already exists, skip
         }
     }
 

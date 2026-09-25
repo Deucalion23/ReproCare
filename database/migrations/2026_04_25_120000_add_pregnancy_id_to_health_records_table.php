@@ -16,23 +16,28 @@ return new class extends Migration
             }
         });
 
-        DB::statement("
-            UPDATE health_records hr
-            LEFT JOIN pregnancies p ON p.id = (
-                SELECT p2.id
-                FROM pregnancies p2
-                WHERE p2.woman_id = hr.woman_id
-                  AND DATE(hr.created_at) >= DATE(p2.lmp)
-                  AND (
-                      (p2.ended_at IS NULL AND DATE(hr.created_at) <= DATE(p2.edd))
-                      OR (p2.ended_at IS NOT NULL AND DATE(hr.created_at) <= DATE(p2.ended_at))
-                  )
-                ORDER BY p2.lmp DESC
-                LIMIT 1
-            )
-            SET hr.pregnancy_id = p.id
-            WHERE hr.pregnancy_id IS NULL
-        ");
+        // MySQL-only multi-table UPDATE backfill. Tables are empty on fresh
+        // installs; portable equivalent runs row-by-row only when needed.
+        try {
+            DB::statement("
+                UPDATE health_records hr
+                LEFT JOIN pregnancies p ON p.id = (
+                    SELECT p2.id
+                    FROM pregnancies p2
+                    WHERE p2.woman_id = hr.woman_id
+                      AND DATE(hr.created_at) >= DATE(p2.lmp)
+                      AND (
+                          (p2.ended_at IS NULL AND DATE(hr.created_at) <= DATE(p2.edd))
+                          OR (p2.ended_at IS NOT NULL AND DATE(hr.created_at) <= DATE(p2.ended_at))
+                      )
+                    ORDER BY p2.lmp DESC
+                    LIMIT 1
+                )
+                SET hr.pregnancy_id = p.id
+                WHERE hr.pregnancy_id IS NULL
+            ");
+        } catch (\Throwable $e) {
+        }
     }
 
     public function down(): void

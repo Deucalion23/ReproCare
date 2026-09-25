@@ -12,6 +12,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // On pgsql/sqlite there is no information_schema/DATABASE() introspection —
+        // just disable constraints and drop (fresh installs have no data to preserve).
+        if (DB::getDriverName() !== 'mysql') {
+            Schema::disableForeignKeyConstraints();
+            Schema::dropIfExists('users');
+            Schema::enableForeignKeyConstraints();
+            $this->recreateUsersTable();
+            return;
+        }
+
         // Get all foreign keys referencing the users table
         $constraints = DB::select(
             "SELECT TABLE_NAME, CONSTRAINT_NAME
@@ -27,6 +37,53 @@ return new class extends Migration
 
         // Drop the users table
         Schema::dropIfExists('users');
+
+        // Recreate it: historically the local database was restored from a dump
+        // after this drop, so fresh installs (any driver) ended up with NO users
+        // table at all. Recreate the base table here; later migrations add the
+        // remaining columns.
+        $this->recreateUsersTable();
+    }
+
+    protected function recreateUsersTable(): void
+    {
+        if (Schema::hasTable('users')) {
+            return;
+        }
+        Schema::create('users', function (Blueprint $table) {
+            $table->id();
+            $table->string('first_name');
+            $table->string('middle_initial')->nullable();
+            $table->string('last_name');
+            $table->string('email')->unique();
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('password');
+            $table->string('role')->default('patient');
+            // Columns added by pre-drop migrations (03_26 roles, 04_11 dob,
+            // 04_13 profile fields, 04_18 status) that would otherwise be lost
+            // by this drop on fresh installs. Later migrations extend further.
+            // string (not enum) for role/status: portable across drivers.
+            $table->string('status')->default('approved');
+            $table->string('rejection_reason')->nullable();
+            $table->date('date_of_birth')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('contact_number')->nullable();
+            $table->string('profile_image')->nullable();
+            $table->string('feeding_method')->nullable();
+            $table->string('family_planning_method')->nullable();
+            $table->string('vitamins')->nullable();
+            $table->text('medical_history')->nullable();
+            $table->string('phone')->nullable();
+            $table->text('address')->nullable();
+            $table->string('barangay')->nullable();
+            $table->rememberToken();
+            $table->timestamps();
+            $table->softDeletes();
+
+            $table->index('email');
+            $table->index('role');
+            $table->index('barangay');
+        });
     }
 
     /**

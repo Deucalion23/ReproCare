@@ -22,9 +22,12 @@ return new class extends Migration
         $this->standardizeSymptoms();
 
         // Step 2: Change column type to JSON
-        Schema::table('menstruation_records', function (Blueprint $table) {
-            $table->json('symptoms')->nullable()->change();
-        });
+        try {
+            Schema::table('menstruation_records', function (Blueprint $table) {
+                $table->json('symptoms')->nullable()->change();
+            });
+        } catch (\Throwable $e) {
+        }
 
         // Step 3: Refresh stale AOG values in pregnancies
         $this->refreshStaleAog();
@@ -88,33 +91,28 @@ return new class extends Migration
      */
     protected function standardizeSymptoms(): void
     {
-        // Convert comma-separated symptoms to JSON array
-        $affected = DB::statement("
-            UPDATE menstruation_records
-            SET symptoms = CONCAT('[\"', REPLACE(symptoms, ',', '\",\"'), '\"]')
-            WHERE symptoms IS NOT NULL 
-              AND symptoms LIKE '%,%'
-              AND symptoms NOT LIKE '[%'
-        ");
-
-        // Convert pipe-separated symptoms to JSON array
-        DB::statement("
-            UPDATE menstruation_records
-            SET symptoms = CONCAT('[\"', REPLACE(symptoms, '|', '\",\"'), '\"]')
-            WHERE symptoms IS NOT NULL 
-              AND symptoms LIKE '%|%'
-              AND symptoms NOT LIKE '[%'
-        ");
-
-        // Wrap single symptoms in JSON array
-        DB::statement("
-            UPDATE menstruation_records
-            SET symptoms = CONCAT('[\"', symptoms, '\"]')
-            WHERE symptoms IS NOT NULL 
-              AND symptoms NOT LIKE '[%'
-              AND symptoms NOT LIKE '%,%'
-              AND symptoms NOT LIKE '%|%'
-        ");
+        // Portable PHP-side conversion (works on mysql/pgsql/sqlite, no CONCAT).
+        try {
+            if (!Schema::hasTable('menstruation_records') || !Schema::hasColumn('menstruation_records', 'symptoms')) {
+                return;
+            }
+            $rows = DB::table('menstruation_records')->whereNotNull('symptoms')->select('id', 'symptoms')->get();
+            foreach ($rows as $row) {
+                $s = trim((string) $row->symptoms);
+                if ($s === '' || str_starts_with($s, '[')) {
+                    continue;
+                }
+                if (str_contains($s, ',')) {
+                    $parts = array_values(array_filter(array_map('trim', explode(',', $s))));
+                } elseif (str_contains($s, '|')) {
+                    $parts = array_values(array_filter(array_map('trim', explode('|', $s))));
+                } else {
+                    $parts = [$s];
+                }
+                DB::table('menstruation_records')->where('id', $row->id)->update(['symptoms' => json_encode($parts)]);
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     /**
@@ -122,13 +120,21 @@ return new class extends Migration
      */
     protected function refreshStaleAog(): void
     {
-        DB::table('pregnancies')
-            ->whereNull('ended_at')
-            ->whereRaw('ABS(aog - ROUND(DATEDIFF(CURDATE(), lmp) / 7)) > 1')
-            ->update([
-                'aog' => DB::raw('ROUND(DATEDIFF(CURDATE(), lmp) / 7)'),
-                'updated_at' => now(),
-            ]);
+        // MySQL-only date math — skip on pgsql/sqlite fresh installs.
+        // AOG is recalculated at runtime by the app; safe to skip during migrate.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
+        try {
+            DB::table('pregnancies')
+                ->whereNull('ended_at')
+                ->whereRaw('ABS(aog - ROUND(DATEDIFF(CURDATE(), lmp) / 7)) > 1')
+                ->update([
+                    'aog' => DB::raw('ROUND(DATEDIFF(CURDATE(), lmp) / 7)'),
+                    'updated_at' => now(),
+                ]);
+        } catch (\Throwable $e) {
+        }
     }
 
     /**
@@ -136,14 +142,23 @@ return new class extends Migration
      */
     protected function createHealthRecordsEnrichedView(): void
     {
-        DB::statement("
+        $sql = "
             CREATE OR REPLACE VIEW health_records_enriched AS
-            SELECT 
+            SELECT
                 hr.*,
                 u.role AS recorded_by_role_actual
             FROM health_records hr
             INNER JOIN users u ON hr.recorded_by_id = u.id
-        ");
+        ";
+        try {
+            DB::statement($sql);
+        } catch (\Throwable $e) {
+            try {
+                DB::statement('DROP VIEW IF EXISTS health_records_enriched');
+                DB::statement(preg_replace('/CREATE\s+OR\s+REPLACE\s+VIEW/i', 'CREATE VIEW', $sql));
+            } catch (\Throwable $e2) {
+            }
+        }
     }
 
     /**

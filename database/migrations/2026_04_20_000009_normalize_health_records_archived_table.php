@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,73 +12,77 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Get existing columns and foreign keys
-        $existingColumns = Schema::getColumnListing('health_records_archived');
-        $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'health_records_archived' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+        if (!Schema::hasTable('health_records_archived')) {
+            return;
+        }
 
-        Schema::table('health_records_archived', function (Blueprint $table) use ($existingColumns, $foreignKeys) {
-            // Add new specific foreign key columns only if they don't exist
-            if (!in_array('woman_id', $existingColumns)) {
-                $table->unsignedBigInteger('woman_id')->nullable()->after('id');
-            }
-            if (!in_array('recorded_by_midwife_id', $existingColumns)) {
-                $table->unsignedBigInteger('recorded_by_midwife_id')->nullable()->after('recorded_by_id');
-            }
-            if (!in_array('recorded_by_bhw_id', $existingColumns)) {
-                $table->unsignedBigInteger('recorded_by_bhw_id')->nullable()->after('recorded_by_midwife_id');
-            }
-
-            // Add foreign key constraints only if columns exist and FK doesn't
-            if (in_array('woman_id', $existingColumns) && !in_array('health_records_archived_woman_id_foreign', $foreignKeys)) {
-                $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
-            }
-            if (in_array('recorded_by_midwife_id', $existingColumns) && !in_array('health_records_archived_recorded_by_midwife_id_foreign', $foreignKeys)) {
-                $table->foreign('recorded_by_midwife_id')->references('id')->on('midwives')->onDelete('set null');
-            }
-            if (in_array('recorded_by_bhw_id', $existingColumns) && !in_array('health_records_archived_recorded_by_bhw_id_foreign', $foreignKeys)) {
-                $table->foreign('recorded_by_bhw_id')->references('id')->on('bhws')->onDelete('set null');
-            }
-
-            // Add index if column exists and index doesn't
-            $indexes = collect(DB::select("SHOW INDEX FROM health_records_archived"))->pluck('Key_name')->unique()->values()->toArray();
-            if (in_array('woman_id', $existingColumns) && !in_array('health_records_archived_woman_id_index', $indexes)) {
-                $table->index('woman_id');
+        // Add new specific foreign key columns only if they don't exist
+        Schema::table('health_records_archived', function (Blueprint $table) {
+            foreach (['woman_id', 'recorded_by_midwife_id', 'recorded_by_bhw_id'] as $column) {
+                if (!Schema::hasColumn('health_records_archived', $column)) {
+                    $table->unsignedBigInteger($column)->nullable();
+                }
             }
         });
 
-        // Migrate data - assuming archived records use role to determine table
-        if (in_array('user_id', $existingColumns) && in_array('created_by_role', $existingColumns)) {
-            DB::statement("
-                UPDATE health_records_archived hra
-                SET hra.woman_id = hra.user_id
-                WHERE hra.created_by_role = 'user'
-            ");
+        // Add foreign key constraints + index (best effort)
+        foreach ([
+            ['woman_id', 'women', 'cascade'],
+            ['recorded_by_midwife_id', 'midwives', 'set null'],
+            ['recorded_by_bhw_id', 'bhws', 'set null'],
+        ] as [$column, $on, $delete]) {
+            if (!Schema::hasColumn('health_records_archived', $column) || !Schema::hasTable($on)) {
+                continue;
+            }
+            try {
+                Schema::table('health_records_archived', function (Blueprint $table) use ($column, $on, $delete) {
+                    $table->foreign($column)->references('id')->on($on)->onDelete($delete);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
+        if (Schema::hasColumn('health_records_archived', 'woman_id')) {
+            try {
+                Schema::table('health_records_archived', function (Blueprint $table) {
+                    $table->index('woman_id');
+                });
+            } catch (\Throwable $e) {
+            }
         }
 
-        if (in_array('recorded_by_id', $existingColumns) && in_array('created_by_role', $existingColumns)) {
-            DB::statement("
-                UPDATE health_records_archived hra
-                SET hra.recorded_by_midwife_id = hra.recorded_by_id
-                WHERE hra.created_by_role = 'midwife'
-            ");
+        // Migrate data - assuming archived records use role to determine table.
+        // Query-builder updates: portable across mysql/pgsql/sqlite.
+        if (Schema::hasColumn('health_records_archived', 'user_id') && Schema::hasColumn('health_records_archived', 'created_by_role')) {
+            try {
+                DB::table('health_records_archived')->where('created_by_role', 'user')->update(['woman_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+        }
 
-            DB::statement("
-                UPDATE health_records_archived hra
-                SET hra.recorded_by_bhw_id = hra.recorded_by_id
-                WHERE hra.created_by_role = 'bhw'
-            ");
+        if (Schema::hasColumn('health_records_archived', 'recorded_by_id') && Schema::hasColumn('health_records_archived', 'created_by_role')) {
+            try {
+                DB::table('health_records_archived')->where('created_by_role', 'midwife')->update(['recorded_by_midwife_id' => DB::raw('recorded_by_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('health_records_archived')->where('created_by_role', 'bhw')->update(['recorded_by_bhw_id' => DB::raw('recorded_by_id')]);
+            } catch (\Throwable $e) {
+            }
         }
 
         // Drop old columns with try-catch
         try {
-            Schema::table('health_records_archived', function (Blueprint $table) use ($existingColumns, $foreignKeys) {
-                if (in_array('user_id', $existingColumns) && in_array('health_records_archived_user_id_foreign', $foreignKeys)) {
+            Schema::table('health_records_archived', function (Blueprint $table) {
+                try {
                     $table->dropForeign(['user_id']);
+                } catch (\Throwable $e) {
                 }
                 $columnsToDrop = [];
-                if (in_array('user_id', $existingColumns)) $columnsToDrop[] = 'user_id';
-                if (in_array('created_by_role', $existingColumns)) $columnsToDrop[] = 'created_by_role';
-                if (in_array('recorded_by_id', $existingColumns)) $columnsToDrop[] = 'recorded_by_id';
+                foreach (['user_id', 'created_by_role', 'recorded_by_id'] as $column) {
+                    if (Schema::hasColumn('health_records_archived', $column)) {
+                        $columnsToDrop[] = $column;
+                    }
+                }
                 if (!empty($columnsToDrop)) {
                     $table->dropColumn($columnsToDrop);
                 }

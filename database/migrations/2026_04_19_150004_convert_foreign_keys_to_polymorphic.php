@@ -12,8 +12,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Helper function to drop foreign key if it exists
+        // Helper function to drop foreign key if it exists (portable)
         $dropForeignKeyIfExists = function ($table, $foreignKey) {
+            if (DB::getDriverName() !== 'mysql') {
+                try {
+                    Schema::table($table, function (Blueprint $t) use ($foreignKey) {
+                        $t->dropForeign($foreignKey);
+                    });
+                } catch (\Throwable $e) {
+                }
+                return;
+            }
             $exists = DB::select("SELECT COUNT(*) as count FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND CONSTRAINT_NAME = ?", [$table, $foreignKey]);
             if ($exists[0]->count > 0) {
                 DB::statement("ALTER TABLE {$table} DROP FOREIGN KEY {$foreignKey}");
@@ -25,19 +34,39 @@ return new class extends Migration
         $dropForeignKeyIfExists('checkups', 'checkups_midwife_user_id_foreign');
         $dropForeignKeyIfExists('checkups', 'checkups_scheduled_by_id_foreign');
 
+        // Renames first (only if old exists and backup name is free)
         Schema::table('checkups', function (Blueprint $table) {
-            // Rename old columns to backup
-            $table->renameColumn('user_id', 'user_id_old');
-            $table->renameColumn('midwife_user_id', 'midwife_user_id_old');
-            $table->renameColumn('scheduled_by_id', 'scheduled_by_id_old');
+            if (Schema::hasColumn('checkups', 'user_id') && !Schema::hasColumn('checkups', 'user_id_old')) {
+                $table->renameColumn('user_id', 'user_id_old');
+            }
+            if (Schema::hasColumn('checkups', 'midwife_user_id') && !Schema::hasColumn('checkups', 'midwife_user_id_old')) {
+                $table->renameColumn('midwife_user_id', 'midwife_user_id_old');
+            }
+            if (Schema::hasColumn('checkups', 'scheduled_by_id') && !Schema::hasColumn('checkups', 'scheduled_by_id_old')) {
+                $table->renameColumn('scheduled_by_id', 'scheduled_by_id_old');
+            }
+        });
 
-            // Add new polymorphic columns
-            $table->unsignedBigInteger('patient_id')->nullable()->after('id');
-            $table->unsignedBigInteger('midwife_id')->nullable()->after('patient_id');
-            $table->unsignedBigInteger('scheduled_by_id')->nullable()->after('midwife_id');
-            $table->string('patient_type')->nullable()->after('patient_id');
-            $table->string('midwife_type')->nullable()->after('midwife_id');
-            $table->string('scheduled_by_type')->nullable()->after('scheduled_by_id');
+        // Add new polymorphic columns (only missing ones)
+        Schema::table('checkups', function (Blueprint $table) {
+            if (!Schema::hasColumn('checkups', 'patient_id')) {
+                $table->unsignedBigInteger('patient_id')->nullable();
+            }
+            if (!Schema::hasColumn('checkups', 'midwife_id')) {
+                $table->unsignedBigInteger('midwife_id')->nullable();
+            }
+            if (!Schema::hasColumn('checkups', 'scheduled_by_id')) {
+                $table->unsignedBigInteger('scheduled_by_id')->nullable();
+            }
+            if (!Schema::hasColumn('checkups', 'patient_type')) {
+                $table->string('patient_type')->nullable();
+            }
+            if (!Schema::hasColumn('checkups', 'midwife_type')) {
+                $table->string('midwife_type')->nullable();
+            }
+            if (!Schema::hasColumn('checkups', 'scheduled_by_type')) {
+                $table->string('scheduled_by_type')->nullable();
+            }
         });
 
         // Health records table - convert user_id and recorded_by_id to polymorphic

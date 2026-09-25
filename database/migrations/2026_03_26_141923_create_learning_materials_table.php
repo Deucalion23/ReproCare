@@ -15,7 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('content');
-            $table->enum('material_type', ['article', 'link', 'file'])->default('article');
+            // Plain string (not enum): later migrations widen the allowed set
+            // (video, quiz, ...) via MySQL-only MODIFY; a CHECK/enum here would
+            // reject those values on Postgres/SQLite fresh installs.
+            $table->string('material_type', 50)->default('article');
             $table->string('link_url')->nullable();
             $table->timestamps();
         });

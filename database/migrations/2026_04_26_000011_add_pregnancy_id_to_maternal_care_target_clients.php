@@ -12,10 +12,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Step 1: Add pregnancy_id column (nullable initially) if it doesn't exist
+        // Step 1: Add pregnancy_id column (nullable initially) if it doesn't exist.
+        // NOTE: no ->after() here — at this point the table still carries the
+        // pre-rename woman_id column (it becomes user_id only in a later
+        // migration), and MySQL errors on AFTER a missing column.
         if (!Schema::hasColumn('maternal_care_target_clients', 'pregnancy_id')) {
             Schema::table('maternal_care_target_clients', function (Blueprint $table) {
-                $table->unsignedBigInteger('pregnancy_id')->nullable()->after('user_id');
+                $table->unsignedBigInteger('pregnancy_id')->nullable();
             });
         }
 
@@ -41,31 +44,36 @@ return new class extends Migration
             $table->unsignedBigInteger('pregnancy_id')->nullable(false)->change();
         });
 
-        // Step 4: Add foreign key constraint if it doesn't exist
-        $fkExists = DB::select("
-            SELECT COUNT(*) as count
-            FROM information_schema.table_constraints
-            WHERE table_schema = DATABASE()
-            AND table_name = 'maternal_care_target_clients'
-            AND constraint_name = 'maternal_care_target_clients_pregnancy_id_foreign'
-            AND constraint_type = 'FOREIGN KEY'
-        ");
-        if (empty($fkExists) || $fkExists[0]->count == 0) {
+        // Step 4: Add foreign key constraint (best effort — the
+        // information_schema introspection is MySQL-only)
+        try {
             Schema::table('maternal_care_target_clients', function (Blueprint $table) {
                 $table->foreign('pregnancy_id')->references('id')->on('pregnancies')->onDelete('cascade');
             });
+        } catch (\Throwable $e) {
         }
 
         // Step 5: Remove unique constraint on user_id (need to drop foreign key first)
-        Schema::table('maternal_care_target_clients', function (Blueprint $table) {
-            $table->dropForeign('maternal_care_target_clients_woman_id_foreign');
-        });
-        Schema::table('maternal_care_target_clients', function (Blueprint $table) {
-            $table->dropUnique('maternal_care_target_clients_woman_id_unique');
-        });
-        Schema::table('maternal_care_target_clients', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        // Every step is best effort: on fresh installs these constraints may
+        // not exist under these names (or at all).
+        try {
+            Schema::table('maternal_care_target_clients', function (Blueprint $table) {
+                $table->dropForeign('maternal_care_target_clients_woman_id_foreign');
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table('maternal_care_target_clients', function (Blueprint $table) {
+                $table->dropUnique('maternal_care_target_clients_woman_id_unique');
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table('maternal_care_target_clients', function (Blueprint $table) {
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            });
+        } catch (\Throwable $e) {
+        }
     }
 
     /**

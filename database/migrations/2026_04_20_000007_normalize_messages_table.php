@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,76 +12,77 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Add new specific foreign key columns (only missing ones)
         Schema::table('messages', function (Blueprint $table) {
-            // Add new specific foreign key columns for sender
-            $table->unsignedBigInteger('sender_woman_id')->nullable()->after('id');
-            $table->unsignedBigInteger('sender_midwife_id')->nullable()->after('sender_woman_id');
-            $table->unsignedBigInteger('sender_bhw_id')->nullable()->after('sender_midwife_id');
-
-            // Add new specific foreign key columns for receiver
-            $table->unsignedBigInteger('receiver_woman_id')->nullable()->after('sender_bhw_id');
-            $table->unsignedBigInteger('receiver_midwife_id')->nullable()->after('receiver_woman_id');
-            $table->unsignedBigInteger('receiver_bhw_id')->nullable()->after('receiver_midwife_id');
-
-            // Add foreign key constraints
-            $table->foreign('sender_woman_id')->references('id')->on('women')->onDelete('cascade');
-            $table->foreign('sender_midwife_id')->references('id')->on('midwives')->onDelete('cascade');
-            $table->foreign('sender_bhw_id')->references('id')->on('bhws')->onDelete('cascade');
-            $table->foreign('receiver_woman_id')->references('id')->on('women')->onDelete('cascade');
-            $table->foreign('receiver_midwife_id')->references('id')->on('midwives')->onDelete('cascade');
-            $table->foreign('receiver_bhw_id')->references('id')->on('bhws')->onDelete('cascade');
-
-            // Add indexes
-            $table->index('sender_woman_id');
-            $table->index('sender_midwife_id');
-            $table->index('sender_bhw_id');
-            $table->index('receiver_woman_id');
-            $table->index('receiver_midwife_id');
-            $table->index('receiver_bhw_id');
+            foreach (['sender_woman_id', 'sender_midwife_id', 'sender_bhw_id', 'receiver_woman_id', 'receiver_midwife_id', 'receiver_bhw_id'] as $column) {
+                if (!Schema::hasColumn('messages', $column)) {
+                    $table->unsignedBigInteger($column)->nullable();
+                }
+            }
         });
 
-        // Migrate sender data
-        DB::statement("
-            UPDATE messages m
-            SET m.sender_woman_id = m.sender_id
-            WHERE m.sender_type = 'App\\\\Models\\\\Woman' OR m.sender_type = 'App\\\\Models\\\\Patient'
-        ");
+        // Add foreign key constraints + indexes (best effort)
+        foreach ([
+            ['sender_woman_id', 'women', 'cascade'],
+            ['sender_midwife_id', 'midwives', 'cascade'],
+            ['sender_bhw_id', 'bhws', 'cascade'],
+            ['receiver_woman_id', 'women', 'cascade'],
+            ['receiver_midwife_id', 'midwives', 'cascade'],
+            ['receiver_bhw_id', 'bhws', 'cascade'],
+        ] as [$column, $on, $delete]) {
+            if (!Schema::hasColumn('messages', $column) || !Schema::hasTable($on)) {
+                continue;
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column, $on, $delete) {
+                    $table->foreign($column)->references('id')->on($on)->onDelete($delete);
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column) {
+                    $table->index($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
 
-        DB::statement("
-            UPDATE messages m
-            SET m.sender_midwife_id = m.sender_id
-            WHERE m.sender_type = 'App\\\\Models\\\\Midwife'
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            SET m.sender_bhw_id = m.sender_id
-            WHERE m.sender_type = 'App\\\\Models\\\\Bhw'
-        ");
-
-        // Migrate receiver data
-        DB::statement("
-            UPDATE messages m
-            SET m.receiver_woman_id = m.receiver_id
-            WHERE m.receiver_type = 'App\\\\Models\\\\Woman' OR m.receiver_type = 'App\\\\Models\\\\Patient'
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            SET m.receiver_midwife_id = m.receiver_id
-            WHERE m.receiver_type = 'App\\\\Models\\\\Midwife'
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            SET m.receiver_bhw_id = m.receiver_id
-            WHERE m.receiver_type = 'App\\\\Models\\\\Bhw'
-        ");
+        // Migrate sender/receiver data via query builder (portable — the
+        // original MySQL "UPDATE .. alias SET alias.col" syntax does not
+        // parse on pgsql/sqlite).
+        $moves = [
+            ['sender_woman_id', 'sender_id', 'sender_type', ['App\\Models\\Woman', 'App\\Models\\Patient']],
+            ['sender_midwife_id', 'sender_id', 'sender_type', ['App\\Models\\Midwife']],
+            ['sender_bhw_id', 'sender_id', 'sender_type', ['App\\Models\\Bhw']],
+            ['receiver_woman_id', 'receiver_id', 'receiver_type', ['App\\Models\\Woman', 'App\\Models\\Patient']],
+            ['receiver_midwife_id', 'receiver_id', 'receiver_type', ['App\\Models\\Midwife']],
+            ['receiver_bhw_id', 'receiver_id', 'receiver_type', ['App\\Models\\Bhw']],
+        ];
+        foreach ($moves as [$target, $source, $typeColumn, $types]) {
+            if (!Schema::hasColumn('messages', $target) || !Schema::hasColumn('messages', $source) || !Schema::hasColumn('messages', $typeColumn)) {
+                continue;
+            }
+            try {
+                DB::table('messages')->whereIn($typeColumn, $types)->update([$target => DB::raw($source)]);
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Drop polymorphic columns
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropColumn(['sender_id', 'sender_type', 'receiver_id', 'receiver_type']);
-        });
+        $drop = [];
+        foreach (['sender_id', 'sender_type', 'receiver_id', 'receiver_type'] as $column) {
+            if (Schema::hasColumn('messages', $column)) {
+                $drop[] = $column;
+            }
+        }
+        if (!empty($drop)) {
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($drop) {
+                    $table->dropColumn($drop);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

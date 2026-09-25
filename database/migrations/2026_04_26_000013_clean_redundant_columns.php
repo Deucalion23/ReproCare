@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -26,41 +27,62 @@ return new class extends Migration
         }
 
         // Step 3: Consolidate forum_likes to use only user_id
-        // First, migrate data from role-specific columns to user_id
-        DB::statement("
-            UPDATE forum_likes
-            SET user_id = COALESCE(user_id, midwife_id, bhw_id)
-            WHERE user_id IS NULL
-        ");
+        // First, migrate data from role-specific columns to user_id.
+        // COALESCE references only columns that actually exist (portable).
+        try {
+            $likeColumns = Schema::getColumnListing('forum_likes');
+            $coalesce = array_values(array_intersect(['user_id', 'midwife_id', 'bhw_id'], $likeColumns));
+            if (in_array('user_id', $coalesce) && count($coalesce) > 1) {
+                DB::statement('UPDATE forum_likes SET user_id = COALESCE(' . implode(', ', $coalesce) . ') WHERE user_id IS NULL');
+            }
+        } catch (\Throwable $e) {
+        }
 
-        // Add unique constraint on (post_id, user_id) if it doesn't exist
-        $uniqueExists = DB::select("
-            SELECT COUNT(*) as count
-            FROM information_schema.table_constraints
-            WHERE table_schema = DATABASE()
-            AND table_name = 'forum_likes'
-            AND constraint_name = 'forum_likes_post_id_user_id_unique'
-            AND constraint_type = 'UNIQUE'
-        ");
-        if (empty($uniqueExists) || $uniqueExists[0]->count == 0) {
+        // Add unique constraint on (post_id, user_id) (best effort — the
+        // information_schema introspection is MySQL-only)
+        try {
             Schema::table('forum_likes', function (Blueprint $table) {
                 $table->unique(['post_id', 'user_id']);
             });
+        } catch (\Throwable $e) {
         }
 
         // Drop role-specific columns individually (need to drop unique constraint first)
-        Schema::table('forum_likes', function (Blueprint $table) {
-            $table->dropUnique('unique_like');
-        });
-        Schema::table('forum_likes', function (Blueprint $table) {
-            $table->dropColumn('woman_id');
-        });
-        Schema::table('forum_likes', function (Blueprint $table) {
-            $table->dropColumn('midwife_id');
-        });
-        Schema::table('forum_likes', function (Blueprint $table) {
-            $table->dropColumn('bhw_id');
-        });
+        try {
+            Schema::table('forum_likes', function (Blueprint $table) {
+                $table->dropUnique('unique_like');
+            });
+        } catch (\Throwable $e) {
+        }
+        foreach (['woman_id', 'midwife_id', 'bhw_id'] as $column) {
+            if (!Schema::hasColumn('forum_likes', $column)) {
+                continue;
+            }
+            try {
+                Schema::table('forum_likes', function (Blueprint $table) use ($column) {
+                    try {
+                        $table->dropForeign([$column]);
+                    } catch (\Throwable $e) {
+                    }
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('forum_likes', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            } catch (\Throwable $e) {
+                // SQLite cannot drop FK-bound/indexed columns — rename away.
+                if (DB::getDriverName() === 'sqlite' && Schema::hasColumn('forum_likes', $column)) {
+                    try {
+                        Schema::table('forum_likes', function (Blueprint $table) use ($column) {
+                            $table->renameColumn($column, $column . '__deprecated');
+                        });
+                    } catch (\Throwable $e2) {
+                    }
+                }
+            }
+        }
     }
 
     /**

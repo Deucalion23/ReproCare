@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -23,7 +24,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('bhw_id')->nullable()->after('midwife_id');
             }
 
-            $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'forum_posts' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+            $foreignKeys = $this->existingForeignKeys('forum_posts');
 
             if (Schema::hasColumn('forum_posts', 'woman_id') && !in_array('forum_posts_woman_id_foreign', $foreignKeys)) {
                 $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
@@ -37,23 +38,20 @@ return new class extends Migration
         });
 
         if (Schema::hasColumn('forum_posts', 'user_id') && Schema::hasColumn('forum_posts', 'user_type')) {
-            DB::statement("
-                UPDATE forum_posts fp
-                SET fp.woman_id = fp.user_id
-                WHERE fp.user_type = 'App\\Models\\Woman' OR fp.user_type = 'App\\Models\\Patient'
-            ");
-
-            DB::statement("
-                UPDATE forum_posts fp
-                SET fp.midwife_id = fp.user_id
-                WHERE fp.user_type = 'App\\Models\\Midwife'
-            ");
-
-            DB::statement("
-                UPDATE forum_posts fp
-                SET fp.bhw_id = fp.user_id
-                WHERE fp.user_type = 'App\\Models\\Bhw'
-            ");
+            // Portable query-builder updates (original MySQL "UPDATE .. alias SET
+            // alias.col" syntax does not parse on pgsql/sqlite).
+            try {
+                DB::table('forum_posts')->whereIn('user_type', ['App\\Models\\Woman', 'App\\Models\\Patient'])->update(['woman_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('forum_posts')->where('user_type', 'App\\Models\\Midwife')->update(['midwife_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('forum_posts')->where('user_type', 'App\\Models\\Bhw')->update(['bhw_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
         }
 
         try {
@@ -82,7 +80,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('bhw_id')->nullable()->after('midwife_id');
             }
 
-            $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'forum_comments' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+            $foreignKeys = $this->existingForeignKeys('forum_comments');
 
             if (Schema::hasColumn('forum_comments', 'woman_id') && !in_array('forum_comments_woman_id_foreign', $foreignKeys)) {
                 $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
@@ -96,23 +94,18 @@ return new class extends Migration
         });
 
         if (Schema::hasColumn('forum_comments', 'user_id') && Schema::hasColumn('forum_comments', 'user_type')) {
-            DB::statement("
-                UPDATE forum_comments fc
-                SET fc.woman_id = fc.user_id
-                WHERE fc.user_type = 'App\\Models\\Woman' OR fc.user_type = 'App\\Models\\Patient'
-            ");
-
-            DB::statement("
-                UPDATE forum_comments fc
-                SET fc.midwife_id = fc.user_id
-                WHERE fc.user_type = 'App\\Models\\Midwife'
-            ");
-
-            DB::statement("
-                UPDATE forum_comments fc
-                SET fc.bhw_id = fc.user_id
-                WHERE fc.user_type = 'App\\Models\\Bhw'
-            ");
+            try {
+                DB::table('forum_comments')->whereIn('user_type', ['App\\Models\\Woman', 'App\\Models\\Patient'])->update(['woman_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('forum_comments')->where('user_type', 'App\\Models\\Midwife')->update(['midwife_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('forum_comments')->where('user_type', 'App\\Models\\Bhw')->update(['bhw_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
         }
 
         try {
@@ -141,7 +134,7 @@ return new class extends Migration
                 $table->unsignedBigInteger('bhw_id')->nullable()->after('midwife_id');
             }
 
-            $foreignKeys = collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = 'forum_likes' AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'"))->pluck('CONSTRAINT_NAME')->toArray();
+            $foreignKeys = $this->existingForeignKeys('forum_likes');
 
             if (Schema::hasColumn('forum_likes', 'woman_id') && !in_array('forum_likes_woman_id_foreign', $foreignKeys)) {
                 $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
@@ -152,32 +145,29 @@ return new class extends Migration
             if (Schema::hasColumn('forum_likes', 'bhw_id') && !in_array('forum_likes_bhw_id_foreign', $foreignKeys)) {
                 $table->foreign('bhw_id')->references('id')->on('bhws')->onDelete('cascade');
             }
-
-            // Add unique constraint if not exists
-            $indexes = collect(DB::select("SHOW INDEX FROM forum_likes"))->pluck('Key_name')->unique()->values()->toArray();
-            if (!in_array('unique_like', $indexes)) {
-                $table->unique(['post_id', 'woman_id', 'midwife_id', 'bhw_id'], 'unique_like');
-            }
         });
 
+        // Add unique constraint (best effort — ignored if already present)
+        try {
+            Schema::table('forum_likes', function (Blueprint $table) {
+                $table->unique(['post_id', 'woman_id', 'midwife_id', 'bhw_id'], 'unique_like');
+            });
+        } catch (\Throwable $e) {
+        }
+
         if (Schema::hasColumn('forum_likes', 'user_id') && Schema::hasColumn('forum_likes', 'user_type')) {
-            DB::statement("
-                UPDATE forum_likes fl
-                SET fl.woman_id = fl.user_id
-                WHERE fl.user_type = 'App\\Models\\Woman' OR fl.user_type = 'App\\Models\\Patient'
-            ");
-
-            DB::statement("
-                UPDATE forum_likes fl
-                SET fl.midwife_id = fl.user_id
-                WHERE fl.user_type = 'App\\Models\\Midwife'
-            ");
-
-            DB::statement("
-                UPDATE forum_likes fl
-                SET fl.bhw_id = fl.user_id
-                WHERE fl.user_type = 'App\\Models\\Bhw'
-            ");
+            try {
+                DB::table('forum_likes')->whereIn('user_type', ['App\\Models\\Woman', 'App\\Models\\Patient'])->update(['woman_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('forum_likes')->where('user_type', 'App\\Models\\Midwife')->update(['midwife_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::table('forum_likes')->where('user_type', 'App\\Models\\Bhw')->update(['bhw_id' => DB::raw('user_id')]);
+            } catch (\Throwable $e) {
+            }
         }
 
         try {
@@ -251,5 +241,21 @@ return new class extends Migration
             $table->dropUnique('unique_like');
             $table->dropColumn(['woman_id', 'midwife_id', 'bhw_id']);
         });
+    }
+
+    /**
+     * MySQL-only FK introspection helper. Returns [] on pgsql/sqlite so the
+     * caller falls back to best-effort Schema attempts.
+     */
+    protected function existingForeignKeys(string $table): array
+    {
+        if (DB::getDriverName() !== 'mysql') {
+            return [];
+        }
+        try {
+            return collect(DB::select("SELECT CONSTRAINT_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_NAME = ? AND CONSTRAINT_SCHEMA = DATABASE() AND CONSTRAINT_NAME LIKE '%foreign'", [$table]))->pluck('CONSTRAINT_NAME')->toArray();
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 };

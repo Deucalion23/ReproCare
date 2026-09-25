@@ -11,9 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Make user_id nullable to support walk-in patients
-        Schema::table('maternal_care_target_clients', function (Blueprint $table) {
-            $table->unsignedBigInteger('user_id')->nullable()->change();
+        // Make the owner column nullable to support walk-in patients.
+        // NOTE: at this point the column is still woman_id (renamed to
+        // user_id only by a later migration).
+        $owner = Schema::hasColumn('maternal_care_target_clients', 'woman_id') ? 'woman_id'
+            : (Schema::hasColumn('maternal_care_target_clients', 'user_id') ? 'user_id' : null);
+        if (!$owner) {
+            return;
+        }
+        Schema::table('maternal_care_target_clients', function (Blueprint $table) use ($owner) {
+            $table->unsignedBigInteger($owner)->nullable()->change();
         });
     }
 

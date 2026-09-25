@@ -14,27 +14,41 @@ return new class extends Migration
     {
         // Step 1: Add is_archived column to health_records table
         Schema::table('health_records', function (Blueprint $table) {
-            $table->boolean('is_archived')->default(false)->after('recommendations');
-            $table->timestamp('archived_at')->nullable()->after('is_archived');
-            $table->string('archived_reason')->nullable()->after('archived_at');
-            
-            $table->index('is_archived');
-            $table->index('archived_at');
+            if (!Schema::hasColumn('health_records', 'is_archived')) {
+                $table->boolean('is_archived')->default(false);
+            }
+            if (!Schema::hasColumn('health_records', 'archived_at')) {
+                $table->timestamp('archived_at')->nullable();
+            }
+            if (!Schema::hasColumn('health_records', 'archived_reason')) {
+                $table->string('archived_reason')->nullable();
+            }
         });
+        foreach (['is_archived', 'archived_at'] as $column) {
+            try {
+                Schema::table('health_records', function (Blueprint $table) use ($column) {
+                    $table->index($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Step 2: Migrate data from health_records_archived to health_records
-        DB::statement("
-            INSERT INTO health_records (
-                woman_id, recorded_by_midwife_id, recorded_by_bhw_id, 
-                bp, weight, heart_rate, temperature, notes, risk_level,
-                is_archived, archived_at, archived_reason, created_at, updated_at
-            )
-            SELECT 
-                woman_id, recorded_by_midwife_id, recorded_by_bhw_id,
-                bp, weight, heart_rate, temperature, notes, risk_level,
-                true as is_archived, archived_at, archived_reason, created_at, updated_at
-            FROM health_records_archived
-        ");
+        try {
+            DB::statement("
+                INSERT INTO health_records (
+                    woman_id, recorded_by_midwife_id, recorded_by_bhw_id,
+                    bp, weight, heart_rate, temperature, notes, risk_level,
+                    is_archived, archived_at, archived_reason, created_at, updated_at
+                )
+                SELECT
+                    woman_id, recorded_by_midwife_id, recorded_by_bhw_id,
+                    bp, weight, heart_rate, temperature, notes, risk_level,
+                    true as is_archived, archived_at, archived_reason, created_at, updated_at
+                FROM health_records_archived
+            ");
+        } catch (\Throwable $e) {
+        }
 
         // Step 3: Drop the health_records_archived table
         Schema::dropIfExists('health_records_archived');

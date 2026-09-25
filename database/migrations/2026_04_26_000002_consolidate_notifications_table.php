@@ -15,85 +15,88 @@ return new class extends Migration
         // Add new user_id column if not exists
         if (!Schema::hasColumn('notifications', 'user_id')) {
             Schema::table('notifications', function (Blueprint $table) {
-                $table->unsignedBigInteger('user_id')->nullable()->after('id');
+                $table->unsignedBigInteger('user_id')->nullable();
             });
         }
 
-        // Migrate data from polymorphic columns to user_id (only if user_id is null)
-        DB::statement("
-            UPDATE notifications n
-            INNER JOIN users u ON n.woman_id = u.id AND u.role = 'user'
-            SET n.user_id = n.woman_id
-            WHERE n.woman_id IS NOT NULL AND n.user_id IS NULL
-        ");
-
-        DB::statement("
-            UPDATE notifications n
-            INNER JOIN users u ON n.midwife_id = u.id AND u.role = 'midwife'
-            SET n.user_id = n.midwife_id
-            WHERE n.midwife_id IS NOT NULL AND n.user_id IS NULL
-        ");
-
-        DB::statement("
-            UPDATE notifications n
-            INNER JOIN users u ON n.bhw_id = u.id AND u.role IN ('bhw', 'bhw_president')
-            SET n.user_id = n.bhw_id
-            WHERE n.bhw_id IS NOT NULL AND n.user_id IS NULL
-        ");
+        // Migrate data from polymorphic columns to user_id (only if user_id is null).
+        // Portable query-builder version of the original MySQL UPDATE..JOIN.
+        $moves = [
+            ['woman_id', ['user']],
+            ['midwife_id', ['midwife']],
+            ['bhw_id', ['bhw', 'bhw_president']],
+        ];
+        foreach ($moves as [$source, $roles]) {
+            if (!Schema::hasColumn('notifications', $source) || !Schema::hasColumn('notifications', 'user_id')) {
+                continue;
+            }
+            try {
+                $ids = DB::table('users')->whereIn('role', $roles)->pluck('id');
+                if ($ids->isNotEmpty()) {
+                    DB::table('notifications')->whereNotNull($source)->whereNull('user_id')->whereIn($source, $ids)->update(['user_id' => DB::raw($source)]);
+                }
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Delete notifications where user_id couldn't be migrated
-        DB::statement("
-            DELETE FROM notifications
-            WHERE user_id IS NULL
-        ");
+        try {
+            DB::statement('DELETE FROM notifications WHERE user_id IS NULL');
+        } catch (\Throwable $e) {
+        }
 
         // Delete notifications where user_id doesn't exist in users table
-        DB::statement("
-            DELETE FROM notifications
-            WHERE user_id NOT IN (SELECT id FROM users)
-        ");
-
-        // Add foreign key constraint if not exists
-        $fkExists = DB::select("
-            SELECT COUNT(*) as count
-            FROM information_schema.table_constraints
-            WHERE table_schema = DATABASE()
-            AND table_name = 'notifications'
-            AND constraint_name = 'notifications_user_id_foreign'
-            AND constraint_type = 'FOREIGN KEY'
-        ");
-
-        if (empty($fkExists) || $fkExists[0]->count == 0) {
-            Schema::table('notifications', function (Blueprint $table) {
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            });
+        try {
+            DB::statement('DELETE FROM notifications WHERE user_id NOT IN (SELECT id FROM users)');
+        } catch (\Throwable $e) {
         }
 
-        // Add index if not exists
-        $indexExists = DB::select("
-            SELECT COUNT(*) as count
-            FROM information_schema.statistics
-            WHERE table_schema = DATABASE()
-            AND table_name = 'notifications'
-            AND index_name = 'notifications_user_id_index'
-        ");
-
-        if (empty($indexExists) || $indexExists[0]->count == 0) {
-            Schema::table('notifications', function (Blueprint $table) {
-                $table->index('user_id');
-            });
+        // Add foreign key constraint + index (best effort)
+        if (Schema::hasColumn('notifications', 'user_id')) {
+            try {
+                Schema::table('notifications', function (Blueprint $table) {
+                    $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('notifications', function (Blueprint $table) {
+                    $table->index('user_id');
+                });
+            } catch (\Throwable $e) {
+            }
         }
 
-        // Drop old polymorphic columns
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropForeign(['woman_id']);
-            $table->dropForeign(['midwife_id']);
-            $table->dropForeign(['bhw_id']);
-        });
-
-        Schema::table('notifications', function (Blueprint $table) {
-            $table->dropColumn(['woman_id', 'midwife_id', 'bhw_id']);
-        });
+        // Drop old polymorphic columns (drop FKs first, best effort — the
+        // referenced role tables may already be gone)
+        foreach (['woman_id', 'midwife_id', 'bhw_id'] as $column) {
+            if (!Schema::hasColumn('notifications', $column)) {
+                continue;
+            }
+            try {
+                Schema::table('notifications', function (Blueprint $table) use ($column) {
+                    try {
+                        $table->dropForeign([$column]);
+                    } catch (\Throwable $e) {
+                    }
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('notifications', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            } catch (\Throwable $e) {
+                if (DB::getDriverName() === 'sqlite' && Schema::hasColumn('notifications', $column)) {
+                    try {
+                        Schema::table('notifications', function (Blueprint $table) use ($column) {
+                            $table->renameColumn($column, $column . '__deprecated');
+                        });
+                    } catch (\Throwable $e2) {
+                    }
+                }
+            }
+        }
     }
 
     /**

@@ -12,27 +12,42 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Clean up orphaned data before adding foreign keys
-        DB::statement('DELETE FROM cycles WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)');
-        DB::statement('DELETE FROM forum_likes WHERE post_id IS NOT NULL AND post_id NOT IN (SELECT id FROM forum_posts)');
-        DB::statement('DELETE FROM pregnancies WHERE user_id IS NOT NULL AND user_id NOT IN (SELECT id FROM users)');
-        DB::statement('DELETE FROM bhw_monthly_reports WHERE bhw_id IS NOT NULL AND bhw_id NOT IN (SELECT id FROM users)');
+        // Clean up orphaned data before adding foreign keys (best effort —
+        // on sqlite these tables can hold dangling FK definitions to already
+        // dropped legacy tables, which makes even empty DELETEs fail).
+        $cleanups = [
+            ['cycles', 'user_id', 'users'],
+            ['forum_likes', 'post_id', 'forum_posts'],
+            ['pregnancies', 'user_id', 'users'],
+            ['bhw_monthly_reports', 'bhw_id', 'users'],
+        ];
+        foreach ($cleanups as [$table, $column, $parent]) {
+            if (!Schema::hasTable($table) || !Schema::hasColumn($table, $column) || !Schema::hasTable($parent)) {
+                continue;
+            }
+            try {
+                DB::statement("DELETE FROM {$table} WHERE {$column} IS NOT NULL AND {$column} NOT IN (SELECT id FROM {$parent})");
+            } catch (\Throwable $e) {
+            }
+        }
 
-        Schema::table('cycles', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
-
-        Schema::table('forum_likes', function (Blueprint $table) {
-            $table->foreign('post_id')->references('id')->on('forum_posts')->onDelete('cascade');
-        });
-
-        Schema::table('pregnancies', function (Blueprint $table) {
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-        });
-
-        Schema::table('bhw_monthly_reports', function (Blueprint $table) {
-            $table->foreign('bhw_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        $keys = [
+            ['cycles', 'user_id', 'users', 'cascade'],
+            ['forum_likes', 'post_id', 'forum_posts', 'cascade'],
+            ['pregnancies', 'user_id', 'users', 'cascade'],
+            ['bhw_monthly_reports', 'bhw_id', 'users', 'cascade'],
+        ];
+        foreach ($keys as [$table, $column, $parent, $delete]) {
+            if (!Schema::hasTable($table) || !Schema::hasColumn($table, $column) || !Schema::hasTable($parent)) {
+                continue;
+            }
+            try {
+                Schema::table($table, function (Blueprint $tableBlueprint) use ($column, $parent, $delete) {
+                    $tableBlueprint->foreign($column)->references('id')->on($parent)->onDelete($delete);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

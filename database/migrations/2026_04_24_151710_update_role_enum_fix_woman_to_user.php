@@ -12,14 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // First, temporarily add 'woman' to the enum to allow updating existing records
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'bhw_president', 'user', 'woman')");
+        // MySQL only: widen the ENUM so existing 'woman' rows can be updated.
+        // On pgsql/sqlite the column is VARCHAR — just run the data update.
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'bhw_president', 'user', 'woman')");
+        }
 
         // Update all 'woman' roles to 'user'
-        DB::table('users')->where('role', 'woman')->update(['role' => 'user']);
+        try {
+            DB::table('users')->where('role', 'woman')->update(['role' => 'user']);
+        } catch (\Throwable $e) {
+        }
 
-        // Now remove 'woman' from the enum
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'bhw_president', 'user')");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'bhw_president', 'user')");
+        }
     }
 
     /**
@@ -27,13 +34,20 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Add 'woman' back to enum
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'bhw_president', 'user', 'woman')");
+        if (DB::getDriverName() === 'mysql') {
+            // Add 'woman' back to enum
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'bhw_president', 'user', 'woman')");
+        }
 
         // Revert 'user' back to 'woman' (this is imperfect but best effort)
-        DB::table('users')->where('role', 'user')->update(['role' => 'woman']);
+        try {
+            DB::table('users')->where('role', 'user')->update(['role' => 'woman']);
+        } catch (\Throwable $e) {
+        }
 
-        // Remove 'user' and 'bhw_president' from enum
-        DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'woman')");
+        if (DB::getDriverName() === 'mysql') {
+            // Remove 'user' and 'bhw_president' from enum
+            DB::statement("ALTER TABLE users MODIFY COLUMN role ENUM('midwife', 'bhw', 'woman')");
+        }
     }
 };

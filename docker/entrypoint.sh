@@ -43,7 +43,8 @@ mkdir -p /var/www/html/storage/framework/cache/data \
 chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache /var/www/html/database
 
-# Handle SQLite database and parent directory permissions
+# Handle SQLite database file (local dev only — production uses Postgres,
+# whose data lives outside the ephemeral container filesystem)
 if [ "${DB_CONNECTION}" = "sqlite" ] || [ -z "${DB_CONNECTION}" ]; then
     if [ ! -f /var/www/html/database/database.sqlite ]; then
         echo "Creating database.sqlite file..."
@@ -51,6 +52,23 @@ if [ "${DB_CONNECTION}" = "sqlite" ] || [ -z "${DB_CONNECTION}" ]; then
     fi
     chown www-data:www-data /var/www/html/database/database.sqlite
     chmod 666 /var/www/html/database/database.sqlite
+fi
+
+# Wait for external Postgres (Render / Supabase) before migrating.
+# Uses PHP (no pg client installed) with a TCP check, up to ~60s.
+if [ "${DB_CONNECTION}" = "pgsql" ]; then
+    echo "Waiting for Postgres at ${DB_HOST}:${DB_PORT:-5432}..."
+    for i in $(seq 1 30); do
+        if php -r '$h = getenv("DB_HOST"); $p = getenv("DB_PORT") ?: "5432"; $c = @fsockopen($h, (int) $p, $e, $s, 2); if ($c) { fclose($c); exit(0); } exit(1);'; then
+            echo "Postgres is reachable."
+            break
+        fi
+        if [ "$i" = "30" ]; then
+            echo "Warning: Postgres not reachable after 60s, continuing anyway (migrate may fail)."
+        else
+            sleep 2
+        fi
+    done
 fi
 
 # Ensure storage symlink exists

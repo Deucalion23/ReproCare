@@ -11,12 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // MySQL only — on pgsql/sqlite the column is VARCHAR, no change needed.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('pending','approved','rejected','suspended','inactive','archived') DEFAULT 'approved'");
     }
 
     public function down(): void
     {
         DB::statement("UPDATE users SET status = 'suspended' WHERE status IN ('inactive','archived')");
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         DB::statement("ALTER TABLE users MODIFY COLUMN status ENUM('pending','approved','rejected','suspended') DEFAULT 'approved'");
     }
 };

@@ -1,0 +1,65 @@
+# ==============================================================================
+# Render Blueprint — ReproCare (Laravel 12, Docker) + managed Postgres
+# ==============================================================================
+# Deploy: Render Dashboard → New → Blueprint → pick this repo.
+# The entrypoint (docker/entrypoint.sh) runs `php artisan migrate --force`
+# and `php artisan db:seed --force` on every boot; both are idempotent, so
+# the demo accounts (cho@reprocare.com / password123, ...) are seeded
+# automatically into the persistent database below.
+#
+# NOTE: SQLite is NOT usable on Render (ephemeral filesystem wipes
+# database/database.sqlite on every deploy — that data loss is exactly what
+# caused the production login crash). Keep DB_CONNECTION=pgsql here.
+#
+# Supabase instead of Render Postgres? Delete the `databases:` section and
+# set DB_HOST / DB_PORT / DB_DATABASE / DB_USERNAME / DB_PASSWORD /
+# DB_SSLMODE manually in the dashboard (see .env.example).
+# ==============================================================================
+
+services:
+  - type: web
+    name: reprocare
+    runtime: docker
+    plan: free
+    healthCheckPath: /up
+    envVars:
+      - key: APP_NAME
+        value: ReproCare
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: reprocare-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: reprocare-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: reprocare-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: reprocare-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: reprocare-db
+          property: password
+      - key: DB_SSLMODE
+        value: prefer
+      # APP_KEY is intentionally NOT in this file: set one stable value in
+      # the dashboard (php artisan key:generate --show, paste the base64:...
+      # string). The entrypoint auto-generates an ephemeral key if empty,
+      # which would log every user out on each redeploy.
+
+databases:
+  - name: reprocare-db
+    plan: free

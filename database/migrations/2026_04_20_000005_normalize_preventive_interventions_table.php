@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,28 +12,53 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('preventive_interventions', function (Blueprint $table) {
-            // Add new specific foreign key column
-            $table->unsignedBigInteger('woman_id')->nullable()->after('id');
+        if (!Schema::hasColumn('preventive_interventions', 'woman_id')) {
+            Schema::table('preventive_interventions', function (Blueprint $table) {
+                // Add new specific foreign key column
+                $table->unsignedBigInteger('woman_id')->nullable();
+            });
+        }
 
-            // Add foreign key constraint
-            $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
+        // Add foreign key constraint + index (best effort)
+        try {
+            Schema::table('preventive_interventions', function (Blueprint $table) {
+                $table->foreign('woman_id')->references('id')->on('women')->onDelete('cascade');
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table('preventive_interventions', function (Blueprint $table) {
+                $table->index('woman_id');
+            });
+        } catch (\Throwable $e) {
+        }
 
-            // Add indexes
-            $table->index('woman_id');
-        });
-
-        // Migrate data from polymorphic columns to specific columns
-        DB::statement("
-            UPDATE preventive_interventions pi
-            SET pi.woman_id = pi.patient_id
-            WHERE pi.patient_type = 'App\\\\Models\\\\Woman' OR pi.patient_type = 'App\\\\Models\\\\Patient'
-        ");
+        // Migrate data from polymorphic columns to specific columns.
+        // Plain UPDATE without table alias: valid on mysql/pgsql/sqlite.
+        try {
+            DB::statement("
+                UPDATE preventive_interventions
+                SET woman_id = patient_id
+                WHERE patient_type = 'App\\\\Models\\\\Woman' OR patient_type = 'App\\\\Models\\\\Patient'
+            ");
+        } catch (\Throwable $e) {
+        }
 
         // Drop polymorphic columns
-        Schema::table('preventive_interventions', function (Blueprint $table) {
-            $table->dropColumn(['patient_id', 'patient_type']);
-        });
+        $drop = [];
+        foreach (['patient_id', 'patient_type'] as $column) {
+            if (Schema::hasColumn('preventive_interventions', $column)) {
+                $drop[] = $column;
+            }
+        }
+        if (!empty($drop)) {
+            try {
+                Schema::table('preventive_interventions', function (Blueprint $table) use ($drop) {
+                    $table->dropColumn($drop);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

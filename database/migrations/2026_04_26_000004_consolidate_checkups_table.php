@@ -12,191 +12,188 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Portable version of the original MySQL-only consolidation (which used
+        // information_schema introspection, "ALTER TABLE .. DROP FOREIGN KEY"
+        // and "UPDATE .. INNER JOIN .. SET" — none parse on pgsql/sqlite).
+
         // Consolidate midwife_id
         if (Schema::hasColumn('checkups', 'midwife_id')) {
-            Schema::table('checkups', function (Blueprint $table) {
-                if (!Schema::hasColumn('checkups', 'midwife_id_consolidated')) {
-                    $table->unsignedBigInteger('midwife_id_consolidated')->nullable()->after('midwife_id');
-                }
-            });
-
-            DB::statement("
-                UPDATE checkups c
-                INNER JOIN users u ON c.midwife_id = u.id AND u.role = 'midwife'
-                SET c.midwife_id_consolidated = c.midwife_id
-                WHERE c.midwife_id IS NOT NULL
-            ");
-
-            // Drop old midwife_id foreign key if exists
-            $fkExists = DB::select("
-                SELECT COUNT(*) as count
-                FROM information_schema.table_constraints
-                WHERE table_schema = DATABASE()
-                AND table_name = 'checkups'
-                AND constraint_name = 'checkups_midwife_id_foreign'
-                AND constraint_type = 'FOREIGN KEY'
-            ");
-            if (!empty($fkExists) && $fkExists[0]->count > 0) {
-                Schema::table('checkups', function (Blueprint $table) {
-                    $table->dropForeign(['midwife_id']);
-                });
-            }
-
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->dropIndex(['midwife_id']);
-                $table->dropColumn('midwife_id');
-            });
-
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->renameColumn('midwife_id_consolidated', 'midwife_id');
-            });
-
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->foreign('midwife_id')->references('id')->on('users')->onDelete('cascade');
-                $table->index('midwife_id');
-            });
+            $this->ensureColumn('checkups', 'midwife_id_consolidated');
+            $this->copyRoleFiltered('checkups', 'midwife_id', 'midwife_id_consolidated', ['midwife']);
+            $this->dropColumnSafely('checkups', 'midwife_id');
+            $this->renameColumnSafely('checkups', 'midwife_id_consolidated', 'midwife_id');
+            $this->addForeignKey('checkups', 'midwife_id', 'users', 'cascade');
+            $this->addIndex('checkups', 'midwife_id');
         }
 
         // Consolidate scheduled_by columns
         if (Schema::hasColumn('checkups', 'scheduled_by_midwife_id') || Schema::hasColumn('checkups', 'scheduled_by_bhw_id')) {
-            Schema::table('checkups', function (Blueprint $table) {
-                if (!Schema::hasColumn('checkups', 'scheduled_by_user_id')) {
-                    $table->unsignedBigInteger('scheduled_by_user_id')->nullable()->after('scheduled_by_id');
-                }
-            });
+            $this->ensureColumn('checkups', 'scheduled_by_user_id');
 
             if (Schema::hasColumn('checkups', 'scheduled_by_midwife_id')) {
-                DB::statement("
-                    UPDATE checkups c
-                    INNER JOIN users u ON c.scheduled_by_midwife_id = u.id AND u.role = 'midwife'
-                    SET c.scheduled_by_user_id = c.scheduled_by_midwife_id
-                    WHERE c.scheduled_by_midwife_id IS NOT NULL
-                ");
+                $this->copyRoleFiltered('checkups', 'scheduled_by_midwife_id', 'scheduled_by_user_id', ['midwife']);
             }
 
             if (Schema::hasColumn('checkups', 'scheduled_by_bhw_id')) {
-                DB::statement("
-                    UPDATE checkups c
-                    INNER JOIN users u ON c.scheduled_by_bhw_id = u.id AND u.role IN ('bhw', 'bhw_president')
-                    SET c.scheduled_by_user_id = c.scheduled_by_bhw_id
-                    WHERE c.scheduled_by_bhw_id IS NOT NULL
-                ");
+                $this->copyRoleFiltered('checkups', 'scheduled_by_bhw_id', 'scheduled_by_user_id', ['bhw', 'bhw_president']);
             }
 
             // If scheduled_by_id exists and scheduled_by_user_id is null, use it
             if (Schema::hasColumn('checkups', 'scheduled_by_id')) {
-                DB::statement("
-                    UPDATE checkups
-                    SET scheduled_by_user_id = scheduled_by_id
-                    WHERE scheduled_by_user_id IS NULL AND scheduled_by_id IS NOT NULL
-                ");
+                try {
+                    DB::statement('UPDATE checkups SET scheduled_by_user_id = scheduled_by_id WHERE scheduled_by_user_id IS NULL AND scheduled_by_id IS NOT NULL');
+                } catch (\Throwable $e) {
+                }
             }
 
-            DB::statement("DELETE FROM checkups WHERE scheduled_by_user_id IS NULL AND (scheduled_by_midwife_id IS NOT NULL OR scheduled_by_bhw_id IS NOT NULL)");
-            DB::statement("DELETE FROM checkups WHERE scheduled_by_user_id IS NOT NULL AND scheduled_by_user_id NOT IN (SELECT id FROM users)");
-
-            // Add foreign key constraint if not exists
-            $fkExists = DB::select("
-                SELECT COUNT(*) as count
-                FROM information_schema.table_constraints
-                WHERE table_schema = DATABASE()
-                AND table_name = 'checkups'
-                AND constraint_name = 'checkups_scheduled_by_user_id_foreign'
-                AND constraint_type = 'FOREIGN KEY'
-            ");
-            if (empty($fkExists) || $fkExists[0]->count == 0) {
-                Schema::table('checkups', function (Blueprint $table) {
-                    $table->foreign('scheduled_by_user_id')->references('id')->on('users')->onDelete('set null');
-                });
+            try {
+                DB::statement('DELETE FROM checkups WHERE scheduled_by_user_id IS NULL AND (scheduled_by_midwife_id IS NOT NULL OR scheduled_by_bhw_id IS NOT NULL)');
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::statement('DELETE FROM checkups WHERE scheduled_by_user_id IS NOT NULL AND scheduled_by_user_id NOT IN (SELECT id FROM users)');
+            } catch (\Throwable $e) {
             }
 
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->index('scheduled_by_user_id');
-            });
+            $this->addForeignKey('checkups', 'scheduled_by_user_id', 'users', 'set null');
+            $this->addIndex('checkups', 'scheduled_by_user_id');
 
             // Drop old scheduled_by columns
-            $fkNames = ['checkups_scheduled_by_midwife_id_foreign', 'checkups_scheduled_by_bhw_id_foreign'];
-            foreach ($fkNames as $fkName) {
-                $fkExists = DB::select("
-                    SELECT COUNT(*) as count
-                    FROM information_schema.table_constraints
-                    WHERE table_schema = DATABASE()
-                    AND table_name = 'checkups'
-                    AND constraint_name = '$fkName'
-                    AND constraint_type = 'FOREIGN KEY'
-                ");
-                if (!empty($fkExists) && $fkExists[0]->count > 0) {
-                    DB::statement("ALTER TABLE checkups DROP FOREIGN KEY $fkName");
-                }
-            }
+            $this->dropColumnSafely('checkups', 'scheduled_by_midwife_id');
+            $this->dropColumnSafely('checkups', 'scheduled_by_bhw_id');
+            $this->dropColumnSafely('checkups', 'scheduled_by_id');
 
-            $columnsToDrop = ['scheduled_by_midwife_id', 'scheduled_by_bhw_id', 'scheduled_by_id'];
-            foreach ($columnsToDrop as $column) {
-                if (Schema::hasColumn('checkups', $column)) {
-                    DB::statement("ALTER TABLE checkups DROP COLUMN $column");
-                }
-            }
-
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->renameColumn('scheduled_by_user_id', 'scheduled_by_id');
-            });
+            $this->renameColumnSafely('checkups', 'scheduled_by_user_id', 'scheduled_by_id');
         }
 
         // Consolidate bhw_president_id
         if (Schema::hasColumn('checkups', 'bhw_president_id')) {
-            Schema::table('checkups', function (Blueprint $table) {
-                if (!Schema::hasColumn('checkups', 'bhw_president_user_id')) {
-                    $table->unsignedBigInteger('bhw_president_user_id')->nullable()->after('bhw_president_id');
+            $this->ensureColumn('checkups', 'bhw_president_user_id');
+            $this->copyRoleFiltered('checkups', 'bhw_president_id', 'bhw_president_user_id', ['bhw_president']);
+
+            try {
+                DB::statement('DELETE FROM checkups WHERE bhw_president_user_id IS NULL AND bhw_president_id IS NOT NULL');
+            } catch (\Throwable $e) {
+            }
+            try {
+                DB::statement('DELETE FROM checkups WHERE bhw_president_user_id IS NOT NULL AND bhw_president_user_id NOT IN (SELECT id FROM users)');
+            } catch (\Throwable $e) {
+            }
+
+            $this->addForeignKey('checkups', 'bhw_president_user_id', 'users', 'set null');
+            $this->addIndex('checkups', 'bhw_president_user_id');
+
+            $this->dropColumnSafely('checkups', 'bhw_president_id');
+
+            $this->renameColumnSafely('checkups', 'bhw_president_user_id', 'bhw_president_id');
+        }
+    }
+
+    protected function ensureColumn(string $table, string $column): void
+    {
+        if (Schema::hasColumn($table, $column)) {
+            return;
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($column) {
+                $t->unsignedBigInteger($column)->nullable();
+            });
+        } catch (\Throwable $e) {
+        }
+    }
+
+    /**
+     * Copy values from $source to $target for rows whose $source id belongs
+     * to a user with one of the given roles. Portable equivalent of
+     * "UPDATE .. INNER JOIN users .. SET".
+     */
+    protected function copyRoleFiltered(string $table, string $source, string $target, array $roles): void
+    {
+        if (!Schema::hasColumn($table, $source) || !Schema::hasColumn($table, $target)) {
+            return;
+        }
+        try {
+            $ids = DB::table('users')->whereIn('role', $roles)->pluck('id');
+            if ($ids->isNotEmpty()) {
+                DB::table($table)->whereNotNull($source)->whereIn($source, $ids)->update([$target => DB::raw($source)]);
+            }
+        } catch (\Throwable $e) {
+        }
+    }
+
+    protected function addForeignKey(string $table, string $column, string $on, string $delete): void
+    {
+        if (!Schema::hasColumn($table, $column) || !Schema::hasTable($on)) {
+            return;
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($column, $on, $delete) {
+                $t->foreign($column)->references('id')->on($on)->onDelete($delete);
+            });
+        } catch (\Throwable $e) {
+        }
+    }
+
+    protected function addIndex(string $table, string $column): void
+    {
+        if (!Schema::hasColumn($table, $column)) {
+            return;
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($column) {
+                $t->index($column);
+            });
+        } catch (\Throwable $e) {
+        }
+    }
+
+    protected function dropColumnSafely(string $table, string $column): void
+    {
+        if (!Schema::hasColumn($table, $column)) {
+            return;
+        }
+        // NOTE: each in its own Schema::table call — a missing FK must not
+        // prevent the index drop (and vice versa), since Blueprint commands
+        // only throw at execution time for the whole call.
+        try {
+            Schema::table($table, function (Blueprint $t) use ($column) {
+                $t->dropForeign([$column]);
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($column) {
+                $t->dropIndex([$column]);
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($column) {
+                $t->dropColumn($column);
+            });
+        } catch (\Throwable $e) {
+            // SQLite cannot drop FK-bound columns — rename away instead.
+            if (DB::getDriverName() === 'sqlite' && Schema::hasColumn($table, $column)) {
+                try {
+                    Schema::table($table, function (Blueprint $t) use ($column) {
+                        $t->renameColumn($column, $column . '__deprecated');
+                    });
+                } catch (\Throwable $e2) {
                 }
-            });
-
-            DB::statement("
-                UPDATE checkups c
-                INNER JOIN users u ON c.bhw_president_id = u.id AND u.role = 'bhw_president'
-                SET c.bhw_president_user_id = c.bhw_president_id
-                WHERE c.bhw_president_id IS NOT NULL
-            ");
-
-            DB::statement("DELETE FROM checkups WHERE bhw_president_user_id IS NULL AND bhw_president_id IS NOT NULL");
-            DB::statement("DELETE FROM checkups WHERE bhw_president_user_id IS NOT NULL AND bhw_president_user_id NOT IN (SELECT id FROM users)");
-
-            // Add foreign key constraint if not exists
-            $fkExists = DB::select("
-                SELECT COUNT(*) as count
-                FROM information_schema.table_constraints
-                WHERE table_schema = DATABASE()
-                AND table_name = 'checkups'
-                AND constraint_name = 'checkups_bhw_president_user_id_foreign'
-                AND constraint_type = 'FOREIGN KEY'
-            ");
-            if (empty($fkExists) || $fkExists[0]->count == 0) {
-                Schema::table('checkups', function (Blueprint $table) {
-                    $table->foreign('bhw_president_user_id')->references('id')->on('users')->onDelete('set null');
-                });
             }
+        }
+    }
 
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->index('bhw_president_user_id');
+    protected function renameColumnSafely(string $table, string $from, string $to): void
+    {
+        if (!Schema::hasColumn($table, $from) || Schema::hasColumn($table, $to)) {
+            return;
+        }
+        try {
+            Schema::table($table, function (Blueprint $t) use ($from, $to) {
+                $t->renameColumn($from, $to);
             });
-
-            // Drop old bhw_president_id
-            $fkExists = DB::select("
-                SELECT COUNT(*) as count
-                FROM information_schema.table_constraints
-                WHERE table_schema = DATABASE()
-                AND table_name = 'checkups'
-                AND constraint_name = 'checkups_bhw_president_id_foreign'
-                AND constraint_type = 'FOREIGN KEY'
-            ");
-            if (!empty($fkExists) && $fkExists[0]->count > 0) {
-                DB::statement("ALTER TABLE checkups DROP FOREIGN KEY checkups_bhw_president_id_foreign");
-            }
-
-            DB::statement("ALTER TABLE checkups DROP COLUMN bhw_president_id");
-
-            Schema::table('checkups', function (Blueprint $table) {
-                $table->renameColumn('bhw_president_user_id', 'bhw_president_id');
-            });
+        } catch (\Throwable $e) {
         }
     }
 

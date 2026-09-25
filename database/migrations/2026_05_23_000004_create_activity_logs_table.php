@@ -16,25 +16,11 @@ return new class extends Migration
             $table->string('user_role')->nullable();   // snapshot of role at time of action
             $table->string('user_name')->nullable();   // snapshot of name (for history even if user deleted)
 
-            // What was done
-            $table->enum('action', [
-                'login',
-                'logout',
-                'create',
-                'update',
-                'archive',
-                'restore',
-                'approve',
-                'reject',
-                'submit',
-                'print',
-                'export',
-                'view_sensitive',
-                'send_message',
-                'request_supply',
-                'delete',
-                'other'
-            ])->default('other');
+            // What was done. Plain string (not enum): later migrations widen
+            // the allowed set (handover, role_change, ...) via MySQL-only
+            // MODIFY; a CHECK/enum here would reject those values on
+            // Postgres/SQLite fresh installs.
+            $table->string('action', 50)->default('other');
 
             // What it was done to
             $table->string('model_type')->nullable();       // e.g. HealthRecord, Pregnancy, User

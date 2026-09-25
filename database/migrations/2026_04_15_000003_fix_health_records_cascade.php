@@ -15,6 +15,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // FK introspection below is MySQL-only. On pgsql/sqlite fresh installs
+        // the base migrations already create correct FKs — nothing to fix.
+        if (DB::getDriverName() !== 'mysql') {
+            return;
+        }
         // Check current FK rules to avoid duplicate operations
         $fkRules = DB::select("
             SELECT CONSTRAINT_NAME, DELETE_RULE

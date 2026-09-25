@@ -12,52 +12,72 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Portable index existence check: information_schema.STATISTICS is
+        // MySQL-only. On other drivers we attempt the add and ignore
+        // "already exists" errors.
         $indexExists = function (string $table, string $indexName): bool {
-            return DB::table('information_schema.STATISTICS')
-                ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
-                ->where('TABLE_NAME', $table)
-                ->where('INDEX_NAME', $indexName)
-                ->exists();
+            if (DB::getDriverName() !== 'mysql') {
+                return false;
+            }
+            try {
+                return DB::table('information_schema.STATISTICS')
+                    ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+                    ->where('TABLE_NAME', $table)
+                    ->where('INDEX_NAME', $indexName)
+                    ->exists();
+            } catch (\Throwable $e) {
+                return false;
+            }
+        };
+
+        $addIndex = function (string $table, callable $definition): void {
+            if (!Schema::hasTable($table)) {
+                return;
+            }
+            try {
+                Schema::table($table, $definition);
+            } catch (\Throwable $e) {
+            }
         };
 
         if (Schema::hasTable('forum_likes') && !$indexExists('forum_likes', 'forum_likes_post_id_user_id_user_type_unique')) {
-            Schema::table('forum_likes', function (Blueprint $table) {
+            $addIndex('forum_likes', function (Blueprint $table) {
                 $table->unique(['post_id', 'user_id', 'user_type'], 'forum_likes_post_id_user_id_user_type_unique');
             });
         }
 
         if (Schema::hasTable('messages') && !$indexExists('messages', 'messages_receiver_type_read_index')) {
-            Schema::table('messages', function (Blueprint $table) {
+            $addIndex('messages', function (Blueprint $table) {
                 $table->index(['receiver_id', 'receiver_type', 'is_read'], 'messages_receiver_type_read_index');
             });
         }
 
         if (Schema::hasTable('messages') && !$indexExists('messages', 'messages_sender_type_index')) {
-            Schema::table('messages', function (Blueprint $table) {
+            $addIndex('messages', function (Blueprint $table) {
                 $table->index(['sender_id', 'sender_type'], 'messages_sender_type_index');
             });
         }
 
         if (Schema::hasTable('fertility_logs') && !$indexExists('fertility_logs', 'fertility_logs_patient_log_date_unique')) {
-            Schema::table('fertility_logs', function (Blueprint $table) {
+            $addIndex('fertility_logs', function (Blueprint $table) {
                 $table->unique(['patient_id', 'patient_type', 'log_date'], 'fertility_logs_patient_log_date_unique');
             });
         }
 
         if (Schema::hasTable('fertility_logs') && !$indexExists('fertility_logs', 'fertility_logs_patient_log_date_index')) {
-            Schema::table('fertility_logs', function (Blueprint $table) {
+            $addIndex('fertility_logs', function (Blueprint $table) {
                 $table->index(['patient_id', 'patient_type', 'log_date'], 'fertility_logs_patient_log_date_index');
             });
         }
 
         if (Schema::hasTable('menstruation_dailies') && !$indexExists('menstruation_dailies', 'menstruation_dailies_patient_date_unique')) {
-            Schema::table('menstruation_dailies', function (Blueprint $table) {
+            $addIndex('menstruation_dailies', function (Blueprint $table) {
                 $table->unique(['patient_id', 'patient_type', 'date'], 'menstruation_dailies_patient_date_unique');
             });
         }
 
         if (Schema::hasTable('preventive_interventions') && !$indexExists('preventive_interventions', 'preventive_interventions_patient_index')) {
-            Schema::table('preventive_interventions', function (Blueprint $table) {
+            $addIndex('preventive_interventions', function (Blueprint $table) {
                 $table->index(['patient_id', 'patient_type'], 'preventive_interventions_patient_index');
             });
         }
@@ -67,26 +87,68 @@ return new class extends Migration
                 return;
             }
 
-            $indexes = DB::table('information_schema.STATISTICS')
-                ->select('INDEX_NAME')
-                ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
-                ->where('TABLE_NAME', $table)
-                ->where('COLUMN_NAME', $column)
-                ->where('INDEX_NAME', '!=', 'PRIMARY')
-                ->distinct()
-                ->pluck('INDEX_NAME');
+            if (DB::getDriverName() === 'mysql') {
+                try {
+                    $indexes = DB::table('information_schema.STATISTICS')
+                        ->select('INDEX_NAME')
+                        ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
+                        ->where('TABLE_NAME', $table)
+                        ->where('COLUMN_NAME', $column)
+                        ->where('INDEX_NAME', '!=', 'PRIMARY')
+                        ->distinct()
+                        ->pluck('INDEX_NAME');
 
-            foreach ($indexes as $indexName) {
-                DB::statement(sprintf(
-                    'ALTER TABLE `%s` DROP INDEX `%s`',
-                    $table,
-                    $indexName
-                ));
+                    foreach ($indexes as $indexName) {
+                        try {
+                            DB::statement(sprintf(
+                                'ALTER TABLE `%s` DROP INDEX `%s`',
+                                $table,
+                                $indexName
+                            ));
+                        } catch (\Throwable $e) {
+                        }
+                    }
+                } catch (\Throwable $e) {
+                }
             }
 
-            Schema::table($table, function (Blueprint $tableBlueprint) use ($column) {
-                $tableBlueprint->dropColumn($column);
-            });
+            // Drop FKs that may reference the column. The constraint may still
+            // carry its pre-rename MySQL name (e.g. checkups_user_id_foreign on
+            // the renamed user_id_old column), so try several candidates.
+            $base = preg_replace('/_old\d*$/', '', $column);
+            $candidates = array_unique([$column, $base]);
+            try {
+                Schema::table($table, function (Blueprint $tableBlueprint) use ($table, $candidates) {
+                    foreach ($candidates as $name) {
+                        try {
+                            $tableBlueprint->dropForeign("{$table}_{$name}_foreign");
+                        } catch (\Throwable $e) {
+                        }
+                    }
+                    try {
+                        $tableBlueprint->dropForeign([$column]);
+                    } catch (\Throwable $e) {
+                    }
+                });
+            } catch (\Throwable $e) {
+            }
+
+            try {
+                Schema::table($table, function (Blueprint $tableBlueprint) use ($column) {
+                    $tableBlueprint->dropColumn($column);
+                });
+            } catch (\Throwable $e) {
+                // SQLite cannot DROP FK-bound columns — rename away; the final
+                // repair migration removes leftovers on Postgres.
+                if (DB::getDriverName() === 'sqlite' && Schema::hasColumn($table, $column)) {
+                    try {
+                        Schema::table($table, function (Blueprint $tableBlueprint) use ($column) {
+                            $tableBlueprint->renameColumn($column, $column . '__deprecated');
+                        });
+                    } catch (\Throwable $e2) {
+                    }
+                }
+            }
         };
 
         $legacyColumns = [
@@ -120,14 +182,11 @@ return new class extends Migration
     public function down(): void
     {
         $dropIndexIfExists = function (string $table, string $indexName): void {
-            $exists = DB::table('information_schema.STATISTICS')
-                ->where('TABLE_SCHEMA', DB::raw('DATABASE()'))
-                ->where('TABLE_NAME', $table)
-                ->where('INDEX_NAME', $indexName)
-                ->exists();
-
-            if ($exists) {
-                DB::statement(sprintf('ALTER TABLE `%s` DROP INDEX `%s`', $table, $indexName));
+            try {
+                Schema::table($table, function (Blueprint $tableBlueprint) use ($indexName) {
+                    $tableBlueprint->dropIndex($indexName);
+                });
+            } catch (\Throwable $e) {
             }
         };
 

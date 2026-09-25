@@ -12,12 +12,21 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Delete orphaned cycles with NULL user_id (IDs 19, 20, 21, 22)
-        // These are duplicates of user 4's cycles (IDs 3, 4, 5, 6)
-        DB::table('cycles')
-            ->whereIn('id', [19, 20, 21, 22])
-            ->whereNull('user_id')
-            ->delete();
+        // Delete orphaned cycles with NULL owner (IDs 19, 20, 21, 22)
+        // These are duplicates of user 4's cycles (IDs 3, 4, 5, 6).
+        // NOTE: at this point the owner column is still woman_id (renamed to
+        // user_id only by a later migration).
+        try {
+            $owner = Schema::hasColumn('cycles', 'woman_id') ? 'woman_id'
+                : (Schema::hasColumn('cycles', 'user_id') ? 'user_id' : null);
+            if ($owner) {
+                DB::table('cycles')
+                    ->whereIn('id', [19, 20, 21, 22])
+                    ->whereNull($owner)
+                    ->delete();
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     /**

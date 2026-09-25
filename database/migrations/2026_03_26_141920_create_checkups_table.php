@@ -17,7 +17,10 @@ return new class extends Migration
             $table->foreignId('midwife_id')->constrained('midwives')->onDelete('cascade');
             $table->date('scheduled_date');
             $table->string('purpose');
-            $table->enum('status', ['Scheduled', 'Completed', 'Missed'])->default('Scheduled');
+            // Plain string (not enum): later migrations widen the allowed set
+            // (cancelled, Rescheduled, ...) via MySQL-only MODIFY; a CHECK/enum
+            // here would reject those values on Postgres/SQLite fresh installs.
+            $table->string('status', 50)->default('Scheduled');
             $table->timestamps();
         });
     }

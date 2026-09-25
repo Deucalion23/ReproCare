@@ -3,8 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\MenstruationRecord;
-use App\Models\Cycle;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -13,24 +12,34 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Sync existing MenstruationRecord data to Cycle records
-        $records = MenstruationRecord::all();
-        
-        foreach ($records as $record) {
-            // Check if Cycle record already exists for this MenstruationRecord
-            $existingCycle = Cycle::where('user_id', $record->user_id)
-                ->where('period_start_date', $record->start_date)
-                ->first();
-            
-            if (!$existingCycle) {
-                // Create Cycle record from MenstruationRecord
-                Cycle::create([
-                    'user_id' => $record->user_id,
-                    'period_start_date' => $record->start_date,
-                    'period_end_date' => $record->end_date,
-                    'flow_intensity' => 'medium', // Default value
-                ]);
+        // Legacy one-time data sync. On fresh installs (pgsql/sqlite production)
+        // there is no data to sync — skip gracefully. Uses query builder instead
+        // of Eloquent models so deleted model classes can't break fresh migrates.
+        try {
+            if (!Schema::hasTable('menstruation_records') || !Schema::hasTable('cycles')) {
+                return;
             }
+            $records = DB::table('menstruation_records')->get();
+            foreach ($records as $record) {
+                if (!isset($record->user_id, $record->start_date)) {
+                    continue;
+                }
+                $exists = DB::table('cycles')
+                    ->where('user_id', $record->user_id)
+                    ->where('period_start_date', $record->start_date)
+                    ->exists();
+                if (!$exists) {
+                    DB::table('cycles')->insert([
+                        'user_id' => $record->user_id,
+                        'period_start_date' => $record->start_date,
+                        'period_end_date' => $record->end_date ?? null,
+                        'flow_intensity' => 'medium',
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+                }
+            }
+        } catch (\Throwable $e) {
         }
     }
 

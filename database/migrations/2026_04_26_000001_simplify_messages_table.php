@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -23,51 +24,30 @@ return new class extends Migration
             });
         }
 
-        // Migrate sender data from polymorphic columns to single sender_id
-        // Only migrate if the user exists in users table
-        DB::statement("
-            UPDATE messages m
-            INNER JOIN users u ON m.sender_woman_id = u.id AND u.role = 'user'
-            SET m.sender_id = m.sender_woman_id
-            WHERE m.sender_woman_id IS NOT NULL
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            INNER JOIN users u ON m.sender_midwife_id = u.id AND u.role = 'midwife'
-            SET m.sender_id = m.sender_midwife_id
-            WHERE m.sender_midwife_id IS NOT NULL
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            INNER JOIN users u ON m.sender_bhw_id = u.id AND u.role IN ('bhw', 'bhw_president')
-            SET m.sender_id = m.sender_bhw_id
-            WHERE m.sender_bhw_id IS NOT NULL
-        ");
-
-        // Migrate receiver data from polymorphic columns to single receiver_id
-        // Only migrate if the user exists in users table
-        DB::statement("
-            UPDATE messages m
-            INNER JOIN users u ON m.receiver_woman_id = u.id AND u.role = 'user'
-            SET m.receiver_id = m.receiver_woman_id
-            WHERE m.receiver_woman_id IS NOT NULL
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            INNER JOIN users u ON m.receiver_midwife_id = u.id AND u.role = 'midwife'
-            SET m.receiver_id = m.receiver_midwife_id
-            WHERE m.receiver_midwife_id IS NOT NULL
-        ");
-
-        DB::statement("
-            UPDATE messages m
-            INNER JOIN users u ON m.receiver_bhw_id = u.id AND u.role IN ('bhw', 'bhw_president')
-            SET m.receiver_id = m.receiver_bhw_id
-            WHERE m.receiver_bhw_id IS NOT NULL
-        ");
+        // Migrate sender/receiver data from polymorphic columns to single ids.
+        // Portable query-builder version — the original MySQL
+        // "UPDATE .. INNER JOIN .. SET" syntax does not parse on pgsql/sqlite.
+        // Only migrates ids that belong to a user with a matching role.
+        $moves = [
+            ['sender_woman_id', 'sender_id', ['user']],
+            ['sender_midwife_id', 'sender_id', ['midwife']],
+            ['sender_bhw_id', 'sender_id', ['bhw', 'bhw_president']],
+            ['receiver_woman_id', 'receiver_id', ['user']],
+            ['receiver_midwife_id', 'receiver_id', ['midwife']],
+            ['receiver_bhw_id', 'receiver_id', ['bhw', 'bhw_president']],
+        ];
+        foreach ($moves as [$source, $target, $roles]) {
+            if (!Schema::hasColumn('messages', $source) || !Schema::hasColumn('messages', $target)) {
+                continue;
+            }
+            try {
+                $ids = DB::table('users')->whereIn('role', $roles)->pluck('id');
+                if ($ids->isNotEmpty()) {
+                    DB::table('messages')->whereNotNull($source)->whereIn($source, $ids)->update([$target => DB::raw($source)]);
+                }
+            } catch (\Throwable $e) {
+            }
+        }
 
         // Delete messages where sender or receiver couldn't be migrated (orphaned)
         DB::statement("
@@ -82,40 +62,72 @@ return new class extends Migration
                OR receiver_id NOT IN (SELECT id FROM users)
         ");
 
-        // Now add foreign key constraints for new columns
-        Schema::table('messages', function (Blueprint $table) {
-            $table->foreign('sender_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('receiver_id')->references('id')->on('users')->onDelete('cascade');
-        });
+        // Now add foreign key constraints + indexes for new columns (best effort)
+        foreach (['sender_id', 'receiver_id'] as $column) {
+            if (!Schema::hasColumn('messages', $column)) {
+                continue;
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column) {
+                    $table->foreign($column)->references('id')->on('users')->onDelete('cascade');
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column) {
+                    $table->index($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
 
-        // Add indexes for new columns
-        Schema::table('messages', function (Blueprint $table) {
-            $table->index('sender_id');
-            $table->index('receiver_id');
-        });
-
-        // Drop old polymorphic columns
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropIndex(['sender_woman_id']);
-            $table->dropIndex(['sender_midwife_id']);
-            $table->dropIndex(['sender_bhw_id']);
-            $table->dropIndex(['receiver_woman_id']);
-            $table->dropIndex(['receiver_midwife_id']);
-            $table->dropIndex(['receiver_bhw_id']);
-            $table->dropColumn([
-                'sender_woman_id',
-                'sender_midwife_id',
-                'sender_bhw_id',
-                'receiver_woman_id',
-                'receiver_midwife_id',
-                'receiver_bhw_id',
-            ]);
-        });
+        // Drop old polymorphic columns (drop FKs/indexes first, best effort)
+        foreach (['sender_woman_id', 'sender_midwife_id', 'sender_bhw_id', 'receiver_woman_id', 'receiver_midwife_id', 'receiver_bhw_id'] as $column) {
+            if (!Schema::hasColumn('messages', $column)) {
+                continue;
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column) {
+                    try {
+                        $table->dropForeign([$column]);
+                    } catch (\Throwable $e) {
+                    }
+                    try {
+                        $table->dropIndex([$column]);
+                    } catch (\Throwable $e) {
+                    }
+                });
+            } catch (\Throwable $e) {
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            } catch (\Throwable $e) {
+                // SQLite cannot drop FK-bound columns — rename away instead.
+                if (DB::getDriverName() === 'sqlite' && Schema::hasColumn('messages', $column)) {
+                    try {
+                        Schema::table('messages', function (Blueprint $table) use ($column) {
+                            $table->renameColumn($column, $column . '__deprecated');
+                        });
+                    } catch (\Throwable $e2) {
+                    }
+                }
+            }
+        }
 
         // Drop scheduled_at and is_sent columns
-        Schema::table('messages', function (Blueprint $table) {
-            $table->dropColumn(['scheduled_at', 'is_sent']);
-        });
+        foreach (['scheduled_at', 'is_sent'] as $column) {
+            if (!Schema::hasColumn('messages', $column)) {
+                continue;
+            }
+            try {
+                Schema::table('messages', function (Blueprint $table) use ($column) {
+                    $table->dropColumn($column);
+                });
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
     /**

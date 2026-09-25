@@ -11,10 +11,10 @@ return new class extends Migration
     {
         Schema::table('learning_materials', function (Blueprint $table) {
             if (!Schema::hasColumn('learning_materials', 'category')) {
-                $table->enum('category', [
-                    'general', 'nutrition', 'warning-signs',
-                    'family-planning', 'postpartum', 'pregnancy-guide'
-                ])->default('general')->after('image');
+                // Plain string (not enum): a later migration widens this to
+                // VARCHAR(100) via MySQL-only MODIFY; an enum here would
+                // reject new categories on Postgres/SQLite fresh installs.
+                $table->string('category', 100)->default('general')->after('image');
             }
             if (!Schema::hasColumn('learning_materials', 'video_url')) {
                 $table->string('video_url')->nullable()->after('link_url');
@@ -27,8 +27,11 @@ return new class extends Migration
             }
         });
 
-        // Extend material_type ENUM to include video and quiz
-        DB::statement("ALTER TABLE learning_materials MODIFY COLUMN material_type ENUM('article','link','file','video','quiz') DEFAULT 'article'");
+        // Extend material_type ENUM to include video and quiz (MySQL only;
+        // on pgsql/sqlite Laravel stores enums as VARCHAR — no change needed)
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE learning_materials MODIFY COLUMN material_type ENUM('article','link','file','video','quiz') DEFAULT 'article'");
+        }
     }
 
     public function down(): void
@@ -36,6 +39,8 @@ return new class extends Migration
         Schema::table('learning_materials', function (Blueprint $table) {
             $table->dropColumn(['category', 'video_url', 'quiz_data', 'week_number']);
         });
-        DB::statement("ALTER TABLE learning_materials MODIFY COLUMN material_type ENUM('article','link','file') DEFAULT 'article'");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE learning_materials MODIFY COLUMN material_type ENUM('article','link','file') DEFAULT 'article'");
+        }
     }
 };
