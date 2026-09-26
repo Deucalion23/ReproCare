@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
         $this->call(LearningMaterialSeeder::class);
         $this->call(LearningVideoSeeder::class);
         $this->call(MariaClaraPregnancySeeder::class);
+        $this->call(HighRiskPregnancySeeder::class);
 
         $this->command->info('Database seeded successfully!');
         $this->command->info('Login credentials:');
