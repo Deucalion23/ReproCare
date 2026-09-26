@@ -77,6 +77,11 @@ class Pregnancy extends Model
         return $this->hasMany(CheckupReferral::class, 'pregnancy_id')->latest();
     }
 
+    public function checkups()
+    {
+        return $this->hasMany(Checkup::class, 'pregnancy_id')->latest();
+    }
+
     // Get the patient model (either user or walk-in)
     public function getPatientModel()
     {
