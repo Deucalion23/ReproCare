@@ -27,7 +27,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-page .button-secondary { background:var(--color-surface-strong); border-color:var(--color-surface-strong); color:var(--color-white); }
 .public-page .button-secondary:hover { box-shadow:0 8px 22px rgb(var(--color-shadow-rgb) / .25); }
 .public-page .button-small { min-height:42px; padding:10px 20px; font-size:13px; }
-.eyebrow { color:var(--color-purple-text); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; display:inline-flex; gap:10px; align-items:center; margin-bottom:22px; background:var(--color-purple-soft); border:1px solid var(--color-border); padding:8px 16px; border-radius:999px; }
+.eyebrow { color:#fff; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; display:inline-flex; gap:10px; align-items:center; margin-bottom:22px; background:var(--color-primary); border:1px solid var(--color-primary); padding:8px 16px; border-radius:999px; }
 .eyebrow-dot { width:7px; height:7px; background:var(--public-rose); border-radius:50%; box-shadow:0 0 0 5px color-mix(in srgb, var(--color-secondary-text) 4.71%, transparent); }
 .hero { display:grid; grid-template-columns:1.02fr 1fr; gap:65px; padding-block:70px 66px; align-items:center; }
 .hero h1 { font-size:clamp(42px,4.55vw,64px); font-weight:700; line-height:1.1; margin-bottom:25px; }
