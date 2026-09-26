@@ -306,7 +306,7 @@
         width:100%;
         height:48px;
         padding:0 14px 0 40px;
-        background:var(--var(--color-surface));
+        background:var(--color-surface, #ffffff);
         border:1.5px solid var(--border);
         border-radius:var(--r-md);
         font-size:0.9rem;
@@ -416,7 +416,7 @@
         display:inline-flex; align-items:center; gap:6px;
     }
     .id-mode-btn.active {
-        background:var(--var(--color-surface));
+        background:var(--color-surface, #ffffff);
         color:var(--primary-dk);
         box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent);
     }
@@ -528,7 +528,7 @@
         box-shadow:0 10px 28px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 45%, transparent);
     }
     .btn-prev {
-        background:var(--var(--color-surface));
+        background:var(--color-surface, #ffffff);
         color:var(--text-mid);
         border:1.5px solid var(--border);
         padding:13px 20px;
@@ -650,8 +650,11 @@
         top:calc(100% + 6px);
         left:0;
         right:0;
-        background:var(--var(--color-surface));
-        border:1.5px solid var(--border);
+        /* NOTE: was background:var(--var(--color-surface)) — nested var()
+           is invalid CSS, so the declaration was dropped and the open panel
+           rendered transparent over the fields below. */
+        background:var(--color-surface, #ffffff);
+        border:1.5px solid var(--color-border, #e5e7eb);
         border-radius:var(--r-md);
         box-shadow:0 14px 36px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 16%, transparent);
         z-index:1000;
@@ -733,7 +736,7 @@
     .reg-right { min-height:auto; overflow-y:visible; }
     .reg-right-inner { max-width:680px; padding:2.5rem 2rem 4rem; }
     .fb-reg-top { margin-bottom:1.75rem; }
-    .fb-back { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; border:1.5px solid var(--border); background:var(--var(--color-surface)); color:var(--text-mid); font-size:1.1rem; cursor:pointer; text-decoration:none; transition:all .2s; margin-bottom:1.25rem; }
+    .fb-back { display:inline-flex; align-items:center; justify-content:center; width:42px; height:42px; border-radius:50%; border:1.5px solid var(--color-border, #e5e7eb); background:var(--color-surface, #ffffff); color:var(--text-mid); font-size:1.1rem; cursor:pointer; text-decoration:none; transition:all .2s; margin-bottom:1.25rem; }
     .fb-back:hover { border-color:var(--pink-dark); color:var(--pink-dark); transform:translateX(-2px); }
     .fb-reg-top h1 { margin-top:0.25rem; }
     .fb-reg-top h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.6rem,3.4vw,2.1rem); font-weight:800; color:var(--text); margin:0 0 .4rem; letter-spacing:-0.02em; }
