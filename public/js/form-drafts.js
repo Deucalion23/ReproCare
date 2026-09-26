@@ -13,12 +13,23 @@
  *    never prefill a later form); the keep-alive below makes 419s during
  *    an open form nearly impossible, and the PWA outbox covers offline.
  *  - One draft per form key (method + path + form id/name).
+ *  - Successful submits leave a short-lived submit-marker. The
+ *    beforeunload handler inevitably re-snapshots the still-filled fields
+ *    AFTER submit clears the draft, so without the marker every successful
+ *    POST-redirect-GET would "restore" the just-sent text with a phantom
+ *    toast. On load, a fresh marker PLUS a .alert-success banner means the
+ *    submit succeeded: drop the draft and stay silent. Markers alone (419,
+ *    validation errors, offline) keep the normal restore path.
  */
 (function () {
     'use strict';
 
     var PREFIX = 'reprocare-form-draft:';
+    var SUBMITTED_PREFIX = 'reprocare-form-submitted:';
     var SAVE_DELAY_MS = 2500;
+    // Markers older than this are stale (e.g. submit followed by navigation
+    // elsewhere) and must not suppress a genuine later restore.
+    var SUBMIT_MARK_TTL_MS = 10 * 60 * 1000;
 
     function formKey(form) {
         var id = form.getAttribute('id') || form.getAttribute('name') || '';
@@ -86,6 +97,24 @@
         try { localStorage.removeItem(formKey(form)); } catch (e) {}
     }
 
+    function markSubmitted(form) {
+        try { localStorage.setItem(SUBMITTED_PREFIX + formKey(form), String(Date.now())); } catch (e) {}
+    }
+
+    // Returns true once if this form was submitted within the TTL window.
+    // Always consumes the marker so it can never suppress a later restore.
+    function consumeFreshSubmitMark(form) {
+        var mk = SUBMITTED_PREFIX + formKey(form);
+        var ts = 0;
+        try {
+            ts = parseInt(localStorage.getItem(mk), 10) || 0;
+            localStorage.removeItem(mk);
+        } catch (e) {
+            return false;
+        }
+        return ts > 0 && (Date.now() - ts) <= SUBMIT_MARK_TTL_MS;
+    }
+
     function toast(message) {
         var el = document.createElement('div');
         el.textContent = message;
@@ -96,7 +125,7 @@
         setTimeout(function () { el.remove(); }, 4200);
     }
 
-    function arm(form) {
+    function arm(form, skipRestore) {
         if (form.hasAttribute('data-no-draft')) return;
         // Skip GET/search forms — only state-changing forms need drafts.
         if ((form.method || 'get').toLowerCase() !== 'post') return;
@@ -110,22 +139,32 @@
         form.addEventListener('change', queueSave);
         window.addEventListener('beforeunload', function () { snapshot(form); });
 
-        if (restore(form)) {
+        if (!skipRestore && restore(form)) {
             queueSave();
             toast('Unsaved draft restored — your interrupted entries are back.');
         }
 
-        form.addEventListener('submit', function () { clearDraft(form); });
+        form.addEventListener('submit', function () { clearDraft(form); markSubmitted(form); });
     }
 
     document.addEventListener('DOMContentLoaded', function () {
         var forms = document.querySelectorAll('form');
+        // A success banner means the previous POST landed (POST-redirect-GET).
+        // Combined with a fresh submit-mark for the same form, the draft on
+        // disk is the just-sent text re-saved by beforeunload: drop it and
+        // stay silent. Anything else (419, validation errors, offline, back
+        // button) keeps the normal restore path so no typed data is lost.
+        var justSucceeded = !!document.querySelector('.alert-success');
         var armed = 0;
         for (var i = 0; i < forms.length; i++) {
             var f = forms[i];
             if (f.hasAttribute('data-no-draft')) continue;
             if ((f.method || 'get').toLowerCase() !== 'post') continue;
-            arm(f);
+            var submittedOk = consumeFreshSubmitMark(f);
+            if (justSucceeded && submittedOk) {
+                clearDraft(f);
+            }
+            arm(f, justSucceeded && submittedOk);
             armed++;
         }
         // Session keep-alive: while a state-changing form is open, ping
