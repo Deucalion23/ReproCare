@@ -33,28 +33,32 @@ class BhwPresidentController extends Controller
         $barangay = auth()->user()->barangay;
         // Live counts on every load (previously cached for 5 minutes, which
         // left dashboard cards stale right after new records appeared).
-        // Barangay scoping kept so presidents see their barangay, not the city.
+        // Jurisdiction matching uses the shared normalize-and-overlap rule so
+        // legacy spellings ('Burgos' vs 'Barangay Burgos Padlan, San Carlos
+        // City, Pangasinan') resolve to the same area. A strict equality
+        // check matched nothing and left every card at 0.
+        $area = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $barangay, $column);
         $stats = [
-                'totalPatients' => User::where('role', 'user')->where('barangay', $barangay)->count(),
-                'totalBhws' => User::where('role', 'bhw')->where('barangay', $barangay)->count(),
-                'activePregnancies' => Pregnancy::active()->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
-                'highRiskPregnancies' => Pregnancy::active()->highRisk()->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
-                'scheduledCheckups' => Checkup::scheduled()->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
-                'missedCheckups' => Checkup::missed()->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
-                'completedCheckups' => Checkup::where('status', 'Completed')->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
-                'totalHealthRecords' => HealthRecord::whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
-                'monthlyReports' => BhwMonthlyReport::whereHas('bhw', fn ($q) => $q->where('barangay', $barangay))->count(),
+                'totalPatients' => tap(User::where('role', 'user'), $area)->count(),
+                'totalBhws' => tap(User::where('role', 'bhw'), $area)->count(),
+                'activePregnancies' => Pregnancy::active()->whereHas('woman', function ($q) use ($area) { $area($q); })->count(),
+                'highRiskPregnancies' => Pregnancy::active()->highRisk()->whereHas('woman', function ($q) use ($area) { $area($q); })->count(),
+                'scheduledCheckups' => Checkup::scheduled()->whereHas('woman', function ($q) use ($area) { $area($q); })->count(),
+                'missedCheckups' => Checkup::missed()->whereHas('woman', function ($q) use ($area) { $area($q); })->count(),
+                'completedCheckups' => Checkup::where('status', 'Completed')->whereHas('woman', function ($q) use ($area) { $area($q); })->count(),
+                'totalHealthRecords' => HealthRecord::whereHas('woman', function ($q) use ($area) { $area($q); })->count(),
+                'monthlyReports' => BhwMonthlyReport::whereHas('bhw', function ($q) use ($area) { $area($q); })->count(),
         ];
 
         // Recent activity
         $recentCheckups = Checkup::with(['woman', 'scheduledByBhw'])
-            ->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))
+            ->whereHas('woman', function ($q) use ($area) { $area($q); })
             ->latest('scheduled_date')
             ->limit(10)
             ->get();
 
         $recentHealthRecords = HealthRecord::with(['woman', 'recordedBy'])
-            ->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))
+            ->whereHas('woman', function ($q) use ($area) { $area($q); })
             ->latest()
             ->limit(10)
             ->get();
@@ -62,7 +66,7 @@ class BhwPresidentController extends Controller
         // High-risk pregnancies needing attention
         $highRiskPregnancies = Pregnancy::active()
             ->highRisk()
-            ->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))
+            ->whereHas('woman', function ($q) use ($area) { $area($q); })
             ->with(['woman', 'checkups' => function ($query) {
                 $query->latest('scheduled_date');
             }])
@@ -86,7 +90,8 @@ class BhwPresidentController extends Controller
         $search = request('search');
         $status = request('status');
 
-        $query = User::where('role', 'bhw')->where('barangay', auth()->user()->barangay)->with(['purok', 'activeBhwAssignment.purok']);
+        $query = User::where('role', 'bhw')->with(['purok', 'activeBhwAssignment.purok']);
+        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, auth()->user()->barangay);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -207,10 +212,11 @@ class BhwPresidentController extends Controller
 
         $healthRecords = HealthRecord::with(['woman', 'walkInPatient', 'recordedBy'])
             ->whereNotNull('recorded_by_id')
-            ->when($president->barangay, function ($query) use ($president) {
-                $query->where(function ($inner) use ($president) {
-                    $inner->whereHas('woman', fn ($q) => $q->where('barangay', $president->barangay))
-                        ->orWhereHas('walkInPatient', fn ($q) => $q->where('barangay', $president->barangay));
+            ->where(function ($query) use ($president) {
+                $query->whereHas('woman', function ($q) use ($president) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $president->barangay);
+                })->orWhereHas('walkInPatient', function ($q) use ($president) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $president->barangay);
                 });
             })
             ->latest()
