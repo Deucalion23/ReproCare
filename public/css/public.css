@@ -15,7 +15,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-header { background:color-mix(in srgb, var(--color-bg) 96%, transparent); border-bottom:1px solid var(--public-line); }
 .header-inner { min-height:88px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .public-brand { display:inline-flex; align-items:center; gap:8px; font-family:'Plus Jakarta Sans',sans-serif; font-size:24px; font-weight:800; letter-spacing:-1px; line-height:1; flex-shrink:0; }
-.public-brand-mark { width:42px; height:42px; display:grid; place-items:center; overflow:visible; flex:0 0 42px; transform:translateY(-4px); }
+.public-brand-mark { width:42px; height:42px; display:grid; place-items:center; overflow:visible; flex:0 0 42px; transform:translateY(-6px); }
 .public-brand-mark img { width:58px; height:58px; max-width:none; object-fit:contain; display:block; }
 .public-brand-name { display:inline-flex; align-items:center; line-height:1; transform:translateY(6px); }
 /* Match the wordmark accent to the lavender used by the supplied logo. */
