@@ -39,12 +39,16 @@ self.addEventListener('fetch', (event) => {
     if (url.origin !== self.location.origin) return;
 
     // Navigations: network first, fall back to offline page.
+    // NOTE: only cache successful (2xx) responses. Caching an error page
+    // would serve that 500 again later whenever the network hiccups.
     if (req.mode === 'navigate') {
         event.respondWith(
             fetch(req)
                 .then((res) => {
-                    const copy = res.clone();
-                    caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy)).catch(() => undefined);
+                    if (res && res.ok) {
+                        const copy = res.clone();
+                        caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy)).catch(() => undefined);
+                    }
                     return res;
                 })
                 .catch(() => caches.match(req).then((hit) => hit || caches.match(OFFLINE_URL)))
@@ -52,12 +56,14 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Static assets: cache first.
+    // Static assets: cache first (only successful responses).
     if (/\.(css|js|png|jpg|jpeg|svg|webp|ico|woff2?)$/i.test(url.pathname)) {
         event.respondWith(
             caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-                const copy = res.clone();
-                caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy)).catch(() => undefined);
+                if (res && res.ok) {
+                    const copy = res.clone();
+                    caches.open(RUNTIME_CACHE).then((c) => c.put(req, copy)).catch(() => undefined);
+                }
                 return res;
             }))
         );
