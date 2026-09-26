@@ -82,7 +82,12 @@ class MessageController extends Controller
                         }));
                 });
             })
-            ->orderByRaw('COALESCE(replies_max_created_at, created_at) DESC')
+            // NOTE: cannot be COALESCE(replies_max_created_at, ...) — Postgres
+            // resolves a SELECT alias only as a bare ORDER BY item, never
+            // nested inside an expression (MySQL/SQLite allow it). Inline the
+            // aggregate instead; identifiers stay unquoted/lowercase so the
+            // same SQL parses on pgsql, mysql and sqlite.
+            ->orderByRaw('COALESCE((select max(replies.created_at) from messages as replies where replies.reply_to_id = messages.id and replies.deleted_at is null), messages.created_at) DESC')
             ->paginate(15);
 
         $unreadCount = Message::where('receiver_id', $userId)
