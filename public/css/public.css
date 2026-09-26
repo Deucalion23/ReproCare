@@ -22,12 +22,12 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-nav a:hover,.text-link:hover { color:var(--public-rose); }
 .public-page .button { display:inline-flex; align-items:center; justify-content:center; gap:14px; min-height:50px; padding:13px 28px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:14px; cursor:pointer; transition:background .2s,transform .2s,box-shadow .2s; }
 .public-page .button:hover { transform:translateY(-2px); }
-.public-page .button-primary { color:var(--color-on-solid); background:linear-gradient(135deg, var(--color-primary), var(--color-primary-hover)); box-shadow:0 8px 22px color-mix(in srgb, var(--color-primary) 35%, transparent); }
-.public-page .button-primary:hover { color:var(--color-on-solid); box-shadow:0 12px 30px color-mix(in srgb, var(--color-primary) 45%, transparent); }
+.public-page .button-primary { color:var(--color-purple-text); background:var(--color-purple-soft); border-color:color-mix(in srgb, var(--color-primary-text) 20%, transparent); box-shadow:0 8px 22px color-mix(in srgb, var(--color-primary) 16%, transparent); }
+.public-page .button-primary:hover { color:var(--color-purple-text); background:color-mix(in srgb, var(--color-purple-soft) 82%, var(--color-primary) 18%); box-shadow:0 12px 30px color-mix(in srgb, var(--color-primary) 22%, transparent); }
 .public-page .button-secondary { background:var(--color-surface-strong); border-color:var(--color-surface-strong); color:var(--color-white); }
 .public-page .button-secondary:hover { box-shadow:0 8px 22px rgb(var(--color-shadow-rgb) / .25); }
 .public-page .button-small { min-height:42px; padding:10px 20px; font-size:13px; }
-.eyebrow { color:#fff; font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; display:inline-flex; gap:10px; align-items:center; margin-bottom:22px; background:var(--color-primary); border:1px solid var(--color-primary); padding:8px 16px; border-radius:999px; }
+.eyebrow { color:var(--color-purple-text); font-size:11px; font-weight:700; letter-spacing:2px; text-transform:uppercase; display:inline-flex; gap:10px; align-items:center; margin-bottom:22px; background:var(--color-purple-soft); border:1px solid color-mix(in srgb, var(--color-primary-text) 18%, transparent); padding:8px 16px; border-radius:999px; }
 .eyebrow-dot { width:7px; height:7px; background:var(--public-rose); border-radius:50%; box-shadow:0 0 0 5px color-mix(in srgb, var(--color-secondary-text) 4.71%, transparent); }
 .hero { display:grid; grid-template-columns:1.02fr 1fr; gap:65px; padding-block:70px 66px; align-items:center; }
 .hero h1 { font-size:clamp(42px,4.55vw,64px); font-weight:700; line-height:1.1; margin-bottom:25px; }
@@ -70,10 +70,10 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .feature-card p { color:var(--public-muted); font-size:13px; margin:0; line-height:1.8; }
 .how-section { background:var(--color-surface); border:1px solid var(--color-border); border-radius:24px; box-shadow:var(--shadow-sm); padding:38px 42px; margin-bottom:60px; display:grid; grid-template-columns:.85fr 1.5fr; gap:55px; align-items:center; }
 .how-section h2 { font-size:29px; margin-bottom:15px; color:var(--color-text); }
-.how-section .text-link { display:inline-flex; align-items:center; gap:8px; font-size:15px; color:#fff !important; background:var(--color-primary); font-weight:800; letter-spacing:.01em; border-radius:999px; padding:13px 28px; box-shadow:0 8px 22px color-mix(in srgb, var(--color-primary) 40%, transparent); }
-.how-section .text-link:hover { background:var(--color-primary-hover); color:#fff !important; transform:translateY(-2px); }
+.how-section .text-link { display:inline-flex; align-items:center; gap:8px; font-size:15px; color:var(--color-purple-text) !important; background:var(--color-purple-soft); border:1px solid color-mix(in srgb, var(--color-primary-text) 20%, transparent); font-weight:800; letter-spacing:.01em; border-radius:999px; padding:13px 28px; box-shadow:0 8px 22px color-mix(in srgb, var(--color-primary) 16%, transparent); }
+.how-section .text-link:hover { background:color-mix(in srgb, var(--color-purple-soft) 82%, var(--color-primary) 18%); color:var(--color-purple-text) !important; transform:translateY(-2px); }
 /* theme.css loads after public.css and recolors plain <a> tags purple — keep this button label white. */
-:root[data-theme][data-bs-theme] body .how-section .text-link, :root[data-theme][data-bs-theme] body .how-section .text-link:hover, :root[data-theme][data-bs-theme] body .how-section .text-link:visited { color:#fff !important; }
+:root[data-theme][data-bs-theme] body .how-section .text-link, :root[data-theme][data-bs-theme] body .how-section .text-link:hover, :root[data-theme][data-bs-theme] body .how-section .text-link:visited { color:var(--color-purple-text) !important; }
 .how-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:27px; list-style:none; margin:0; padding:0; }
 .how-steps li { position:relative; }
 .how-steps li:not(:last-child)::after { content:'\2192'; position:absolute; right:-20px; top:6px; color:var(--color-primary-text); font-size:16px; }
@@ -87,7 +87,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .auth-nav-note a { color:var(--public-rose); font-weight:600; }
 .auth-nav-cta { display:inline-flex; align-items:center; gap:10px; }
 .public-page .auth-nav-btn { min-height:40px; padding:8px 20px; font-size:13px; border-radius:999px; margin-left:0; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
-.public-page .auth-nav-btn:hover { color:var(--color-on-solid) !important; }
+.public-page .auth-nav-btn:hover { color:var(--color-purple-text) !important; }
 .auth-nav-home { display:inline-flex; align-items:center; gap:6px; margin-left:0 !important; padding:8px 16px; border-radius:999px; border:1px solid var(--public-line); background:var(--color-surface); color:var(--public-ink) !important; font-weight:600; box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 8%, transparent); transition:all .2s ease; white-space:nowrap; }
 .auth-nav-home:hover { border-color:var(--public-rose); color:var(--public-rose) !important; transform:translateY(-1px); box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 16%, transparent); }
 /* Modern loading state for auth submit buttons (prevents double-click dead feeling) */
