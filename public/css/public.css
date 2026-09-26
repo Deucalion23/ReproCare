@@ -32,7 +32,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-brand-mark img { width:58px; height:58px; max-width:none; object-fit:contain; display:block; }
 .public-brand-name { display:inline-flex; align-items:center; line-height:1; transform:translateY(6px); }
 /* Match the wordmark accent to the lavender used by the supplied logo. */
-.public-brand .brand-accent { color:#F1EBFA !important; }
+.public-brand .brand-accent { color:#B7A8D3 !important; }
 .public-nav,.nav-account { display:flex; align-items:center; gap:30px; font-size:13px; font-weight:600; }
 .public-nav a:hover,.text-link:hover { color:var(--public-rose); }
 .public-page .button { display:inline-flex; align-items:center; justify-content:center; gap:14px; min-height:50px; padding:13px 28px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:14px; cursor:pointer; transition:background .2s,transform .2s,box-shadow .2s; }
