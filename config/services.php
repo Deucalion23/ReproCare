@@ -47,7 +47,7 @@ return [
     ],
 
     // ─── SMS Provider Switch ──────────────────────────────────────────
-    'sms_provider' => env('SMS_PROVIDER', 'movider'), // 'movider' or 'textbee'
+    'sms_provider' => env('SMS_PROVIDER', 'textbee'), // 'textbee' (default) or 'movider'
 
     // ─── Movider SMS Gateway ──────────────────────────────────────────
     'movider' => [

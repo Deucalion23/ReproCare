@@ -250,7 +250,7 @@ class SmsService
         ]);
 
         // DB settings (CHO → Settings → SMS Gateway) override config/services.php when filled.
-        $provider = \App\Models\Setting::get('sms.provider', config('services.sms_provider', 'movider')) ?: 'movider';
+        $provider = \App\Models\Setting::get('sms.provider', config('services.sms_provider', 'textbee')) ?: 'textbee';
 
         // ── MOCK MODE ──────────────────────────────────────────────────
         $mock = \App\Models\Setting::get('sms.mock', null);

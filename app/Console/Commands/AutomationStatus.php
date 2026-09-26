@@ -23,7 +23,7 @@ class AutomationStatus extends Command
             $this->line('Database: connected');
             $this->line('Alert lifecycle migration: ' . (Schema::hasColumn('notifications', 'event_key') ? 'applied' : 'PENDING'));
             $this->line('Scheduler heartbeat: ' . (Cache::get('automation.scheduler_heartbeat') ?: 'not yet recorded'));
-            $provider = Setting::get('sms.provider', config('services.sms_provider', 'movider')) ?: 'movider';
+            $provider = Setting::get('sms.provider', config('services.sms_provider', 'textbee')) ?: 'textbee';
             $mock = Setting::get('sms.mock', null);
             $mock = filter_var($mock !== null && $mock !== '' ? $mock : config('services.movider.mock'), FILTER_VALIDATE_BOOLEAN);
             $this->line('SMS provider: ' . $provider);

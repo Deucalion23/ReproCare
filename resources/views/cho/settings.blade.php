@@ -490,16 +490,17 @@
                         <div class="col-md-6">
                             <label class="form-label">Provider</label>
                             <select name="provider" class="form-select" required>
-                                <option value="movider" {{ \App\Models\Setting::get('sms.provider', 'movider') === 'movider' ? 'selected' : '' }}>Movider</option>
-                                <option value="textbee" {{ \App\Models\Setting::get('sms.provider') === 'textbee' ? 'selected' : '' }}>TextBee (Android gateway)</option>
+                                <option value="textbee" {{ \App\Models\Setting::get('sms.provider', 'textbee') === 'textbee' ? 'selected' : '' }}>TextBee (Android gateway)</option>
+                                <option value="movider" {{ \App\Models\Setting::get('sms.provider') === 'movider' ? 'selected' : '' }}>Movider</option>
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Mode</label>
                             <select name="mock" class="form-select" required>
-                                <option value="1" {{ \App\Models\Setting::get('sms.mock', '1') === '1' ? 'selected' : '' }}>Mock — log only, no live SMS</option>
-                                <option value="0" {{ \App\Models\Setting::get('sms.mock') === '0' ? 'selected' : '' }}>Live — send real SMS</option>
+                                <option value="0" {{ \App\Models\Setting::get('sms.mock', '0') === '0' ? 'selected' : '' }}>Live — send real SMS</option>
+                                <option value="1" {{ \App\Models\Setting::get('sms.mock') === '1' ? 'selected' : '' }}>Mock — log only, no live SMS</option>
                             </select>
+                            <div class="form-text">Mock marks messages as "sent" without delivering anything. Use Live for real SMS.</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">TextBee API key</label>
