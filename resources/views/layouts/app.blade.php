@@ -3106,7 +3106,7 @@
     <!-- PWA: offline-first field support (service worker + IndexedDB outbox) -->
     <script src="{{ asset('js/pwa-outbox.js') }}?v=3" defer></script>
     <!-- Field resilience: localStorage draft auto-save for long clinical forms (419-proof) -->
-    <script src="{{ asset('js/form-drafts.js') }}?v=1" defer></script>
+    <script src="{{ asset('js/form-drafts.js') }}?v=2" defer></script>
     <script>
         if ('serviceWorker' in navigator && window.location.protocol.indexOf('http') === 0) {
             window.addEventListener('load', function () {
