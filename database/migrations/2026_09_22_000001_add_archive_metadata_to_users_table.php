@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     /**
+     * Run without a DDL transaction. Steps below are best-effort
+     * (attempt-and-ignore-if-present); on Postgres a failed statement
+     * aborts the whole transaction, so caught failures must not poison
+     * the statements that follow. All steps are guarded and re-runnable.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Who archived the account, when, and why — required for audit trails.
      * archived_at already exists (2026_04_24_141541); only add the missing pieces.
      */

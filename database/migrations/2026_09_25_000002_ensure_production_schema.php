@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration
 {
     /**
+     * Run without a DDL transaction. Steps below are best-effort
+     * (attempt-and-ignore-if-present); on Postgres a failed statement
+     * aborts the whole transaction, so caught failures must not poison
+     * the statements that follow. All steps are guarded and re-runnable.
+     */
+    public $withinTransaction = false;
+
+    /**
      * Production safety net for fresh installs (Render/Supabase Postgres).
      *
      * The pre-2026-09-25 migration history was developed against a single

@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run without a DDL transaction. Steps below are best-effort
+     * (attempt-and-ignore-if-present); on Postgres a failed statement
+     * aborts the whole transaction, so caught failures must not poison
+     * the statements that follow. All steps are guarded and re-runnable.
+     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         // Deduplicate same-day cycle entries before constraining.
@@ -23,24 +31,27 @@ return new class extends Migration
             }
         } catch (\Throwable $e) {
         }
-        Schema::table('cycles', function (Blueprint $table) {
-            try {
+        // NOTE: guards must wrap the Schema::table() call itself — a
+        // try/catch *inside* the closure is dead code because Blueprint
+        // commands only throw when the call executes.
+        try {
+            Schema::table('cycles', function (Blueprint $table) {
                 $table->unique(['user_id', 'period_start_date'], 'cycles_user_start_unique');
-            } catch (\Throwable $e) {
-            }
-        });
-        Schema::table('forum_likes', function (Blueprint $table) {
-            try {
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table('forum_likes', function (Blueprint $table) {
                 $table->unique(['post_id', 'user_id'], 'forum_likes_post_user_unique');
-            } catch (\Throwable $e) {
-            }
-        });
-        Schema::table('sms_logs', function (Blueprint $table) {
-            try {
+            });
+        } catch (\Throwable $e) {
+        }
+        try {
+            Schema::table('sms_logs', function (Blueprint $table) {
                 $table->index('phone_number', 'sms_logs_phone_index');
-            } catch (\Throwable $e) {
-            }
-        });
+            });
+        } catch (\Throwable $e) {
+        }
     }
 
     public function down(): void

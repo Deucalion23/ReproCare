@@ -6,6 +6,14 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
+    /**
+     * Run without a DDL transaction. Steps below are best-effort
+     * (attempt-and-ignore-if-present); on Postgres a failed statement
+     * aborts the whole transaction, so caught failures must not poison
+     * the statements that follow. All steps are guarded and re-runnable.
+     */
+    public $withinTransaction = false;
+
     public function up(): void
     {
         // Drop denormalized columns from maternal_care_target_clients

@@ -12,9 +12,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // On pgsql/sqlite there is no information_schema/DATABASE() introspection —
-        // just disable constraints and drop (fresh installs have no data to preserve).
+        // On pgsql/sqlite there is no information_schema/DATABASE() introspection.
+        // Postgres additionally refuses DROP TABLE while other tables hold FKs
+        // to it, so dependent constraints are removed first (fresh installs
+        // have no data to preserve).
         if (DB::getDriverName() !== 'mysql') {
+            $this->dropDependentForeignKeys(['users']);
             Schema::disableForeignKeyConstraints();
             Schema::dropIfExists('users');
             Schema::enableForeignKeyConstraints();
@@ -43,6 +46,34 @@ return new class extends Migration
         // table at all. Recreate the base table here; later migrations add the
         // remaining columns.
         $this->recreateUsersTable();
+    }
+
+    /**
+     * Drop FK constraints in any table that reference the given parent tables.
+     * Postgres-only; other drivers don't need it here. Best effort.
+     */
+    protected function dropDependentForeignKeys(array $parents): void
+    {
+        if (DB::getDriverName() !== 'pgsql') {
+            return;
+        }
+        try {
+            $rows = DB::select(
+                "SELECT con.conname AS name, tbl.relname AS table_name
+                 FROM pg_constraint con
+                 JOIN pg_class tbl ON tbl.oid = con.conrelid
+                 JOIN pg_class ref ON ref.oid = con.confrelid
+                 WHERE con.contype = 'f' AND ref.relname IN (" . implode(',', array_fill(0, count($parents), '?')) . ')',
+                $parents
+            );
+            foreach ($rows as $row) {
+                try {
+                    DB::statement(sprintf('ALTER TABLE "%s" DROP CONSTRAINT "%s"', $row->table_name, $row->name));
+                } catch (\Throwable $e) {
+                }
+            }
+        } catch (\Throwable $e) {
+        }
     }
 
     protected function recreateUsersTable(): void
