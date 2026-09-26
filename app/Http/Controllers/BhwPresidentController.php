@@ -31,10 +31,10 @@ class BhwPresidentController extends Controller
     public function dashboard()
     {
         $barangay = auth()->user()->barangay;
-        // Per-president cache key + barangay scoping so presidents see their barangay, not the city.
-        $cacheKey = 'bhw_president_dashboard_stats_'.auth()->id();
-        $stats = Cache::remember($cacheKey, 300, function () use ($barangay) {
-            return [
+        // Live counts on every load (previously cached for 5 minutes, which
+        // left dashboard cards stale right after new records appeared).
+        // Barangay scoping kept so presidents see their barangay, not the city.
+        $stats = [
                 'totalPatients' => User::where('role', 'user')->where('barangay', $barangay)->count(),
                 'totalBhws' => User::where('role', 'bhw')->where('barangay', $barangay)->count(),
                 'activePregnancies' => Pregnancy::active()->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
@@ -44,8 +44,7 @@ class BhwPresidentController extends Controller
                 'completedCheckups' => Checkup::where('status', 'Completed')->whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
                 'totalHealthRecords' => HealthRecord::whereHas('woman', fn ($q) => $q->where('barangay', $barangay))->count(),
                 'monthlyReports' => BhwMonthlyReport::whereHas('bhw', fn ($q) => $q->where('barangay', $barangay))->count(),
-            ];
-        });
+        ];
 
         // Recent activity
         $recentCheckups = Checkup::with(['woman', 'scheduledByBhw'])

@@ -17,7 +17,6 @@ use App\Services\RiskAnalysisService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
@@ -46,17 +45,16 @@ class MidwifeController extends Controller
             \Log::error('Midwife dashboard alert check failed: ' . $e->getMessage());
         }
         
-        // Cache dashboard statistics for 5 minutes (300 seconds) for faster loading
-        $cacheKey = 'midwife_dashboard_stats_' . auth()->id();
-        $stats = Cache::remember($cacheKey, 300, function () {
-            return [
-                'totalPatients' => User::where('role', 'user')->where('status', 'approved')->count(),
-                'activePregnancies' => Pregnancy::active()->count(),
-                'scheduledCheckups' => Checkup::scheduled()->count(),
-                'missedCheckups' => Checkup::missed()->count(),
-                'highRiskPatients' => Pregnancy::active()->highRisk()->count(),
-            ];
-        });
+        // Live counts on every load. (Previously cached for 5 minutes, which
+        // left the Registry card stale right after registering a patient.)
+        // These are indexed COUNT queries — milliseconds, no cache needed.
+        $stats = [
+            'totalPatients' => User::where('role', 'user')->where('status', 'approved')->count(),
+            'activePregnancies' => Pregnancy::active()->count(),
+            'scheduledCheckups' => Checkup::scheduled()->count(),
+            'missedCheckups' => Checkup::missed()->count(),
+            'highRiskPatients' => Pregnancy::active()->highRisk()->count(),
+        ];
 
         // Only select needed columns for better performance
         $recentCheckups = Checkup::with(['woman:id,first_name,middle_initial,last_name', 'midwife:id,first_name,middle_initial,last_name'])
@@ -434,15 +432,13 @@ class MidwifeController extends Controller
         $search = request('search');
         $status = request('status', 'active');
         
-        // Cache pregnancy stats for 5 minutes (search must not poison global totals)
-        $statsCacheKey = 'pregnancy_stats_' . $status;
-        $stats = Cache::remember($statsCacheKey, 300, function () {
-            return [
-                'totalActive' => Pregnancy::active()->count(),
-                'totalCompleted' => Pregnancy::completed()->count(),
-                'totalHighRisk' => Pregnancy::highRisk()->count(),
-            ];
-        });
+        // Live totals (never filtered by search, and never cached — a cache
+        // here showed stale counts right after new pregnancies appeared).
+        $stats = [
+            'totalActive' => Pregnancy::active()->count(),
+            'totalCompleted' => Pregnancy::completed()->count(),
+            'totalHighRisk' => Pregnancy::highRisk()->count(),
+        ];
         
         $query = Pregnancy::with(['woman' => fn($q) => $q->withTrashed(), 'walkInPatient'])
             ->select('id', 'user_id', 'walk_in_patient_id', 'lmp', 'edd', 'aog', 'is_high_risk', 'created_at')

@@ -15,7 +15,6 @@ use App\Services\RiskAnalysisService;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
@@ -44,20 +43,18 @@ class BhwController extends Controller
             \Log::error('BHW dashboard alert check failed: ' . $e->getMessage());
         }
 
-        // Cache dashboard statistics for 5 minutes (300 seconds) for faster loading
-        $cacheKey = 'bhw_dashboard_stats_' . auth()->id();
-        $stats = Cache::remember($cacheKey, 300, function () {
-            return [
-                'totalPatients' => User::where('role', 'user')->count(),
-                'scheduledCheckups' => Checkup::scheduled()->count(),
-                'todayCheckups' => Checkup::whereDate('scheduled_date', today())
-                    ->scheduled()
-                    ->count(),
-                'myHealthRecords' => HealthRecord::byBhw()
-                    ->where('recorded_by_id', auth()->id())
-                    ->count(),
-            ];
-        });
+        // Live counts on every load (previously cached for 5 minutes, which
+        // left dashboard cards stale right after new records appeared).
+        $stats = [
+            'totalPatients' => User::where('role', 'user')->count(),
+            'scheduledCheckups' => Checkup::scheduled()->count(),
+            'todayCheckups' => Checkup::whereDate('scheduled_date', today())
+                ->scheduled()
+                ->count(),
+            'myHealthRecords' => HealthRecord::byBhw()
+                ->where('recorded_by_id', auth()->id())
+                ->count(),
+        ];
 
         // Only select needed columns for better performance
         $upcomingCheckups = Checkup::with(['woman:id,first_name,middle_initial,last_name', 'midwife:id,first_name,middle_initial,last_name'])
