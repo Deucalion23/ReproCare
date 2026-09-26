@@ -30,8 +30,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'ReproCare - Maternal Health System')</title>
     <meta name="description" content="ReproCare - Comprehensive Maternal & Reproductive Health Management System">
-    <link rel="icon" type="image/png" href="{{ asset('images/brand/reprocare-logo.png?v=4') }}">
-    <link rel="shortcut icon" href="{{ asset('images/brand/reprocare-logo.png?v=4') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/reprocare-logo.png?v=5') }}">
+    <link rel="shortcut icon" href="{{ asset('images/brand/reprocare-logo.png?v=5') }}">
     <!-- PWA: installable field app with offline-first support -->
     <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
     <meta name="theme-color" content="#F273AC">

@@ -56,7 +56,7 @@
                 <i class="bi bi-list fs-5"></i>
             </button>
             <a class="navbar-brand d-flex align-items-center gap-2 m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}">
-                <img src="{{ asset('images/brand/reprocare-logo.png?v=4') }}" alt="ReproCare Logo"
+                <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo"
                      style="width:36px; height:36px; object-fit:contain; border-radius:10px; background:var(--color-surface);">
                 <span class="fw-800" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px;">
                     Repro<span style="color:var(--color-secondary-text);">Care</span>

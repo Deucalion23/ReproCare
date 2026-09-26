@@ -8,7 +8,7 @@
     <meta name="theme-color" content="#FBF7FA">
     <meta name="description" content="ReproCare connects women in San Carlos City with their community care team. Follow your pregnancy, manage checkups, and stay informed.">
     <title>@yield('title', 'ReproCare — Care for every chapter')</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/brand/reprocare-logo.png?v=4') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/reprocare-logo.png?v=5') }}">
     <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
     @stack('styles')
@@ -20,7 +20,7 @@
     <header class="public-header">
         <div class="public-container header-inner">
             <a class="public-brand" href="{{ url('/') }}" aria-label="ReproCare home">
-                <img src="{{ asset('images/brand/reprocare-logo.png?v=4') }}" width="40" height="40" alt="">
+                <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" width="40" height="40" alt="">
                 <span>Repro<span class="brand-accent">Care</span></span>
             </a>
             @yield('navigation')
