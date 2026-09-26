@@ -2,6 +2,17 @@
 @font-face { font-family:'Inter'; font-style:normal; font-weight:400 700; font-display:swap; src:url('fonts/inter-latin.woff2') format('woff2'); }
 @font-face { font-family:'Plus Jakarta Sans'; font-style:normal; font-weight:400 800; font-display:swap; src:url('fonts/plus-jakarta-sans-latin.woff2') format('woff2'); }
 :root {;;;;;;; }
+/* Public pages inherit the supplied logo's lavender instead of the default violet. */
+body.public-page {
+    --logo-lavender:#B7A8D3;
+    --color-primary:var(--logo-lavender);
+    --color-primary-hover:#A894C6;
+    --color-primary-text:#745A98;
+    --color-primary-on:#2B2335;
+    --color-primary-on-hover:#2B2335;
+    --public-rose:var(--color-primary-text);
+    --public-rose-dark:#624B82;
+}
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; scroll-padding-top:100px; }
 body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg); font-family:'Inter',sans-serif; line-height:1.6; }
