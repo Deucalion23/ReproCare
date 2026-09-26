@@ -4,14 +4,16 @@
 :root {;;;;;;; }
 /* Public pages inherit the supplied logo's lavender instead of the default violet. */
 body.public-page {
-    --logo-lavender:#B7A8D3;
+    --logo-lavender:#F1EBFA;
     --color-primary:var(--logo-lavender);
-    --color-primary-hover:#A894C6;
+    --color-primary-hover:#E3D8F1;
     --color-primary-text:#745A98;
     --color-primary-on:#2B2335;
     --color-primary-on-hover:#2B2335;
     --public-rose:var(--color-primary-text);
     --public-rose-dark:#624B82;
+    --color-purple-soft:#F1EBFA;
+    --color-purple-text:#745A98;
 }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; scroll-padding-top:100px; }
@@ -30,7 +32,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-brand-mark img { width:58px; height:58px; max-width:none; object-fit:contain; display:block; }
 .public-brand-name { display:inline-flex; align-items:center; line-height:1; transform:translateY(6px); }
 /* Match the wordmark accent to the lavender used by the supplied logo. */
-.public-brand .brand-accent { color:#B7A8D3 !important; }
+.public-brand .brand-accent { color:#F1EBFA !important; }
 .public-nav,.nav-account { display:flex; align-items:center; gap:30px; font-size:13px; font-weight:600; }
 .public-nav a:hover,.text-link:hover { color:var(--public-rose); }
 .public-page .button { display:inline-flex; align-items:center; justify-content:center; gap:14px; min-height:50px; padding:13px 28px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:14px; cursor:pointer; transition:background .2s,transform .2s,box-shadow .2s; }

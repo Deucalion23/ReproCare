@@ -23,7 +23,7 @@
                 <span class="public-brand-mark" aria-hidden="true">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" width="64" height="64" alt="">
                 </span>
-                <span class="public-brand-name">Repro<span class="brand-accent" style="color:#B7A8D3 !important;">Care</span></span>
+                <span class="public-brand-name">Repro<span class="brand-accent" style="color:#F1EBFA !important;">Care</span></span>
             </a>
             @yield('navigation')
         </div>
