@@ -57,9 +57,9 @@
             </button>
             <a class="navbar-brand d-flex align-items-center gap-2 m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}">
                 <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo"
-                     style="width:36px; height:36px; object-fit:contain; border-radius:10px; background:var(--color-surface);">
-                <span class="fw-800" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px;">
-                    Repro<span style="color:var(--color-secondary-text);">Care</span>
+                     style="width:42px; height:42px; object-fit:contain; border-radius:10px; background:var(--color-surface); display:block; flex-shrink:0;">
+                <span class="fw-800" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1;">
+                    Repro<span style="color:#B7A8D3;">Care</span>
                 </span>
             </a>
         </div>

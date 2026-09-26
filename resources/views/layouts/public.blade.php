@@ -20,7 +20,7 @@
     <header class="public-header">
         <div class="public-container header-inner">
             <a class="public-brand" href="{{ url('/') }}" aria-label="ReproCare home">
-                <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" width="40" height="40" alt="">
+                <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" width="48" height="48" alt="">
                 <span>Repro<span class="brand-accent">Care</span></span>
             </a>
             @yield('navigation')

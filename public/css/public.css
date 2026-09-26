@@ -14,10 +14,11 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-container { width:min(1180px,calc(100% - 80px)); margin-inline:auto; }
 .public-header { background:color-mix(in srgb, var(--color-bg) 96%, transparent); border-bottom:1px solid var(--public-line); }
 .header-inner { min-height:88px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-.public-brand { display:inline-flex; align-items:center; gap:9px; font-family:'Plus Jakarta Sans',sans-serif; font-size:23px; font-weight:800; letter-spacing:-1px; flex-shrink:0; }
-.public-brand img { object-fit:contain; }
-/* The landing-page wordmark always uses the ReproCare pink for "Care". */
-.public-brand .brand-accent { color:#F06292 !important; }
+.public-brand { display:inline-flex; align-items:center; gap:10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:24px; font-weight:800; letter-spacing:-1px; line-height:1; flex-shrink:0; }
+.public-brand img { width:48px; height:48px; object-fit:contain; display:block; flex-shrink:0; }
+.public-brand > span { display:inline-flex; align-items:center; line-height:1; }
+/* Match the wordmark accent to the lavender used by the supplied logo. */
+.public-brand .brand-accent { color:#B7A8D3 !important; }
 .public-nav,.nav-account { display:flex; align-items:center; gap:30px; font-size:13px; font-weight:600; }
 .public-nav a:hover,.text-link:hover { color:var(--public-rose); }
 .public-page .button { display:inline-flex; align-items:center; justify-content:center; gap:14px; min-height:50px; padding:13px 28px; border-radius:999px; border:1px solid transparent; font-weight:600; font-size:14px; cursor:pointer; transition:background .2s,transform .2s,box-shadow .2s; }

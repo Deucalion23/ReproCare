@@ -110,7 +110,7 @@
     }
 
     .women-brand-title span {
-        color:var(--nav-primary);
+        color:#B7A8D3;
     }
 
     /* ── 3. SECTION 2: Center Primary Links ── */
@@ -458,9 +458,9 @@
              ============================================================ -->
         <div class="women-nav-left flex items-center gap-2.5 flex-shrink-0">
             <a href="{{ route('user.dashboard') }}" class="women-brand-link flex items-center gap-2" title="ReproCare Home">
-                <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo" style="width:36px; height:36px; object-fit:contain; border-radius:10px; background:var(--color-surface); flex-shrink:0;">
+                <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo" style="width:42px; height:42px; object-fit:contain; border-radius:10px; background:var(--color-surface); flex-shrink:0;">
                 <div class="flex items-center gap-2">
-                    <span class="women-brand-title font-extrabold text-slate-800">ReproCare</span>
+                    <span class="women-brand-title font-extrabold text-slate-800">Repro<span>Care</span></span>
                 </div>
             </a>
         </div>
@@ -651,9 +651,9 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
         <div class="d-flex align-items-center gap-2">
-            <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo" style="width:34px; height:34px; object-fit:contain; border-radius:10px; background:var(--color-surface);">
+            <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo" style="width:38px; height:38px; object-fit:contain; border-radius:10px; background:var(--color-surface);">
             <div>
-                <h6 class="offcanvas-title fw-800 text-dark mb-0" id="womenMobileDrawerLabel">ReproCare</h6>
+                <h6 class="offcanvas-title fw-800 text-dark mb-0" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>
