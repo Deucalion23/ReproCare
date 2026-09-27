@@ -223,16 +223,18 @@
         text-decoration:none;
         font-size:0.85rem;
         font-weight:700;
-        color:var(--color-text);
+        color:#000 !important;
         box-shadow:var(--wp-shadow-sm);
         transition:all 0.2s ease;
         white-space:nowrap;
     }
+    .action-pill > span:last-child { color:#000 !important; }
     .action-pill:hover {
         transform:translateY(-2px);
         box-shadow:var(--wp-shadow-md);
-        color:var(--color-text);
+        color:#000 !important;
     }
+    .action-pill:hover > span:last-child { color:#000 !important; }
     .action-pill-icon {
         width:28px;
         height:28px;
@@ -1139,7 +1141,7 @@
                         <span class="fw-800 pregnancy-trim-pct" style="color:var(--color-text); font-size:0.9rem;">Week {{ $weeks }} of 40 ({{ $pct }}%)</span>
                     </div>
                     <div style="height:12px; background:var(--color-surface-soft); border-radius:9999px; overflow:hidden;">
-                        <div style="width:{{ $pct }}%; height:100%; background:linear-gradient(90deg, var(--color-surface-strong) 0%, var(--color-surface-soft) 100%); border-radius:9999px; transition:width 1s ease;"></div>
+                        <div style="width:{{ $pct }}%; height:100%; background:linear-gradient(90deg, var(--color-primary) 0%, #A855F7 52%, var(--color-secondary) 100%); border-radius:9999px; transition:width 1s ease;"></div>
                     </div>
                 </div>
             </div>
