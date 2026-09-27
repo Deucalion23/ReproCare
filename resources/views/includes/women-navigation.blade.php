@@ -244,8 +244,8 @@
 
     /* Active Pill State */
     .women-tab-link.active {
-        background:var(--color-surface-strong) !important;
-        border-color:var(--color-surface-strong) !important;
+        background:#000000 !important;
+        border-color:#000000 !important;
         color:var(--color-on-solid) !important;
         font-weight:700 !important;
         box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent);
@@ -257,8 +257,8 @@
 
     /* Keep the selected tab stable when hovered. */
     .women-tab-link.active:hover {
-        background:var(--color-surface-strong) !important;
-        border-color:var(--color-surface-strong) !important;
+        background:#000000 !important;
+        border-color:#000000 !important;
         color:var(--color-on-solid) !important;
     }
 
@@ -368,8 +368,8 @@
 
     [data-theme="dark"] .women-tab-link.active,
     [data-theme="dark"] .women-tab-link.active:hover {
-        background:#0F172A !important;
-        border-color:#0F172A !important;
+        background:#000000 !important;
+        border-color:#000000 !important;
         color:#FFFFFF !important;
     }
 

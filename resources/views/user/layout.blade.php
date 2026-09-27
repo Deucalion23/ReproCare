@@ -65,7 +65,6 @@
         bottom:7rem;
         left:-245px;
         background:rgb(222 207 239 / .25);
-        box-shadow:0 0 0 42px rgb(222 207 239 / .12);
     }
 
     .women-content-wrap {
@@ -92,7 +91,6 @@
             width:260px;
             height:260px;
             left:-195px;
-            box-shadow:0 0 0 30px rgb(222 207 239 / .12);
         }
 
         .women-content-wrap {
@@ -211,7 +209,7 @@
 
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active {
-        background:#1F2937 !important;
+        background:#000000 !important;
         color:#FFFFFF !important;
     }
 
@@ -222,7 +220,7 @@
 
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover {
-        background:#1F2937 !important;
+        background:#000000 !important;
         color:#FFFFFF !important;
     }
 
