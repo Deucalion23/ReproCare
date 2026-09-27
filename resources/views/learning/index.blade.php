@@ -24,19 +24,25 @@
 
 @section($learningSection)
 
-{{-- Header Banner --}}
-<div class="card mb-4" style="border:none; border-radius:18px; background:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
-    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3 p-4">
-    <div>
-        <h2 class="fw-800 mb-1" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text); letter-spacing:-0.5px; font-size:1.6rem;">
-            Learning Materials
-        </h2>
-        <p class="mb-0" style="font-size:0.9rem; color:var(--color-text); font-weight:600;">
-            Watch, read, and learn — videos, guides, and resources for mothers and health workers.
-        </p>
-    </div>
+{{-- Header Banner (compact — no dead space when no staff actions) --}}
+<div class="card mb-4 learn-hero" style="border:none; border-radius:18px; background:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
+    <div class="card-body learn-hero-body d-flex align-items-center gap-3 p-3 p-md-4">
+        <div class="learn-hero-icon" aria-hidden="true">
+            <i class="bi bi-mortarboard-fill"></i>
+        </div>
+        <div class="flex-grow-1" style="min-width:0;">
+            <h2 class="fw-800 mb-1" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text); letter-spacing:-0.5px; font-size:1.4rem; line-height:1.2;">
+                Learning Materials
+            </h2>
+            <p class="mb-0" style="font-size:0.88rem; color:var(--color-text-muted); font-weight:500; line-height:1.5;">
+                Watch, read, and learn — videos, guides, and resources for mothers and health workers.
+            </p>
+        </div>
+        <span class="learn-hero-count flex-shrink-0" title="Total materials">
+            <i class="bi bi-collection-play-fill"></i> {{ $materials->total() }}
+        </span>
     @if($learningUser?->isMidwife() || $learningUser?->isCho())
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
             <a href="{{ route('midwife.learning.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
                 <i class="bi bi-plus-lg"></i> Add New Video / Material
             </a>
@@ -50,21 +56,21 @@
     </div>
 </div>
 
-{{-- Filter Toolbar --}}
-<div class="card mb-4" style="border:none; border-radius:20px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
-    <div class="card-body p-3">
-        <form method="GET" action="{{ route('learning.index') }}" class="row g-2 align-items-end">
-            <div class="col-md-5">
-                <label class="form-label text-xs fw-800 text-muted mb-1 text-uppercase" style="letter-spacing:0.5px; color:var(--color-text-muted);">Search Topic / Keyword</label>
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text text-muted" style="background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none; border-radius:999px 0 0 999px;"><i class="bi bi-search"></i></span>
-                    <input type="text" name="search" class="form-control form-control-sm" style="background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none; border-radius:0 999px 999px 0;"
+{{-- Filter Toolbar (proper labeled controls + aligned actions) --}}
+<div class="card mb-4 learn-filter-card" style="border:none; border-radius:20px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
+    <div class="card-body p-3 p-md-4">
+        <form method="GET" action="{{ route('learning.index') }}" class="learn-filter-grid">
+            <div class="learn-field learn-field-search">
+                <label for="learnSearch" class="form-label learn-label">Search Topic / Keyword</label>
+                <div class="input-group learn-search-group">
+                    <span class="input-group-text learn-search-icon"><i class="bi bi-search"></i></span>
+                    <input id="learnSearch" type="text" name="search" class="form-control learn-input"
                            placeholder="Search videos, articles, counseling guides..." value="{{ request('search') }}">
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <label class="form-label text-xs fw-800 text-muted mb-1 text-uppercase" style="letter-spacing:0.5px; color:var(--color-text-muted);">Format</label>
-                <select name="type" class="form-select form-select-sm" style="background-color:var(--color-surface-soft); border:none; border-radius:12px;" onchange="this.form.submit()">
+            <div class="learn-field">
+                <label for="learnFormat" class="form-label learn-label">Format</label>
+                <select id="learnFormat" name="type" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Formats</option>
                     <option value="video" {{ $activeFilter === 'video' ? 'selected' : '' }}>🎬 Playable Videos</option>
                     <option value="article" {{ $activeFilter === 'article' ? 'selected' : '' }}>📄 Articles &amp; Guides</option>
@@ -72,9 +78,9 @@
                     <option value="link" {{ $activeFilter === 'link' ? 'selected' : '' }}>🔗 External Links</option>
                 </select>
             </div>
-            <div class="col-6 col-md-3">
-                <label class="form-label text-xs fw-800 text-muted mb-1 text-uppercase" style="letter-spacing:0.5px; color:var(--color-text-muted);">Category</label>
-                <select name="category" class="form-select form-select-sm" style="background-color:var(--color-surface-soft); border:none; border-radius:12px;" onchange="this.form.submit()">
+            <div class="learn-field">
+                <label for="learnCategory" class="form-label learn-label">Category</label>
+                <select id="learnCategory" name="category" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Categories</option>
                     <option value="prenatal-care" {{ $activeCategory === 'prenatal-care' ? 'selected' : '' }}>🤰 Prenatal Care</option>
                     <option value="nutrition" {{ $activeCategory === 'nutrition' ? 'selected' : '' }}>🥗 Nutrition</option>
@@ -83,9 +89,9 @@
                     <option value="postpartum" {{ $activeCategory === 'postpartum' ? 'selected' : '' }}>👶 Postpartum &amp; Newborn</option>
                 </select>
             </div>
-            <div class="col-12 col-md-1 d-flex gap-1">
-                <button type="submit" class="btn btn-sm w-100" style="border:none; border-radius:999px; background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid); font-weight:800;"><i class="bi bi-funnel-fill"></i></button>
-                <a href="{{ route('learning.index') }}" class="btn btn-sm" style="border:none; border-radius:999px; background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);"><i class="bi bi-x"></i></a>
+            <div class="learn-actions">
+                <button type="submit" class="btn learn-btn-apply" title="Apply filters"><i class="bi bi-funnel-fill"></i><span>Filter</span></button>
+                <a href="{{ route('learning.index') }}" class="btn learn-btn-clear" title="Clear all filters"><i class="bi bi-x-lg"></i><span class="visually-hidden">Clear</span></a>
             </div>
         </form>
 
@@ -341,7 +347,7 @@
 
 @push('styles')
 <style>
-    .video-media-card { border:none !important; }
+    .video-media-card { border:none !important; padding:0 !important; }
     .video-media-card:hover {
         transform:translateY(-3px);
         box-shadow:var(--wp-shadow-md) !important;
@@ -355,6 +361,103 @@
         -webkit-line-clamp:2;
         -webkit-box-orient:vertical;
         overflow:hidden;
+    }
+
+    /* ── Compact hero (no dead space) ── */
+    .learn-hero-body { flex-wrap:wrap; }
+    .learn-hero-icon {
+        width:48px; height:48px; border-radius:14px; flex-shrink:0;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.4rem; color:#FFFFFF;
+        background:linear-gradient(135deg, #1E293B, #0F172A);
+        box-shadow:0 8px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent);
+    }
+    .learn-hero-icon i { color:#FFFFFF !important; }
+    .learn-hero-count {
+        display:inline-flex; align-items:center; gap:6px;
+        background:var(--color-surface-soft); color:var(--color-text);
+        border-radius:999px; padding:0.45rem 0.9rem;
+        font-size:0.82rem; font-weight:800; white-space:nowrap;
+    }
+    .learn-hero-count i { color:var(--color-secondary-text); }
+
+    /* ── Appropriate filter layout: labels sit directly above their own control ── */
+    .learn-filter-grid {
+        display:grid;
+        grid-template-columns:minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) auto;
+        gap:0.9rem;
+        align-items:end;
+    }
+    .learn-field { min-width:0; }
+    .learn-label {
+        display:block;
+        font-size:0.72rem !important; font-weight:800 !important;
+        text-transform:uppercase; letter-spacing:0.6px;
+        color:var(--color-text-muted) !important;
+        margin-bottom:0.4rem !important;
+    }
+    .learn-input {
+        min-height:44px;
+        background:var(--color-surface) !important;
+        background-color:var(--color-surface) !important;
+        border:1.5px solid var(--color-border) !important;
+        border-radius:12px !important;
+        font-size:0.88rem !important;
+        color:var(--color-text) !important;
+        box-shadow:none !important;
+    }
+    .learn-input:focus {
+        border-color:var(--color-secondary-text) !important;
+        box-shadow:0 0 0 3px color-mix(in srgb, var(--color-secondary-text) 18%, transparent) !important;
+        outline:none;
+    }
+    .learn-search-group { flex-wrap:nowrap; }
+    .learn-search-group .learn-search-icon {
+        background:var(--color-surface) !important;
+        border:1.5px solid var(--color-border) !important;
+        border-right:none !important;
+        border-radius:12px 0 0 12px !important;
+        color:var(--color-text-muted) !important;
+        min-height:44px;
+        display:flex; align-items:center;
+    }
+    .learn-search-group .learn-input {
+        border-left:none !important;
+        border-radius:0 12px 12px 0 !important;
+    }
+    .learn-actions { display:flex; gap:0.5rem; padding-bottom:1px; }
+    .learn-btn-apply {
+        display:inline-flex; align-items:center; gap:0.45rem;
+        min-height:44px; padding:0 1.2rem;
+        border:none !important; border-radius:999px !important;
+        background:#1E293B !important; background-color:#1E293B !important;
+        color:#FFFFFF !important; font-weight:800; font-size:0.85rem;
+        white-space:nowrap;
+    }
+    .learn-btn-apply :is(i, svg, span) { color:#FFFFFF !important; }
+    .learn-btn-apply:hover { background:#0F172A !important; background-color:#0F172A !important; color:#FFFFFF !important; }
+    .learn-btn-apply:hover :is(i, svg, span) { color:#FFFFFF !important; }
+    .learn-btn-clear {
+        display:inline-flex; align-items:center; justify-content:center;
+        width:44px; height:44px; min-height:44px;
+        border:1.5px solid var(--color-border) !important; border-radius:50% !important;
+        background:var(--color-surface-soft) !important; color:var(--color-text) !important;
+    }
+    .learn-btn-clear:hover { background:var(--color-border) !important; color:var(--color-text) !important; }
+
+    /* Thumbnails must touch card edges (no white inset gap) */
+    .video-media-card > .position-relative.overflow-hidden { border-radius:20px 20px 0 0 !important; margin:0 !important; }
+
+    @media (max-width: 991.98px) {
+        .learn-filter-grid { grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); }
+        .learn-field-search { grid-column:1 / -1; }
+        .learn-actions { grid-column:1 / -1; }
+        .learn-btn-apply { flex:1; justify-content:center; }
+    }
+    @media (max-width: 575.98px) {
+        .learn-filter-grid { grid-template-columns:minmax(0, 1fr); }
+        .learn-hero-icon { width:42px; height:42px; font-size:1.2rem; }
+        .learn-hero-count { width:100%; justify-content:center; }
     }
 </style>
 @endpush

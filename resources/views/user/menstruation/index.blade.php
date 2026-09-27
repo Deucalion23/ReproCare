@@ -51,6 +51,26 @@
     .cycle-right { text-align:center; width:100%; }
     .cycle-right .cycle-hero-sub { margin-left:auto; margin-right:auto; }
 }
+@media (max-width:600px) {
+    .menstruation-page .page-title { font-size:1.3rem; }
+    .menstruation-page .page-subtitle { font-size:0.82rem; }
+    .cycle-hero { padding:1.25rem 1rem; border-radius:20px; margin-bottom:1.25rem; }
+    .cycle-left { min-width:0; width:100%; }
+    .cycle-ring { width:140px; height:140px; }
+    .cycle-ring::before { width:112px; height:112px; }
+    .cycle-ring-inner .day-num { font-size:2rem; }
+    .cycle-ring-inner .day-label { font-size:0.62rem; }
+    .cycle-tabs { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:4px; }
+    .cycle-nav-btn { font-size:0.78rem; padding:0.55rem 0.5rem; white-space:nowrap; min-width:0; }
+    .cycle-hero-title { font-size:1.3rem; overflow-wrap:anywhere; }
+    .cycle-hero-sub { font-size:0.82rem; }
+    .cycle-phase-badge { font-size:0.66rem; max-width:100%; overflow-wrap:anywhere; }
+    .period-record-card { padding:0.85rem; gap:0.65rem !important; flex-wrap:wrap; }
+    .period-date-num { font-size:1.25rem; }
+    .period-range { font-size:0.85rem; overflow-wrap:anywhere; }
+    .period-days-badge { font-size:0.66rem; white-space:nowrap; }
+    .history-card .card-header { flex-wrap:wrap; gap:0.5rem; }
+}
 
 .cycle-phase-badge {
     display:inline-flex;

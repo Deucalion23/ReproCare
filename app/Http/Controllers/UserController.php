@@ -500,16 +500,31 @@ class UserController extends Controller
             ->orderBy('date', 'desc')
             ->get();
         
-        // Generate PDF
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('user.menstruation.report', compact(
+        // Render with TCPDF directly. The old Barryvdh DomPDF facade is not
+        // installed and its current release does not support Laravel 12.
+        $html = view('user.menstruation.report', compact(
             'user',
             'records',
             'averageCycle',
             'averagePeriod',
             'dailyData'
-        ));
-        
-        return $pdf->download('menstrual-cycle-report-' . now()->format('Y-m-d') . '.pdf');
+        ))->render();
+
+        $filename = 'menstrual-cycle-report-' . now()->format('Y-m-d') . '.pdf';
+        $pdf = new \TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
+        $pdf->SetCreator(config('app.name'));
+        $pdf->SetTitle('Menstrual Cycle Report');
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+        $pdf->SetMargins(12, 12, 12);
+        $pdf->SetAutoPageBreak(true, 12);
+        $pdf->AddPage();
+        $pdf->writeHTML($html, true, false, true, false, '');
+
+        return response($pdf->Output($filename, 'S'), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
     }
 
     // ============================================
