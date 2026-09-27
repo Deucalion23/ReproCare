@@ -126,7 +126,9 @@
     .week-ring-wrap, .week-ring-svg { width:140px; height:140px; }
     .week-num { font-size:2.1rem; }
     .preg-hero-body { width:100%; }
-    .preg-pill-row { justify-content:center; }
+    .preg-pill-row { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; justify-content:stretch; }
+    .preg-pill { justify-content:center; text-align:center; font-size:0.74rem; padding:0.42rem 0.6rem; white-space:nowrap; min-width:0; overflow:hidden; text-overflow:ellipsis; }
+    .preg-pill-row .preg-pill:last-child:nth-child(odd) { grid-column:1 / -1; }
     .preg-info-grid { grid-template-columns:repeat(2,1fr); gap:0.75rem; }
     .preg-info-card { padding:1.1rem 0.75rem; border-radius:16px; }
     .preg-info-val { font-size:0.98rem; }
