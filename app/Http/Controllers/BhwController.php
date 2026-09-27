@@ -62,11 +62,14 @@ class BhwController extends Controller
                 ->count(),
         ];
 
-        // Only select needed columns for better performance
+        // Only select needed columns for better performance.
+        // Same barangay scope as the counts above: the BHW sees upcoming
+        // checkups for her own area only.
         $upcomingCheckups = Checkup::with(['woman:id,first_name,middle_initial,last_name', 'midwife:id,first_name,middle_initial,last_name'])
             ->select('id', 'user_id', 'midwife_id', 'scheduled_date', 'status', 'purpose')
             ->scheduled()
             ->upcoming()
+            ->whereHas('woman', function ($q) use ($inArea) { $inArea($q); })
             ->orderBy('scheduled_date', 'asc')
             ->limit(10)
             ->get();
