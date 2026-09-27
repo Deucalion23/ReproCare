@@ -402,10 +402,13 @@ class MessageController extends Controller
             return collect([]);
         }
 
+        $isPatient = $currentUser->role === 'user';
+
         $contacts = User::query()
-            ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status'])
+            ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status', 'barangay', 'assigned_barangay'])
             ->where('id', '!=', $currentUser->id)
-            ->whereIn('role', ['user', 'midwife', 'bhw', 'bhw_president'])
+            // Patients only see BHW / BHW President staff; staff keep the full directory.
+            ->whereIn('role', $isPatient ? ['bhw', 'bhw_president'] : ['user', 'midwife', 'bhw', 'bhw_president'])
             ->where(function ($query) {
                 $query->where('role', '!=', 'user')
                     ->orWhere(function ($userQuery) {
@@ -482,7 +485,14 @@ class MessageController extends Controller
         }
 
         if ($sender->role === 'user') {
-            return in_array($receiver->role, ['midwife', 'bhw', 'bhw_president'], true);
+            // Patients may only message the BHW / BHW President of their own
+            // barangay (same jurisdiction as the rest of the BHW workflows).
+            if (!in_array($receiver->role, ['bhw', 'bhw_president'], true)) {
+                return false;
+            }
+
+            return $this->sharesJurisdiction($sender->barangay ?? null, $receiver->barangay ?? null)
+                || $this->sharesJurisdiction($sender->barangay ?? null, $receiver->assigned_barangay ?? null);
         }
 
         return in_array($sender->role, ['midwife', 'bhw', 'bhw_president'], true)
@@ -492,6 +502,22 @@ class MessageController extends Controller
     private function normalizeUserRoleForMessaging(string $role): string
     {
         return $role === 'user' ? 'woman' : $role;
+    }
+
+    /**
+     * Same barangay-jurisdiction check used across BHW workflows: normalized
+     * names overlap when equal or one contains the other (e.g. "burgos" vs
+     * "barangay burgos padlan"), so legacy spellings still resolve.
+     */
+    private function sharesJurisdiction(?string $patientBarangay, ?string $staffBarangay): bool
+    {
+        $a = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($patientBarangay);
+        $b = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($staffBarangay);
+        if ($a === '' || $b === '') {
+            return false;
+        }
+
+        return $a === $b || str_contains($a, $b) || str_contains($b, $a);
     }
 
     private function formatRoleLabel(string $role): string
