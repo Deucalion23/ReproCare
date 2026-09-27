@@ -1141,7 +1141,7 @@
                         <span class="fw-800 pregnancy-trim-pct" style="color:var(--color-text); font-size:0.9rem;">Week {{ $weeks }} of 40 ({{ $pct }}%)</span>
                     </div>
                     <div style="height:12px; background:var(--color-surface-soft); border-radius:9999px; overflow:hidden;">
-                        <div style="width:{{ $pct }}%; height:100%; background:linear-gradient(90deg, var(--color-primary) 0%, #A855F7 52%, var(--color-secondary) 100%); border-radius:9999px; transition:width 1s ease;"></div>
+                        <div style="width:{{ $pct }}%; height:100%; background:linear-gradient(90deg, var(--color-primary) 0%, #A78BFA 55%, #FFFFFF 100%); border-radius:9999px; transition:width 1s ease;"></div>
                     </div>
                 </div>
             </div>
