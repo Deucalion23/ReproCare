@@ -330,10 +330,7 @@
 
     /* Care Records dropdown items — same gray as the top navigation buttons. */
     .women-nav-dropdown-menu .women-dropdown-item,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item,
-    .women-nav-dropdown-menu .women-dropdown-item.active,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:active {
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item {
         display:flex !important;
         align-items:center !important;
         gap:9px !important;
@@ -352,32 +349,90 @@
     }
 
     .women-nav-dropdown-menu .women-dropdown-item i,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item i,
-    .women-nav-dropdown-menu .women-dropdown-item.active i,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active i {
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item i {
         font-size:15px !important;
         color:var(--nav-slate-500) !important;
     }
 
+    /* Hover — same lavender + purple text as the top navigation buttons. */
     .women-nav-dropdown-menu .women-dropdown-item:hover,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
     .women-nav-dropdown-menu .women-dropdown-item:focus,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus,
-    .women-nav-dropdown-menu .women-dropdown-item.active:hover,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover {
-        background:var(--nav-slate-100) !important;
-        background-color:var(--nav-slate-100) !important;
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus {
+        background:var(--nav-hover-bg) !important;
+        background-color:var(--nav-hover-bg) !important;
         border:none !important;
         border-left:none !important;
         box-shadow:none !important;
-        color:var(--nav-slate-600) !important;
+        color:var(--nav-hover-text) !important;
     }
 
     .women-nav-dropdown-menu .women-dropdown-item:hover i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
     .women-nav-dropdown-menu .women-dropdown-item:focus i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus i {
-        color:var(--nav-slate-500) !important;
+        color:var(--nav-hover-text) !important;
+    }
+
+    /* Selected page — same dark pill + white text as the top navigation. */
+    .women-nav-dropdown-menu .women-dropdown-item.active,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:active,
+    .women-nav-dropdown-menu .women-dropdown-item.active:hover,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:none !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+
+    .women-nav-dropdown-menu .women-dropdown-item.active i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active i,
+    .women-nav-dropdown-menu .women-dropdown-item.active:hover i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover i {
+        color:var(--color-on-solid) !important;
+    }
+
+    /* Selected dropdown page MUST match the dark navigation pill — not the
+       global theme's generic lavender `.dropdown-item.active` tint
+       (theme.css `:root[data-theme][data-bs-theme] body :is(...)` outranks a
+       plain 4-class portal selector, so this override carries the same
+       :root prefix plus the `.women-navbar` ancestor to win it back).
+       Covers hover/focus/active states so the dark pill never flashes purple. */
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active,
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent) !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active),
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active),
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active) {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent) !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active) :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active) :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active :is(span, i, svg) {
+        color:var(--color-on-solid) !important;
     }
 
     /* Dark mode needs its own navigation states: the shared `surface-strong`
