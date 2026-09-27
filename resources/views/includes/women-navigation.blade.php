@@ -101,7 +101,7 @@
         max-width:none;
         object-fit:contain;
         display:block;
-        transform:translateY(-8px);
+        transform:translateY(-10px);
     }
 
     .women-brand-icon {
@@ -670,7 +670,7 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
         <div class="d-flex align-items-center" style="gap:10px;">
-            <span aria-hidden="true" style="width:38px; height:38px; display:grid; place-items:center; overflow:visible; flex:0 0 38px;"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:52px; height:52px; max-width:none; object-fit:contain; display:block; transform:translateY(-8px);"></span>
+            <span aria-hidden="true" style="width:38px; height:38px; display:grid; place-items:center; overflow:visible; flex:0 0 38px;"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:52px; height:52px; max-width:none; object-fit:contain; display:block; transform:translateY(-10px);"></span>
             <div>
                 <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:19px;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
