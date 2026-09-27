@@ -71,8 +71,7 @@
         <div class="care-gallery-copy">
             <div class="eyebrow">Care in your community</div>
             <h2 id="gallery-title">Real support, for every part of your journey.</h2>
-            <p>From checkups and family planning to pregnancy support, ReproCare keeps you connected to the local health workers who care for you.</p>
-            <a class="gallery-link" href="{{ route('register') }}">Join your care network <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+            <p>From checkups to pregnancy support, ReproCare keeps you connected to the local health workers who care for you.</p>
         </div>
         <div class="care-gallery-grid">
             <figure class="care-gallery-photo care-gallery-photo-large">
