@@ -51,20 +51,30 @@
     .women-navbar {
         width:100% !important;
         min-height:var(--nav-bar-min-h) !important;
-        background:#F4F3F8 !important;
+        background:#F1F3F5 !important;
+        background-color:#F1F3F5 !important;
         border-bottom:1px solid var(--nav-border) !important;
-        position:sticky;
+        position:fixed;
         top:0;
+        left:0;
+        right:0;
         z-index:1025;
         display:flex;
         align-items:center;
         box-shadow:0 1px 2px 0 color-mix(in srgb, rgb(var(--color-shadow-rgb)) 3%, transparent);
     }
 
-    /* Preserve the portal's dark-mode surface while the light theme follows the
-       pale lilac-gray navigation background from the supplied reference. */
+    /* Preserve the portal's dark-mode surface while the light theme uses a
+       soft charcoal-gray navigation background. */
+    :root[data-theme="light"][data-bs-theme] body .women-navbar,
+    body .women-navbar {
+        background:#F1F3F5 !important;
+        background-color:#F1F3F5 !important;
+    }
+
     [data-theme="dark"] .women-navbar {
         background:var(--color-surface) !important;
+        background-color:var(--color-surface) !important;
     }
 
     .women-nav-container {
@@ -221,6 +231,17 @@
         color:var(--nav-primary) !important;
     }
 
+    /* A restrained charcoal hover is visible against the soft-gray header. */
+    html:not([data-theme="dark"]) .women-tab-link:not(.active):hover {
+        background:#D1D5DB !important;
+        border-color:transparent !important;
+        color:#1F2937 !important;
+    }
+
+    html:not([data-theme="dark"]) .women-tab-link:not(.active):hover i.nav-icon {
+        color:#334155 !important;
+    }
+
     /* Active Pill State */
     .women-tab-link.active {
         background:var(--color-surface-strong) !important;
@@ -303,6 +324,15 @@
         background:var(--nav-slate-100) !important;
         color:var(--nav-slate-900) !important;
         font-weight:600;
+    }
+
+    html:not([data-theme="dark"]) .women-dropdown-item:hover {
+        background:#D1D5DB !important;
+        color:#1F2937 !important;
+    }
+
+    html:not([data-theme="dark"]) .women-dropdown-item:hover i {
+        color:#334155 !important;
     }
 
     /* Keep both Care Records menu entries in the same dark slate used by the navigation. */

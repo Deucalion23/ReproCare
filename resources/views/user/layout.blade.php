@@ -22,6 +22,7 @@
         background:var(--color-surface);
         min-height:calc(100vh - 64px);
         width:100%;
+        margin-top:72px;
         padding-bottom:3.5rem;
         position:relative;
         isolation:isolate;
@@ -29,7 +30,14 @@
     }
 
     html:not([data-theme="dark"]) .women-shell {
-        background:#FFFFFF;
+        background-color:#FFFFFF;
+        background-image:
+            radial-gradient(circle at 8% 13%, rgb(232 218 247 / .45) 0 52px, transparent 53px),
+            radial-gradient(circle at 24% 66%, rgb(242 231 252 / .6) 0 34px, transparent 35px),
+            radial-gradient(circle at 78% 19%, rgb(235 220 249 / .48) 0 26px, transparent 27px),
+            radial-gradient(circle at 91% 62%, rgb(243 232 252 / .65) 0 48px, transparent 49px),
+            radial-gradient(circle at 61% 89%, rgb(236 224 249 / .42) 0 30px, transparent 31px);
+        background-repeat:no-repeat;
     }
 
     .women-shell::before,
