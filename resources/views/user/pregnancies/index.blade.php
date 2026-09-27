@@ -247,7 +247,7 @@
                     @if($activePreg->edd) Estimated due date: <strong>{{ $activePreg->edd->format('F j, Y') }}</strong> @endif
                 </div>
                 <div class="preg-pill-row">
-                    <span class="preg-pill preg-pill-trim"><i class="bi bi-calendar3"></i> Trimester {{ $trimester }}</span>
+                    <span class="preg-pill preg-pill-trim"><i class="bi bi-calendar3"></i> {{ $trimester === 1 ? '1st' : ($trimester === 2 ? '2nd' : '3rd') }} Trimester</span>
                     @if($activePreg->gravida) <span class="preg-pill preg-pill-grav"><i class="bi bi-person-heart"></i> Gravida {{ $activePreg->gravida }}</span> @endif
                     @if($activePreg->para !== null) <span class="preg-pill preg-pill-para"><i class="bi bi-star"></i> Para {{ $activePreg->para }}</span> @endif
                     @if($activePreg->risk_level)
@@ -264,6 +264,7 @@
         @php
             $state = $trimester > $t ? 'completed' : ($trimester === $t ? 'active' : 'upcoming');
             $statusLabel = $state === 'completed' ? 'Completed' : ($state === 'active' ? 'Current' : 'Upcoming');
+            $ordLabel = $t === 1 ? '1st' : ($t === 2 ? '2nd' : '3rd');
         @endphp
         <div class="trimester-card {{ $state }}">
             @if($state === 'completed') <div class="trimester-badge"><i class="bi bi-check-lg"></i></div>
@@ -278,7 +279,7 @@
                 <div class="trimester-icon"><i class="bi bi-clock-fill"></i></div>
             @endif
             <div class="trimester-copy">
-                <div class="trimester-num">Trimester {{ $t }}</div>
+                <div class="trimester-num">{{ $ordLabel }} Trimester</div>
                 <div class="trimester-weeks">{{ $trimesterWeeks[(string)$t] }}</div>
                 <span class="trimester-status">{{ $statusLabel }}</span>
             </div>
@@ -332,7 +333,7 @@
     <div class="preg-tip-card">
         <div class="preg-tip-icon"><i class="bi bi-lightbulb-fill"></i></div>
         <div>
-            <div class="preg-tip-title">Tip for Trimester {{ $trimester }}</div>
+            <div class="preg-tip-title">Tip for {{ $trimester === 1 ? '1st' : ($trimester === 2 ? '2nd' : '3rd') }} Trimester</div>
             <p class="preg-tip-text">{{ $currentTip }}</p>
         </div>
     </div>
