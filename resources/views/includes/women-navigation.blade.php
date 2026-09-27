@@ -330,10 +330,7 @@
 
     /* Care Records dropdown items — same gray as the top navigation buttons. */
     .women-nav-dropdown-menu .women-dropdown-item,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item,
-    .women-nav-dropdown-menu .women-dropdown-item.active,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:active {
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item {
         display:flex !important;
         align-items:center !important;
         gap:9px !important;
@@ -352,32 +349,51 @@
     }
 
     .women-nav-dropdown-menu .women-dropdown-item i,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item i,
-    .women-nav-dropdown-menu .women-dropdown-item.active i,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active i {
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item i {
         font-size:15px !important;
         color:var(--nav-slate-500) !important;
     }
 
+    /* Hover — same lavender + purple text as the top navigation buttons. */
     .women-nav-dropdown-menu .women-dropdown-item:hover,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
     .women-nav-dropdown-menu .women-dropdown-item:focus,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus,
-    .women-nav-dropdown-menu .women-dropdown-item.active:hover,
-    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover {
-        background:var(--nav-slate-100) !important;
-        background-color:var(--nav-slate-100) !important;
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus {
+        background:var(--nav-hover-bg) !important;
+        background-color:var(--nav-hover-bg) !important;
         border:none !important;
         border-left:none !important;
         box-shadow:none !important;
-        color:var(--nav-slate-600) !important;
+        color:var(--nav-hover-text) !important;
     }
 
     .women-nav-dropdown-menu .women-dropdown-item:hover i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
     .women-nav-dropdown-menu .women-dropdown-item:focus i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus i {
-        color:var(--nav-slate-500) !important;
+        color:var(--nav-hover-text) !important;
+    }
+
+    /* Selected page — same dark pill + white text as the top navigation. */
+    .women-nav-dropdown-menu .women-dropdown-item.active,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:active,
+    .women-nav-dropdown-menu .women-dropdown-item.active:hover,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:none !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+
+    .women-nav-dropdown-menu .women-dropdown-item.active i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active i,
+    .women-nav-dropdown-menu .women-dropdown-item.active:hover i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover i {
+        color:var(--color-on-solid) !important;
     }
 
     /* Dark mode needs its own navigation states: the shared `surface-strong`
