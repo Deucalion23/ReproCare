@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="hero-visual">
-            <img class="hero-photo" src="{{ asset('images/community-maternal-health-education.jpg') }}" alt="Pregnant women attending a community maternal health education session" width="630" height="420" fetchpriority="high">
+            <img class="hero-photo" src="{{ asset('images/maternal/landing-maternal-health.jpg') }}" alt="Woman receiving family-planning support from a community maternal health worker" width="630" height="420" fetchpriority="high">
             <div class="photo-label"><i class="bi bi-geo-alt" aria-hidden="true"></i> Care, closer to home</div>
             <div class="care-note">
                 <div><strong>Your journey. Our shared care.</strong><small>Connected to your community health team</small></div>

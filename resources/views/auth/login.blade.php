@@ -63,7 +63,7 @@
         <h1>Care for the ones <span>you love.</span></h1>
         <div class="fb-collage" aria-hidden="true">
             <div class="fb-float fb-f1"><span class="fb-ico"><i class="bi bi-clipboard2-pulse"></i></span> Checkups on track</div>
-            <div class="fb-shot fb-shot-a"><img src="{{ asset('images/maternal-care-bright.jpg') }}" alt=""></div>
+            <div class="fb-shot fb-shot-a"><img src="{{ asset('images/maternal/login-maternal-care.jpeg') }}" alt="Community health worker providing care during a maternal health visit"></div>
             <div class="fb-float fb-f2"><span class="fb-ico"><i class="bi bi-alarm"></i></span> Reminders that care</div>
             <div class="fb-float fb-f3"><span class="fb-ico"><i class="bi bi-calendar-heart"></i></span> Period tracking</div>
             <div class="fb-float fb-f4"><span class="fb-ico"><i class="bi bi-journal-medical"></i></span> Health learning</div>
