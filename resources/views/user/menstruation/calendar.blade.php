@@ -27,6 +27,16 @@
         background:var(--color-primary-subtle);
         transform:translateX(-2px);
     }
+    .cycle-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
+    @media (max-width:600px) {
+        .cycle-top-card { padding:1rem; border-radius:18px; margin-bottom:1.15rem; flex-direction:column; align-items:stretch !important; }
+        .cycle-top-card .page-title { font-size:1.05rem; }
+        .cycle-top-card .page-subtitle { font-size:0.76rem; }
+        .cycle-top-card .btn { width:100%; justify-content:center; font-size:0.78rem; }
+        .cal-month-title { font-size:1rem; }
+        .cycle-stat-pill .stat-val { font-size:1.2rem; }
+        .cycle-stat-pill .stat-lbl { font-size:0.62rem; }
+    }
     /* ── Calendar Wrapper ── */
     .cal-page-wrap {
         max-width:900px;
@@ -341,8 +351,8 @@
         <i class="bi bi-arrow-left"></i> Back to Menstrual Cycle
     </a>
 
-    {{-- ── Header ── --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 fade-in-card">
+    {{-- ── Header Top Card ── --}}
+    <div class="cycle-top-card d-flex justify-content-between align-items-center flex-wrap gap-3 fade-in-card">
         <div>
             <h1 class="page-title">Cycle Calendar
             </h1>
