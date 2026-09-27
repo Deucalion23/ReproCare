@@ -581,10 +581,10 @@
         }
         .women-nav-left { margin-right:0; gap:0.35rem; }
         .women-brand-link { gap:8px; }
-        .women-brand-mark, .women-brand-mark img { width:44px !important; height:44px !important; flex-basis:44px; }
-        .women-brand-mark { flex:0 0 44px; transform:translateY(-1.5px) !important; }
+        .women-brand-mark, .women-brand-mark img { width:54px !important; height:54px !important; flex-basis:54px; }
+        .women-brand-mark { flex:0 0 54px; transform:translateY(-1.5px) !important; }
         .women-brand-title {
-            font-size:1.3rem;
+            font-size:1.5rem;
         }
         .women-nav-right { gap:0.45rem; margin-left:auto !important; }
         /* Hide the round Care Support button on phones — it lives in the drawer. */

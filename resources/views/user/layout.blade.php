@@ -119,9 +119,11 @@
         padding:0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
     }
 
-    html:not([data-theme="dark"]) .women-bottom-dock {
-        background:#F1F3F5;
-        border-top-color:#D1D5DB;
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock,
+    :root:not([data-theme="dark"]) body .women-bottom-dock {
+        background:#F1F3F5 !important;
+        background-color:#F1F3F5 !important;
+        border-top-color:#D1D5DB !important;
     }
 
     .women-dock-items {
@@ -184,6 +186,18 @@
         color:#1F2937;
     }
 
+    /* Match the desktop tab hover colors exactly, including the icon shade. */
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link:not(.active):hover,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link:not(.active):hover {
+        background:#D1D5DB !important;
+        color:#1F2937 !important;
+    }
+
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link:not(.active):hover i,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link:not(.active):hover i {
+        color:#334155 !important;
+    }
+
     .women-dock-link.active {
         color:var(--wp-primary);
         font-weight:800;
@@ -193,6 +207,23 @@
     .women-dock-link.active i {
         color:var(--wp-primary);
         transform:scale(1.12);
+    }
+
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active {
+        background:#1F2937 !important;
+        color:#FFFFFF !important;
+    }
+
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active i,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active i {
+        color:#FFFFFF !important;
+    }
+
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover {
+        background:#1F2937 !important;
+        color:#FFFFFF !important;
     }
 
     .women-dock-unread {
