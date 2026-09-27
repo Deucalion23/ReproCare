@@ -181,14 +181,15 @@
 .period-days-badge { background:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; border-radius:999px; padding:0.3em 0.85em; font-size:0.72rem; font-weight:800; }
 .period-del-btn { border:none; background:var(--color-surface-soft); color:var(--color-text-muted); border-radius:50%; width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; font-size:0.8rem; transition:all 0.2s ease; }
 .period-del-btn:hover { background:var(--color-danger-soft); color:var(--color-danger-text); }
+.cycle-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
 </style>
 @endpush
 
 @section('user-content')
 <div class="py-2 menstruation-page">
 
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Page Header Top Card -->
+    <div class="cycle-top-card d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h1 class="page-title">Menstrual Cycle</h1>
             <p class="page-subtitle">Track, predict, and understand your cycle</p>

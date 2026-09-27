@@ -26,6 +26,12 @@
         background:var(--color-primary-subtle);
         transform:translateX(-2px);
     }
+    .cycle-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
+    @media (max-width:600px) {
+        .cycle-top-card { padding:1.1rem 1.15rem; border-radius:18px; margin-bottom:1.15rem; flex-direction:column; align-items:stretch !important; }
+        .cycle-top-card .d-flex.gap-2 { flex-wrap:wrap; }
+        .cycle-top-card .btn { flex:1 1 auto; justify-content:center; }
+    }
 </style>
 @endpush
 
@@ -39,8 +45,8 @@
         <i class="bi bi-arrow-left"></i> Back to Menstrual Cycle
     </a>
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <!-- Header Top Card -->
+    <div class="cycle-top-card d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h1 class="page-title">Cycle Statistics</h1>
             <p class="page-subtitle">Insights from your complete cycle history</p>
