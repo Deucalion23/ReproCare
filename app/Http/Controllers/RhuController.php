@@ -1511,7 +1511,14 @@ class RhuController extends Controller
      */
     public function reactivatePatient($id)
     {
-        $woman = User::where('role', 'user')->where('status', 'inactive')->findOrFail($id);
+        // Tolerant lookup: find by role+id first so a double-submit,
+        // refresh, or status drift returns a friendly message instead of a 404 page.
+        $woman = User::where('role', 'user')->findOrFail($id);
+
+        if ($woman->status === 'approved') {
+            return redirect()->route('rhu.pending-patients')
+                ->with('success', $woman->name . ' is already active.');
+        }
         $woman->update([
             'status' => 'approved',
             'rejection_reason' => null,
