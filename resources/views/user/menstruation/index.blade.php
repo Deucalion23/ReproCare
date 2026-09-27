@@ -185,9 +185,6 @@
             <i class="bi bi-heart-pulse-fill me-2"></i>
             <strong>Period tracking is paused during pregnancy.</strong>
             If you are experiencing bleeding or your pregnancy has ended, contact your healthcare provider so your pregnancy record can be reviewed and updated.
-            @if($activePregnancy)
-                <a href="{{ route('user.pregnancies.show', $activePregnancy) }}" class="alert-link ms-1">View pregnancy record</a>
-            @endif
         </div>
     @endif
 
