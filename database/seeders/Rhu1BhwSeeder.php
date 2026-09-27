@@ -13,14 +13,13 @@ use Illuminate\Support\Facades\Hash;
  *
  * Fully idempotent (updateOrCreate) so it is safe to run on every production
  * boot via DatabaseSeeder. Uses NO faker (unavailable in production builds).
- * NOTE: shared password here is intentionally password12345 per request
- * (distinct from the password123 used by other demo accounts).
+ * Shared password is password123, same as all other demo accounts.
  */
 class Rhu1BhwSeeder extends Seeder
 {
     public function run(): void
     {
-        $password = Hash::make('password12345');
+        $password = Hash::make('password123');
 
         $bhws = [
             // first, middle, last, dob, contact, barangay
@@ -70,6 +69,6 @@ class Rhu1BhwSeeder extends Seeder
             );
         }
 
-        $this->command?->info('Seeded 15 RHU 1 BHWs, one per barangay (shared password: password12345).');
+        $this->command?->info('Seeded 15 RHU 1 BHWs, one per barangay (shared password: password123).');
     }
 }
