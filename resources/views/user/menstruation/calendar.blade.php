@@ -29,6 +29,9 @@
     }
     .cycle-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
     @media (max-width:600px) {
+        /* Top card goes above the back button on phones */
+        .cal-page-wrap { display:flex; flex-direction:column; }
+        .cal-page-wrap > .cycle-top-card { order:-1; }
         .cycle-top-card { padding:1rem; border-radius:18px; margin-bottom:1.15rem; flex-direction:column; align-items:stretch !important; }
         .cycle-top-card .page-title { font-size:1.05rem; }
         .cycle-top-card .page-subtitle { font-size:0.76rem; }

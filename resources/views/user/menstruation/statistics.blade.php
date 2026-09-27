@@ -28,6 +28,10 @@
     }
     .cycle-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
     @media (max-width:600px) {
+        /* Top card goes above the back button on phones */
+        .py-2 { display:flex; flex-direction:column; }
+        .py-2 > .cycle-top-card { order:-1; }
+        .py-2 > .row { width:100%; margin-left:0; margin-right:0; }
         .cycle-top-card { padding:1rem; border-radius:18px; margin-bottom:1.15rem; flex-direction:column; align-items:stretch !important; }
         .cycle-top-card .page-title { font-size:1.05rem; }
         .cycle-top-card .page-subtitle { font-size:0.76rem; }
