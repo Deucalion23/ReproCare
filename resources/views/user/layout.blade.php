@@ -198,10 +198,11 @@
         color:#334155 !important;
     }
 
-    /* Selected dock tab = same dark pill as desktop, no left bar */
+    /* Selected dock tab = same dark pill as desktop, no left bar (same
+       font-weight as inactive so dock items never shift position) */
     .women-dock-link.active {
         color:#FFFFFF;
-        font-weight:800;
+        font-weight:600;
         background:var(--color-surface-strong);
         background-color:var(--color-surface-strong);
         border-color:transparent;

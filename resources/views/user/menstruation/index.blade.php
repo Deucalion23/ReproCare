@@ -152,7 +152,15 @@
 .cycle-nav-dark:hover, .cycle-nav-dark:active, .cycle-nav-dark:focus-visible, .cycle-nav-dark:visited { background:#0F172A !important; background-color:#0F172A !important; color:#FFFFFF !important; transform:translateY(-1px); }
 .cycle-nav-dark:hover :is(span, i, svg, a), .cycle-nav-dark:active :is(span, i, svg, a), .cycle-nav-dark:focus-visible :is(span, i, svg, a), .cycle-nav-dark:visited :is(span, i, svg, a) { color:#FFFFFF !important; }
 .cycle-nav-soft { background:#F1F5F9; color:#743AFF; }
-.cycle-nav-soft:hover { background:#E8EEF5; color:#6431DE; transform:translateY(-1px); }
+.cycle-nav-soft i { color:#743AFF; }
+.cycle-nav-soft:hover, .cycle-nav-soft:focus-visible {
+    background:#DCC9EE !important;
+    background-color:#DCC9EE !important;
+    color:#74499E !important;
+    transform:translateY(-1px);
+    box-shadow:0 8px 18px rgb(var(--color-shadow-rgb) / .14);
+}
+.cycle-nav-soft:hover i, .cycle-nav-soft:focus-visible i { color:#74499E !important; }
 
 .history-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; box-shadow:var(--wp-shadow-sm); overflow:hidden; }
 .history-count { background:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; font-size:0.72rem; font-weight:800; padding:0.35em 0.9em; border-radius:999px; }

@@ -250,12 +250,12 @@
         color:#334155 !important;
     }
 
-    /* Active Pill State */
+    /* Active Pill State (same font-weight as inactive so tabs never shift position) */
     .women-tab-link.active {
         background:var(--color-surface-strong) !important;
         border-color:var(--color-surface-strong) !important;
         color:var(--color-on-solid) !important;
-        font-weight:700 !important;
+        font-weight:600 !important;
         box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent);
     }
 
@@ -354,24 +354,57 @@
         color:var(--nav-slate-500) !important;
     }
 
-    /* Hover — same lavender + purple text as the top navigation buttons. */
+    /* Hover/focus — mirrors the top navigation tab hover exactly:
+       light mode = #D1D5DB gray + #1F2937 text (+#334155 icon).
+       (Boosted duplicates below beat theme.css generic
+       `.dropdown-item:hover` lavender.) */
     .women-nav-dropdown-menu .women-dropdown-item:hover,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
     .women-nav-dropdown-menu .women-dropdown-item:focus,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus {
-        background:var(--nav-hover-bg) !important;
-        background-color:var(--nav-hover-bg) !important;
+        background:#D1D5DB !important;
+        background-color:#D1D5DB !important;
         border:none !important;
         border-left:none !important;
         box-shadow:none !important;
-        color:var(--nav-hover-text) !important;
+        color:#1F2937 !important;
+        font-weight:600 !important;
     }
 
     .women-nav-dropdown-menu .women-dropdown-item:hover i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
     .women-nav-dropdown-menu .women-dropdown-item:focus i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus i {
-        color:var(--nav-hover-text) !important;
+        color:#334155 !important;
+    }
+
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:focus,
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover {
+        background:#D1D5DB !important;
+        background-color:#D1D5DB !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:none !important;
+        color:#1F2937 !important;
+        font-weight:600 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:focus :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover :is(span, i, svg) {
+        color:#1F2937 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover i,
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover i {
+        color:#334155 !important;
     }
 
     /* Selected page — same dark pill + white text as the top navigation. */
@@ -460,15 +493,28 @@
         color:#FFFFFF !important;
     }
 
-    [data-theme="dark"] .women-dropdown-item:hover,
-    [data-theme="dark"] .women-dropdown-item.active {
+    /* Dark mode: hover mirrors the dark tab hover; selected stays the
+       near-black pill (same as the dark active tab). */
+    [data-theme="dark"] .women-dropdown-item:hover {
         background:var(--color-surface-soft) !important;
+        background-color:var(--color-surface-soft) !important;
+        color:var(--color-text) !important;
+        font-weight:600 !important;
+    }
+
+    [data-theme="dark"] .women-dropdown-item:hover i {
         color:var(--color-text) !important;
     }
 
-    [data-theme="dark"] .women-dropdown-item:hover i,
+    [data-theme="dark"] .women-dropdown-item.active {
+        background:#0F172A !important;
+        background-color:#0F172A !important;
+        color:#FFFFFF !important;
+        font-weight:700 !important;
+    }
+
     [data-theme="dark"] .women-dropdown-item.active i {
-        color:var(--color-text) !important;
+        color:#FFFFFF !important;
     }
 
     /* ── 4. SECTION 3: Right Actions Container ── */
@@ -981,3 +1027,53 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    // Keep the pressed nav button highlighted through the page load and
+    // prefetch destinations so taps feel instant and the bar never "jumps".
+    var SELECTOR = '.women-navbar a.women-tab-link[href], .women-navbar a.women-dropdown-item[href], .women-bottom-dock a.women-dock-link[href], #womenMobileDrawer a[href]';
+    var prefetched = {};
+
+    function prefetch(url) {
+        if (!url || prefetched[url] || url.charAt(0) === '#' || url.indexOf('javascript:') === 0) return;
+        try {
+            var a = document.createElement('a');
+            a.href = url;
+            if (a.origin !== window.location.origin) return;
+            prefetched[url] = true;
+            var link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = a.href;
+            document.head.appendChild(link);
+        } catch (e) { /* no-op */ }
+    }
+
+    document.addEventListener('mouseover', function (e) {
+        var link = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (link) prefetch(link.getAttribute('href'));
+    }, { passive: true });
+
+    document.addEventListener('touchstart', function (e) {
+        var link = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (link) prefetch(link.getAttribute('href'));
+    }, { passive: true });
+
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (!link || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        var scope = link.closest('.women-navbar, .women-bottom-dock, #womenMobileDrawer');
+        if (scope) {
+            scope.querySelectorAll('.active').forEach(function (el) { el.classList.remove('active'); });
+            link.classList.add('active');
+            // A Care Records dropdown pick also keeps its parent toggle lit.
+            var dropdown = link.closest('.dropdown');
+            if (dropdown) {
+                var toggle = dropdown.querySelector('.women-tab-link');
+                if (toggle) toggle.classList.add('active');
+            }
+        }
+        prefetch(link.getAttribute('href'));
+    });
+})();
+</script>
