@@ -8,15 +8,15 @@
 .pregnancy-page { padding:0; text-size-adjust:100%; -webkit-text-size-adjust:100%; }
 .women-shell { background-color:var(--color-surface) !important; }
 
-.pregnancy-page .page-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.75rem, 1.45rem + 1.5vw, 2.05rem); font-weight:800; color:var(--color-text); letter-spacing:-0.02em; margin-bottom:0.2rem; line-height:1.2; text-wrap:balance; }
-.pregnancy-page .page-subtitle { font-size:clamp(1rem, 0.92rem + 0.6vw, 1.08rem); color:var(--color-text-muted); margin:0; line-height:1.5; }
+.pregnancy-page .page-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.05rem, 0.95rem + 0.6vw, 1.2rem); font-weight:800; color:var(--color-text); letter-spacing:-0.02em; margin-bottom:0.2rem; line-height:1.25; text-wrap:balance; }
+.pregnancy-page .page-subtitle { font-size:0.85rem; color:var(--color-text-muted); margin:0; line-height:1.5; }
 .preg-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
-.preg-active-badge { display:inline-flex; align-items:center; gap:6px; background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; font-size:0.95rem; padding:0.55em 1.15em; border-radius:999px; font-weight:800; }
+.preg-active-badge { display:inline-flex; align-items:center; gap:6px; background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; font-size:0.82rem; padding:0.5em 1.05em; border-radius:999px; font-weight:800; }
 .preg-active-badge i { color:var(--color-danger); }
 .preg-verification-banner { display:flex; align-items:flex-start; gap:0.8rem; background:var(--color-primary-soft); border:1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border)); border-radius:16px; padding:0.95rem 1.1rem; margin-bottom:1.25rem; color:var(--color-primary-text); }
 .preg-verification-banner > i { font-size:1.25rem; line-height:1.25; color:var(--color-primary); }
-.preg-verification-banner strong { display:block; font-size:1.02rem; margin-bottom:0.2rem; }
-.preg-verification-banner span { display:block; font-size:0.94rem; line-height:1.55; color:var(--color-text-muted); }
+.preg-verification-banner strong { display:block; font-size:0.86rem; margin-bottom:0.2rem; }
+.preg-verification-banner span { display:block; font-size:0.8rem; line-height:1.55; color:var(--color-text-muted); }
 
 .preg-hero {
     background:var(--color-surface); background-color:var(--color-surface);
@@ -38,13 +38,13 @@
 [data-theme="light"] .week-label { color:var(--color-text-muted); }
 
 .preg-hero-body { position:relative; z-index:1; min-width:0; }
-.preg-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.75rem, 1.4rem + 1.8vw, 2.35rem); font-weight:800; color:var(--color-text); line-height:1.15; margin-bottom:0.45rem; letter-spacing:-0.02em; text-wrap:balance; }
+.preg-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.1rem, 1rem + 0.8vw, 1.3rem); font-weight:800; color:var(--color-text); line-height:1.25; margin-bottom:0.45rem; letter-spacing:-0.02em; text-wrap:balance; }
 [data-theme="light"] .preg-hero-title { color:var(--color-text); }
-.preg-hero-sub { font-size:clamp(1rem, 0.92rem + 0.6vw, 1.08rem); color:var(--color-text-muted); margin-bottom:1.15rem; line-height:1.55; }
+.preg-hero-sub { font-size:0.85rem; color:var(--color-text-muted); margin-bottom:1.15rem; line-height:1.55; }
 .preg-hero-sub strong { color:var(--color-secondary-text); }
 
-.preg-pill-row { display:flex; flex-wrap:wrap; gap:0.6rem; }
-.preg-pill { display:inline-flex; align-items:center; gap:0.45rem; padding:0.45rem 1rem; border-radius:999px; font-size:0.88rem; font-weight:700; border:none; }
+.preg-pill-row { display:flex; flex-wrap:wrap; gap:0.55rem; }
+.preg-pill { display:inline-flex; align-items:center; gap:0.4rem; padding:0.38rem 0.9rem; border-radius:999px; font-size:0.8rem; font-weight:700; border:none; }
 [data-theme="light"] .preg-pill { border:none; }
 .preg-pill-trim { background:var(--color-secondary-soft); color:var(--color-secondary-text); }
 .preg-pill-grav { background:var(--color-primary-soft); color:var(--color-primary-text); }
@@ -108,22 +108,22 @@
 
 /* ── Stable mobile sizing: same visual size at 100% and zoomed-out ── */
 @media (max-width: 600px) {
-    .preg-top-card { padding:1.2rem 1.2rem; border-radius:18px; margin-bottom:1.15rem; }
-    .preg-top-card .d-flex { flex-direction:column; align-items:stretch !important; gap:0.8rem !important; }
-    .preg-active-badge { align-self:flex-start; font-size:0.9rem; }
-    .preg-verification-banner { padding:1rem 1.05rem; border-radius:14px; }
-    .preg-verification-banner strong { font-size:0.98rem; }
-    .preg-verification-banner span { font-size:0.9rem; }
-    .preg-hero { padding:1.5rem 1.2rem; border-radius:20px; }
+    .preg-top-card { padding:1.1rem 1.15rem; border-radius:18px; margin-bottom:1.15rem; }
+    .preg-top-card .d-flex { flex-direction:column; align-items:stretch !important; gap:0.75rem !important; }
+    .preg-active-badge { align-self:flex-start; font-size:0.8rem; }
+    .preg-verification-banner { padding:0.9rem 1rem; border-radius:14px; }
+    .preg-verification-banner strong { font-size:0.84rem; }
+    .preg-verification-banner span { font-size:0.8rem; }
+    .preg-hero { padding:1.4rem 1.15rem; border-radius:20px; }
     .preg-hero .d-flex.align-items-center { flex-direction:column; align-items:center !important; text-align:center; }
-    .week-ring-wrap, .week-ring-svg { width:150px; height:150px; }
-    .week-num { font-size:2.4rem; }
+    .week-ring-wrap, .week-ring-svg { width:140px; height:140px; }
+    .week-num { font-size:2.1rem; }
     .preg-hero-body { width:100%; }
     .preg-pill-row { justify-content:center; }
     .preg-info-grid { grid-template-columns:repeat(2,1fr); gap:0.75rem; }
-    .preg-info-card { padding:1.15rem 0.8rem; border-radius:16px; }
-    .preg-info-val { font-size:1.05rem; }
-    .baby-week-card { padding:1.2rem; gap:1rem; }
+    .preg-info-card { padding:1.1rem 0.75rem; border-radius:16px; }
+    .preg-info-val { font-size:0.98rem; }
+    .baby-week-card { padding:1.15rem; gap:1rem; }
     .baby-progress-block { width:100%; padding-left:0; border-left:none; border-top:1px solid var(--color-border); padding-top:1rem; }
 }
 </style>
