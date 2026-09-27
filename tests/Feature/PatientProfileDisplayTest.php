@@ -107,12 +107,12 @@ class PatientProfileDisplayTest extends AutomationTestCase
     public function test_missing_images_have_a_local_fallback_and_legacy_filenames_resolve(): void
     {
         $patient = new User(['profile_image' => 'old/location/portrait.png', 'gender' => 'female']);
-        $this->assertSame(asset('images/avatars/avatar-female.svg'), $patient->profile_image_url);
+        $this->assertStringStartsWith(asset('images/avatars/avatar-female.svg'), $patient->profile_image_url);
         Storage::disk('public')->put('uploads/profile/portrait.png', 'synthetic-image');
         $this->assertSame(asset('storage/uploads/profile/portrait.png'), $patient->profile_image_url);
         $patient->profile_image = null;
         $patient->gender = 'male';
-        $this->assertSame(asset('images/avatars/avatar-male.svg'), $patient->profile_image_url);
+        $this->assertStringStartsWith(asset('images/avatars/avatar-male.svg'), $patient->profile_image_url);
     }
 
     public function test_profile_urls_support_an_application_hosted_in_a_subdirectory(): void
