@@ -93,7 +93,7 @@
     @media (max-width:600px) {
         .login-page .header-inner { min-height:62px; padding-inline:20px; }
         .login-page .public-brand { transform:translateY(-1px); }
-        .login-page .public-brand-mark { transform:translateY(-7px); }
+        .login-page .public-brand-mark { transform:translateY(-9px); }
         .login-page .public-brand-name { transform:translateY(3px); }
         .fb-hero { padding:38px 20px 35px; }
         .fb-hero::before { width:270px; height:270px; right:-170px; top:-155px; border-width:38px; }
