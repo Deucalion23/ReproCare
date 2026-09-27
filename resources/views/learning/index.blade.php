@@ -552,11 +552,11 @@
         .learn-media-grid .video-media-card { border-radius:14px !important; }
         .learn-media-grid .video-media-card > .position-relative.overflow-hidden { height:120px !important; border-radius:14px 14px 0 0 !important; }
         .learn-media-grid .video-media-card .card-body { padding:0.6rem 0.65rem !important; }
-        .learn-media-grid .video-media-card h6 { font-size:0.78rem !important; line-height:1.35 !important; margin-bottom:0.35rem !important; }
+        .learn-media-grid .video-media-card h6 { font-size:0.7rem !important; line-height:1.35 !important; margin-bottom:0.25rem !important; }
         .learn-media-grid .video-media-card .card-body p { display:none !important; }
-        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.4rem !important; }
-        .learn-media-grid .video-media-card small { font-size:0.66rem !important; }
-        .learn-media-grid .video-media-card .btn { font-size:0.7rem !important; padding:0.35rem 0.7rem !important; }
+        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.3rem !important; }
+        .learn-media-grid .video-media-card small { font-size:0.6rem !important; }
+        .learn-media-grid .video-media-card .btn { display:none !important; }
         .learn-media-grid .yt-watch-btn.rounded-circle { width:42px !important; height:42px !important; }
     }
 </style>
