@@ -658,20 +658,25 @@
         .card-body { padding:1rem !important; }
         .recent-activity-card { border-radius:18px; overflow:hidden; }
         .recent-activity-head {
-            flex-direction:row;
+            display:flex !important;
+            flex-direction:row !important;
             align-items:center !important;
             justify-content:space-between !important;
+            text-align:left !important;
             gap:0.5rem !important;
             padding:0.85rem 1rem !important;
         }
         .recent-activity-title {
             font-size:0.98rem !important;
             line-height:1.3 !important;
+            text-align:left !important;
             flex:1 1 auto;
             min-width:0;
+            margin-bottom:0 !important;
         }
         .recent-activity-link {
             flex-shrink:0;
+            margin-left:auto !important;
             font-size:0.78rem !important;
             padding:0.25rem 0.4rem !important;
             white-space:nowrap;
@@ -690,9 +695,40 @@
             max-width:300px;
             margin-inline:auto;
         }
-        .timeline-row { padding-left:44px; margin-bottom:1rem; }
-        .maternal-timeline::before { left:17px; }
-        .timeline-dot-icon { left:4px; width:26px; height:26px; font-size:0.75rem; }
+        .recent-timeline { margin:0; padding:0; }
+        .timeline-row, .recent-timeline-row {
+            padding-left:42px !important;
+            margin-bottom:0.9rem !important;
+            position:relative;
+        }
+        .recent-timeline-row:last-child { margin-bottom:0 !important; }
+        .maternal-timeline::before { left:16px !important; top:14px; bottom:14px; }
+        .timeline-dot-icon { left:2px !important; width:28px !important; height:28px !important; font-size:0.8rem !important; top:1px !important; }
+        .timeline-content { min-width:0; flex:1 1 auto; }
+        .timeline-title {
+            font-size:0.88rem !important;
+            line-height:1.4 !important;
+            overflow-wrap:anywhere;
+            margin-bottom:3px !important;
+        }
+        .timeline-meta {
+            display:flex !important;
+            flex-wrap:wrap !important;
+            align-items:center !important;
+            column-gap:6px !important;
+            row-gap:5px !important;
+            font-size:0.78rem !important;
+            line-height:1.45 !important;
+        }
+        .timeline-date { white-space:nowrap; }
+        .timeline-dot { opacity:0.6; }
+        .timeline-status {
+            font-size:0.68rem !important;
+            font-weight:700 !important;
+            padding:0.22rem 0.65rem !important;
+            border-radius:9999px !important;
+            white-space:nowrap;
+        }
 
         /* Community + tips */
         .list-group-item .d-flex.align-items-center { flex-wrap:wrap; row-gap:4px; }
@@ -1043,32 +1079,33 @@
                 @endphp
 
                 @if($recentCheckups->count() > 0 || $recentRecords->count() > 0)
-                    <div class="maternal-timeline">
+                    <div class="maternal-timeline recent-timeline">
                         @foreach($recentCheckups as $c)
-                            <div class="timeline-row">
+                            <div class="timeline-row recent-timeline-row">
                                 <div class="timeline-dot-icon" style="background:var(--color-secondary-text); color:var(--color-on-solid);">
                                     <i class="bi bi-hospital"></i>
                                 </div>
-                                <div>
-                                    <div class="fw-700 text-dark" style="font-size:0.92rem;">
+                                <div class="timeline-content">
+                                    <div class="fw-700 text-dark timeline-title" style="font-size:0.92rem;">
                                         Prenatal Consultation with {{ $c->midwife->name ?? 'Clinical Midwife' }}
                                     </div>
-                                    <div style="font-size:0.82rem; color:var(--wp-text-soft);">
-                                        {{ $c->scheduled_date->format('F j, Y') }} &bull;
-                                        <span class="badge bg-light text-dark border">{{ ucfirst($c->status) }}</span>
+                                    <div class="timeline-meta" style="font-size:0.82rem; color:var(--wp-text-soft);">
+                                        <span class="timeline-date">{{ $c->scheduled_date->format('F j, Y') }}</span>
+                                        <span class="timeline-dot" aria-hidden="true">&bull;</span>
+                                        <span class="badge bg-light text-dark border timeline-status">{{ ucfirst($c->status) }}</span>
                                     </div>
                                 </div>
                             </div>
                         @endforeach
 
                         @foreach($recentRecords as $r)
-                            <div class="timeline-row">
+                            <div class="timeline-row recent-timeline-row">
                                 <div class="timeline-dot-icon" style="background:var(--color-danger-text); color:var(--color-on-solid);">
                                     <i class="bi bi-droplet-fill"></i>
                                 </div>
-                                <div>
-                                    <div class="fw-700 text-dark" style="font-size:0.92rem;">Period Logged</div>
-                                    <div style="font-size:0.82rem; color:var(--wp-text-soft);">
+                                <div class="timeline-content">
+                                    <div class="fw-700 text-dark timeline-title" style="font-size:0.92rem;">Period Logged</div>
+                                    <div class="timeline-meta" style="font-size:0.82rem; color:var(--wp-text-soft);">
                                         {{ $r->period_start_date->format('M d') }} –
                                         {{ $r->period_end_date ? $r->period_end_date->format('M d') : 'Present' }}
                                         ({{ $r->duration }} days cycle)
