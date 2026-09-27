@@ -26,6 +26,12 @@ class DatabaseSeeder extends Seeder
         // Seed one BHW per RHU 1 barangay (idempotent)
         $this->call(Rhu1BhwSeeder::class);
 
+        // Seed one BHW President per RHU 1 barangay (idempotent)
+        $this->call(Rhu1BhwPresidentSeeder::class);
+
+        // Seed sample vitals + scheduled checkups per BHW for her area (idempotent)
+        $this->call(Rhu1BhwActivitySeeder::class);
+
         // Seed Learning Materials
         $this->call(LearningMaterialSeeder::class);
         $this->call(LearningVideoSeeder::class);
