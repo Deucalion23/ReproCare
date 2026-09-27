@@ -52,8 +52,8 @@
     .cycle-right .cycle-hero-sub { margin-left:auto; margin-right:auto; }
 }
 @media (max-width:600px) {
-    .menstruation-page .page-title { font-size:1.05rem; }
-    .menstruation-page .page-subtitle { font-size:0.76rem; }
+    .menstruation-page .page-title { font-size:0.95rem; }
+    .menstruation-page .page-subtitle { font-size:0.7rem; }
     .cycle-top-card { padding:1rem !important; }
     .cycle-hero { padding:1.25rem 1rem; border-radius:20px; margin-bottom:1.25rem; }
     .cycle-left { min-width:0; width:100%; }

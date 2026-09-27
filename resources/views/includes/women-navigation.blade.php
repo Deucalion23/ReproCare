@@ -726,13 +726,39 @@
             height:32px !important;
         }
         .women-bell-btn i { font-size:13px; }
-        .women-profile-pill {
-            height:32px !important;
-            padding:0 6px 0 2px !important;
-            gap:4px;
+        .women-nav-right .dropdown {
+            display:flex !important;
+            align-items:center !important;
+            align-self:center !important;
+            margin:0 !important;
         }
-        .women-profile-avatar { width:24px; height:24px; }
-        .women-profile-pill .bi-chevron-down { display:none; }
+        .women-profile-pill {
+            width:32px !important;
+            height:32px !important;
+            min-width:32px !important;
+            padding:0 !important;
+            gap:0 !important;
+            border-radius:50% !important;
+            overflow:hidden !important;
+            background:var(--color-surface-soft) !important;
+            border:2px solid var(--nav-rose) !important;
+            box-shadow:0 0 0 2px color-mix(in srgb, var(--nav-rose) 25%, transparent) !important;
+            flex-shrink:0 !important;
+            align-self:center !important;
+            margin:0 !important;
+            vertical-align:middle !important;
+        }
+        .women-profile-pill .women-profile-name,
+        .women-profile-pill .bi-chevron-down { display:none !important; }
+        .women-profile-avatar {
+            width:100% !important;
+            height:100% !important;
+            aspect-ratio:1 / 1 !important;
+            object-fit:cover !important;
+            display:block !important;
+            border:none !important;
+            border-radius:50% !important;
+        }
         .women-mobile-toggle { width:32px; height:32px; font-size:1.05rem; }
         .btn-care-support span {
             display:none;
@@ -749,7 +775,7 @@
         .women-brand-title { font-size:var(--nav-brand-title-sz); }
         .women-nav-right { gap:0.35rem; }
         .women-bell-btn { width:30px !important; height:30px !important; }
-        .women-profile-pill { height:30px !important; }
+        .women-profile-pill { width:30px !important; height:30px !important; min-width:30px !important; }
         .women-mobile-toggle { width:30px; height:30px; }
     }
 </style>

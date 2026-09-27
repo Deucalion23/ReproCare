@@ -544,12 +544,12 @@
             margin-bottom:1.25rem;
         }
         .patient-hero-title {
-            font-size:1.45rem;
-            line-height:1.2;
+            font-size:0.95rem;
+            line-height:1.3;
             overflow-wrap:anywhere;
         }
         .patient-hero-subtitle {
-            font-size:0.82rem;
+            font-size:0.7rem;
             gap:6px;
         }
         .patient-hero-content .d-flex.justify-content-between {
@@ -559,8 +559,8 @@
         .btn-hero-action {
             width:100%;
             justify-content:center;
-            padding:0.7rem 1rem;
-            font-size:0.88rem;
+            padding:0.6rem 1rem;
+            font-size:0.8rem;
             white-space:normal;
             text-align:center;
         }
@@ -571,8 +571,8 @@
             margin-top:0.9rem;
         }
         .patient-summary-chip {
-            font-size:0.74rem;
-            padding:0.45rem 0.7rem;
+            font-size:0.68rem;
+            padding:0.4rem 0.65rem;
             min-width:0;
             overflow:hidden;
         }

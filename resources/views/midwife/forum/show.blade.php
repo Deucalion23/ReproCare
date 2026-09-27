@@ -94,11 +94,11 @@
                 @endif
 
                 <div class="d-flex align-items-center gap-3 pt-3" style="border-top:1px solid var(--color-border);">
-                    <form method="POST" action="{{ route('forum.like', $post->id) }}">
+                    <form method="POST" action="{{ route('forum.like', $post->id) }}" data-like-form data-post-id="{{ $post->id }}">
                         @csrf
-                        <button type="submit" class="btn btn-sm {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'btn-danger' : 'btn-light border' }}" style="border-radius:20px; font-weight:600; padding:0.35rem 0.85rem;">
-                            <i class="bi bi-heart{{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? '-fill text-white' : ' text-danger' }} me-1"></i>
-                            {{ $post->likes_count }}
+                        <button type="submit" class="btn btn-sm {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'btn-danger' : 'btn-light border' }}" style="border-radius:20px; font-weight:600; padding:0.35rem 0.85rem;" data-liked-class="btn-danger" data-unliked-class="btn-light border">
+                            <i class="bi bi-heart{{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? '-fill text-white' : ' text-danger' }} me-1" data-like-icon data-icon-liked="text-white" data-icon-unliked="text-danger"></i>
+                            <span data-like-count>{{ $post->likes_count }}</span>
                         </button>
                     </form>
                     <span class="text-muted fw-semibold" style="font-size:0.85rem;">
