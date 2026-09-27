@@ -148,7 +148,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .landing-page .public-header { background:color-mix(in srgb, var(--color-bg) 92%, transparent); }
 .landing-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
 .landing-page .public-brand { transform:translateY(-2px); }
-.landing-page .public-brand-mark { transform:translateY(-4px); }
+.landing-page .public-brand-mark { transform:translateY(-6px); }
 .landing-page .public-brand-name { transform:translateY(4px); }
 .landing-page .landing-hero { min-height:615px; padding-block:64px 88px; gap:72px; }
 .landing-page .hero-copy { position:relative; z-index:1; }
@@ -282,7 +282,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 @media (max-width:600px) {
     .landing-page .header-inner { min-height:62px; padding-inline:20px; }
     .landing-page .public-brand { transform:translateY(-1px); }
-    .landing-page .public-brand-mark { transform:translateY(-3px); }
+    .landing-page .public-brand-mark { transform:translateY(-4px); }
     .landing-page .public-brand-name { transform:translateY(3px); }
     .landing-page .landing-hero { padding-block:40px 42px; gap:32px; }
     .landing-page .hero h1 { font-size:clamp(2.65rem, 12vw, 3.45rem); line-height:1.05; }

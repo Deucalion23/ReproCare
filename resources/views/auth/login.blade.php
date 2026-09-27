@@ -80,7 +80,7 @@
     .login-page .public-header { border-bottom:1px solid var(--color-border); }
     .login-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
     .login-page .public-brand { transform:translateY(-2px); }
-    .login-page .public-brand-mark { transform:translateY(-4px); }
+    .login-page .public-brand-mark { transform:translateY(-6px); }
     .login-page .public-brand-name { transform:translateY(4px); }
     .fb-hero { justify-content:flex-start; padding-top:48px; }
     .fb-side { align-items:flex-start; padding-top:58px; }
@@ -93,7 +93,7 @@
     @media (max-width:600px) {
         .login-page .header-inner { min-height:62px; padding-inline:20px; }
         .login-page .public-brand { transform:translateY(-1px); }
-        .login-page .public-brand-mark { transform:translateY(-3px); }
+        .login-page .public-brand-mark { transform:translateY(-4px); }
         .login-page .public-brand-name { transform:translateY(3px); }
         .fb-hero { padding:38px 20px 35px; }
         .fb-hero::before { width:270px; height:270px; right:-170px; top:-155px; border-width:38px; }
