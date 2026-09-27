@@ -56,19 +56,29 @@
     </div>
 </div>
 
-{{-- Filter Toolbar (proper labeled controls + aligned actions) --}}
+{{-- Filter Toolbar (desktop grid / mobile bottom-sheet style) --}}
 <div class="card mb-4 learn-filter-card" style="border:none; border-radius:20px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
     <div class="card-body p-3 p-md-4">
+        {{-- Mobile-only header: clearly different entry point from desktop --}}
+        <div class="learn-mobile-head">
+            <span class="learn-mobile-title"><i class="bi bi-sliders"></i> Filters</span>
+            @php $learnActiveCount = ($activeFilter ? 1 : 0) + ($activeCategory ? 1 : 0) + (request('search') ? 1 : 0); @endphp
+            @if($learnActiveCount > 0)
+                <span class="learn-mobile-count">{{ $learnActiveCount }} active</span>
+            @endif
+            <a href="{{ route('learning.index') }}" class="learn-mobile-reset">Reset</a>
+        </div>
         <form method="GET" action="{{ route('learning.index') }}" class="learn-filter-grid">
             <div class="learn-field learn-field-search">
                 <label for="learnSearch" class="form-label learn-label">Search Topic / Keyword</label>
                 <div class="input-group learn-search-group">
                     <span class="input-group-text learn-search-icon"><i class="bi bi-search"></i></span>
                     <input id="learnSearch" type="text" name="search" class="form-control learn-input"
-                           placeholder="Search videos, articles, counseling guides..." value="{{ request('search') }}">
+                           placeholder="Search videos, articles, counseling guides..." value="{{ request('search') }}"
+                           enterkeyhint="search" autocomplete="off">
                 </div>
             </div>
-            <div class="learn-field">
+            <div class="learn-field learn-field-format">
                 <label for="learnFormat" class="form-label learn-label">Format</label>
                 <select id="learnFormat" name="type" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Formats</option>
@@ -78,7 +88,7 @@
                     <option value="link" {{ $activeFilter === 'link' ? 'selected' : '' }}>🔗 External Links</option>
                 </select>
             </div>
-            <div class="learn-field">
+            <div class="learn-field learn-field-category">
                 <label for="learnCategory" class="form-label learn-label">Category</label>
                 <select id="learnCategory" name="category" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Categories</option>
@@ -95,9 +105,9 @@
             </div>
         </form>
 
-        {{-- Interactive Category Chips --}}
-        <div class="d-flex align-items-center gap-1.5 mt-3 pt-3 flex-wrap" style="font-size:0.8rem; border:none;">
-            <span class="text-xs fw-800 text-uppercase me-2" style="letter-spacing:0.5px; color:var(--color-text-muted);">Quick Filters:</span>
+        {{-- Interactive Category Chips (mobile: swipeable strip) --}}
+        <div class="d-flex align-items-center gap-1.5 mt-3 pt-3 flex-wrap learn-chips" style="font-size:0.8rem; border:none;">
+            <span class="text-xs fw-800 text-uppercase me-2 learn-chips-label" style="letter-spacing:0.5px; color:var(--color-text-muted);">Quick Filters:</span>
             <a href="{{ route('learning.index') }}"
                class="badge text-decoration-none px-3 py-2 rounded-pill {{ !$activeFilter && !$activeCategory ? '' : '' }}"
                style="border:none; {{ !$activeFilter && !$activeCategory ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
@@ -448,16 +458,108 @@
     /* Thumbnails must touch card edges (no white inset gap) */
     .video-media-card > .position-relative.overflow-hidden { border-radius:20px 20px 0 0 !important; margin:0 !important; }
 
+    /* Mobile header is desktop-hidden by design */
+    .learn-mobile-head { display:none; }
+
     @media (max-width: 991.98px) {
-        .learn-filter-grid { grid-template-columns:minmax(0, 1fr) minmax(0, 1fr); }
-        .learn-field-search { grid-column:1 / -1; }
-        .learn-actions { grid-column:1 / -1; }
-        .learn-btn-apply { flex:1; justify-content:center; }
+        /* ── MOBILE filter = different pattern from desktop ──
+           Compact sheet: header row + big search + duo selects + full-width CTA + swipe chips.
+           Desktop stays a 4-column labeled grid; mobile is a thumb-first stacked sheet. */
+        .learn-filter-card { border-radius:18px !important; }
+        .learn-filter-card > .card-body { padding:0.9rem !important; }
+
+        .learn-mobile-head {
+            display:flex; align-items:center; gap:0.5rem;
+            padding:0.15rem 0.25rem 0.8rem;
+        }
+        .learn-mobile-title {
+            display:inline-flex; align-items:center; gap:0.45rem;
+            font-family:'Plus Jakarta Sans',sans-serif; font-weight:800;
+            font-size:1rem; color:var(--color-text); letter-spacing:-0.2px;
+        }
+        .learn-mobile-title i { color:var(--color-secondary-text); font-size:1.05rem; }
+        .learn-mobile-count {
+            font-size:0.7rem; font-weight:800;
+            background:var(--color-surface-strong); color:var(--color-on-solid);
+            border-radius:999px; padding:0.2rem 0.6rem; white-space:nowrap;
+        }
+        .learn-mobile-reset {
+            margin-left:auto; font-size:0.82rem; font-weight:800;
+            color:var(--color-secondary-text); text-decoration:none;
+            padding:0.5rem 0.25rem; min-height:44px;
+            display:inline-flex; align-items:center;
+        }
+
+        .learn-filter-grid {
+            display:grid !important;
+            grid-template-columns:minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-areas:
+                "search search"
+                "format category"
+                "actions actions";
+            gap:0.65rem;
+            align-items:stretch;
+            background:var(--color-surface-soft);
+            border:1px solid var(--color-border);
+            border-radius:14px;
+            padding:0.75rem;
+        }
+        .learn-field-search { grid-area:search; }
+        .learn-field-format { grid-area:format; min-width:0; }
+        .learn-field-category { grid-area:category; min-width:0; }
+        .learn-actions {
+            grid-area:actions; display:flex; gap:0.5rem; padding-bottom:0;
+        }
+        .learn-label {
+            font-size:0.68rem !important; letter-spacing:0.4px;
+            margin-bottom:0.3rem !important;
+        }
+        .learn-input, .learn-search-group .learn-search-icon { min-height:50px !important; }
+        .learn-input { font-size:0.92rem !important; border-radius:14px !important; }
+        .learn-search-group .learn-search-icon { border-radius:14px 0 0 14px !important; }
+        .learn-search-group .learn-input { border-radius:0 14px 14px 0 !important; }
+        .learn-field-format .learn-input, .learn-field-category .learn-input {
+            padding-left:0.7rem; padding-right:0.7rem;
+            text-overflow:ellipsis;
+        }
+        .learn-btn-apply {
+            flex:1 1 auto; min-height:50px; justify-content:center;
+            font-size:0.92rem; border-radius:14px !important;
+        }
+        .learn-btn-clear {
+            width:50px; height:50px; min-height:50px; border-radius:14px !important;
+        }
+
+        /* Swipeable quick-filter strip — no wrapping on mobile */
+        .learn-chips {
+            flex-wrap:nowrap !important;
+            overflow-x:auto; overflow-y:hidden;
+            margin-left:-0.9rem; margin-right:-0.9rem;
+            padding:0.8rem 0.9rem 0.2rem !important;
+            gap:0.5rem !important;
+            scroll-snap-type:x mandatory;
+            scrollbar-width:none;
+            -webkit-overflow-scrolling:touch;
+        }
+        .learn-chips::-webkit-scrollbar { display:none; }
+        .learn-chips .learn-chips-label {
+            position:sticky; left:0; flex-shrink:0;
+            background:var(--color-surface);
+            padding-right:0.25rem;
+            display:inline-flex; align-items:center; min-height:40px;
+        }
+        .learn-chips .badge {
+            flex-shrink:0; scroll-snap-align:start;
+            padding:0.65rem 1rem !important;
+            font-size:0.82rem !important;
+            min-height:40px; display:inline-flex; align-items:center;
+        }
     }
     @media (max-width: 575.98px) {
-        .learn-filter-grid { grid-template-columns:minmax(0, 1fr); }
         .learn-hero-icon { width:42px; height:42px; font-size:1.2rem; }
         .learn-hero-count { width:100%; justify-content:center; }
+        .learn-filter-grid { padding:0.65rem; gap:0.6rem; }
+        .learn-input { font-size:0.88rem !important; }
     }
 </style>
 @endpush
