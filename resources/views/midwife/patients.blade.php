@@ -383,7 +383,7 @@
             </div>
 
             <div class="d-flex justify-content-center" style="padding:1.25rem;">
-                {{ $patients->links('pagination::bootstrap-5') }}
+                {{ $patients->links('vendor.pagination.numbers-only') }}
             </div>
         @else
             <div class="empty-state p-5 text-center">
