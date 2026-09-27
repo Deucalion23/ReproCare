@@ -328,37 +328,56 @@
         color:var(--nav-slate-500);
     }
 
-.women-dropdown-item:hover, .women-dropdown-item.active {
-        background:var(--nav-slate-100) !important;
-        color:var(--nav-slate-900) !important;
-        font-weight:600;
-    }
-
-    html:not([data-theme="dark"]) .women-dropdown-item:hover {
-        background:#D1D5DB !important;
-        color:#1F2937 !important;
-    }
-
-    html:not([data-theme="dark"]) .women-dropdown-item:hover i {
-        color:#334155 !important;
-    }
-
-    /* Keep both Care Records menu entries in the same dark slate used by the navigation. */
+    /* Care Records dropdown items — same gray as the top navigation buttons. */
     .women-nav-dropdown-menu .women-dropdown-item,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item,
     .women-nav-dropdown-menu .women-dropdown-item.active,
-    .women-nav-dropdown-menu .women-dropdown-item i,
-    .women-nav-dropdown-menu .women-dropdown-item.active i {
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:active {
+        display:flex !important;
+        align-items:center !important;
+        gap:9px !important;
+        padding:8px 12px !important;
+        border-radius:6px !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:none !important;
+        font-size:13px !important;
+        font-weight:600 !important;
+        background:transparent !important;
+        background-color:transparent !important;
         color:var(--nav-slate-600) !important;
+        text-decoration:none !important;
+        white-space:nowrap !important;
+    }
+
+    .women-nav-dropdown-menu .women-dropdown-item i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item i,
+    .women-nav-dropdown-menu .women-dropdown-item.active i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active i {
+        font-size:15px !important;
+        color:var(--nav-slate-500) !important;
     }
 
     .women-nav-dropdown-menu .women-dropdown-item:hover,
-    .women-nav-dropdown-menu .women-dropdown-item:hover i {
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
+    .women-nav-dropdown-menu .women-dropdown-item:focus,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus,
+    .women-nav-dropdown-menu .women-dropdown-item.active:hover,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:hover {
         background:var(--nav-slate-100) !important;
-        color:var(--nav-primary) !important;
+        background-color:var(--nav-slate-100) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:none !important;
+        color:var(--nav-slate-600) !important;
     }
 
-    .women-dropdown-item:hover i, .women-dropdown-item.active i {
-        color:var(--nav-teal) !important;
+    .women-nav-dropdown-menu .women-dropdown-item:hover i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
+    .women-nav-dropdown-menu .women-dropdown-item:focus i,
+    .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus i {
+        color:var(--nav-slate-500) !important;
     }
 
     /* Dark mode needs its own navigation states: the shared `surface-strong`
