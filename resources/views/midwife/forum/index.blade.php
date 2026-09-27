@@ -145,11 +145,11 @@
                     <!-- Post Actions Bar (forum-card-actions: kept inline on phones) -->
                     <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 forum-card-actions" style="border-top:1px solid var(--color-border);">
                         <div class="d-flex gap-3">
-                            <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline">
+                            <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline" data-like-form data-post-id="{{ $post->id }}">
                                 @csrf
-                                <button type="submit" class="btn btn-sm {{ $post->isLikedBy(auth()->id(), \App\Models\User::class) ? 'btn-danger' : 'btn-outline-danger' }}" style="border-radius:10px;">
-                                    <i class="bi {{ $post->isLikedBy(auth()->id(), \App\Models\User::class) ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                                    <span class="ms-1 fw-bold">{{ $post->likes_count }}</span>
+                                <button type="submit" class="btn btn-sm {{ $post->isLikedBy(auth()->id(), \App\Models\User::class) ? 'btn-danger' : 'btn-outline-danger' }}" style="border-radius:10px;" data-liked-class="btn-danger" data-unliked-class="btn-outline-danger">
+                                    <i class="bi {{ $post->isLikedBy(auth()->id(), \App\Models\User::class) ? 'bi-heart-fill' : 'bi-heart' }}" data-like-icon></i>
+                                    <span class="ms-1 fw-bold" data-like-count>{{ $post->likes_count }}</span>
                                 </button>
                             </form>
                             <a href="{{ route('forum.show', $post->id) }}" class="btn btn-sm btn-outline-secondary" style="border-radius:10px; border-color:var(--color-border);">
