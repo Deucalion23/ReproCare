@@ -55,7 +55,7 @@
 
 .trimester-track { display:flex; gap:0.85rem; margin-bottom:1.25rem; position:relative; }
 /* Uniform gray cards (Trimester 3 look) — only the side icons carry state color */
-.trimester-card { flex:1; border-radius:18px; padding:1.1rem 1.15rem; display:flex; align-items:flex-start; gap:0.85rem; position:relative; z-index:1; overflow:hidden; transition:all 0.25s ease; border:1px solid var(--color-border); box-shadow:var(--wp-shadow-sm); text-align:left; background:var(--color-surface-soft); }
+.trimester-card { flex:1; border-radius:18px; padding:1.1rem 1.15rem; display:flex; align-items:center; gap:0.85rem; position:relative; z-index:1; overflow:hidden; transition:all 0.25s ease; border:1px solid var(--color-border); box-shadow:var(--wp-shadow-sm); text-align:left; background:var(--color-surface-soft); }
 .trimester-card.active { background:var(--color-surface-soft); border-color:var(--color-border); box-shadow:var(--wp-shadow-sm); transform:none; }
 .trimester-card.completed { background:var(--color-surface-soft); border-color:var(--color-border); }
 .trimester-card.upcoming { background:var(--color-surface-soft); border-color:var(--color-border); box-shadow:var(--wp-shadow-sm); }
@@ -63,16 +63,16 @@
 .trimester-card.completed .trimester-icon { color:var(--color-success-text); }
 .trimester-card.active .trimester-icon { color:#9B64B9; }
 .trimester-card.upcoming .trimester-icon { color:var(--color-text-muted); }
-.trimester-copy { min-width:0; flex:1; }
+.trimester-copy { min-width:0; flex:1; display:flex; flex-direction:column; justify-content:center; }
 .trimester-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1.1px; margin-bottom:0.2rem; color:var(--color-text-muted); }
 .trimester-card.active .trimester-num { color:var(--color-text-muted); }
 .trimester-card.completed .trimester-num { color:var(--color-text-muted); }
 .trimester-card.upcoming .trimester-num { color:var(--color-text-muted); }
-.trimester-weeks { font-size:0.9rem; font-weight:800; color:#000; margin-bottom:0.55rem; }
+.trimester-weeks { font-size:0.9rem; font-weight:800; color:#000; margin-bottom:0; }
 [data-theme="dark"] .trimester-weeks { color:var(--color-text); }
 .trimester-card.active .trimester-weeks { color:var(--color-text); font-weight:800; }
 .trimester-card.completed .trimester-weeks { color:var(--color-text); }
-.trimester-status { display:inline-flex; align-items:center; gap:4px; font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; padding:0.28rem 0.75rem; border-radius:9999px; background:#FFFFFF; color:var(--color-text-muted); }
+.trimester-status { display:inline-flex; align-items:center; justify-content:center; gap:4px; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; padding:0.6rem 1rem; border-radius:9999px; background:#FFFFFF; color:var(--color-text-muted); margin-left:auto; align-self:center; flex-shrink:0; white-space:nowrap; }
 .trimester-card.completed .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
 .trimester-card.active .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
 .trimester-card.upcoming .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
@@ -277,8 +277,8 @@
             <div class="trimester-copy">
                 <div class="trimester-num">{{ $ordLabel }} Trimester</div>
                 <div class="trimester-weeks">{{ $trimesterWeeks[(string)$t] }}</div>
-                <span class="trimester-status">{{ $statusLabel }}</span>
             </div>
+            <span class="trimester-status">{{ $statusLabel }}</span>
         </div>
         @endfor
     </div>
