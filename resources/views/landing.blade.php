@@ -13,7 +13,7 @@
 <div class="public-container">
     <section class="hero landing-hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-            <div class="eyebrow"><i class="bi bi-heart-pulse" aria-hidden="true"></i> With you, every step of the way</div>
+            <div class="eyebrow">With you, every step of the way</div>
             <h1 id="hero-title">Your health journey,<br><span>supported close to home.</span></h1>
             <p>ReproCare connects you with your local health team for pregnancy care, checkups, reminders, and trusted health information—all in one place.</p>
             <div class="hero-actions">
