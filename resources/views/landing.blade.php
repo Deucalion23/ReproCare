@@ -83,6 +83,10 @@
                 <img src="{{ asset('images/maternal/home-visit.jpg') }}" alt="Health worker providing a prenatal check during a home visit" loading="lazy">
                 <figcaption><i class="bi bi-house-heart" aria-hidden="true"></i> Care that reaches you</figcaption>
             </figure>
+            <figure class="care-gallery-photo care-gallery-photo-wide">
+                <img src="{{ asset('images/maternal/login-maternal-care.jpeg') }}" alt="Community health worker providing a routine health check" loading="lazy">
+                <figcaption><i class="bi bi-clipboard2-pulse" aria-hidden="true"></i> Checkups made more connected</figcaption>
+            </figure>
         </div>
     </section>
     <section class="how-section" id="how-it-works" aria-labelledby="how-title">

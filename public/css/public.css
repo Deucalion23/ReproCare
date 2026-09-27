@@ -194,6 +194,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .landing-page .care-gallery-photo:hover img { transform:scale(1.04); }
 .landing-page .care-gallery-photo-large { height:330px; border-radius:28px 28px 28px 90px; }
 .landing-page .care-gallery-photo-small { height:246px; border-radius:28px 28px 90px 28px; }
+.landing-page .care-gallery-photo-wide { grid-column:1 / -1; height:175px; border-radius:24px 24px 70px 24px; }
 .landing-page .care-gallery-photo figcaption { position:absolute; left:13px; bottom:13px; display:inline-flex; align-items:center; gap:7px; max-width:calc(100% - 26px); padding:8px 11px; border-radius:999px; background:color-mix(in srgb, var(--color-surface) 88%, transparent); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px); color:var(--color-text); font-size:10px; font-weight:700; }
 .landing-page .care-gallery-photo figcaption i { color:var(--color-primary-text); font-size:14px; }
 .landing-page .how-section { position:relative; overflow:hidden; padding:50px 52px; margin-bottom:72px; border-radius:28px; background:linear-gradient(135deg, var(--color-surface) 0%, var(--color-secondary-soft) 100%); }
@@ -334,6 +335,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
     .landing-page .care-gallery-photo { border-width:3px; }
     .landing-page .care-gallery-photo-large { height:250px; border-radius:20px 20px 20px 64px; }
     .landing-page .care-gallery-photo-small { height:184px; border-radius:20px 20px 64px 20px; }
+    .landing-page .care-gallery-photo-wide { height:130px; border-radius:18px 18px 52px 18px; }
     .landing-page .care-gallery-photo figcaption { left:8px; bottom:8px; padding:6px 8px; font-size:8px; }
     .landing-page .how-section { padding:31px 25px; margin-bottom:42px; border-radius:22px; }
     .landing-page .how-section::after { width:220px; height:220px; right:-110px; top:-145px; border-width:31px; }
