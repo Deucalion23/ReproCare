@@ -541,9 +541,10 @@ class User extends Authenticatable
             }
         }
 
-        // Return default avatar: BHW Presidents get their own badge,
+        // Return default avatar: BHW and BHW Presidents share one badge
+        // (lavender silhouette on white with slim black border),
         // everyone else falls back by gender.
-        if ($this->role === 'bhw_president') {
+        if (in_array($this->role, ['bhw', 'bhw_president'], true)) {
             return asset('images/avatars/avatar-bhw-president.svg');
         }
         $defaultAvatar = $this->gender === 'male' ? 'avatar-male.svg' : 'avatar-female.svg';
