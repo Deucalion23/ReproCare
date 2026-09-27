@@ -1,6 +1,8 @@
 @extends('bhw.layout')
 
 @section('title', 'Dashboard - BHW Portal | ReproCare')
+{{-- Back button on this page asks to log out instead of landing on a stale login page --}}
+@section('body_extra_attrs', 'data-confirm-exit')
 
 @section('bhw-content')
 

@@ -2698,7 +2698,7 @@
     @vite('resources/css/theme.css')
     <script src="{{ asset('js/chart-palette.js') }}?v={{ filemtime(public_path('js/chart-palette.js')) }}"></script>
 </head>
-<body class="{{ auth()->check() && auth()->user()->role !== 'user' ? 'has-sidebar' : 'patient-portal-body' }}">
+    <body class="{{ auth()->check() && auth()->user()->role !== 'user' ? 'has-sidebar' : 'patient-portal-body' }}" @yield('body_extra_attrs', '')>
     @include('includes.navigation')
 
     @yield('content')
@@ -2991,6 +2991,35 @@
             });
         }
 
+        /* -- Back-button logout guard (opt-in via data-confirm-exit on <body>) --
+           Dashboard pages opt in so pressing the browser Back button asks to
+           log out (existing logout modal) instead of dropping onto a stale,
+           bfcache-restored login page with a frozen "Signing in..." button.
+           Mechanism: push a sentinel history entry on load; the first Back
+           press fires popstate instead of navigating away. "Stay" just
+           dismisses (trap re-armed); "Log Out" submits the logout form. */
+        function initBackButtonGuard() {
+            if (!('pushState' in window.history)) return;
+            var guardOn = function () {
+                return !!(document.body
+                    && document.body.hasAttribute('data-confirm-exit')
+                    && document.querySelector('form.js-logout-form'));
+            };
+            var arm = function () {
+                if (!guardOn()) return;
+                try { window.history.pushState({ rcBackGuard: true }, ''); } catch (e) {}
+            };
+            arm();
+            window.addEventListener('popstate', function () {
+                if (!guardOn()) return;
+                arm();
+                var form = document.querySelector('form.js-logout-form');
+                if (form && typeof showLogoutDialog === 'function') {
+                    showLogoutDialog(form);
+                }
+            });
+        }
+
         /* -- Init on DOM ready -- */
         document.addEventListener('DOMContentLoaded', function() {
 
@@ -3069,6 +3098,7 @@
 
             enhanceLegacyConfirms();
             wireLogoutForms();
+            initBackButtonGuard();
 
             window.addEventListener('resize', function() {
                 rcApplyLayout();

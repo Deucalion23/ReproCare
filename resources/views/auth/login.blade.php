@@ -210,5 +210,15 @@
         btn.disabled = true;
         btn.innerHTML = 'Signing in…';
     });
+    // If this page is restored from the back-forward cache (e.g. Back button
+    // pressed right after logging in), the button would stay frozen on
+    // "Signing in…". Always restore it so the form stays usable.
+    window.addEventListener('pageshow', function () {
+        var btn = document.getElementById('btnSubmitLogin');
+        if (!btn) return;
+        btn.classList.remove('is-loading');
+        btn.disabled = false;
+        btn.innerHTML = 'Log in';
+    });
 </script>
 @endpush
