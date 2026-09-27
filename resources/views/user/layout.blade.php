@@ -198,12 +198,12 @@
         color:#334155 !important;
     }
 
-    /* Selected dock tab = same solid lavender pill as desktop, no left bar */
+    /* Selected dock tab = same dark pill as desktop, no left bar */
     .women-dock-link.active {
         color:#FFFFFF;
         font-weight:800;
-        background:var(--women-action);
-        background-color:var(--women-action);
+        background:var(--color-surface-strong);
+        background-color:var(--color-surface-strong);
         border-color:transparent;
         box-shadow:none;
     }
@@ -216,8 +216,8 @@
     :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active,
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active.active {
-        background:var(--women-action) !important;
-        background-color:var(--women-action) !important;
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
         border-color:transparent !important;
         box-shadow:none !important;
         color:#FFFFFF !important;
@@ -232,8 +232,8 @@
     :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active:hover,
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active:hover,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active.active:hover {
-        background:var(--women-action-hover) !important;
-        background-color:var(--women-action-hover) !important;
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
         border-color:transparent !important;
         box-shadow:none !important;
         color:#FFFFFF !important;
