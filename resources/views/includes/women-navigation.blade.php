@@ -396,6 +396,45 @@
         color:var(--color-on-solid) !important;
     }
 
+    /* Selected dropdown page MUST match the dark navigation pill — not the
+       global theme's generic lavender `.dropdown-item.active` tint
+       (theme.css `:root[data-theme][data-bs-theme] body :is(...)` outranks a
+       plain 4-class portal selector, so this override carries the same
+       :root prefix plus the `.women-navbar` ancestor to win it back).
+       Covers hover/focus/active states so the dark pill never flashes purple. */
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active,
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active,
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent) !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active),
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active),
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active) {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent) !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active) :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active:is(:hover, :focus, :focus-visible, :active) :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item.active :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item.active :is(span, i, svg) {
+        color:var(--color-on-solid) !important;
+    }
+
     /* Dark mode needs its own navigation states: the shared `surface-strong`
        token is the same shade as the dark navbar, which made the selected tab
        disappear and left hovered dropdown labels too muted to read. */

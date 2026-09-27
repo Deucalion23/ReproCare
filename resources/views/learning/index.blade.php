@@ -108,7 +108,7 @@
 </div>
 
 {{-- Media Grid --}}
-<div class="row g-4">
+<div class="row g-4 learn-media-grid">
     @forelse($materials as $material)
         @php
             $isVideo = $material->isPlayableVideo();
@@ -545,6 +545,19 @@
         }
         .learn-btn-apply { min-height:48px; font-size:0.9rem; }
         .learn-btn-clear { width:48px; height:48px; min-height:48px; }
+
+        /* Phones: YouTube-style 2-col video grid — compact cards fit side by side */
+        .learn-media-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.65rem; }
+        .learn-media-grid > [class*="col-"] { width:auto !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; margin-top:0 !important; }
+        .learn-media-grid .video-media-card { border-radius:14px !important; }
+        .learn-media-grid .video-media-card > .position-relative.overflow-hidden { height:120px !important; border-radius:14px 14px 0 0 !important; }
+        .learn-media-grid .video-media-card .card-body { padding:0.6rem 0.65rem !important; }
+        .learn-media-grid .video-media-card h6 { font-size:0.78rem !important; line-height:1.35 !important; margin-bottom:0.35rem !important; }
+        .learn-media-grid .video-media-card .card-body p { display:none !important; }
+        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.4rem !important; }
+        .learn-media-grid .video-media-card small { font-size:0.66rem !important; }
+        .learn-media-grid .video-media-card .btn { font-size:0.7rem !important; padding:0.35rem 0.7rem !important; }
+        .learn-media-grid .yt-watch-btn.rounded-circle { width:42px !important; height:42px !important; }
     }
 </style>
 @endpush
