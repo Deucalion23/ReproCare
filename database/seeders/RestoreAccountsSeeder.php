@@ -33,6 +33,7 @@ class RestoreAccountsSeeder extends Seeder
                 'status' => 'approved',
                 'address' => 'Rural Health Unit 1, San Carlos City',
                 'barangay' => 'Poblacion',
+                'rhu_assignment' => 'RHU 1',
                 'profile_image' => null,
             ],
             [
