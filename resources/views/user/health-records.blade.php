@@ -520,9 +520,6 @@
                 <a href="{{ route('user.health-records.create') }}" class="btn-hero-action btn-log">
                     <i class="bi bi-plus-circle-fill"></i> Log Vitals Check
                 </a>
-                <button type="button" class="btn-hero-action btn-support" data-bs-toggle="modal" data-bs-target="#careEmergencyModal">
-                    <i class="bi bi-telephone-plus-fill"></i> Health Center Help
-                </button>
             </div>
         </div>
     </div>
