@@ -119,6 +119,11 @@
         padding:0.5rem 0.5rem calc(0.5rem + env(safe-area-inset-bottom));
     }
 
+    html:not([data-theme="dark"]) .women-bottom-dock {
+        background:#F1F3F5;
+        border-top-color:#D1D5DB;
+    }
+
     .women-dock-items {
         display:flex;
         align-items:stretch;
@@ -172,6 +177,11 @@
 
     .women-dock-link:hover {
         color:var(--wp-primary);
+    }
+
+    html:not([data-theme="dark"]) .women-dock-link:hover {
+        background:#D1D5DB;
+        color:#1F2937;
     }
 
     .women-dock-link.active {

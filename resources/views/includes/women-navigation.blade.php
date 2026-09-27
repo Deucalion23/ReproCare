@@ -535,6 +535,16 @@
         flex-shrink:0 !important;
     }
 
+    html:not([data-theme="dark"]) .women-mobile-toggle {
+        background:#E5E7EB !important;
+        color:#334155 !important;
+        border-color:transparent !important;
+    }
+
+    html:not([data-theme="dark"]) #womenMobileDrawer {
+        background:#F1F3F5 !important;
+    }
+
     /* ── Responsive Adaptations ── */
     @media (max-width: 1320px) {
         .women-tab-link {
@@ -570,11 +580,11 @@
             gap:0.5rem;
         }
         .women-nav-left { margin-right:0; gap:0.35rem; }
-        .women-brand-link { gap:6px; }
-        .women-brand-mark, .women-brand-mark img { width:30px !important; height:30px !important; flex-basis:30px; }
-        .women-brand-mark { flex:0 0 30px; transform:none !important; }
+        .women-brand-link { gap:8px; }
+        .women-brand-mark, .women-brand-mark img { width:44px !important; height:44px !important; flex-basis:44px; }
+        .women-brand-mark { flex:0 0 44px; transform:translateY(-1.5px) !important; }
         .women-brand-title {
-            font-size:1.05rem;
+            font-size:1.3rem;
         }
         .women-nav-right { gap:0.45rem; margin-left:auto !important; }
         /* Hide the round Care Support button on phones — it lives in the drawer. */
