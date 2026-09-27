@@ -16,7 +16,7 @@
     .rc-card-head h3 { font-size:1rem; font-weight:800; color:var(--color-text); margin:0; font-family:'Plus Jakarta Sans',sans-serif; }
     .rc-card-head p { font-size:.8rem; color:var(--color-text-muted); margin:.25rem 0 0; }
     .rc-contact-search { width:100%; margin-top:.85rem; border:1px solid var(--color-border); background:var(--color-bg); border-radius:12px; padding:.7rem 1rem; font-size:.86rem; color:var(--color-text); outline:none; }
-    .rc-contact-search:focus { border-color:var(--color-secondary); background:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 16%, transparent); }
+    .rc-contact-search:focus { border-color:var(--color-border); background:var(--color-surface); box-shadow:none; }
     .rc-contact-list { padding:.8rem; max-height:62vh; overflow-y:auto; display:flex; flex-direction:column; gap:.45rem; }
     .rc-contact-opt { display:flex; align-items:center; gap:.8rem; width:100%; border:1px solid transparent; background:transparent; border-radius:14px; text-align:left; padding:.8rem; transition:.18s; cursor:pointer; }
     .rc-contact-opt:hover, .rc-contact-opt.active { background:var(--color-secondary-soft); border-color:var(--color-secondary-soft); }
@@ -31,7 +31,7 @@
     .rc-selected .rc-av img { width:100%; height:100%; object-fit:cover; }
     .rc-label { font-weight:700; font-size:.76rem; text-transform:uppercase; letter-spacing:.05em; color:var(--color-text-muted); margin-bottom:.4rem; display:block; }
     .rc-input, .rc-textarea { width:100%; background:var(--color-surface); border:1px solid var(--color-border); border-radius:12px; color:var(--color-text); padding:.8rem 1rem; font-size:.88rem; outline:none; transition:.18s; }
-    .rc-input:focus, .rc-textarea:focus { border-color:var(--color-secondary); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 16%, transparent); }
+    .rc-input:focus, .rc-textarea:focus { border-color:var(--color-border); box-shadow:none; }
     .rc-textarea { min-height:220px; resize:vertical; line-height:1.6; }
     .rc-actions { display:flex; justify-content:flex-end; gap:.6rem; margin-top:1rem; }
     .rc-btn-pink { display:inline-flex; align-items:center; gap:.45rem; background:var(--color-secondary); border:1px solid var(--color-secondary); color:var(--color-on-solid); font-weight:700; font-size:.86rem; padding:.65rem 1.35rem; border-radius:12px; box-shadow:0 6px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); transition:all .2s; }

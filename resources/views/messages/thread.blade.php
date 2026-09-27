@@ -36,7 +36,7 @@
 
     .rc-composer { padding:.85rem 1.1rem; background:var(--color-surface); border-top:1px solid var(--color-border); }
     .rc-composer-bar { display:flex; align-items:center; gap:.7rem; background:var(--color-bg); border:1px solid var(--color-border); border-radius:999px; padding:.35rem .4rem .35rem 1.2rem; transition:all .2s; }
-    .rc-composer-bar:focus-within { border-color:var(--color-secondary); background:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 16%, transparent); }
+    .rc-composer-bar:focus-within { border-color:var(--color-border); background:var(--color-surface); box-shadow:none; }
     .rc-composer-bar input { flex:1; border:none; outline:none; background:transparent; font-size:.9rem; color:var(--color-text); padding:.4rem 0; min-width:0; }
     .rc-send { width:44px; height:44px; border-radius:50%; background:var(--color-secondary); border:1px solid var(--color-secondary); color:var(--color-on-solid); display:inline-flex; align-items:center; justify-content:center; font-size:1.05rem; cursor:pointer; transition:all .2s; box-shadow:0 3px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent); flex-shrink:0; }
     .rc-send:hover { background:var(--color-secondary); transform:scale(1.05); }
@@ -79,7 +79,6 @@
             </div>
             <div class="rc-top-actions">
                 <span id="connDot" class="badge bg-success" title="Live">Live</span>
-                <button type="button" class="rc-icon-btn" data-bs-toggle="modal" data-bs-target="#careEmergencyModal" title="Emergency help"><i class="bi bi-telephone-fill" style="color:var(--color-success-text);"></i></button>
                 <a href="{{ route($messagesRouteBase . '.create', ['to' => $otherParty?->id, 'role' => $rootSentByCurrentUser ? $root->receiver_role : $root->sender_role]) }}" class="rc-icon-btn" title="New topic"><i class="bi bi-pencil-square" style="color:var(--color-secondary-text);"></i></a>
                 <button type="button" class="rc-icon-btn" id="deleteThreadBtn" title="Move to trash"><i class="bi bi-trash" style="color:var(--color-danger-text);"></i></button>
             </div>
