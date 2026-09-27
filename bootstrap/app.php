@@ -23,5 +23,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Expired/invalid CSRF token (e.g. session wiped by a redeploy,
+        // or a stale cached login form) shows a bare 419 page by default.
+        // Send users back to login with an explanation instead.
+        // NOTE: the framework converts TokenMismatchException to a plain
+        // HttpException(419) before render callbacks run, so match on the
+        // status code and let anything else fall through (return null).
+        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\HttpException $e, \Illuminate\Http\Request $request) {
+            if ($e->getStatusCode() !== 419) {
+                return null;
+            }
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['message' => 'Session expired. Please refresh and try again.'], 419);
+            }
+
+            return redirect()->guest(route('login'))
+                ->withErrors(['session' => 'Your session expired. Please log in again.']);
+        });
     })->create();
