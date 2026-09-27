@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
         // Restore original accounts with separated names
         $this->call(RestoreAccountsSeeder::class);
 
+        // Seed 13 RHU 1 pregnant women with partners (idempotent)
+        $this->call(Rhu1PregnantWomenSeeder::class);
+
         // Seed Learning Materials
         $this->call(LearningMaterialSeeder::class);
         $this->call(LearningVideoSeeder::class);
