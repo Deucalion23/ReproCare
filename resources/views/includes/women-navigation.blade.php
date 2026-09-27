@@ -250,12 +250,12 @@
         color:#334155 !important;
     }
 
-    /* Active Pill State */
+    /* Active Pill State (same font-weight as inactive so tabs never shift position) */
     .women-tab-link.active {
         background:var(--color-surface-strong) !important;
         border-color:var(--color-surface-strong) !important;
         color:var(--color-on-solid) !important;
-        font-weight:700 !important;
+        font-weight:600 !important;
         box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent);
     }
 
@@ -981,3 +981,53 @@
         </div>
     </div>
 </div>
+
+<script>
+(function () {
+    // Keep the pressed nav button highlighted through the page load and
+    // prefetch destinations so taps feel instant and the bar never "jumps".
+    var SELECTOR = '.women-navbar a.women-tab-link[href], .women-navbar a.women-dropdown-item[href], .women-bottom-dock a.women-dock-link[href], #womenMobileDrawer a[href]';
+    var prefetched = {};
+
+    function prefetch(url) {
+        if (!url || prefetched[url] || url.charAt(0) === '#' || url.indexOf('javascript:') === 0) return;
+        try {
+            var a = document.createElement('a');
+            a.href = url;
+            if (a.origin !== window.location.origin) return;
+            prefetched[url] = true;
+            var link = document.createElement('link');
+            link.rel = 'prefetch';
+            link.href = a.href;
+            document.head.appendChild(link);
+        } catch (e) { /* no-op */ }
+    }
+
+    document.addEventListener('mouseover', function (e) {
+        var link = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (link) prefetch(link.getAttribute('href'));
+    }, { passive: true });
+
+    document.addEventListener('touchstart', function (e) {
+        var link = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (link) prefetch(link.getAttribute('href'));
+    }, { passive: true });
+
+    document.addEventListener('click', function (e) {
+        var link = e.target.closest ? e.target.closest(SELECTOR) : null;
+        if (!link || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+        var scope = link.closest('.women-navbar, .women-bottom-dock, #womenMobileDrawer');
+        if (scope) {
+            scope.querySelectorAll('.active').forEach(function (el) { el.classList.remove('active'); });
+            link.classList.add('active');
+            // A Care Records dropdown pick also keeps its parent toggle lit.
+            var dropdown = link.closest('.dropdown');
+            if (dropdown) {
+                var toggle = dropdown.querySelector('.women-tab-link');
+                if (toggle) toggle.classList.add('active');
+            }
+        }
+        prefetch(link.getAttribute('href'));
+    });
+})();
+</script>
