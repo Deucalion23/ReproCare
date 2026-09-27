@@ -73,8 +73,8 @@
 .trimester-card.active .trimester-weeks { color:var(--color-text); font-weight:800; }
 .trimester-card.completed .trimester-weeks { color:var(--color-text); }
 .trimester-status { display:inline-flex; align-items:center; justify-content:center; gap:4px; font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; padding:0.6rem 1rem; border-radius:9999px; background:#FFFFFF; color:var(--color-text-muted); margin-left:auto; align-self:center; flex-shrink:0; white-space:nowrap; }
-.trimester-card.completed .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
-.trimester-card.active .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
+.trimester-card.completed .trimester-status { background:#FFFFFF; color:var(--color-success-text); }
+.trimester-card.active .trimester-status { background:#FFFFFF; color:#9B64B9; }
 .trimester-card.upcoming .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
 .trimester-badge { position:absolute; top:0.65rem; right:0.65rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; background:#FFFFFF; color:var(--color-text-muted); border:1px solid var(--color-border); box-shadow:none; }
 .trimester-card.active .trimester-badge { background:#FFFFFF; color:var(--color-text-muted); border:1px solid var(--color-border); box-shadow:none; }
