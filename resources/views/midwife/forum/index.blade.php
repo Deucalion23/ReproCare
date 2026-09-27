@@ -131,7 +131,7 @@
                     <div class="post-content mb-3">
                         <p class="card-text" style="font-size:1rem; line-height:1.6; white-space:pre-wrap; color:var(--color-text);">{{ $post->content }}</p>
 
-                        @if($post->post_image)
+                        @if($post->post_image_url)
                             <div class="mt-2">
                                 <img src="{{ $post->post_image_url }}"
                                      alt="Post image"
@@ -142,8 +142,8 @@
                         @endif
                     </div>
 
-                    <!-- Post Actions Bar -->
-                    <div class="d-flex justify-content-between align-items-center pt-3" style="border-top:1px solid var(--color-border);">
+                    <!-- Post Actions Bar (forum-card-actions: kept inline on phones) -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 forum-card-actions" style="border-top:1px solid var(--color-border);">
                         <div class="d-flex gap-3">
                             <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline">
                                 @csrf

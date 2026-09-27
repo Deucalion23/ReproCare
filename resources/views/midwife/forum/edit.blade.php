@@ -53,7 +53,7 @@
                 @enderror
             </div>
 
-            @if($post->post_image)
+            @if($post->post_image_url)
                 <div class="mb-4">
                     <label class="form-label">Current Image</label>
                     <img src="{{ $post->post_image_url }}"

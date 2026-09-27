@@ -118,7 +118,7 @@
                 </div>
 
                 {{-- Current image --}}
-                @if($post->post_image)
+                @if($post->post_image_url)
                 <div class="current-image-wrap mb-3">
                     <div class="current-image-label">
                         <i class="bi bi-image" style="color:var(--primary-light);"></i>
