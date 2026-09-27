@@ -505,10 +505,10 @@
             </a>
         </li>
         <li>
-            <a href="{{ route('user.notifications') }}"
-               class="women-dock-link {{ request()->routeIs('user.notifications*') ? 'active' : '' }}">
-                <i class="bi bi-bell-fill"></i>
-                <span>Alerts</span>
+            <a href="{{ route('learning.index') }}"
+               class="women-dock-link {{ request()->routeIs('learning.*') ? 'active' : '' }}">
+                <i class="bi bi-mortarboard-fill"></i>
+                <span>Learning</span>
             </a>
         </li>
     </ul>
