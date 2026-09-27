@@ -28,9 +28,9 @@
 [data-theme="light"] .preg-hero { background:var(--color-surface); background-color:var(--color-surface); }
 .week-ring-wrap { position:relative; width:170px; height:170px; flex-shrink:0; z-index:1; }
 .week-ring-svg { width:170px; height:170px; transform:rotate(-90deg); }
-.week-ring-svg .ring-bg { fill:none; stroke:var(--color-primary-soft); stroke-width:12; }
-[data-theme="light"] .week-ring-svg .ring-bg { stroke:var(--color-primary-soft); }
-.week-ring-svg .ring-fill { fill:none; stroke:var(--color-primary); stroke-width:12; stroke-linecap:round; }
+.week-ring-svg .ring-bg { fill:none; stroke:#E8D9F0; stroke-width:12; }
+[data-theme="light"] .week-ring-svg .ring-bg { stroke:#E8D9F0; }
+.week-ring-svg .ring-fill { fill:none; stroke:#9B64B9; stroke-width:12; stroke-linecap:round; }
 .week-ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .week-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:2.6rem; font-weight:900; line-height:1; color:var(--color-text); letter-spacing:-0.03em; }
 [data-theme="light"] .week-num { color:var(--color-text); }
@@ -320,8 +320,8 @@
             <div class="baby-progress-lbl">Progress</div>
             <div style="position:relative;width:60px;height:60px;margin:0 auto;">
                 <svg viewBox="0 0 60 60" style="width:60px;height:60px;transform:rotate(-90deg);">
-                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--color-primary-soft)" stroke-width="6"/>
-                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--color-primary)" stroke-width="6" stroke-linecap="round"
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="#E8D9F0" stroke-width="6"/>
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="#9B64B9" stroke-width="6" stroke-linecap="round"
                         stroke-dasharray="150.8" stroke-dashoffset="{{ 150.8 - (150.8 * $progressPct / 100) }}"/>
                 </svg>
                 <div class="baby-progress-val">{{ round($progressPct) }}%</div>
