@@ -162,7 +162,7 @@
                     <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password" aria-pressed="false"><i class="bi bi-eye" id="passwordToggleIcon" aria-hidden="true"></i></button>
                 </div>
             </div>
-            <label class="fb-remember"><input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}><span>Remember this device</span></label>
+            <label class="fb-remember"><input type="checkbox" name="remember" id="remember" value="1" {{ old('remember') ? 'checked' : '' }}><span>Remember this device</span></label>
             <button type="submit" id="btnSubmitLogin" class="fb-btn-primary">Log in</button>
         </form>
         <div class="fb-center"><a class="fb-forgot" href="{{ route('password.request') }}">Forgot password?</a></div>
