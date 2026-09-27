@@ -545,10 +545,27 @@ class User extends Authenticatable
         // (lavender silhouette on white with slim black border),
         // everyone else falls back by gender.
         if (in_array($this->role, ['bhw', 'bhw_president'], true)) {
-            return asset('images/avatars/avatar-bhw-president.svg');
+            return self::versionedAvatar('avatar-bhw-president.svg');
         }
         $defaultAvatar = $this->gender === 'male' ? 'avatar-male.svg' : 'avatar-female.svg';
-        return asset('images/avatars/' . $defaultAvatar);
+        return self::versionedAvatar($defaultAvatar);
+    }
+
+    /**
+     * Default avatar URL with a filemtime version query so browsers fetch
+     * the new artwork immediately after it changes instead of showing a
+     * stale cached copy (which looks like the avatar "flip-flops").
+     */
+    private static array $avatarVersions = [];
+
+    private static function versionedAvatar(string $filename): string
+    {
+        if (!array_key_exists($filename, self::$avatarVersions)) {
+            $path = public_path('images/avatars/' . $filename);
+            self::$avatarVersions[$filename] = is_file($path) ? (int) filemtime($path) : 0;
+        }
+
+        return asset('images/avatars/' . $filename) . '?v=' . self::$avatarVersions[$filename];
     }
 
     public function hasProfileImage()
