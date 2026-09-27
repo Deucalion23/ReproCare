@@ -604,12 +604,50 @@
         /* Pregnancy journey card */
         .pregnancy-journey-card { border-radius:18px; margin-bottom:1.25rem; }
         .pregnancy-journey-card .p-4 { padding:1rem !important; }
-        .pregnancy-journey-card .border-bottom {
+        .pregnancy-journey-card .border-bottom,
+        .pregnancy-journey-card .pregnancy-head {
             flex-direction:column;
             align-items:stretch !important;
+            gap:0.75rem !important;
+        }
+        .pregnancy-head-copy { min-width:0; width:100%; }
+        .pregnancy-meta {
+            flex-direction:column;
+            align-items:flex-start !important;
+            gap:4px !important;
+        }
+        .pregnancy-meta .badge {
+            font-size:0.68rem;
+            padding:0.3rem 0.65rem;
+            border-radius:9999px;
+            white-space:nowrap;
+        }
+        .pregnancy-recorded {
+            font-size:0.74rem !important;
+            line-height:1.4;
+        }
+        .pregnancy-title {
+            font-size:1.05rem !important;
+            line-height:1.3 !important;
+            overflow-wrap:anywhere;
+        }
+        .pregnancy-head-btn {
+            align-self:stretch;
+            width:100%;
+            display:inline-flex;
+            justify-content:center;
+            align-items:center;
+            white-space:nowrap;
         }
         .pregnancy-journey-card h5 { font-size:1rem; line-height:1.35; }
         .pregnancy-journey-card .btn { align-self:flex-start; }
+        .pregnancy-trim-row {
+            flex-direction:column;
+            align-items:flex-start !important;
+            gap:2px !important;
+        }
+        .pregnancy-trim-label { font-size:0.8rem !important; }
+        .pregnancy-trim-pct { font-size:0.84rem !important; }
         .pregnancy-stat-val { font-size:1.2rem; overflow-wrap:anywhere; }
         .pregnancy-stat-lbl { font-size:0.72rem; }
         .pregnancy-stat-pill { padding:0.9rem 0.75rem; }
@@ -892,17 +930,17 @@
         {{-- Active Pregnancy Journey Widget --}}
         @if($activePregnancy)
         <div class="pregnancy-journey-card">
-            <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <div>
-                    <div class="d-flex align-items-center gap-2 mb-1">
+            <div class="p-4 border-bottom d-flex align-items-center justify-content-between flex-wrap gap-2 pregnancy-head">
+                <div class="pregnancy-head-copy">
+                    <div class="d-flex align-items-center gap-2 mb-1 flex-wrap pregnancy-meta">
                         <span class="badge" style="background:var(--color-surface-soft); color:var(--color-text); font-weight:700;">Active Pregnancy</span>
-                        <span class="text-muted" style="font-size:0.8rem;">Recorded by RHU 1 Clinician</span>
+                        <span class="text-muted pregnancy-recorded" style="font-size:0.8rem;">Recorded by RHU 1 Clinician</span>
                     </div>
-                    <h5 class="fw-800 text-dark mb-0" style="font-family:'Plus Jakarta Sans', sans-serif;">
+                    <h5 class="fw-800 text-dark mb-0 pregnancy-title" style="font-family:'Plus Jakarta Sans', sans-serif;">
                         Your Baby's Journey &bull; Week {{ $activePregnancy->aog_weeks }}
                     </h5>
                 </div>
-                <a href="{{ route('user.pregnancies.index') }}" class="btn btn-sm btn-outline-dark">
+                <a href="{{ route('user.pregnancies.index') }}" class="btn btn-sm btn-outline-dark pregnancy-head-btn">
                     Full Pregnancy Details <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
@@ -943,9 +981,9 @@
                     $trimColor = 'var(--color-text)';
                 @endphp
                 <div>
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="fw-700 text-dark" style="font-size:0.88rem;">{{ $trimester }}</span>
-                        <span class="fw-800" style="color:var(--color-text); font-size:0.9rem;">Week {{ $weeks }} of 40 ({{ $pct }}%)</span>
+                    <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1 pregnancy-trim-row">
+                        <span class="fw-700 text-dark pregnancy-trim-label" style="font-size:0.88rem;">{{ $trimester }}</span>
+                        <span class="fw-800 pregnancy-trim-pct" style="color:var(--color-text); font-size:0.9rem;">Week {{ $weeks }} of 40 ({{ $pct }}%)</span>
                     </div>
                     <div style="height:12px; background:var(--color-surface-soft); border-radius:9999px; overflow:hidden;">
                         <div style="width:{{ $pct }}%; height:100%; background:linear-gradient(90deg, var(--color-surface-strong) 0%, var(--color-surface-soft) 100%); border-radius:9999px; transition:width 1s ease;"></div>
