@@ -40,7 +40,8 @@
         background-repeat:no-repeat;
     }
 
-    .women-shell::before {
+    .women-shell::before,
+    .women-shell::after {
         content:'';
         position:absolute;
         z-index:0;
@@ -55,6 +56,16 @@
         top:-330px;
         right:-150px;
         border:64px solid rgb(182 150 218 / .17);
+    }
+
+    /* A second quiet circular accent keeps long pages from feeling flat. */
+    .women-shell::after {
+        width:360px;
+        height:360px;
+        bottom:7rem;
+        left:-245px;
+        background:rgb(222 207 239 / .25);
+        box-shadow:0 0 0 42px rgb(222 207 239 / .12);
     }
 
     .women-content-wrap {
@@ -75,6 +86,13 @@
             top:-255px;
             right:-180px;
             border-width:44px;
+        }
+
+        .women-shell::after {
+            width:260px;
+            height:260px;
+            left:-195px;
+            box-shadow:0 0 0 30px rgb(222 207 239 / .12);
         }
 
         .women-content-wrap {
@@ -193,7 +211,7 @@
 
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active {
-        background:#000000 !important;
+        background:#1F2937 !important;
         color:#FFFFFF !important;
     }
 
@@ -204,7 +222,7 @@
 
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover {
-        background:#000000 !important;
+        background:#1F2937 !important;
         color:#FFFFFF !important;
     }
 

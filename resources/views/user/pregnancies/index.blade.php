@@ -5,11 +5,11 @@
 @push('styles')
 <style>
 /* === PREGNANCY JOURNEY PAGE === */
-.pregnancy-page { padding:0; }
+.pregnancy-page { padding:0; text-size-adjust:100%; -webkit-text-size-adjust:100%; }
 .women-shell { background-color:var(--color-surface) !important; }
 
-.pregnancy-page .page-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.6rem; font-weight:800; color:var(--color-text); letter-spacing:-0.02em; margin-bottom:0.15rem; }
-.pregnancy-page .page-subtitle { font-size:0.9rem; color:var(--color-text-muted); margin:0; }
+.pregnancy-page .page-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.4rem, 1.15rem + 1.2vw, 1.6rem); font-weight:800; color:var(--color-text); letter-spacing:-0.02em; margin-bottom:0.15rem; line-height:1.2; text-wrap:balance; }
+.pregnancy-page .page-subtitle { font-size:clamp(0.85rem, 0.8rem + 0.5vw, 0.9rem); color:var(--color-text-muted); margin:0; line-height:1.5; }
 .preg-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
 .preg-active-badge { display:inline-flex; align-items:center; gap:6px; background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; font-size:0.82rem; padding:0.5em 1.05em; border-radius:999px; font-weight:800; }
 .preg-active-badge i { color:var(--color-danger); }
@@ -37,10 +37,10 @@
 .week-label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:1px; color:var(--color-text-muted); margin-top:4px; }
 [data-theme="light"] .week-label { color:var(--color-text-muted); }
 
-.preg-hero-body { position:relative; z-index:1; }
-.preg-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.9rem; font-weight:800; color:var(--color-text); line-height:1.15; margin-bottom:0.4rem; letter-spacing:-0.02em; }
+.preg-hero-body { position:relative; z-index:1; min-width:0; }
+.preg-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:clamp(1.4rem, 1.1rem + 1.5vw, 1.9rem); font-weight:800; color:var(--color-text); line-height:1.15; margin-bottom:0.4rem; letter-spacing:-0.02em; text-wrap:balance; }
 [data-theme="light"] .preg-hero-title { color:var(--color-text); }
-.preg-hero-sub { font-size:0.92rem; color:var(--color-text-muted); margin-bottom:1.15rem; }
+.preg-hero-sub { font-size:clamp(0.85rem, 0.8rem + 0.5vw, 0.92rem); color:var(--color-text-muted); margin-bottom:1.15rem; line-height:1.5; }
 .preg-hero-sub strong { color:var(--color-secondary-text); }
 
 .preg-pill-row { display:flex; flex-wrap:wrap; gap:0.55rem; }
@@ -105,6 +105,27 @@
 .preg-history-card:hover { border-color:var(--color-secondary-soft); box-shadow:var(--shadow-sm); }
 
 .preg-empty { background:linear-gradient(135deg, var(--color-secondary-soft) 0%, var(--color-secondary-soft) 100%); border:2px dashed var(--color-secondary-soft); border-radius:24px; padding:3.5rem 2rem; text-align:center; }
+
+/* ── Stable mobile sizing: same visual size at 100% and zoomed-out ── */
+@media (max-width: 600px) {
+    .preg-top-card { padding:1.1rem 1.15rem; border-radius:18px; margin-bottom:1.15rem; }
+    .preg-top-card .d-flex { flex-direction:column; align-items:stretch !important; gap:0.75rem !important; }
+    .preg-active-badge { align-self:flex-start; font-size:0.8rem; }
+    .preg-verification-banner { padding:0.9rem 1rem; border-radius:14px; }
+    .preg-verification-banner strong { font-size:0.88rem; }
+    .preg-verification-banner span { font-size:0.8rem; }
+    .preg-hero { padding:1.4rem 1.15rem; border-radius:20px; }
+    .preg-hero .d-flex.align-items-center { flex-direction:column; align-items:center !important; text-align:center; }
+    .week-ring-wrap, .week-ring-svg { width:140px; height:140px; }
+    .week-num { font-size:2.1rem; }
+    .preg-hero-body { width:100%; }
+    .preg-pill-row { justify-content:center; }
+    .preg-info-grid { grid-template-columns:repeat(2,1fr); gap:0.75rem; }
+    .preg-info-card { padding:1.1rem 0.75rem; border-radius:16px; }
+    .preg-info-val { font-size:0.98rem; }
+    .baby-week-card { padding:1.15rem; gap:1rem; }
+    .baby-progress-block { width:100%; padding-left:0; border-left:none; border-top:1px solid var(--color-border); padding-top:1rem; }
+}
 </style>
 @endpush
 
