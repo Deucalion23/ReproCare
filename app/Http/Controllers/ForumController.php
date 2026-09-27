@@ -157,6 +157,7 @@ class ForumController extends Controller
             $filename = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('uploads/forum', $filename, 'public');
             $postData['post_image'] = $filename;
+            $postData['post_image_data'] = ForumPost::makePostImageDataUrl($image);
         }
 
         ForumPost::create($postData);
@@ -215,6 +216,7 @@ class ForumController extends Controller
         if ($removePostImage) {
             $this->deletePostImage($post->post_image);
             $updateData['post_image'] = null;
+            $updateData['post_image_data'] = null;
         }
 
         // Handle image upload
@@ -226,6 +228,7 @@ class ForumController extends Controller
             $filename = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('uploads/forum', $filename, 'public');
             $updateData['post_image'] = $filename;
+            $updateData['post_image_data'] = ForumPost::makePostImageDataUrl($image);
         }
 
         $post->update($updateData);
@@ -366,6 +369,7 @@ class ForumController extends Controller
             $filename = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('uploads/forum', $filename, 'public');
             $data['post_image'] = $filename;
+            $data['post_image_data'] = ForumPost::makePostImageDataUrl($image);
         }
 
         $post = ForumPost::create($data);
@@ -455,6 +459,7 @@ class ForumController extends Controller
         if ($request->boolean('remove_post_image')) {
             $this->deletePostImage($post->post_image);
             $updateData['post_image'] = null;
+            $updateData['post_image_data'] = null;
         }
 
         if ($request->hasFile('post_image')) {
@@ -464,6 +469,7 @@ class ForumController extends Controller
             $filename = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
             $image->storeAs('uploads/forum', $filename, 'public');
             $updateData['post_image'] = $filename;
+            $updateData['post_image_data'] = ForumPost::makePostImageDataUrl($image);
         }
 
         $post->update($updateData);

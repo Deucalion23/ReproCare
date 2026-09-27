@@ -17,11 +17,13 @@
      - Responsive action spacing before tablet drawer mode
      ================================================================ -->
 <style>
-    /* ── Layout & Variables ── */
+    /* ── Layout & Variables (rem-based so browser zoom / root font scales everything) ── */
     :root {
         --nav-bar-h:auto;
-        --nav-bar-min-h:100px;
-        --nav-btn-h:36px;
+        --nav-bar-min-h:3.75rem; /* 60px @ 16px root — was 72px, slimmed to match smaller brand */
+        --nav-btn-h:2.25rem; /* 36px pill — brand is intentionally smaller */
+        --nav-brand-sz:1.5rem; /* 24px logo — smaller than the 36px action pill */
+        --nav-brand-title-sz:clamp(0.9rem, 0.85rem + 0.4vw, 1rem);
         --nav-font-sz:13.5px;
         --nav-icon-sz:16px;
         --nav-btn-r:9999px; /* Pill Shape */
@@ -103,26 +105,27 @@
     .women-brand-link {
         display:flex;
         align-items:center;
-        gap:9px;
+        gap:0.125rem;
         text-decoration:none;
         line-height:1;
+        min-width:0;
     }
 
     .women-brand-mark {
-        width:64px;
-        height:64px;
+        width:var(--nav-brand-sz);
+        height:var(--nav-brand-sz);
         display:flex;
         align-items:center;
         justify-content:center;
         overflow:visible;
-        flex:0 0 64px;
+        flex:0 0 var(--nav-brand-sz);
         transform:translateY(-1.5px);
     }
 
     .women-brand-mark img {
-        width:64px !important;
-        height:64px !important;
-        max-width:none;
+        width:100% !important;
+        height:100% !important;
+        max-width:100%;
         object-fit:contain;
         display:block;
         transform:none !important;
@@ -145,15 +148,20 @@
     .women-brand-title {
         display:inline-flex;
         align-items:center;
-        min-height:64px;
+        min-height:var(--nav-btn-h);
         font-family:'Plus Jakarta Sans',sans-serif;
         font-weight:800;
-        font-size:1.85rem;
+        font-size:var(--nav-brand-title-sz);
         letter-spacing:-0.025em;
         color:var(--nav-slate-900);
         line-height:1;
         white-space:nowrap;
         padding-bottom:1px;
+        margin-left:-0.25rem;
+        transform:translateX(0);
+        max-width:100%;
+        overflow:hidden;
+        text-overflow:ellipsis;
     }
 
     .women-brand-title span {
@@ -571,7 +579,7 @@
     }
 
     @media (max-width: 640px) {
-        .women-navbar { --nav-bar-min-h:88px; }
+        .women-navbar { --nav-bar-min-h:3.25rem; --nav-brand-sz:1.375rem; --nav-brand-title-sz:0.92rem; }
         .women-nav-container {
             padding-left:0.85rem;
             padding-right:0.85rem;
@@ -579,13 +587,14 @@
             padding-bottom:0.5rem;
             gap:0.5rem;
         }
-        .women-nav-left { margin-right:0; gap:0.35rem; }
-        .women-brand-link { gap:6px; }
-        .women-brand-mark, .women-brand-mark img { width:60px !important; height:60px !important; flex-basis:60px; }
-        .women-brand-mark { flex:0 0 60px; transform:translateY(-1.5px) !important; }
+        .women-nav-left { margin-right:0; gap:0.35rem; min-width:0; }
+        .women-brand-link { gap:0.125rem; }
+        .women-brand-mark { flex:0 0 var(--nav-brand-sz); width:var(--nav-brand-sz); height:var(--nav-brand-sz); transform:translateY(-1.5px) !important; }
+        .women-brand-mark img { width:100% !important; height:100% !important; }
         .women-brand-title {
-            font-size:1.8rem;
-            min-height:60px;
+            font-size:var(--nav-brand-title-sz);
+            min-height:2rem;
+            margin-left:-0.2rem;
         }
         .women-nav-right { gap:0.45rem; margin-left:auto !important; }
         /* Hide the round Care Support button on phones — it lives in the drawer. */
@@ -616,7 +625,8 @@
     }
 
     @media (max-width: 380px) {
-        .women-brand-title { font-size:1.4rem; }
+        .women-navbar { --nav-brand-sz:1.25rem; --nav-brand-title-sz:0.85rem; }
+        .women-brand-title { font-size:var(--nav-brand-title-sz); }
         .women-nav-right { gap:0.35rem; }
         .women-bell-btn { width:30px !important; height:30px !important; }
         .women-profile-pill { height:30px !important; }
@@ -822,10 +832,10 @@
    ═══════════════════════════════════════════════ --}}
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
-        <div class="d-flex align-items-center" style="gap:12px;">
-            <span aria-hidden="true" style="width:56px; height:56px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 56px; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:56px; height:56px; max-width:none; object-fit:contain; display:block;"></span>
-            <div>
-                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:56px; line-height:1; padding-bottom:1px; font-size:1.5rem;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
+        <div class="d-flex align-items-center" style="gap:0.125rem;">
+            <span aria-hidden="true" style="width:var(--nav-brand-sz); height:var(--nav-brand-sz); display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 var(--nav-brand-sz); transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
+            <div style="margin-left:-0.25rem; min-width:0;">
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:var(--nav-btn-h); line-height:1; padding-bottom:1px; font-size:var(--nav-brand-title-sz);" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>

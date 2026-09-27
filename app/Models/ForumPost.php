@@ -15,6 +15,7 @@ class ForumPost extends Model
         'content',
         'status',
         'post_image',
+        'post_image_data',
     ];
 
     // Relationships
@@ -46,6 +47,11 @@ class ForumPost extends Model
 
     public function getPostImageUrlAttribute()
     {
+        $inline = $this->getAttribute('post_image_data');
+        if (is_string($inline) && str_starts_with($inline, 'data:image/')) {
+            return $inline;
+        }
+
         if ($this->post_image) {
             $publicDisk = Storage::disk('public');
             $filename = basename($this->post_image);
@@ -69,6 +75,64 @@ class ForumPost extends Model
                     return '/' . trim(str_replace('\\', '/', $directory . $filename), '/');
                 }
             }
+        }
+
+        return null;
+    }
+
+    /**
+     * Make a database-safe copy of an attachment so it survives ephemeral
+     * application disks (such as Render's default filesystem).
+     */
+    public static function makePostImageDataUrl($file): ?string
+    {
+        try {
+            if (! $file || ! method_exists($file, 'getRealPath') || ! is_file($file->getRealPath())) {
+                return null;
+            }
+
+            $raw = @file_get_contents($file->getRealPath());
+            if ($raw === false) {
+                return null;
+            }
+
+            // Resize uploads before encoding, keeping a detailed but practical
+            // attachment size for the database and page load.
+            if (function_exists('imagecreatefromstring') && function_exists('imagecreatetruecolor')
+                && function_exists('imagejpeg') && function_exists('imagesx') && function_exists('imagesy')) {
+                $source = @imagecreatefromstring($raw);
+                if ($source !== false) {
+                    $width = imagesx($source);
+                    $height = imagesy($source);
+                    if ($width > 0 && $height > 0) {
+                        $max = 1200;
+                        $scale = min(1, $max / max($width, $height));
+                        $newWidth = max(1, (int) round($width * $scale));
+                        $newHeight = max(1, (int) round($height * $scale));
+                        $resized = imagecreatetruecolor($newWidth, $newHeight);
+                        imagecopyresampled($resized, $source, 0, 0, 0, 0, $newWidth, $newHeight, $width, $height);
+                        ob_start();
+                        imagejpeg($resized, null, 80);
+                        $jpeg = ob_get_clean();
+                        imagedestroy($source);
+                        imagedestroy($resized);
+
+                        if ($jpeg !== false && strlen($jpeg) <= 800000) {
+                            return 'data:image/jpeg;base64,' . base64_encode($jpeg);
+                        }
+                    } else {
+                        imagedestroy($source);
+                    }
+                }
+            }
+
+            // If GD is unavailable, preserve smaller valid image uploads.
+            $mime = method_exists($file, 'getMimeType') ? $file->getMimeType() : null;
+            if (is_string($mime) && str_starts_with($mime, 'image/') && strlen($raw) <= 500000) {
+                return 'data:' . $mime . ';base64,' . base64_encode($raw);
+            }
+        } catch (\Throwable $e) {
+            // The normal file upload remains usable if an inline copy cannot be made.
         }
 
         return null;

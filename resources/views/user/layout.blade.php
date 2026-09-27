@@ -20,9 +20,9 @@
     body { background-color:var(--color-surface) !important; }
     .women-shell {
         background:var(--color-surface);
-        min-height:calc(100vh - 100px);
+        min-height:calc(100vh - 3.75rem);
         width:100%;
-        margin-top:100px;
+        margin-top:3.75rem;
         padding-bottom:3.5rem;
         position:relative;
         isolation:isolate;
