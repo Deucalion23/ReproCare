@@ -63,7 +63,8 @@
     .fb-hero h1 span { color:var(--color-primary-text); }
     .fb-collage { z-index:1; max-width:650px; transform:translateX(12px); }
     .fb-shot { border:6px solid var(--color-surface); border-radius:28px 28px 84px 28px; box-shadow:0 22px 55px color-mix(in srgb, var(--color-primary) 20%, transparent); }
-    .fb-float { background:color-mix(in srgb, var(--color-surface) 92%, transparent); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+    .fb-float { background:#F1EBFA; -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border:1px solid color-mix(in srgb, var(--color-primary) 18%, transparent); }
+    .fb-float .fb-ico { color:var(--color-primary-text); border-color:var(--color-primary-text); }
     .fb-side { padding:56px 44px; }
     .fb-card { max-width:450px; padding:10px; }
     .fb-card h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.65rem; letter-spacing:-.045em; margin-bottom:26px; }
