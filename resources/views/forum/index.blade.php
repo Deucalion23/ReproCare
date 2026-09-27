@@ -557,7 +557,7 @@
                     <div class="post-text-body">{{ $post->content }}</div>
 
                     {{-- Attached Photo Preview --}}
-                    @if($post->post_image)
+                    @if($post->post_image_url)
                         <div class="post-media-frame">
                             <img src="{{ $post->post_image_url }}" alt="Attached photo">
                         </div>

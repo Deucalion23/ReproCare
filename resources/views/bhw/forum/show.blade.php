@@ -79,7 +79,7 @@
 
                 <p class="mb-3" style="white-space:pre-wrap; line-height:1.6;">{{ $post->content }}</p>
 
-                @if($post->post_image)
+                @if($post->post_image_url)
                     <div class="mb-3">
                         <img src="{{ $post->post_image_url }}"
                              alt="Post image"

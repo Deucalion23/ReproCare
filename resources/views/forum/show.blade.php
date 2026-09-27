@@ -248,7 +248,7 @@
             <div class="post-detail-body">
                 <p class="post-content-text">{{ $post->content }}</p>
 
-                @if($post->post_image)
+                @if($post->post_image_url)
                     <img src="{{ $post->post_image_url }}"
                          alt="Post image"
                          class="forum-show-image">

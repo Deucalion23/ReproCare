@@ -99,7 +99,7 @@
                     <div class="post-content mb-3">
                         <p class="card-text" style="font-size:1rem; line-height:1.6; white-space:pre-wrap;">{{ $post->content }}</p>
 
-                        @if($post->post_image)
+                        @if($post->post_image_url)
                             <div class="mt-2">
                                 <img src="{{ $post->post_image_url }}"
                                      alt="Post image"

@@ -84,7 +84,7 @@
 
                 <div class="mb-3" style="color:var(--color-text); font-size:0.96rem; line-height:1.7; white-space:pre-wrap;">{{ $post->content }}</div>
 
-                @if($post->post_image)
+                @if($post->post_image_url)
                     <div class="mb-3">
                         <img src="{{ $post->post_image_url }}"
                              alt="Post image"
