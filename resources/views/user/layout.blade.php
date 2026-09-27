@@ -198,31 +198,49 @@
         color:#334155 !important;
     }
 
+    /* Selected dock tab = same solid lavender pill as desktop, no left bar */
     .women-dock-link.active {
-        color:var(--wp-primary);
+        color:#FFFFFF;
         font-weight:800;
-        background:var(--wp-lavender-subtle);
+        background:var(--women-action);
+        background-color:var(--women-action);
+        border-color:transparent;
+        box-shadow:none;
     }
 
     .women-dock-link.active i {
-        color:var(--wp-primary);
+        color:#FFFFFF;
         transform:scale(1.12);
     }
 
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active {
-        background:#1F2937 !important;
+        background:var(--women-action) !important;
+        background-color:var(--women-action) !important;
+        border-color:transparent !important;
+        box-shadow:none !important;
         color:#FFFFFF !important;
     }
 
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active i,
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active i,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active i {
         color:#FFFFFF !important;
     }
 
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
     :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
     :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover {
-        background:#1F2937 !important;
+        background:var(--women-action-hover) !important;
+        background-color:var(--women-action-hover) !important;
+        border-color:transparent !important;
+        box-shadow:none !important;
+        color:#FFFFFF !important;
+    }
+
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover i,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover i {
         color:#FFFFFF !important;
     }
 
