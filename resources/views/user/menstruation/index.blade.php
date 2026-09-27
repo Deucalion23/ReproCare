@@ -123,8 +123,10 @@
 
 .cycle-tabs { display:inline-flex; align-items:center; gap:4px; background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:999px; padding:4px; }
 .cycle-nav-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:999px; font-size:0.82rem; font-weight:800; padding:0.55rem 1.35rem; text-decoration:none; transition:all 0.2s ease; white-space:nowrap; }
-.cycle-nav-dark { background:#1E293B; color:#fff; box-shadow:0 8px 18px rgb(var(--color-shadow-rgb) / .16); }
-.cycle-nav-dark:hover { background:#0F172A; color:#fff; transform:translateY(-1px); }
+.cycle-nav-dark { background:#1E293B !important; background-color:#1E293B !important; color:#FFFFFF !important; box-shadow:0 8px 18px rgb(var(--color-shadow-rgb) / .16); }
+.cycle-nav-dark :is(span, i, svg, a) { color:#FFFFFF !important; }
+.cycle-nav-dark:hover, .cycle-nav-dark:active, .cycle-nav-dark:focus-visible, .cycle-nav-dark:visited { background:#0F172A !important; background-color:#0F172A !important; color:#FFFFFF !important; transform:translateY(-1px); }
+.cycle-nav-dark:hover :is(span, i, svg, a), .cycle-nav-dark:active :is(span, i, svg, a), .cycle-nav-dark:focus-visible :is(span, i, svg, a), .cycle-nav-dark:visited :is(span, i, svg, a) { color:#FFFFFF !important; }
 .cycle-nav-soft { background:#F1F5F9; color:#743AFF; }
 .cycle-nav-soft:hover { background:#E8EEF5; color:#6431DE; transform:translateY(-1px); }
 

@@ -360,26 +360,26 @@
     }
 
     /* High-specificity variants keep theme.css from recoloring the portal. */
-    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill),
-    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill) {
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log) {
         background:#1E293B !important;
         background-color:#1E293B !important;
         border-color:#1E293B !important;
         color:#FFFFFF !important;
     }
-    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill) :is(span, i, svg),
-    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill) :is(span, i, svg) {
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log) :is(span, i, svg, a),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log) :is(span, i, svg, a) {
         color:#FFFFFF !important;
     }
-    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible),
-    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible) {
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log):is(:hover, :active, :focus-visible, :visited),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log):is(:hover, :active, :focus-visible, :visited) {
         background:#0F172A !important;
         background-color:#0F172A !important;
         border-color:#0F172A !important;
         color:#FFFFFF !important;
     }
-    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible) :is(span, i, svg),
-    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible) :is(span, i, svg) {
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log):is(:hover, :active, :focus-visible, :visited) :is(span, i, svg, a),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill, .btn-log, .btn-hs-dark, .cycle-nav-dark, .btn-hero-action.btn-log):is(:hover, :active, :focus-visible, :visited) :is(span, i, svg, a) {
         color:#FFFFFF !important;
     }
 

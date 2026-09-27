@@ -121,14 +121,28 @@
     white-space:nowrap;
 }
 .btn-hero-action.btn-log {
-    background:#1E293B;
-    color:#FFFFFF;
+    background:#1E293B !important;
+    background-color:#1E293B !important;
+    color:#FFFFFF !important;
     box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent);
 }
-.btn-hero-action.btn-log:hover {
-    background:#0F172A;
-    color:#FFFFFF;
+.btn-hero-action.btn-log :is(span, i, svg, a) {
+    color:#FFFFFF !important;
+}
+.btn-hero-action.btn-log:hover,
+.btn-hero-action.btn-log:active,
+.btn-hero-action.btn-log:focus-visible,
+.btn-hero-action.btn-log:visited {
+    background:#0F172A !important;
+    background-color:#0F172A !important;
+    color:#FFFFFF !important;
     transform:translateY(-1px);
+}
+.btn-hero-action.btn-log:hover :is(span, i, svg, a),
+.btn-hero-action.btn-log:active :is(span, i, svg, a),
+.btn-hero-action.btn-log:focus-visible :is(span, i, svg, a),
+.btn-hero-action.btn-log:visited :is(span, i, svg, a) {
+    color:#FFFFFF !important;
 }
 .btn-hero-action.btn-support {
     background:#F1F5F9;
