@@ -302,11 +302,15 @@
     /* Keep both Care Records menu entries in the same dark slate used by the navigation. */
     .women-nav-dropdown-menu .women-dropdown-item,
     .women-nav-dropdown-menu .women-dropdown-item.active,
-    .women-nav-dropdown-menu .women-dropdown-item:hover,
     .women-nav-dropdown-menu .women-dropdown-item i,
-    .women-nav-dropdown-menu .women-dropdown-item.active i,
-    .women-nav-dropdown-menu .women-dropdown-item:hover i {
+    .women-nav-dropdown-menu .women-dropdown-item.active i {
         color:var(--nav-slate-600) !important;
+    }
+
+    .women-nav-dropdown-menu .women-dropdown-item:hover,
+    .women-nav-dropdown-menu .women-dropdown-item:hover i {
+        background:var(--nav-slate-100) !important;
+        color:var(--nav-primary) !important;
     }
 
     .women-dropdown-item:hover i, .women-dropdown-item.active i {
@@ -521,14 +525,39 @@
     }
 
     @media (max-width: 640px) {
+        .women-navbar { --nav-bar-min-h:60px; }
         .women-nav-container {
-            padding-left:1rem;
-            padding-right:1rem;
-            gap:0.75rem;
+            padding-left:0.85rem;
+            padding-right:0.85rem;
+            padding-top:0.5rem;
+            padding-bottom:0.5rem;
+            gap:0.5rem;
         }
+        .women-nav-left { margin-right:0; gap:0.35rem; }
+        .women-brand-link { gap:6px; }
+        .women-brand-mark, .women-brand-mark img { width:30px !important; height:30px !important; flex-basis:30px; }
+        .women-brand-mark { flex:0 0 30px; transform:none !important; }
         .women-brand-title {
-            font-size:1.2rem;
+            font-size:1.05rem;
         }
+        .women-nav-right { gap:0.45rem; margin-left:auto !important; }
+        /* Hide the round Care Support button on phones — it lives in the drawer. */
+        .women-nav-right .btn-care-support {
+            display:none !important;
+        }
+        .women-bell-btn {
+            width:32px !important;
+            height:32px !important;
+        }
+        .women-bell-btn i { font-size:13px; }
+        .women-profile-pill {
+            height:32px !important;
+            padding:0 6px 0 2px !important;
+            gap:4px;
+        }
+        .women-profile-avatar { width:24px; height:24px; }
+        .women-profile-pill .bi-chevron-down { display:none; }
+        .women-mobile-toggle { width:32px; height:32px; font-size:1.05rem; }
         .btn-care-support span {
             display:none;
         }
@@ -537,6 +566,14 @@
             padding:0 !important;
             justify-content:center;
         }
+    }
+
+    @media (max-width: 380px) {
+        .women-brand-title { font-size:0.95rem; }
+        .women-nav-right { gap:0.35rem; }
+        .women-bell-btn { width:30px !important; height:30px !important; }
+        .women-profile-pill { height:30px !important; }
+        .women-mobile-toggle { width:30px; height:30px; }
     }
 </style>
 

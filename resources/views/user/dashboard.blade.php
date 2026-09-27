@@ -489,6 +489,150 @@
             align-items:flex-start;
         }
     }
+
+    /* ── MOBILE: stack + compact everything so nothing overflows ── */
+    @media (max-width: 600px) {
+        .patient-hero {
+            padding:1.4rem 1.1rem;
+            border-radius:20px;
+            margin-bottom:1.25rem;
+        }
+        .patient-hero-title {
+            font-size:1.45rem;
+            line-height:1.2;
+            overflow-wrap:anywhere;
+        }
+        .patient-hero-subtitle {
+            font-size:0.82rem;
+            gap:6px;
+        }
+        .patient-hero-content .d-flex.justify-content-between {
+            flex-direction:column;
+            align-items:stretch !important;
+        }
+        .btn-hero-action {
+            width:100%;
+            justify-content:center;
+            padding:0.7rem 1rem;
+            font-size:0.88rem;
+            white-space:normal;
+            text-align:center;
+        }
+        .patient-chips-row {
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:8px;
+            margin-top:0.9rem;
+        }
+        .patient-summary-chip {
+            font-size:0.74rem;
+            padding:0.45rem 0.7rem;
+            min-width:0;
+            overflow:hidden;
+        }
+        .patient-summary-chip span {
+            overflow:hidden;
+            text-overflow:ellipsis;
+            white-space:nowrap;
+        }
+        .patient-chips-row .patient-summary-chip:last-child:nth-child(odd) {
+            grid-column:1 / -1;
+        }
+
+        /* Stat cards: keep 2-col but tighten */
+        .women-stat-card { padding:1rem 0.9rem; border-radius:16px; }
+        .stat-dark-icon { width:36px; height:36px; font-size:0.95rem; margin-bottom:0.55rem; }
+        .stat-big-value { font-size:1.55rem; }
+        .stat-label-text { font-size:0.68rem; }
+        .stat-footnote { font-size:0.74rem; }
+
+        /* Quick Health Actions: 2-col grid pills */
+        .mb-4 > .d-flex.gap-2.flex-wrap {
+            display:grid !important;
+            grid-template-columns:1fr 1fr;
+            gap:8px !important;
+        }
+        .action-pill {
+            width:100%;
+            justify-content:flex-start;
+            white-space:normal;
+            font-size:0.78rem;
+            line-height:1.25;
+            padding:0.5rem 0.7rem 0.5rem 0.5rem;
+            min-width:0;
+        }
+        .action-pill > span:last-child {
+            overflow:hidden;
+            display:-webkit-box;
+            -webkit-line-clamp:2;
+            -webkit-box-orient:vertical;
+        }
+
+        /* Health station card */
+        .health-station-banner {
+            padding:1rem;
+            gap:0.85rem;
+            border-radius:16px;
+            margin-bottom:1.25rem;
+        }
+        .health-station-banner > .d-flex:first-child {
+            align-items:flex-start !important;
+            gap:0.75rem !important;
+            width:100%;
+            min-width:0;
+        }
+        .hs-icon { width:40px; height:40px; font-size:1.05rem; border-radius:11px; }
+        .hs-title {
+            font-size:0.9rem;
+            line-height:1.35;
+            overflow-wrap:anywhere;
+        }
+        .hs-badge {
+            font-size:0.64rem;
+            white-space:normal;
+            text-align:left;
+            line-height:1.3;
+        }
+        .hs-subtitle { font-size:0.76rem; }
+        .health-station-banner > .d-flex:last-child { width:100%; }
+        .btn-hs-dark {
+            width:100%;
+            justify-content:center;
+            font-size:0.82rem;
+        }
+
+        /* Pregnancy journey card */
+        .pregnancy-journey-card { border-radius:18px; margin-bottom:1.25rem; }
+        .pregnancy-journey-card .p-4 { padding:1rem !important; }
+        .pregnancy-journey-card .border-bottom {
+            flex-direction:column;
+            align-items:stretch !important;
+        }
+        .pregnancy-journey-card h5 { font-size:1rem; line-height:1.35; }
+        .pregnancy-journey-card .btn { align-self:flex-start; }
+        .pregnancy-stat-val { font-size:1.2rem; overflow-wrap:anywhere; }
+        .pregnancy-stat-lbl { font-size:0.72rem; }
+        .pregnancy-stat-pill { padding:0.9rem 0.75rem; }
+
+        /* Recent activity timeline */
+        .card-header { padding:0.9rem 1rem !important; flex-wrap:wrap; gap:0.5rem; }
+        .card-header h5 { font-size:1rem; }
+        .card-body { padding:1rem !important; }
+        .timeline-row { padding-left:44px; margin-bottom:1rem; }
+        .maternal-timeline::before { left:17px; }
+        .timeline-dot-icon { left:4px; width:26px; height:26px; font-size:0.75rem; }
+
+        /* Community + tips */
+        .list-group-item .d-flex.align-items-center { flex-wrap:wrap; row-gap:4px; }
+        .list-group-item small.ms-auto { margin-left:0 !important; width:100%; }
+    }
+
+    @media (max-width: 380px) {
+        .patient-hero-title { font-size:1.28rem; }
+        .patient-chips-row { grid-template-columns:1fr; }
+        .mb-4 > .d-flex.gap-2.flex-wrap { grid-template-columns:1fr; }
+        .row.g-3.mb-4 > [class*="col-6"] { width:100%; flex:0 0 100%; max-width:100%; }
+    }
 </style>
 @endpush
 
@@ -525,7 +669,11 @@
                 <div class="patient-hero-subtitle">
                     <span><i class="bi bi-calendar3 me-1"></i>{{ now()->format('l, F j, Y') }}</span>
                     <span>&bull;</span>
-                    <span>Barangay {{ auth()->user()->barangay ?? 'San Carlos City' }}</span>
+                    @php
+                        $heroBarangay = auth()->user()->barangay ?? 'San Carlos City';
+                        $heroBarangay = preg_replace('/^\s*Barangay\s+/i', '', $heroBarangay);
+                    @endphp
+                    <span>Barangay {{ $heroBarangay }}, San Carlos City, Pangasinan</span>
                 </div>
             </div>
 
