@@ -89,6 +89,28 @@ class BhwPresidentAssignmentService
     }
 
     /**
+     * Constrain a query builder to rows whose barangay falls in the given
+     * jurisdiction. Same normalize-and-overlap rule as jurisdictionsOverlap,
+     * expressed as a portable LIKE so it works in SQL on mysql/pgsql/sqlite:
+     * legacy spellings ('Burgos', 'Barangay Burgos Padlan, San Carlos City,
+     * Pangasinan', 'Brgy. Burgos St') all match. Empty jurisdiction (or a
+     * key with no safe characters) applies no constraint.
+     *
+     * Note: matching runs president-key direction (data containing the key),
+     * which covers real registries where the president holds the short core
+     * name. Exact bidirectional checks remain PHP-side (settings page).
+     */
+    public static function applyJurisdictionFilter($query, ?string $barangay, string $column = 'barangay'): void
+    {
+        $key = self::normalizeBarangay($barangay);
+        if ($key === '' || !preg_match('/^[a-z0-9 ]+$/', $key)) {
+            return;
+        }
+        $like = '%' . str_replace(' ', '%', $key) . '%';
+        $query->whereRaw("LOWER({$column}) LIKE ?", [$like]);
+    }
+
+    /**
      * Throw a styled validation error when the barangay is taken.
      *
      * @throws ValidationException
