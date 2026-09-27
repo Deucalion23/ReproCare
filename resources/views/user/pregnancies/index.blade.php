@@ -55,7 +55,7 @@
 
 .trimester-track { display:flex; gap:0.85rem; margin-bottom:1.25rem; position:relative; }
 /* Payment-style pastel status cards: soft tinted bg + white icon circle + bold title + muted sub */
-.trimester-card { flex:1; border-radius:18px; padding:1.1rem 1.15rem; display:flex; align-items:flex-start; gap:0.85rem; position:relative; z-index:1; overflow:hidden; transition:all 0.25s ease; border:1px solid transparent; box-shadow:var(--wp-shadow-sm); text-align:left; }
+.trimester-card { flex:1; border-radius:18px; padding:1.1rem 1.15rem; display:flex; align-items:center; justify-content:center; gap:0.85rem; position:relative; z-index:1; overflow:hidden; transition:all 0.25s ease; border:1px solid transparent; box-shadow:var(--wp-shadow-sm); text-align:center; }
 .trimester-card.active { background:var(--color-primary-soft); border-color:color-mix(in srgb, var(--color-primary) 22%, transparent); box-shadow:0 14px 32px color-mix(in srgb, var(--color-primary) 18%, transparent), var(--wp-shadow-sm); transform:translateY(-2px); }
 .trimester-card.completed { background:var(--color-success-soft); border-color:color-mix(in srgb, var(--color-success) 22%, transparent); }
 .trimester-card.upcoming { background:var(--color-surface-soft); border-color:var(--color-border); box-shadow:var(--wp-shadow-sm); }
@@ -63,7 +63,7 @@
 .trimester-card.completed .trimester-icon { color:var(--color-success-text); }
 .trimester-card.active .trimester-icon { color:var(--color-primary-text); }
 .trimester-card.upcoming .trimester-icon { color:var(--color-text-muted); }
-.trimester-copy { min-width:0; flex:1; }
+.trimester-copy { min-width:0; flex:1; text-align:center; }
 .trimester-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1.1px; margin-bottom:0.2rem; }
 .trimester-card.active .trimester-num { color:var(--color-primary-text); }
 .trimester-card.completed .trimester-num { color:var(--color-success-text); }
@@ -269,13 +269,6 @@
             @if($state === 'completed') <div class="trimester-badge"><i class="bi bi-check-lg"></i></div>
             @elseif($state === 'active') <div class="trimester-badge"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i></div>
             @else <div class="trimester-badge upcoming">{{ $t }}</div>
-            @endif
-            @if($state === 'completed')
-                <div class="trimester-icon"><i class="bi bi-check-circle-fill"></i></div>
-            @elseif($state === 'active')
-                <div class="trimester-icon"><i class="bi bi-record-circle-fill"></i></div>
-            @else
-                <div class="trimester-icon"><i class="bi bi-clock-fill"></i></div>
             @endif
             <div class="trimester-copy">
                 <div class="trimester-num">Trimester {{ $t }}</div>
