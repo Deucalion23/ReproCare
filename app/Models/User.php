@@ -73,6 +73,7 @@ class User extends Authenticatable
         'pref_report_summary',
         'role',
         'status',
+        'failed_login_attempts',
         'profile_image',
         'profile_image_data',
         'rejection_reason',

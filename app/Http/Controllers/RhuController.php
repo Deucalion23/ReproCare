@@ -1380,7 +1380,9 @@ class RhuController extends Controller
     {
         $search = request('search');
 
-        $query = User::where('role', 'user')->where('status', 'pending');
+        // Pending verifications plus accounts auto-locked by failed logins
+        // (status inactive) so the RHU admin can reactivate them here.
+        $query = User::where('role', 'user')->whereIn('status', ['pending', 'inactive']);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -1486,6 +1488,7 @@ class RhuController extends Controller
         $woman->update([
             'status' => 'approved',
             'rejection_reason' => null,
+            'failed_login_attempts' => 0,
         ]);
 
         \App\Models\Notification::createNotification(
@@ -1500,6 +1503,33 @@ class RhuController extends Controller
 
         return redirect()->route('rhu.pending-patients')
             ->with('success', $woman->name . ' has been approved.');
+    }
+
+    /**
+     * Reactivate a patient account auto-locked by failed logins
+     * (status inactive). Only RHU admins can perform this (route guard).
+     */
+    public function reactivatePatient($id)
+    {
+        $woman = User::where('role', 'user')->where('status', 'inactive')->findOrFail($id);
+        $woman->update([
+            'status' => 'approved',
+            'rejection_reason' => null,
+            'failed_login_attempts' => 0,
+        ]);
+
+        \App\Models\Notification::createNotification(
+            $woman->id,
+            'Your account has been reactivated by your RHU administrator. You can now log in to ReproCare.',
+            'Account Reactivated',
+            'success',
+            route('user.dashboard')
+        );
+
+        ActivityLog::log('approve', "Reactivated locked patient account: {$woman->name}", $woman);
+
+        return redirect()->route('rhu.pending-patients')
+            ->with('success', $woman->name . ' has been reactivated and can log in again.');
     }
 
     public function rejectPatient(Request $request, $id)

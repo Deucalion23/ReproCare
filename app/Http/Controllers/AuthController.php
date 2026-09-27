@@ -16,6 +16,12 @@ use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
     /**
+     * Wrong-password attempts after which an approved patient account
+     * auto-locks (status inactive) until an RHU admin reactivates it.
+     */
+    private const MAX_LOGIN_ATTEMPTS = 3;
+
+    /**
      * Legacy city-wide 86-barangay list. Kept for reference only —
      * user-facing forms must use Barangay::catchmentNames('RHU 1')
      * (16 barangays) since this deployment serves RHU 1 alone.
@@ -222,6 +228,11 @@ class AuthController extends Controller
         if (Auth::attempt(['email' => $credentials['email'], 'password' => $credentials['password']], $request->boolean('remember'))) {
             $user = Auth::user();
 
+            // Successful login clears any prior failed-attempt count.
+            if (!empty($user->failed_login_attempts)) {
+                $user->update(['failed_login_attempts' => 0]);
+            }
+
             // Block pending users from logging in
             if ($user->status === 'pending') {
                 Auth::logout();
@@ -261,9 +272,43 @@ class AuthController extends Controller
             };
         }
 
+        // Locked on this very attempt: tell the owner why, and who to see.
+        if ($this->registerFailedLoginAttempt($credentials['email'])) {
+            return back()->withErrors([
+                'email' => 'Too many incorrect password attempts. Your account has been deactivated for security. Please contact your RHU 1 administrator to reactivate it.',
+            ])->onlyInput('email');
+        }
+
         return back()->withErrors([
             'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
+    }
+
+    /**
+     * Count a failed login against a patient account. Approved patient
+     * accounts lock (status inactive) after MAX_LOGIN_ATTEMPTS wrong
+     * passwords; only an RHU admin can reactivate them. Other roles and
+     * non-approved statuses are never touched. Returns true when this
+     * attempt triggered the lock.
+     */
+    private function registerFailedLoginAttempt(string $email): bool
+    {
+        $user = \App\Models\User::where('email', $email)->first();
+
+        if (!$user || $user->role !== 'user' || $user->status !== 'approved') {
+            return false;
+        }
+
+        $attempts = (int) ($user->failed_login_attempts ?? 0) + 1;
+
+        if ($attempts >= self::MAX_LOGIN_ATTEMPTS) {
+            $user->update(['status' => 'inactive', 'failed_login_attempts' => 0]);
+            \App\Models\ActivityLog::log('update', "Patient account auto-locked after {$attempts} failed login attempts: {$user->name}", $user);
+            return true;
+        }
+
+        $user->update(['failed_login_attempts' => $attempts]);
+        return false;
     }
 
     public function showForgotForm()
