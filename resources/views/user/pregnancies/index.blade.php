@@ -267,10 +267,6 @@
             $ordLabel = $t === 1 ? '1st' : ($t === 2 ? '2nd' : '3rd');
         @endphp
         <div class="trimester-card {{ $state }}">
-            @if($state === 'completed') <div class="trimester-badge"><i class="bi bi-check-lg"></i></div>
-            @elseif($state === 'active') <div class="trimester-badge"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i></div>
-            @else <div class="trimester-badge upcoming">{{ $t }}</div>
-            @endif
             @if($state === 'completed')
                 <div class="trimester-icon"><i class="bi bi-check-circle-fill"></i></div>
             @elseif($state === 'active')
