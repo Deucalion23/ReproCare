@@ -390,11 +390,20 @@
         font-size:0.88rem !important;
         color:var(--color-text) !important;
         box-shadow:none !important;
+        outline:none !important;
     }
-    .learn-input:focus {
-        border-color:var(--color-secondary-text) !important;
-        box-shadow:0 0 0 3px color-mix(in srgb, var(--color-secondary-text) 18%, transparent) !important;
-        outline:none;
+    .learn-input:focus,
+    .learn-input:focus-visible,
+    .learn-input:active {
+        border-color:var(--color-border) !important;
+        box-shadow:none !important;
+        outline:none !important;
+    }
+    .learn-search-group:focus-within .learn-search-icon,
+    .learn-search-group:focus-within .learn-input {
+        border-color:var(--color-border) !important;
+        box-shadow:none !important;
+        outline:none !important;
     }
     .learn-search-group { flex-wrap:nowrap; }
     .learn-search-group .learn-search-icon {
