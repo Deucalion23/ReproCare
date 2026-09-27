@@ -276,6 +276,17 @@
         .women-content-wrap {
             padding-bottom:6.5rem;
         }
+
+        /* ── Portal-wide mobile shrink: top-card text + buttons ── */
+        .women-content-wrap .page-title { font-size:1.05rem !important; line-height:1.3 !important; }
+        .women-content-wrap .page-subtitle { font-size:0.76rem !important; line-height:1.5 !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) { padding:1rem !important; border-radius:18px !important; margin-bottom:1.15rem !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) h1,
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) h2 { font-size:1.05rem !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) p { font-size:0.76rem !important; }
+        .women-content-wrap .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
+        .women-content-wrap .btn-sm { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
+        .women-content-wrap .card-header h5 { font-size:0.9rem !important; }
     }
 
     /* ═══════════════════════════════════════════════

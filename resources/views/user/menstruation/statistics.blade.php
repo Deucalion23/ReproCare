@@ -57,9 +57,6 @@
             <a href="{{ route('user.menstruation.calendar') }}" class="btn btn-outline-secondary btn-sm">
                 <i class="bi bi-calendar3 me-1"></i> Calendar
             </a>
-            <a href="{{ route('user.menstruation.report') }}" class="btn btn-success btn-sm">
-                <i class="bi bi-file-earmark-pdf me-1"></i> PDF Report
-            </a>
         </div>
     </div>
 
