@@ -147,6 +147,22 @@ class User extends Authenticatable
         return $this->hasMany(Pregnancy::class, 'user_id');
     }
 
+    /**
+     * Menstrual periods must not be recorded while a pregnancy remains active.
+     * Pregnancy-related bleeding is a clinical concern, not a cycle entry.
+     */
+    public function pregnancyBlockingMenstrualLogging(): ?Pregnancy
+    {
+        // Do not silently resume cycle tracking simply because an estimated
+        // due date passed. A clinician must first close the pregnancy record.
+        return $this->pregnancies()->whereNull('ended_at')->latest('lmp')->first();
+    }
+
+    public function canLogMenstrualPeriod(): bool
+    {
+        return $this->pregnancyBlockingMenstrualLogging() === null;
+    }
+
     public function newborns()
     {
         return $this->hasMany(Newborn::class, 'mother_id')->orderByDesc('birth_date');

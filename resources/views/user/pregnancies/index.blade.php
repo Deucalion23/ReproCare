@@ -80,7 +80,7 @@
 .trimester-card.active .trimester-badge { background:#FFFFFF; color:var(--color-text-muted); border:1px solid var(--color-border); box-shadow:none; }
 .trimester-card.completed .trimester-badge { background:#FFFFFF; color:var(--color-text-muted); border:1px solid var(--color-border); box-shadow:none; }
 .trimester-card.upcoming .trimester-badge { background:#FFFFFF; color:var(--color-text-muted); border:1px solid var(--color-border); }
-@media (max-width:576px) { .trimester-track { flex-direction:column; } }
+@media (max-width:576px) { .trimester-track { flex-direction:column; } .trimester-status { font-size:0.6rem; padding:0.32rem 0.65rem; letter-spacing:0.4px; } }
 
 .preg-info-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin-bottom:1.25rem; }
 @media (min-width:768px) { .preg-info-grid { grid-template-columns:repeat(4,1fr); } }

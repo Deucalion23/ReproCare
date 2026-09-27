@@ -242,6 +242,7 @@ class UserController extends Controller
     // Menstruation Tracking
     public function menstruation()
     {
+        $activePregnancy = Auth::user()->pregnancyBlockingMenstrualLogging();
         $records = Auth::user()->cycles()
             ->orderBy('period_start_date', 'desc')
             ->paginate(10);
@@ -252,16 +253,24 @@ class UserController extends Controller
         $averagePeriod = Cycle::getAveragePeriodLength(Auth::id());
 
         $predictionDetail = app(CyclePredictionService::class)->getPredictionDetail(Auth::id());
-        return view('user.menstruation.index', compact('records', 'nextPeriod', 'averageCycle', 'averagePeriod', 'predictionDetail'));
+        return view('user.menstruation.index', compact('records', 'nextPeriod', 'averageCycle', 'averagePeriod', 'predictionDetail', 'activePregnancy'));
     }
 
     public function createMenstruationRecord()
     {
+        if ($response = $this->periodLoggingBlockedResponse()) {
+            return $response;
+        }
+
         return view('user.menstruation.create');
     }
 
     public function storeMenstruationRecord(Request $request)
     {
+        if ($response = $this->periodLoggingBlockedResponse()) {
+            return $response;
+        }
+
         $validated = $request->validate([
             'start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,NULL,id,user_id,'.Auth::id(),
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
@@ -524,6 +533,10 @@ class UserController extends Controller
     // POST /cycles - Store a new cycle
     public function storeCycle(Request $request)
     {
+        if ($response = $this->periodLoggingBlockedResponse()) {
+            return $response;
+        }
+
         $validated = $request->validate([
             'period_start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,NULL,id,user_id,'.Auth::id(),
             'period_end_date' => 'nullable|date|after_or_equal:period_start_date|before_or_equal:today',
@@ -600,6 +613,24 @@ class UserController extends Controller
     {
         $service = new CyclePredictionService();
         $service->recalculateCycleLengths($userId);
+    }
+
+    /**
+     * Central guard for every patient-facing period-entry route. Keeping this
+     * server-side prevents bypassing the UI through a direct POST request.
+     */
+    private function periodLoggingBlockedResponse()
+    {
+        $pregnancy = Auth::user()?->pregnancyBlockingMenstrualLogging();
+
+        if (! $pregnancy) {
+            return null;
+        }
+
+        return redirect()->route('user.menstruation.index')->with(
+            'pregnancy_cycle_blocked',
+            'You have an active pregnancy record. Period logging is paused during pregnancy. If you are experiencing bleeding or your pregnancy has ended, please contact your healthcare provider so your pregnancy record can be reviewed and updated.'
+        );
     }
 
     // ============================================

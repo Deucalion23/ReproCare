@@ -180,6 +180,17 @@
         </div>
     @endif
 
+    @if(session('pregnancy_cycle_blocked') || $activePregnancy)
+        <div class="alert alert-warning mb-4" role="alert">
+            <i class="bi bi-heart-pulse-fill me-2"></i>
+            <strong>Period tracking is paused during pregnancy.</strong>
+            If you are experiencing bleeding or your pregnancy has ended, contact your healthcare provider so your pregnancy record can be reviewed and updated.
+            @if($activePregnancy)
+                <a href="{{ route('user.pregnancies.show', $activePregnancy) }}" class="alert-link ms-1">View pregnancy record</a>
+            @endif
+        </div>
+    @endif
+
     <!-- Hero Cycle Card -->
     <div class="cycle-hero mb-4">
         <div class="cycle-hero-content cycle-hero-layout">
@@ -303,9 +314,11 @@
                     <p style="color:var(--text-muted); font-size:0.875rem;">
                         Log your first period to get predictions and insights
                     </p>
-                    <a href="{{ route('user.menstruation.create') }}" class="btn btn-primary btn-sm mt-2">
-                        <i class="bi bi-plus-lg me-1"></i> Log Period
-                    </a>
+                    @if(!$activePregnancy)
+                        <a href="{{ route('user.menstruation.create') }}" class="btn btn-primary btn-sm mt-2">
+                            <i class="bi bi-plus-lg me-1"></i> Log Period
+                        </a>
+                    @endif
                 @endif
             </div>
         </div>
