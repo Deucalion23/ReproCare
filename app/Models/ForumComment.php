@@ -26,14 +26,17 @@ class ForumComment extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function getUserAttribute()
-    {
-        return $this->user;
-    }
+    // NOTE: no getUserAttribute() here on purpose — $comment->user must
+    // resolve through the user() belongsTo relation below. A same-named
+    // accessor would shadow it and fatal with "Undefined property".
 
     public function getUserIdAttribute(): ?int
     {
-        return $this->user_id;
+        // Read the raw row value directly: $this->user_id would re-enter
+        // this same accessor through Eloquent magic and fatal.
+        $value = $this->attributes['user_id'] ?? null;
+
+        return $value === null ? null : (int) $value;
     }
 
     public function getUserTypeAttribute(): ?string
