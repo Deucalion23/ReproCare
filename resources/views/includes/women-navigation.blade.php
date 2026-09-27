@@ -20,9 +20,9 @@
     /* ── Layout & Variables (rem-based so browser zoom / root font scales everything) ── */
     :root {
         --nav-bar-h:auto;
-        --nav-bar-min-h:3.75rem; /* 60px @ 16px root — was 72px, slimmed to match smaller brand */
-        --nav-btn-h:2.25rem; /* 36px pill — brand is intentionally smaller */
-        --nav-brand-sz:1.5rem; /* 24px logo — smaller than the 36px action pill */
+        --nav-bar-min-h:3.75rem; /* 60px @ 16px root */
+        --nav-btn-h:2.25rem; /* 36px pill / bell / profile actions */
+        --nav-brand-sz:2.25rem; /* = action-button size (36px desktop, hamburger-sized) */
         --nav-brand-title-sz:clamp(0.9rem, 0.85rem + 0.4vw, 1rem);
         --nav-font-sz:13.5px;
         --nav-icon-sz:16px;
@@ -579,7 +579,7 @@
     }
 
     @media (max-width: 640px) {
-        .women-navbar { --nav-bar-min-h:3.25rem; --nav-brand-sz:1.375rem; --nav-brand-title-sz:0.92rem; }
+        .women-navbar { --nav-bar-min-h:3.25rem; --nav-brand-sz:2rem; --nav-brand-title-sz:0.92rem; }
         .women-nav-container {
             padding-left:0.85rem;
             padding-right:0.85rem;
@@ -625,7 +625,7 @@
     }
 
     @media (max-width: 380px) {
-        .women-navbar { --nav-brand-sz:1.25rem; --nav-brand-title-sz:0.85rem; }
+        .women-navbar { --nav-brand-sz:1.875rem; --nav-brand-title-sz:0.85rem; }
         .women-brand-title { font-size:var(--nav-brand-title-sz); }
         .women-nav-right { gap:0.35rem; }
         .women-bell-btn { width:30px !important; height:30px !important; }
@@ -833,9 +833,9 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
         <div class="d-flex align-items-center" style="gap:0.125rem;">
-            <span aria-hidden="true" style="width:var(--nav-brand-sz); height:var(--nav-brand-sz); display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 var(--nav-brand-sz); transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
-            <div style="margin-left:-0.25rem; min-width:0;">
-                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:var(--nav-btn-h); line-height:1; padding-bottom:1px; font-size:var(--nav-brand-title-sz);" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
+            <span aria-hidden="true" style="width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 2rem; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
+            <div style="margin-left:-0.2rem; min-width:0;">
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>
