@@ -105,7 +105,7 @@
                     <span class="rc-av" id="selectedContactAvatar">{{ $receiver ? strtoupper(substr($receiver->name, 0, 1)) : '?' }}</span>
                     <div style="min-width:0;">
                         <div class="fw-bold" id="selectedContactName" style="color:var(--color-text);font-size:.92rem;">{{ $receiver?->name ?? 'No contact selected' }}</div>
-                        <small id="selectedContactLabel" style="color:var(--color-secondary-text);font-weight:600;">{{ $receiver ? ucfirst(str_replace('_', ' ', $receiver->role)) : 'Choose a contact from the left' }}</small>
+                        <small id="selectedContactLabel" style="color:var(--color-secondary-text);font-weight:600;">{{ $receiver?->staff_title ?? 'Choose a contact from the left' }}</small>
                     </div>
                     <i class="bi bi-chat-heart-fill ms-auto" style="color:var(--color-secondary-text);font-size:1.2rem;"></i>
                 </div>

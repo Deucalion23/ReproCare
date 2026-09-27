@@ -430,7 +430,7 @@ class MessageController extends Controller
                     'role' => $messagingRole,
                     'type' => $messagingRole,
                     'user_role' => $user->role,
-                    'label' => $this->formatRoleLabel($user->role),
+                    'label' => $this->formatRoleLabel($user),
                 ];
             });
 
@@ -520,14 +520,8 @@ class MessageController extends Controller
         return $a === $b || str_contains($a, $b) || str_contains($b, $a);
     }
 
-    private function formatRoleLabel(string $role): string
+    private function formatRoleLabel(User $user): string
     {
-        return match ($role) {
-            'user' => 'Patient',
-            'midwife' => 'Midwife',
-            'bhw_president' => 'BHW President',
-            'bhw' => 'BHW',
-            default => ucfirst(str_replace('_', ' ', $role)),
-        };
+        return $user->staff_title;
     }
 }

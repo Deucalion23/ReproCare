@@ -53,7 +53,7 @@
     $rootSentByCurrentUser = $root->sender_id === $currentUserId;
     $otherParty = $rootSentByCurrentUser ? $root->receiver : $root->sender;
     $otherPartyPhoto = $otherParty ? $otherParty->profile_image_url : '/images/avatars/avatar-female.svg';
-    $otherPartyLabel = match ($otherParty?->role) { 'user' => 'Patient', 'midwife' => 'Midwife', 'bhw_president' => 'BHW President', 'bhw' => 'BHW Health Worker', default => 'Member', };
+    $otherPartyLabel = $otherParty?->staff_title ?? 'Member';
 @endphp
 
 @section($contentSection)

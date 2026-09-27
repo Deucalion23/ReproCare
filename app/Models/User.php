@@ -579,6 +579,31 @@ class User extends Authenticatable
     }
 
     /**
+     * Display title for directories and chats: BHW roles include their
+     * barangay (e.g. "BHW · Barangay Burgos Padlan"), others show the
+     * plain role name.
+     */
+    public function getStaffTitleAttribute(): string
+    {
+        $base = match ($this->role) {
+            'user' => 'Patient',
+            'midwife' => 'Midwife',
+            'bhw_president' => 'BHW President',
+            'bhw' => 'BHW',
+            default => 'Member',
+        };
+
+        if (in_array($this->role, ['bhw', 'bhw_president'], true)) {
+            $barangay = $this->assigned_barangay ?: $this->barangay;
+            if (is_string($barangay) && trim($barangay) !== '') {
+                return $base . ' · ' . \App\Services\BhwPresidentAssignmentService::displayBarangay($barangay);
+            }
+        }
+
+        return $base;
+    }
+
+    /**
      * Public URL for the front scan of the registrant's valid ID, if any.
      * Mirrors the profile-image fallback chain (public disk → legacy
      * public copy) so RHU verifiers never hit a broken image link.

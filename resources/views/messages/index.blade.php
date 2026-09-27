@@ -114,7 +114,7 @@
                         $lastActivity = $msg->replies_max_created_at ? \Carbon\Carbon::parse($msg->replies_max_created_at) : $msg->created_at;
                         $previewPrefix = $sentByCurrentUser ? 'You: ' : '';
                         $otherPhoto = $otherParty ? $otherParty->profile_image_url : '/images/avatars/avatar-female.svg';
-                        $otherRole = match ($otherParty?->role) { 'midwife' => 'Midwife', 'bhw' => 'BHW', 'bhw_president' => 'BHW President', 'user' => 'Patient', default => 'Member', };
+                        $otherRole = $otherParty?->staff_title ?? 'Member';
                         $roleCls = match ($otherParty?->role) { 'midwife' => 'rc-role-midwife', 'bhw' => 'rc-role-bhw', 'bhw_president' => 'rc-role-president', 'user' => 'rc-role-patient', default => 'rc-role-member', };
                     @endphp
                     <a href="{{ route($messagesRouteBase . '.thread', $msg->id) }}" class="rc-chat-item {{ $unreadForCurrentUser ? 'unread' : '' }}">
