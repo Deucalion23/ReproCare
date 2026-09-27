@@ -354,24 +354,50 @@
         color:var(--nav-slate-500) !important;
     }
 
-    /* Hover — same lavender + purple text as the top navigation buttons. */
+    /* Hover/focus — same dark pill + white text as the top navigation
+       (NOT the lavender tint: must also beat theme.css generic
+       `.dropdown-item:hover`, hence the boosted duplicates below). */
     .women-nav-dropdown-menu .women-dropdown-item:hover,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
     .women-nav-dropdown-menu .women-dropdown-item:focus,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus {
-        background:var(--nav-hover-bg) !important;
-        background-color:var(--nav-hover-bg) !important;
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
         border:none !important;
         border-left:none !important;
         box-shadow:none !important;
-        color:var(--nav-hover-text) !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
     }
 
     .women-nav-dropdown-menu .women-dropdown-item:hover i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover i,
     .women-nav-dropdown-menu .women-dropdown-item:focus i,
     .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus i {
-        color:var(--nav-hover-text) !important;
+        color:var(--color-on-solid) !important;
+    }
+
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus,
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:focus,
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover,
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover {
+        background:var(--color-surface-strong) !important;
+        background-color:var(--color-surface-strong) !important;
+        border:none !important;
+        border-left:none !important;
+        box-shadow:none !important;
+        color:var(--color-on-solid) !important;
+        font-weight:700 !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:focus :is(span, i, svg),
+    :root[data-theme][data-bs-theme] body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:focus :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .dropdown-item.women-dropdown-item:hover :is(span, i, svg),
+    body .women-navbar .women-nav-dropdown-menu .women-dropdown-item:hover :is(span, i, svg) {
+        color:var(--color-on-solid) !important;
     }
 
     /* Selected page — same dark pill + white text as the top navigation. */
@@ -462,13 +488,15 @@
 
     [data-theme="dark"] .women-dropdown-item:hover,
     [data-theme="dark"] .women-dropdown-item.active {
-        background:var(--color-surface-soft) !important;
-        color:var(--color-text) !important;
+        background:#0F172A !important;
+        background-color:#0F172A !important;
+        color:#FFFFFF !important;
+        font-weight:700 !important;
     }
 
     [data-theme="dark"] .women-dropdown-item:hover i,
     [data-theme="dark"] .women-dropdown-item.active i {
-        color:var(--color-text) !important;
+        color:#FFFFFF !important;
     }
 
     /* ── 4. SECTION 3: Right Actions Container ── */
