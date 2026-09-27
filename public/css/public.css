@@ -204,6 +204,12 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .landing-page .how-section > div > p { max-width:330px; color:var(--public-muted); font-size:13px; line-height:1.7; margin-bottom:23px; }
 .landing-page .how-steps { gap:25px; }
 .landing-page .how-steps li { padding-top:2px; }
+/* Keep the Create Account header consistent with landing and sign-in. */
+.signup-page .public-header { border-bottom:1px solid var(--color-border); }
+.signup-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
+.signup-page .public-brand { transform:translateY(-2px); }
+.signup-page .public-brand-mark { transform:translateY(-8px); }
+.signup-page .public-brand-name { transform:translateY(4px); }
 /* Registration keeps its existing fields, step validation and ID capture controls. */
 .signup-page {;;; --primary-sub:var(--color-secondary-soft); --green:var(--color-secondary-text); --green-deep:var(--color-surface-strong); --green-light:var(--color-secondary-soft); --green-dark:var(--color-secondary-text); --green-dim:var(--color-secondary-soft); --pink:var(--color-secondary-text);; --text-faint:var(--color-text-muted);; }
 .signup-page .reg-page { width:min(1100px,calc(100% - 80px)); margin:22px auto 48px; min-height:calc(100vh - 235px); background:transparent; gap:75px; align-items:flex-start; }
@@ -302,6 +308,10 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
     .landing-page .public-brand { transform:translateY(-1px); }
     .landing-page .public-brand-mark { transform:translateY(-11px); }
     .landing-page .public-brand-name { transform:translateY(3px); }
+    .signup-page .header-inner { min-height:62px; padding-inline:20px; }
+    .signup-page .public-brand { transform:translateY(-1px); }
+    .signup-page .public-brand-mark { transform:translateY(-11px); }
+    .signup-page .public-brand-name { transform:translateY(3px); }
     .landing-page .landing-hero { padding-block:40px 42px; gap:32px; }
     .landing-page .hero h1 { font-size:clamp(2.65rem, 12vw, 3.45rem); line-height:1.05; }
     .landing-page .hero-copy > p { font-size:14px; line-height:1.75; }
