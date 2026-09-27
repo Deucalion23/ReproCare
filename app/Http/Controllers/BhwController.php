@@ -724,11 +724,23 @@ class BhwController extends Controller
     // Checkups - BHW can only view scheduled checkups (created by BHW or midwife)
     public function checkups()
     {
+        // BHWs see only checkups from their own barangay (shared jurisdiction
+        // rule so legacy spellings resolve to the same area).
+        $bhwBarangay = auth()->user()->barangay;
+        $inArea = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $bhwBarangay, $column);
+        $areaScope = function ($query) use ($inArea) {
+            $query->where(function ($q) use ($inArea) {
+                $q->whereHas('woman', function ($w) use ($inArea) { $inArea($w); })
+                  ->orWhereHas('walkInPatient', function ($w) use ($inArea) { $inArea($w); });
+            });
+        };
         $checkups = Checkup::with(['woman', 'walkInPatient', 'midwife', 'scheduledBy'])
             ->scheduled()
+            ->where(function ($query) use ($areaScope) { $areaScope($query); })
             ->orderBy('scheduled_date', 'asc')
             ->paginate(10);
         $women = User::where('role', 'user')->where('status', 'approved')
+            ->tap($inArea)
             ->orderBy('last_name')->orderBy('first_name')
             ->get(['id', 'first_name', 'middle_initial', 'last_name']);
 
@@ -783,8 +795,16 @@ class BhwController extends Controller
     // automatically once the midwife marks it completed.
     public function archivedCheckups()
     {
+        $bhwBarangay = auth()->user()->barangay;
         $checkups = Checkup::with(['woman', 'walkInPatient', 'midwife', 'scheduledBy'])
             ->where('status', 'Completed')
+            ->where(function ($query) use ($bhwBarangay) {
+                $query->whereHas('woman', function ($w) use ($bhwBarangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $bhwBarangay);
+                })->orWhereHas('walkInPatient', function ($w) use ($bhwBarangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $bhwBarangay);
+                });
+            })
             ->orderBy('scheduled_date', 'desc')
             ->paginate(10);
 

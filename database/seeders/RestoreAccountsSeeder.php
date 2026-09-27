@@ -65,7 +65,7 @@ class RestoreAccountsSeeder extends Seeder
                 'role' => 'user',
                 'status' => 'approved',
                 'address' => 'Barangay Burgos San Carlos City Pangasinan',
-                'barangay' => 'Barangay Burgos Padlan, San Carlos City, Pangasinan',
+                'barangay' => 'Burgos St',
                 'purok_id' => 4,
                 'date_of_birth' => '1995-03-21',
                 'contact_number' => '09123456785',
