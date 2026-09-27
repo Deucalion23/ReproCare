@@ -16,7 +16,7 @@
     /* Match patient primary actions to the lavender used on the public landing page. */
     .women-shell { --women-action:#9B6CB8; --women-action-hover:#8958A8; --women-action-soft:#F1EBFA; }
 
-    /* Outer Shell - white canvas with the soft circular accents from the portal art. */
+    /* Outer Shell */
     body { background-color:var(--color-surface) !important; }
     .women-shell {
         background:var(--color-surface);
@@ -27,45 +27,6 @@
         position:relative;
         isolation:isolate;
         overflow:hidden;
-    }
-
-    html:not([data-theme="dark"]) .women-shell {
-        background-color:#FFFFFF;
-        background-image:
-            radial-gradient(circle at 8% 13%, rgb(232 218 247 / .45) 0 52px, transparent 53px),
-            radial-gradient(circle at 24% 66%, rgb(242 231 252 / .6) 0 34px, transparent 35px),
-            radial-gradient(circle at 78% 19%, rgb(235 220 249 / .48) 0 26px, transparent 27px),
-            radial-gradient(circle at 91% 62%, rgb(243 232 252 / .65) 0 48px, transparent 49px),
-            radial-gradient(circle at 61% 89%, rgb(236 224 249 / .42) 0 30px, transparent 31px);
-        background-repeat:no-repeat;
-    }
-
-    .women-shell::before,
-    .women-shell::after {
-        content:'';
-        position:absolute;
-        z-index:0;
-        pointer-events:none;
-        border-radius:50%;
-    }
-
-    /* Large, partially cropped lavender ring in the upper-right corner. */
-    .women-shell::before {
-        width:540px;
-        height:540px;
-        top:-330px;
-        right:-150px;
-        border:64px solid rgb(182 150 218 / .17);
-    }
-
-    /* A second quiet circular accent keeps long pages from feeling flat. */
-    .women-shell::after {
-        width:360px;
-        height:360px;
-        bottom:7rem;
-        left:-245px;
-        background:rgb(222 207 239 / .25);
-        box-shadow:0 0 0 42px rgb(222 207 239 / .12);
     }
 
     .women-content-wrap {
@@ -80,21 +41,6 @@
     .women-content-wrap .card { border:none !important; }
 
     @media (max-width: 768px) {
-        .women-shell::before {
-            width:380px;
-            height:380px;
-            top:-255px;
-            right:-180px;
-            border-width:44px;
-        }
-
-        .women-shell::after {
-            width:260px;
-            height:260px;
-            left:-195px;
-            box-shadow:0 0 0 30px rgb(222 207 239 / .12);
-        }
-
         .women-content-wrap {
             padding:1.25rem 1rem 6rem; /* Extra padding on bottom for mobile dock */
         }
