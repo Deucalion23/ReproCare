@@ -76,13 +76,26 @@
         align-items:center;
         gap:0.4rem;
     }
+    .checkups-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
+    @media (max-width:600px) {
+        .checkups-page { padding-top:0.5rem !important; }
+        .checkups-top-card { padding:1rem; border-radius:18px; margin-bottom:1.15rem; }
+        .checkups-top-card .page-title { font-size:1.05rem; }
+        .checkups-count { font-size:0.7rem; white-space:nowrap; }
+        .checkups-chip { font-size:0.68rem; padding:0.38rem 0.7rem; justify-content:center; }
+        .checkups-chips-row { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; }
+        .checkup-card-body { padding:1rem 1rem 0.85rem; }
+        .checkup-purpose { font-size:0.88rem; margin-bottom:0.75rem; }
+        .checkup-info-row { font-size:0.78rem; margin-bottom:0.6rem; }
+        .checkup-card-footer { padding:0.7rem 1rem 0.9rem; font-size:0.7rem; }
+    }
 </style>
 @endpush
 
 @section('user-content')
 <div class="py-4 checkups-page">
-    {{-- Header --}}
-    <div class="d-flex justify-content-between align-items-center mb-4 fade-in-card">
+    {{-- Header Top Card --}}
+    <div class="checkups-top-card d-flex justify-content-between align-items-center flex-wrap gap-3 fade-in-card">
         <div>
             <h1 class="page-title">My Checkups
             </h1>
@@ -96,7 +109,7 @@
 
 {{-- Summary chips --}}
 @if(($totals['all'] ?? $checkups->total()) > 0)
-<div class="d-flex flex-wrap gap-2 mb-4 fade-in-card">
+<div class="checkups-chips-row d-flex flex-wrap gap-2 mb-4 fade-in-card">
     <span class="checkups-chip checkups-chip-sched">
         <i class="bi bi-calendar-check"></i>
         Scheduled: {{ $totals['scheduled'] ?? $checkups->where('status', 'Scheduled')->count() }}
