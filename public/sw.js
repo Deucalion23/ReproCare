@@ -1,5 +1,5 @@
 /* ReproCare Service Worker — app-shell caching + offline fallback + outbox sync. */
-const CACHE_VERSION = 'reprocare-v2';
+const CACHE_VERSION = 'reprocare-v3';
 const SHELL_CACHE = CACHE_VERSION + '-shell';
 const RUNTIME_CACHE = CACHE_VERSION + '-runtime';
 const OFFLINE_URL = '/offline.html';
