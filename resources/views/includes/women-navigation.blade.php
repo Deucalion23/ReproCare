@@ -765,7 +765,7 @@
         .women-brand-title { font-size:var(--nav-brand-title-sz); }
         .women-nav-right { gap:0.35rem; }
         .women-bell-btn { width:30px !important; height:30px !important; }
-        .women-profile-pill { height:30px !important; }
+        .women-profile-pill { width:30px !important; height:30px !important; min-width:30px !important; }
         .women-mobile-toggle { width:30px; height:30px; }
     }
 </style>
