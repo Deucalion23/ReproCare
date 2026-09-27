@@ -28,9 +28,9 @@
 [data-theme="light"] .preg-hero { background:var(--color-surface); background-color:var(--color-surface); }
 .week-ring-wrap { position:relative; width:170px; height:170px; flex-shrink:0; z-index:1; }
 .week-ring-svg { width:170px; height:170px; transform:rotate(-90deg); }
-.week-ring-svg .ring-bg { fill:none; stroke:var(--color-secondary-soft); stroke-width:12; }
-[data-theme="light"] .week-ring-svg .ring-bg { stroke:var(--color-secondary-soft); }
-.week-ring-svg .ring-fill { fill:none; stroke:var(--color-secondary); stroke-width:12; stroke-linecap:round; }
+.week-ring-svg .ring-bg { fill:none; stroke:var(--color-primary-soft); stroke-width:12; }
+[data-theme="light"] .week-ring-svg .ring-bg { stroke:var(--color-primary-soft); }
+.week-ring-svg .ring-fill { fill:none; stroke:var(--color-primary); stroke-width:12; stroke-linecap:round; }
 .week-ring-inner { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; }
 .week-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:2.6rem; font-weight:900; line-height:1; color:var(--color-text); letter-spacing:-0.03em; }
 [data-theme="light"] .week-num { color:var(--color-text); }
@@ -54,25 +54,32 @@
 .preg-pill-risk-high { background:var(--color-danger-soft); color:var(--color-danger-text); }
 
 .trimester-track { display:flex; gap:0.85rem; margin-bottom:1.25rem; position:relative; }
-.trimester-card { flex:1; background:var(--color-surface); border:none; border-radius:18px; padding:1.35rem 0.9rem 1.15rem; text-align:center; transition:all 0.25s ease; position:relative; z-index:1; box-shadow:var(--wp-shadow-sm); overflow:hidden; }
-.trimester-card.active { background:var(--color-surface); box-shadow:0 14px 32px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 18%, transparent), var(--wp-shadow-sm); transform:translateY(-2px); }
-.trimester-card.completed { background:var(--color-surface); }
-.trimester-card.upcoming { background:var(--color-surface); box-shadow:var(--wp-shadow-sm); }
-.trimester-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1.1px; margin-bottom:0.35rem; }
-.trimester-card.active .trimester-num { color:var(--color-secondary-text); }
+/* Payment-style pastel status cards: soft tinted bg + white icon circle + bold title + muted sub */
+.trimester-card { flex:1; border-radius:18px; padding:1.1rem 1.15rem; display:flex; align-items:flex-start; gap:0.85rem; position:relative; z-index:1; overflow:hidden; transition:all 0.25s ease; border:1px solid transparent; box-shadow:var(--wp-shadow-sm); text-align:left; }
+.trimester-card.active { background:var(--color-primary-soft); border-color:color-mix(in srgb, var(--color-primary) 22%, transparent); box-shadow:0 14px 32px color-mix(in srgb, var(--color-primary) 18%, transparent), var(--wp-shadow-sm); transform:translateY(-2px); }
+.trimester-card.completed { background:var(--color-success-soft); border-color:color-mix(in srgb, var(--color-success) 22%, transparent); }
+.trimester-card.upcoming { background:var(--color-surface-soft); border-color:var(--color-border); box-shadow:var(--wp-shadow-sm); }
+.trimester-icon { width:44px; height:44px; border-radius:50%; background:#FFFFFF; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; box-shadow:0 2px 8px rgb(var(--color-shadow-rgb) / .08); }
+.trimester-card.completed .trimester-icon { color:var(--color-success-text); }
+.trimester-card.active .trimester-icon { color:var(--color-primary-text); }
+.trimester-card.upcoming .trimester-icon { color:var(--color-text-muted); }
+.trimester-copy { min-width:0; flex:1; }
+.trimester-num { font-family:'Plus Jakarta Sans',sans-serif; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:1.1px; margin-bottom:0.2rem; }
+.trimester-card.active .trimester-num { color:var(--color-primary-text); }
 .trimester-card.completed .trimester-num { color:var(--color-success-text); }
 .trimester-card.upcoming .trimester-num { color:var(--color-text-muted); }
-.trimester-weeks { font-size:0.82rem; font-weight:600; color:var(--color-text-muted); margin-bottom:0.55rem; }
-.trimester-card.active .trimester-weeks { color:var(--color-secondary-text); font-weight:700; }
+.trimester-weeks { font-size:0.9rem; font-weight:800; color:#000; margin-bottom:0.55rem; }
+[data-theme="dark"] .trimester-weeks { color:var(--color-text); }
+.trimester-card.active .trimester-weeks { color:var(--color-text); font-weight:800; }
 .trimester-card.completed .trimester-weeks { color:var(--color-text); }
-.trimester-status { display:inline-flex; align-items:center; gap:4px; font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; padding:0.22rem 0.65rem; border-radius:9999px; }
-.trimester-card.completed .trimester-status { background:var(--color-success-soft); color:var(--color-success-text); }
-.trimester-card.active .trimester-status { background:var(--color-secondary-soft); color:var(--color-secondary-text); }
-.trimester-card.upcoming .trimester-status { background:var(--color-surface-soft); color:var(--color-text-muted); }
+.trimester-status { display:inline-flex; align-items:center; gap:4px; font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.6px; padding:0.28rem 0.75rem; border-radius:9999px; background:#FFFFFF; }
+.trimester-card.completed .trimester-status { background:#FFFFFF; color:var(--color-success-text); }
+.trimester-card.active .trimester-status { background:#FFFFFF; color:var(--color-primary-text); }
+.trimester-card.upcoming .trimester-status { background:#FFFFFF; color:var(--color-text-muted); }
 .trimester-badge { position:absolute; top:0.65rem; right:0.65rem; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.65rem; font-weight:800; }
-.trimester-card.active .trimester-badge { background:var(--color-secondary-text); color:var(--color-on-solid); box-shadow:0 0 0 4px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
-.trimester-card.completed .trimester-badge { background:var(--color-success-text); color:var(--color-on-solid); box-shadow:0 0 0 4px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
-.trimester-card.upcoming .trimester-badge { background:var(--color-surface); color:var(--color-text-muted); border:1px solid var(--color-border); }
+.trimester-card.active .trimester-badge { background:var(--color-primary); color:#FFFFFF; box-shadow:0 0 0 4px color-mix(in srgb, var(--color-primary) 18%, transparent); }
+.trimester-card.completed .trimester-badge { background:var(--color-success-text); color:#FFFFFF; box-shadow:0 0 0 4px color-mix(in srgb, var(--color-success) 18%, transparent); }
+.trimester-card.upcoming .trimester-badge { background:#FFFFFF; color:var(--color-text-muted); border:1px solid var(--color-border); }
 @media (max-width:576px) { .trimester-track { flex-direction:column; } }
 
 .preg-info-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1rem; margin-bottom:1.25rem; }
@@ -263,9 +270,18 @@
             @elseif($state === 'active') <div class="trimester-badge"><i class="bi bi-circle-fill" style="font-size:0.4rem;"></i></div>
             @else <div class="trimester-badge upcoming">{{ $t }}</div>
             @endif
-            <div class="trimester-num">Trimester {{ $t }}</div>
-            <div class="trimester-weeks">{{ $trimesterWeeks[(string)$t] }}</div>
-            <span class="trimester-status">{{ $statusLabel }}</span>
+            @if($state === 'completed')
+                <div class="trimester-icon"><i class="bi bi-check-circle-fill"></i></div>
+            @elseif($state === 'active')
+                <div class="trimester-icon"><i class="bi bi-record-circle-fill"></i></div>
+            @else
+                <div class="trimester-icon"><i class="bi bi-clock-fill"></i></div>
+            @endif
+            <div class="trimester-copy">
+                <div class="trimester-num">Trimester {{ $t }}</div>
+                <div class="trimester-weeks">{{ $trimesterWeeks[(string)$t] }}</div>
+                <span class="trimester-status">{{ $statusLabel }}</span>
+            </div>
         </div>
         @endfor
     </div>
@@ -304,8 +320,8 @@
             <div class="baby-progress-lbl">Progress</div>
             <div style="position:relative;width:60px;height:60px;margin:0 auto;">
                 <svg viewBox="0 0 60 60" style="width:60px;height:60px;transform:rotate(-90deg);">
-                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--color-secondary-soft)" stroke-width="6"/>
-                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--color-secondary)" stroke-width="6" stroke-linecap="round"
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--color-primary-soft)" stroke-width="6"/>
+                    <circle cx="30" cy="30" r="24" fill="none" stroke="var(--color-primary)" stroke-width="6" stroke-linecap="round"
                         stroke-dasharray="150.8" stroke-dashoffset="{{ 150.8 - (150.8 * $progressPct / 100) }}"/>
                 </svg>
                 <div class="baby-progress-val">{{ round($progressPct) }}%</div>
