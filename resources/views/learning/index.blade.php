@@ -104,31 +104,6 @@
                 <a href="{{ route('learning.index') }}" class="btn learn-btn-clear" title="Clear all filters"><i class="bi bi-x-lg"></i><span class="visually-hidden">Clear</span></a>
             </div>
         </form>
-
-        {{-- Interactive Category Chips (mobile: swipeable strip) --}}
-        <div class="d-flex align-items-center gap-1.5 mt-3 pt-3 flex-wrap learn-chips" style="font-size:0.8rem; border:none;">
-            <span class="text-xs fw-800 text-uppercase me-2 learn-chips-label" style="letter-spacing:0.5px; color:var(--color-text-muted);">Quick Filters:</span>
-            <a href="{{ route('learning.index') }}"
-               class="badge text-decoration-none px-3 py-2 rounded-pill {{ !$activeFilter && !$activeCategory ? '' : '' }}"
-               style="border:none; {{ !$activeFilter && !$activeCategory ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
-                All ({{ $materials->total() }})
-            </a>
-            <a href="{{ route('learning.index', ['type' => 'video']) }}"
-               class="badge text-decoration-none px-3 py-2 rounded-pill"
-               style="border:none; {{ $activeFilter === 'video' ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text);' }}">
-                <i class="bi bi-play-circle-fill me-1"></i> Playable Videos
-            </a>
-            <a href="{{ route('learning.index', ['category' => 'warning-signs']) }}"
-               class="badge text-decoration-none px-3 py-2 rounded-pill"
-               style="border:none; {{ $activeCategory === 'warning-signs' ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:var(--color-peach-soft); background-color:var(--color-peach-soft); color:var(--color-warning-text);' }}">
-                <i class="bi bi-exclamation-triangle me-1"></i> Warning Signs
-            </a>
-            <a href="{{ route('learning.index', ['category' => 'prenatal-care']) }}"
-               class="badge text-decoration-none px-3 py-2 rounded-pill"
-               style="border:none; {{ $activeCategory === 'prenatal-care' ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:var(--color-success-soft); background-color:var(--color-success-soft); color:var(--color-success-text);' }}">
-                🤰 Prenatal Care
-            </a>
-        </div>
     </div>
 </div>
 
@@ -528,31 +503,6 @@
         }
         .learn-btn-clear {
             width:50px; height:50px; min-height:50px; border-radius:14px !important;
-        }
-
-        /* Swipeable quick-filter strip — no wrapping on mobile */
-        .learn-chips {
-            flex-wrap:nowrap !important;
-            overflow-x:auto; overflow-y:hidden;
-            margin-left:-0.9rem; margin-right:-0.9rem;
-            padding:0.8rem 0.9rem 0.2rem !important;
-            gap:0.5rem !important;
-            scroll-snap-type:x mandatory;
-            scrollbar-width:none;
-            -webkit-overflow-scrolling:touch;
-        }
-        .learn-chips::-webkit-scrollbar { display:none; }
-        .learn-chips .learn-chips-label {
-            position:sticky; left:0; flex-shrink:0;
-            background:var(--color-surface);
-            padding-right:0.25rem;
-            display:inline-flex; align-items:center; min-height:40px;
-        }
-        .learn-chips .badge {
-            flex-shrink:0; scroll-snap-align:start;
-            padding:0.65rem 1rem !important;
-            font-size:0.82rem !important;
-            min-height:40px; display:inline-flex; align-items:center;
         }
     }
     @media (max-width: 575.98px) {
