@@ -4,16 +4,16 @@
 :root {;;;;;;; }
 /* Public pages inherit the supplied logo's lavender instead of the default violet. */
 body.public-page {
-    --logo-lavender:#F1EBFA;
+    --logo-lavender:#9B6CB8;
     --color-primary:var(--logo-lavender);
-    --color-primary-hover:#E3D8F1;
-    --color-primary-text:#745A98;
-    --color-primary-on:#2B2335;
-    --color-primary-on-hover:#2B2335;
-    --public-rose:var(--color-primary-text);
-    --public-rose-dark:#624B82;
-    --color-purple-soft:#F1EBFA;
-    --color-purple-text:#745A98;
+    --color-primary-hover:#8958A8;
+    --color-primary-text:#9B6CB8;
+    --color-primary-on:#fff;
+    --color-primary-on-hover:#fff;
+    --public-rose:var(--logo-lavender);
+    --public-rose-dark:#8958A8;
+    --color-purple-soft:#9B6CB8;
+    --color-purple-text:#fff;
 }
 * { box-sizing:border-box; }
 html { scroll-behavior:smooth; scroll-padding-top:100px; }
