@@ -256,12 +256,12 @@
 
                 {{-- Actions --}}
                 <div class="post-action-bar">
-                    <form method="POST" action="{{ route('forum.like', $post->id) }}" class="d-inline">
+                    <form method="POST" action="{{ route('forum.like', $post->id) }}" class="d-inline" data-like-form data-post-id="{{ $post->id }}">
                         @csrf
                         <button type="submit"
                                 class="post-action-btn {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'liked' : '' }}">
-                            <i class="bi {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                            {{ $post->likes_count }} {{ Str::plural('Like', $post->likes_count) }}
+                            <i class="bi {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'bi-heart-fill' : 'bi-heart' }}" data-like-icon></i>
+                            <span data-like-count>{{ $post->likes_count }}</span> <span data-like-label>{{ Str::plural('Like', $post->likes_count) }}</span>
                         </button>
                     </form>
 

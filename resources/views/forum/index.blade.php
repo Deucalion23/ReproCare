@@ -566,12 +566,12 @@
                     {{-- Interaction Bar --}}
                     <div class="post-engagement-bar">
                         <div class="engagement-actions">
-                            <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline">
+                            <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline" data-like-form data-post-id="{{ $post->id }}">
                                 @csrf
                                 <button type="submit" class="btn-engage {{ $isLiked ? 'liked' : '' }}">
-                                    <i class="bi {{ $isLiked ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                                    <span>{{ $post->likes_count }}</span>
-                                    <span class="d-none d-sm-inline">{{ $post->likes_count === 1 ? 'Like' : 'Likes' }}</span>
+                                    <i class="bi {{ $isLiked ? 'bi-heart-fill' : 'bi-heart' }}" data-like-icon></i>
+                                    <span data-like-count>{{ $post->likes_count }}</span>
+                                    <span class="d-none d-sm-inline" data-like-label>{{ $post->likes_count === 1 ? 'Like' : 'Likes' }}</span>
                                 </button>
                             </form>
 

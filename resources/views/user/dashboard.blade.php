@@ -544,12 +544,12 @@
             margin-bottom:1.25rem;
         }
         .patient-hero-title {
-            font-size:1.15rem;
-            line-height:1.25;
+            font-size:0.95rem;
+            line-height:1.3;
             overflow-wrap:anywhere;
         }
         .patient-hero-subtitle {
-            font-size:0.72rem;
+            font-size:0.7rem;
             gap:6px;
         }
         .patient-hero-content .d-flex.justify-content-between {

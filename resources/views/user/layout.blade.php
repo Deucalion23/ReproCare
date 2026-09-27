@@ -225,13 +225,12 @@
             padding-top:0.35rem;
         }
 
-        /* ── Portal-wide mobile shrink: top-card text + buttons ── */
+        /* ── Portal-wide mobile shrink: one consistent top-card text size ── */
         .women-content-wrap .page-title { font-size:0.95rem !important; line-height:1.3 !important; }
         .women-content-wrap .page-subtitle { font-size:0.7rem !important; line-height:1.5 !important; }
-        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) { padding:1rem !important; border-radius:18px !important; margin-bottom:1.15rem !important; }
-        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) h1,
-        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) h2 { font-size:0.95rem !important; }
-        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .page-hero) p { font-size:0.7rem !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) { padding:1rem !important; border-radius:18px !important; margin-bottom:1.15rem !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) :is(h1, h2, .patient-hero-title, .preg-hero-title, .cycle-hero-title) { font-size:0.95rem !important; line-height:1.3 !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) :is(p, .patient-hero-subtitle, .preg-hero-sub, .cycle-hero-sub) { font-size:0.7rem !important; line-height:1.5 !important; }
         .women-content-wrap .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
         .women-content-wrap .btn-sm { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
         .women-content-wrap .card-header h5 { font-size:0.9rem !important; }
