@@ -4,7 +4,7 @@
   </defs>
   <circle cx="80" cy="80" r="80" fill="#1a1030"/>
   <g clip-path="url(#avatar-female-clip)">
-    <circle cx="80" cy="62" r="30" fill="#f472b6"/>
-    <path d="M22 160c0-34 24-52 58-52s58 18 58 52" fill="#f472b6"/>
+    <circle cx="80" cy="64" r="31" fill="#f472b6"/>
+    <path d="M14 160c2-38 28-56 66-56s64 18 66 56" fill="#f472b6"/>
   </g>
 </svg>
