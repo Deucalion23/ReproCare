@@ -157,7 +157,7 @@
         width:100%;
         min-height:52px;
         padding:6px 6px;
-        border-radius:14px;
+        border-radius:8px;
         text-decoration:none;
         color:var(--wp-text-soft);
         font-size:0.66rem;
