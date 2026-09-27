@@ -23,6 +23,9 @@ class DatabaseSeeder extends Seeder
         // Seed 13 RHU 1 pregnant women with partners (idempotent)
         $this->call(Rhu1PregnantWomenSeeder::class);
 
+        // Seed one BHW per RHU 1 barangay (idempotent)
+        $this->call(Rhu1BhwSeeder::class);
+
         // Seed Learning Materials
         $this->call(LearningMaterialSeeder::class);
         $this->call(LearningVideoSeeder::class);

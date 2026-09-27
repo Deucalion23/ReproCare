@@ -45,11 +45,17 @@ class BhwController extends Controller
 
         // Live counts on every load (previously cached for 5 minutes, which
         // left dashboard cards stale right after new records appeared).
+        // Patient counts are scoped to the BHW's own barangay via the shared
+        // jurisdiction rule (legacy spellings resolve to the same area);
+        // myHealthRecords is personal and needs no scoping.
+        $bhwBarangay = auth()->user()->barangay;
+        $inArea = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $bhwBarangay, $column);
         $stats = [
-            'totalPatients' => User::where('role', 'user')->count(),
-            'scheduledCheckups' => Checkup::scheduled()->count(),
+            'totalPatients' => tap(User::where('role', 'user'), $inArea)->count(),
+            'scheduledCheckups' => Checkup::scheduled()->whereHas('woman', function ($q) use ($inArea) { $inArea($q); })->count(),
             'todayCheckups' => Checkup::whereDate('scheduled_date', today())
                 ->scheduled()
+                ->whereHas('woman', function ($q) use ($inArea) { $inArea($q); })
                 ->count(),
             'myHealthRecords' => HealthRecord::byBhw()
                 ->where('recorded_by_id', auth()->id())
@@ -258,11 +264,18 @@ class BhwController extends Controller
         $search = request('search');
         $filter = request('filter', 'all');
 
+        // BHWs see only women from their own barangay (shared jurisdiction
+        // rule: legacy spellings like 'Burgos' and 'Barangay Burgos Padlan,
+        // San Carlos City, Pangasinan' resolve to the same area).
+        $bhwBarangay = auth()->user()->barangay;
+        $inArea = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $bhwBarangay, $column);
+
         // Get registered patients
         $registeredQuery = User::where('role', 'user')
             ->with(['pregnancies' => function($query) {
                 $query->active();
             }, 'purok']);
+        $inArea($registeredQuery);
 
         if ($search) {
             $registeredQuery->where(function($q) use ($search) {
@@ -284,6 +297,7 @@ class BhwController extends Controller
         $unregisteredQuery = WalkInPatient::with(['recordedBy', 'purok', 'convertedToUser', 'user'])
             ->whereNull('converted_to_user_id')
             ->whereNull('user_id');
+        $inArea($unregisteredQuery);
 
         if ($search) {
             $unregisteredQuery->where(function ($q) use ($search) {
@@ -322,11 +336,13 @@ class BhwController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        // Get statistics
-        $scheduledCheckups = Checkup::where('status', 'scheduled')->count();
-        $missedCheckups = Checkup::where('status', 'missed')->count();
-        $registeredCount = User::where('role', 'user')->count();
-        $unregisteredCount = WalkInPatient::whereNull('converted_to_user_id')->whereNull('user_id')->count();
+        // Get statistics (same barangay scope as the lists above)
+        $scheduledCheckups = Checkup::where('status', 'scheduled')
+            ->whereHas('woman', function ($q) use ($inArea) { $inArea($q); })->count();
+        $missedCheckups = Checkup::where('status', 'missed')
+            ->whereHas('woman', function ($q) use ($inArea) { $inArea($q); })->count();
+        $registeredCount = tap(User::where('role', 'user'), $inArea)->count();
+        $unregisteredCount = tap(WalkInPatient::whereNull('converted_to_user_id')->whereNull('user_id'), $inArea)->count();
 
         $trashCount = WalkInPatient::onlyTrashed()->count();
 

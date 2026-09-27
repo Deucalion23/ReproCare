@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Purok;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -10,6 +11,13 @@ class RestoreAccountsSeeder extends Seeder
 {
     public function run(): void
     {
+        // Madonna lives in Burgos St under BHW Ana's coverage; resolve her
+        // purok dynamically so the link stays coherent on every database.
+        $burgosStPurok2 = Purok::firstOrCreate(
+            ['name' => 'Purok 2', 'barangay' => 'Burgos St'],
+            ['description' => 'BHW catchment purok.']
+        )->id;
+
         $users = [
             [
                 'first_name' => 'City Health',
@@ -85,8 +93,9 @@ class RestoreAccountsSeeder extends Seeder
                 'password' => '$2y$12$pdC5c8bBRSdwt0Kp5/hvjuzGYsFkbZlux4K0IMeZSmeui9Re5cAcS',
                 'role' => 'user',
                 'status' => 'approved',
-                'barangay' => 'Barangay Burgos Padlan, San Carlos City, Pangasinan',
-                'purok_id' => 2,
+                'barangay' => 'Burgos St',
+                'address' => 'Purok 2, Burgos St, San Carlos City, Pangasinan',
+                'purok_id' => $burgosStPurok2,
                 'date_of_birth' => '1997-11-21',
                 'contact_number' => '09123456679',
                 'profile_image' => 'uploads/profile/69ec5fd894d87_1777098712.jpg',
@@ -101,7 +110,7 @@ class RestoreAccountsSeeder extends Seeder
                 'password' => '$2y$12$wtfldQoDd8yDcBlzYwI9m.W9owMCY/bYsgC/SSpH69WtS0Nw7AHH.',
                 'role' => 'bhw',
                 'status' => 'approved',
-                'barangay' => 'Barangay Burgos Padlan, San Carlos City, Pangasinan',
+                'barangay' => 'Burgos St',
                 'date_of_birth' => '1981-02-02',
                 'gender' => 'female',
                 'contact_number' => '09234567891',
