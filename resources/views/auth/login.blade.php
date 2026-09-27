@@ -79,9 +79,7 @@
     .fb-demo { border-radius:16px; }
     .login-page .public-header { border-bottom:1px solid var(--color-border); }
     .login-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
-    .login-page .public-brand { transform:translateY(-2px); }
-    .login-page .public-brand-mark { transform:translateY(-8px); }
-    .login-page .public-brand-name { transform:translateY(4px); }
+    .login-page .public-brand, .login-page .public-brand-mark, .login-page .public-brand-name { transform:none; }
     .fb-hero { justify-content:flex-start; padding-top:24px; }
     .fb-side { align-items:flex-start; padding-top:34px; }
     @media (max-width:900px) {
@@ -92,9 +90,7 @@
     }
     @media (max-width:600px) {
         .login-page .header-inner { min-height:62px; padding-inline:20px; }
-        .login-page .public-brand { transform:translateY(-1px); }
-        .login-page .public-brand-mark { transform:translateY(-11px); }
-        .login-page .public-brand-name { transform:translateY(3px); }
+        .login-page .public-brand, .login-page .public-brand-mark, .login-page .public-brand-name { transform:none; }
         .fb-hero { display:none; }
         .fb-hero { padding:38px 20px 35px; }
         .fb-hero::before { width:270px; height:270px; right:-170px; top:-155px; border-width:38px; }

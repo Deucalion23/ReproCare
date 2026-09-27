@@ -55,10 +55,10 @@
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center gap-2 m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}">
+            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:10px;">
                 <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo"
                      style="width:42px; height:42px; object-fit:contain; border-radius:10px; background:var(--color-surface); display:block; flex-shrink:0;">
-                <span class="fw-800" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1;">
+                <span class="fw-800 d-inline-flex align-items-center" style="min-height:42px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1;">
                     Repro<span style="color:#B7A8D3;">Care</span>
                 </span>
             </a>

@@ -82,7 +82,7 @@
     .women-brand-link {
         display:flex;
         align-items:center;
-        gap:8px;
+        gap:10px;
         text-decoration:none;
     }
 
@@ -100,6 +100,9 @@
     }
 
     .women-brand-title {
+        display:inline-flex;
+        align-items:center;
+        min-height:42px;
         font-family:'Plus Jakarta Sans', sans-serif;
         font-weight:800;
         font-size:1.2rem;
@@ -457,11 +460,9 @@
              SECTION 1 (LEFT): Brand Logo & Title
              ============================================================ -->
         <div class="women-nav-left flex items-center gap-2.5 flex-shrink-0">
-            <a href="{{ route('user.dashboard') }}" class="women-brand-link flex items-center gap-2" title="ReproCare Home">
+            <a href="{{ route('user.dashboard') }}" class="women-brand-link flex items-center" title="ReproCare Home">
                 <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo" style="width:42px; height:42px; object-fit:contain; border-radius:10px; background:var(--color-surface); flex-shrink:0;">
-                <div class="flex items-center gap-2">
-                    <span class="women-brand-title font-extrabold text-slate-800">Repro<span>Care</span></span>
-                </div>
+                <span class="women-brand-title font-extrabold text-slate-800">Repro<span>Care</span></span>
             </a>
         </div>
 
@@ -650,10 +651,10 @@
    ═══════════════════════════════════════════════ --}}
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
-        <div class="d-flex align-items-center gap-2">
+        <div class="d-flex align-items-center" style="gap:10px;">
             <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="ReproCare Logo" style="width:38px; height:38px; object-fit:contain; border-radius:10px; background:var(--color-surface);">
             <div>
-                <h6 class="offcanvas-title fw-800 text-dark mb-0" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:19px;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>
