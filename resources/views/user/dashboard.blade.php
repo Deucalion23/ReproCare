@@ -22,28 +22,6 @@
         color:var(--color-secondary-text);
     }
 
-    .patient-hero-orb-1 {
-        position:absolute;
-        top:-40px;
-        right:-30px;
-        width:260px;
-        height:260px;
-        border-radius:50%;
-        background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%);
-        pointer-events:none;
-    }
-
-    .patient-hero-orb-2 {
-        position:absolute;
-        bottom:-50px;
-        left:20%;
-        width:180px;
-        height:180px;
-        border-radius:50%;
-        background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%);
-        pointer-events:none;
-    }
-
     .patient-hero-content {
         position:relative;
         z-index:2;
@@ -852,9 +830,6 @@
      HERO MASTHEAD — WARM, EMPOWERING PATIENT WELCOME
    ═══════════════════════════════════════════════ --}}
 <div class="patient-hero">
-    <div class="patient-hero-orb-1"></div>
-    <div class="patient-hero-orb-2"></div>
-
     <div class="patient-hero-content">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
