@@ -110,8 +110,8 @@
                         @endif
                     </div>
 
-                    <!-- Post Actions Bar -->
-                    <div class="d-flex justify-content-between align-items-center pt-3" style="border-top:1px solid var(--border);">
+                    <!-- Post Actions Bar (forum-card-actions: kept inline on phones) -->
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 pt-3 forum-card-actions" style="border-top:1px solid var(--border);">
                         <div class="d-flex gap-3">
                             <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline">
                                 @csrf

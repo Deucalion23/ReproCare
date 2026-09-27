@@ -536,8 +536,13 @@
         gap:0.75rem;
     }
 
-    /* ── Responsive alignment (any phone size, items stay visible) ── */
+    /* ── Forum post action rows stay inline on phones ──
+       (The global mobile .btn-primary/.btn-outline-primary width:100% rule
+       below would stretch the "Read More" pill across the whole row and
+       crush/overlap the like + comment buttons.) */
     @media (max-width: 768px) {
+        .forum-card-actions .btn { width:auto !important; flex:0 0 auto !important; }
+        .forum-card-actions { row-gap:0.5rem; }
         .main-content { padding:1.25rem 1rem calc(3rem + env(safe-area-inset-bottom, 0px)) !important; }
         .page-hero { padding:1.25rem 1.25rem !important; }
         .main-content .card-body { padding:1.1rem !important; }
