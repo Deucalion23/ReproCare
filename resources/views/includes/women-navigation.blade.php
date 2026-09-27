@@ -729,8 +729,11 @@
         .women-nav-right .dropdown {
             display:flex !important;
             align-items:center !important;
+            justify-content:center !important;
             align-self:center !important;
             margin:0 !important;
+            padding:0 !important;
+            line-height:1 !important;
         }
         .women-profile-pill {
             width:32px !important;
@@ -746,6 +749,7 @@
             flex-shrink:0 !important;
             align-self:center !important;
             margin:0 !important;
+            line-height:1 !important;
             vertical-align:middle !important;
         }
         .women-profile-pill .women-profile-name,
