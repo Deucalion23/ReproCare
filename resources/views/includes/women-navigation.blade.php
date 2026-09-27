@@ -727,12 +727,28 @@
         }
         .women-bell-btn i { font-size:13px; }
         .women-profile-pill {
+            width:32px !important;
             height:32px !important;
-            padding:0 6px 0 2px !important;
-            gap:4px;
+            min-width:32px !important;
+            padding:0 !important;
+            gap:0 !important;
+            border-radius:50% !important;
+            overflow:hidden !important;
+            background:var(--color-surface-soft) !important;
+            border:1px solid var(--nav-border) !important;
+            flex-shrink:0 !important;
         }
-        .women-profile-avatar { width:24px; height:24px; }
-        .women-profile-pill .bi-chevron-down { display:none; }
+        .women-profile-pill .women-profile-name,
+        .women-profile-pill .bi-chevron-down { display:none !important; }
+        .women-profile-avatar {
+            width:100% !important;
+            height:100% !important;
+            aspect-ratio:1 / 1 !important;
+            object-fit:cover !important;
+            display:block !important;
+            border:none !important;
+            border-radius:50% !important;
+        }
         .women-mobile-toggle { width:32px; height:32px; font-size:1.05rem; }
         .btn-care-support span {
             display:none;

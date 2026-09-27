@@ -470,6 +470,13 @@
                 <span>Learning</span>
             </a>
         </li>
+        <li>
+            <a href="{{ route('forum.index') }}"
+               class="women-dock-link {{ request()->routeIs('forum.*') ? 'active' : '' }}">
+                <i class="bi bi-chat-quote-fill"></i>
+                <span>Community</span>
+            </a>
+        </li>
     </ul>
 </div>
 
