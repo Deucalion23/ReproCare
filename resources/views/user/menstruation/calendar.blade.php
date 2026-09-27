@@ -376,25 +376,27 @@
     @endif
 
     {{-- ── Calendar Card ── --}}
-    <div class="calendar-card fade-in-card">
+    <div class="calendar-card fade-in-card" id="calendarCard" data-current-date="{{ $currentDate->format('Y-m-d') }}">
 
         {{-- Calendar Header --}}
         <div class="cal-header">
             <a href="{{ route('user.menstruation.calendar', ['date' => $currentDate->copy()->subMonth()->format('Y-m-d')]) }}"
-               class="calendar-nav-btn" aria-label="Previous month">
+               class="calendar-nav-btn" id="prevNavBtn" aria-label="Previous month"
+               data-prev-date="{{ $currentDate->copy()->subMonth()->format('Y-m-d') }}"
+               data-next-date="{{ $currentDate->copy()->addMonth()->format('Y-m-d') }}">
                 <i class="bi bi-chevron-left"></i>
             </a>
 
             <div class="d-flex align-items-center gap-3">
-                <span class="cal-month-title">{{ $currentDate->format('F Y') }}</span>
+                <span class="cal-month-title" id="calMonthTitle">{{ $currentDate->format('F Y') }}</span>
                 <div class="view-toggle" id="viewToggle">
-                    <button class="active" onclick="switchView('month', this)">Month</button>
-                    <button onclick="switchView('week', this)">Week</button>
+                    <button type="button" class="active" onclick="switchView('month', this)">Month</button>
+                    <button type="button" onclick="switchView('week', this)">Week</button>
                 </div>
             </div>
 
             <a href="{{ route('user.menstruation.calendar', ['date' => $currentDate->copy()->addMonth()->format('Y-m-d')]) }}"
-               class="calendar-nav-btn" aria-label="Next month">
+               class="calendar-nav-btn" id="nextNavBtn" aria-label="Next month">
                 <i class="bi bi-chevron-right"></i>
             </a>
         </div>
@@ -607,12 +609,52 @@ document.addEventListener('DOMContentLoaded', function () {
         grid.classList.add('cal-slide-in');
         grid.addEventListener('animationend', () => grid.classList.remove('cal-slide-in'));
     }
+
+    // Restore week view if user was in it before navigating months.
+    try {
+        if (sessionStorage.getItem('cycleCalendarView') === 'week') {
+            const weekBtn = document.querySelectorAll('#viewToggle button')[1];
+            if (weekBtn) switchView('week', weekBtn);
+        }
+    } catch (e) {}
+
+    // Prev/next arrows respect the active view:
+    // - Month view: normal links step by month (server reload).
+    // - Week view: step by week so the buttons keep working there too.
+    const prevBtn = document.getElementById('prevNavBtn');
+    const nextBtn = document.getElementById('nextNavBtn');
+    function currentView() {
+        const btns = document.querySelectorAll('#viewToggle button');
+        return (btns[1] && btns[1].classList.contains('active')) ? 'week' : 'month';
+    }
+    function shiftByDays(baseYmd, days) {
+        const d = new Date(baseYmd + 'T12:00:00');
+        d.setDate(d.getDate() + days);
+        return d.toISOString().slice(0, 10);
+    }
+    function baseDate() {
+        const card = document.getElementById('calendarCard');
+        return (card && card.dataset.currentDate) || new Date().toISOString().slice(0, 10);
+    }
+    if (prevBtn) prevBtn.addEventListener('click', function (e) {
+        if (currentView() === 'week') {
+            e.preventDefault();
+            window.location.href = this.href.split('?')[0] + '?date=' + shiftByDays(baseDate(), -7);
+        }
+    });
+    if (nextBtn) nextBtn.addEventListener('click', function (e) {
+        if (currentView() === 'week') {
+            e.preventDefault();
+            window.location.href = this.href.split('?')[0] + '?date=' + shiftByDays(baseDate(), 7);
+        }
+    });
 });
 
 // Week/Month view toggle (cosmetic)
 function switchView(view, btn) {
     document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    try { sessionStorage.setItem('cycleCalendarView', view); } catch (e) {}
     const monthView = document.getElementById('monthView');
     const weekView  = document.getElementById('weekView');
     if (view === 'week') {
@@ -626,20 +668,27 @@ function switchView(view, btn) {
 }
 
 function renderWeekView() {
-    // Show days of the current week only
-    const today    = new Date();
-    const dayOfWk  = today.getDay();
-    const sunday   = new Date(today);
-    sunday.setDate(today.getDate() - dayOfWk);
+    // Show the week containing the currently displayed date (not always today),
+    // so prev/next month navigation carries over into week view.
+    const card = document.getElementById('calendarCard');
+    const anchor = (card && card.dataset.currentDate)
+        ? new Date(card.dataset.currentDate + 'T12:00:00')
+        : new Date();
+    const today = new Date();
+    const sameDay = (a, b) => a.toDateString() === b.toDateString();
+    const dayOfWk  = anchor.getDay();
+    const sunday   = new Date(anchor);
+    sunday.setDate(anchor.getDate() - dayOfWk);
     const grid = document.getElementById('weekGrid');
     grid.innerHTML = '';
     for (let i = 0; i < 7; i++) {
         const d = new Date(sunday);
         d.setDate(sunday.getDate() + i);
-        const isToday = d.toDateString() === today.toDateString();
+        const isToday = sameDay(d, today);
         const cel = document.createElement('div');
         cel.className = 'cal-day' + (isToday ? ' today' : '');
         cel.style.aspectRatio = '1';
+        cel.title = d.toDateString();
         cel.textContent = d.getDate();
         grid.appendChild(cel);
     }
