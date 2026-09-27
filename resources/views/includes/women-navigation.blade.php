@@ -20,7 +20,7 @@
     /* ── Layout & Variables ── */
     :root {
         --nav-bar-h:auto;
-        --nav-bar-min-h:72px;
+        --nav-bar-min-h:100px;
         --nav-btn-h:36px;
         --nav-font-sz:13.5px;
         --nav-icon-sz:16px;
@@ -109,19 +109,19 @@
     }
 
     .women-brand-mark {
-        width:36px;
-        height:36px;
+        width:64px;
+        height:64px;
         display:flex;
         align-items:center;
         justify-content:center;
         overflow:visible;
-        flex:0 0 36px;
+        flex:0 0 64px;
         transform:translateY(-1.5px);
     }
 
     .women-brand-mark img {
-        width:36px !important;
-        height:36px !important;
+        width:64px !important;
+        height:64px !important;
         max-width:none;
         object-fit:contain;
         display:block;
@@ -145,10 +145,10 @@
     .women-brand-title {
         display:inline-flex;
         align-items:center;
-        min-height:36px;
+        min-height:64px;
         font-family:'Plus Jakarta Sans',sans-serif;
         font-weight:800;
-        font-size:1.2rem;
+        font-size:1.85rem;
         letter-spacing:-0.025em;
         color:var(--nav-slate-900);
         line-height:1;
@@ -571,7 +571,7 @@
     }
 
     @media (max-width: 640px) {
-        .women-navbar { --nav-bar-min-h:60px; }
+        .women-navbar { --nav-bar-min-h:88px; }
         .women-nav-container {
             padding-left:0.85rem;
             padding-right:0.85rem;
@@ -580,11 +580,12 @@
             gap:0.5rem;
         }
         .women-nav-left { margin-right:0; gap:0.35rem; }
-        .women-brand-link { gap:4px; }
-        .women-brand-mark, .women-brand-mark img { width:54px !important; height:54px !important; flex-basis:54px; }
-        .women-brand-mark { flex:0 0 54px; transform:translateY(-1.5px) !important; }
+        .women-brand-link { gap:6px; }
+        .women-brand-mark, .women-brand-mark img { width:60px !important; height:60px !important; flex-basis:60px; }
+        .women-brand-mark { flex:0 0 60px; transform:translateY(-1.5px) !important; }
         .women-brand-title {
-            font-size:1.7rem;
+            font-size:1.8rem;
+            min-height:60px;
         }
         .women-nav-right { gap:0.45rem; margin-left:auto !important; }
         /* Hide the round Care Support button on phones — it lives in the drawer. */
@@ -615,7 +616,7 @@
     }
 
     @media (max-width: 380px) {
-        .women-brand-title { font-size:0.95rem; }
+        .women-brand-title { font-size:1.4rem; }
         .women-nav-right { gap:0.35rem; }
         .women-bell-btn { width:30px !important; height:30px !important; }
         .women-profile-pill { height:30px !important; }
@@ -821,10 +822,10 @@
    ═══════════════════════════════════════════════ --}}
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
-        <div class="d-flex align-items-center" style="gap:10px;">
-            <span aria-hidden="true" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 36px; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;"></span>
+        <div class="d-flex align-items-center" style="gap:12px;">
+            <span aria-hidden="true" style="width:56px; height:56px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 56px; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:56px; height:56px; max-width:none; object-fit:contain; display:block;"></span>
             <div>
-                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:36px; line-height:1; padding-bottom:1px;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:56px; line-height:1; padding-bottom:1px; font-size:1.5rem;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>

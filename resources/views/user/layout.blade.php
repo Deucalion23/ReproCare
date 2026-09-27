@@ -20,9 +20,9 @@
     body { background-color:var(--color-surface) !important; }
     .women-shell {
         background:var(--color-surface);
-        min-height:calc(100vh - 64px);
+        min-height:calc(100vh - 100px);
         width:100%;
-        margin-top:72px;
+        margin-top:100px;
         padding-bottom:3.5rem;
         position:relative;
         isolation:isolate;
@@ -213,9 +213,9 @@
         transform:scale(1.12);
     }
 
-    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
-    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active,
-    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active {
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active,
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active.active {
         background:var(--women-action) !important;
         background-color:var(--women-action) !important;
         border-color:transparent !important;
@@ -223,15 +223,15 @@
         color:#FFFFFF !important;
     }
 
-    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active i,
-    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active i,
-    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active i {
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active i,
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active i,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active.active i {
         color:#FFFFFF !important;
     }
 
-    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
-    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover,
-    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover {
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active:hover,
+    :root[data-theme="light"][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active:hover,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active.active:hover {
         background:var(--women-action-hover) !important;
         background-color:var(--women-action-hover) !important;
         border-color:transparent !important;
@@ -239,8 +239,8 @@
         color:#FFFFFF !important;
     }
 
-    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active:hover i,
-    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active:hover i {
+    :root[data-theme][data-bs-theme] body .women-bottom-dock .women-dock-link.active.active:hover i,
+    :root:not([data-theme="dark"]) body .women-bottom-dock .women-dock-link.active.active:hover i {
         color:#FFFFFF !important;
     }
 
