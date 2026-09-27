@@ -477,6 +477,70 @@
         color:#FFFFFF !important;
     }
 
+    /* ── MOTHERS COMMUNITY (desktop base: profile photo + one-line meta) ── */
+    .community-card { border-radius:20px; overflow:hidden; }
+    .community-head {
+        display:flex !important;
+        flex-direction:row !important;
+        align-items:center !important;
+        justify-content:space-between !important;
+        gap:0.5rem !important;
+    }
+    .community-title { flex:1 1 auto; min-width:0; margin-bottom:0 !important; }
+    .community-link { flex-shrink:0; margin-left:auto !important; }
+    .community-item { padding:0.9rem 1.25rem !important; }
+    .community-item:last-child { border-bottom:none !important; }
+    .community-item-head { align-items:flex-start !important; gap:0.65rem !important; }
+    .community-avatar {
+        position:relative;
+        width:36px; height:36px;
+        border-radius:50%;
+        overflow:hidden;
+        flex-shrink:0;
+        background:var(--color-secondary-soft);
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+    }
+    .community-avatar-img {
+        width:100%; height:100%;
+        object-fit:cover;
+        display:block;
+    }
+    .community-avatar-fallback {
+        width:100%; height:100%;
+        align-items:center;
+        justify-content:center;
+        font-size:0.85rem;
+        font-weight:800;
+        color:var(--color-secondary-text);
+    }
+    .community-meta {
+        display:flex;
+        align-items:center;
+        gap:0.5rem;
+        flex:1 1 auto;
+        min-width:0;
+    }
+    .community-name {
+        font-size:0.88rem !important;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+    }
+    .community-time {
+        margin-left:auto !important;
+        font-size:0.72rem !important;
+        white-space:nowrap;
+        flex-shrink:0;
+    }
+    .community-text {
+        font-size:0.84rem !important;
+        line-height:1.5 !important;
+        margin:0.15rem 0 0 calc(36px + 0.65rem) !important;
+        overflow-wrap:anywhere;
+    }
+
     @media (max-width: 768px) {
         .patient-hero {
             padding:1.75rem 1.25rem;
@@ -730,9 +794,25 @@
             white-space:nowrap;
         }
 
-        /* Community + tips */
-        .list-group-item .d-flex.align-items-center { flex-wrap:wrap; row-gap:4px; }
-        .list-group-item small.ms-auto { margin-left:0 !important; width:100%; }
+        /* Community (mobile: keep header on one row, avatar + meta tight) */
+        .community-card { border-radius:18px; }
+        .community-head {
+            flex-direction:row !important;
+            align-items:center !important;
+            padding:0.85rem 1rem !important;
+        }
+        .community-title { font-size:0.98rem !important; text-align:left !important; }
+        .community-link { font-size:0.78rem !important; padding:0.25rem 0.4rem !important; }
+        .community-item { padding:0.85rem 1rem !important; }
+        .community-avatar { width:32px; height:32px; }
+        .community-avatar-fallback { font-size:0.78rem; }
+        .community-meta { gap:0.4rem !important; }
+        .community-name { font-size:0.84rem !important; }
+        .community-time { font-size:0.7rem !important; }
+        .community-text {
+            font-size:0.8rem !important;
+            margin-left:calc(32px + 0.65rem) !important;
+        }
     }
 
     @media (max-width: 380px) {
@@ -1156,29 +1236,42 @@
 
         {{-- Community Mothers Forum Preview --}}
         @php
-            $recentForumPosts = \App\Models\ForumPost::active()->latest()->take(3)->get();
+            $recentForumPosts = \App\Models\ForumPost::active()->with('user')->latest()->take(3)->get();
         @endphp
         @if($recentForumPosts->count() > 0)
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center gap-2">
-                <h5 class="fw-800 text-dark mb-0" style="font-family:'Plus Jakarta Sans', sans-serif;">Mothers Community
+        <div class="card mb-4 community-card">
+            <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap community-head">
+                <h5 class="fw-800 text-dark mb-0 community-title" style="font-family:'Plus Jakarta Sans', sans-serif;">Mothers Community
                 </h5>
-                <a href="{{ route('forum.index') }}" class="btn btn-sm btn-link text-decoration-none fw-700 text-nowrap" style="color:var(--color-secondary-text); font-size:0.82rem; white-space:nowrap; flex-shrink:0;">
+                <a href="{{ route('forum.index') }}" class="btn btn-sm btn-link text-decoration-none fw-700 text-nowrap community-link" style="color:var(--color-secondary-text); font-size:0.82rem; white-space:nowrap; flex-shrink:0;">
                     View All &rarr;
                 </a>
             </div>
             <div class="card-body p-0">
-                <div class="list-group list-group-flush">
+                <div class="list-group list-group-flush community-list">
                     @foreach($recentForumPosts as $post)
-                        <div class="list-group-item p-3 border-bottom">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <div style="width:26px; height:26px; border-radius:50%; background:var(--color-secondary-soft); color:var(--color-secondary-text); display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:800; flex-shrink:0;">
-                                    {{ strtoupper(substr($post->user->name ?? 'M', 0, 1)) }}
-                                </div>
-                                <span class="fw-700 text-dark" style="font-size:0.84rem;">{{ $post->user->first_name ?? 'Mother' }}</span>
-                                <small class="text-muted ms-auto" style="font-size:0.72rem;">{{ $post->created_at->diffForHumans() }}</small>
+                        @php
+                            $postUser = $post->user;
+                            $postAvatar = $postUser->profile_image_url ?? '/images/avatars/avatar-female.svg';
+                            $postInitial = strtoupper(substr($postUser->name ?? 'M', 0, 1));
+                            $postDisplayName = $postUser->first_name ?? trim(explode(' ', $postUser->name ?? 'Mother')[0]) ?? 'Mother';
+                        @endphp
+                        <div class="list-group-item p-3 border-bottom community-item">
+                            <div class="d-flex align-items-start gap-2 mb-1 community-item-head">
+                                <span class="community-avatar">
+                                    <img src="{{ $postAvatar }}"
+                                         alt="{{ $postDisplayName }}"
+                                         class="community-avatar-img"
+                                         loading="lazy"
+                                         onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                                    <span class="community-avatar-fallback" style="display:none;">{{ $postInitial }}</span>
+                                </span>
+                                <span class="community-meta">
+                                    <span class="fw-700 text-dark community-name">{{ $postDisplayName }}</span>
+                                    <small class="text-muted community-time">{{ $post->created_at->diffForHumans() }}</small>
+                                </span>
                             </div>
-                            <p class="text-muted mb-0" style="font-size:0.82rem; line-height:1.45;">
+                            <p class="text-muted mb-0 community-text">
                                 {{ \Illuminate\Support\Str::limit($post->content, 75) }}
                             </p>
                         </div>
