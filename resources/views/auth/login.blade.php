@@ -16,6 +16,7 @@
     .fb-shot { position:absolute; border-radius:22px; overflow:hidden; box-shadow:0 18px 48px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); border:4px solid var(--color-border); }
     .fb-shot img { display:block; width:100%; height:100%; object-fit:cover; }
     .fb-shot-a { width:86%; height:94%; left:9%; top:0; }
+    .fb-shot-b { width:145px; height:108px; left:-2px; bottom:7%; z-index:3; }
     .fb-float { position:absolute; display:flex; align-items:center; gap:8px; background:var(--color-surface); border-radius:999px; padding:9px 16px 9px 10px; font-size:.78rem; font-weight:700; color:var(--color-text); box-shadow:0 10px 28px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 16%, transparent); z-index:2; }
     .fb-float .fb-ico { width:30px; height:30px; border-radius:50%; display:grid; place-items:center; color:#111; background:transparent; border:1.5px solid #111; font-size:.95rem; flex-shrink:0; }
     .fb-f1 { left:0; top:0; } .fb-f1 .fb-ico { background:transparent; }
@@ -100,6 +101,7 @@
         .fb-hero h1 { font-size:2.45rem; margin-bottom:24px; }
         .fb-collage { height:255px; max-width:410px; }
         .fb-shot { border-width:4px; border-radius:20px 20px 58px 20px; }
+        .fb-shot-b { width:108px; height:81px; left:-2px; bottom:11%; }
         .fb-float { padding:7px 11px 7px 8px; font-size:.62rem; gap:5px; }
         .fb-float .fb-ico { width:24px; height:24px; font-size:.73rem; }
         .fb-f1 { left:-4px; }.fb-f2 { right:-2px; }.fb-f3 { left:0; }.fb-f4 { right:-3px; top:12%; }
@@ -119,6 +121,7 @@
         <div class="fb-collage" aria-hidden="true">
             <div class="fb-float fb-f1"><span class="fb-ico"><i class="bi bi-clipboard2-pulse"></i></span> Checkups on track</div>
             <div class="fb-shot fb-shot-a"><img src="{{ asset('images/maternal/login-maternal-care.jpeg') }}" alt="Community health worker providing care during a maternal health visit"></div>
+            <div class="fb-shot fb-shot-b"><img src="{{ asset('images/maternal/pregnancy-checkup.jpg') }}" alt="Health worker listening to a pregnant woman's baby during a home checkup"></div>
             <div class="fb-float fb-f2"><span class="fb-ico"><i class="bi bi-alarm"></i></span> Reminders that care</div>
             <div class="fb-float fb-f3"><span class="fb-ico"><i class="bi bi-calendar-heart"></i></span> Period tracking</div>
             <div class="fb-float fb-f4"><span class="fb-ico"><i class="bi bi-journal-medical"></i></span> Health learning</div>

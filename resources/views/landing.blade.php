@@ -67,6 +67,24 @@
             </article>
         </div>
     </section>
+    <section class="care-gallery" aria-labelledby="gallery-title">
+        <div class="care-gallery-copy">
+            <div class="eyebrow">Care in your community</div>
+            <h2 id="gallery-title">Real support, for every part of your journey.</h2>
+            <p>From checkups and family planning to pregnancy support, ReproCare keeps you connected to the local health workers who care for you.</p>
+            <a class="gallery-link" href="{{ route('register') }}">Join your care network <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+        </div>
+        <div class="care-gallery-grid">
+            <figure class="care-gallery-photo care-gallery-photo-large">
+                <img src="{{ asset('images/maternal/landing-maternal-health.jpg') }}" alt="Community health worker supporting a woman at a maternal health station" loading="lazy">
+                <figcaption><i class="bi bi-heart-pulse" aria-hidden="true"></i> Health support that listens</figcaption>
+            </figure>
+            <figure class="care-gallery-photo care-gallery-photo-small">
+                <img src="{{ asset('images/maternal/home-visit.jpg') }}" alt="Health worker providing a prenatal check during a home visit" loading="lazy">
+                <figcaption><i class="bi bi-house-heart" aria-hidden="true"></i> Care that reaches you</figcaption>
+            </figure>
+        </div>
+    </section>
     <section class="how-section" id="how-it-works" aria-labelledby="how-title">
         <div><div class="eyebrow">A simple start</div><h2 id="how-title">Your next chapter<br>starts here.</h2><p>Start with your details, then let your local care team guide the rest.</p><a class="text-link" href="{{ route('register') }}">Create your account <span aria-hidden="true">&nbsp; &rarr;</span></a></div>
         <ol class="how-steps">
