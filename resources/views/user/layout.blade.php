@@ -222,7 +222,7 @@
         .women-dock-link i { font-size:1.1rem; }
         .women-content-wrap {
             padding-bottom:6.5rem;
-            padding-top:0.75rem;
+            padding-top:0.35rem;
         }
 
         /* ── Portal-wide mobile shrink: top-card text + buttons ── */
