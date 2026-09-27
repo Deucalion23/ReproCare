@@ -1,5 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-label="Default female avatar">
-  <rect width="160" height="160" rx="80" fill="#1a1030"/>
-  <circle cx="80" cy="58" r="26" fill="#f472b6"/>
-  <path d="M34 132c8-25 26-40 46-40s38 15 46 40" fill="#f472b6"/>
+  <defs>
+    <clipPath id="avatar-female-clip"><circle cx="80" cy="80" r="80"/></clipPath>
+  </defs>
+  <circle cx="80" cy="80" r="80" fill="#1a1030"/>
+  <g clip-path="url(#avatar-female-clip)">
+    <circle cx="80" cy="62" r="30" fill="#f472b6"/>
+    <path d="M22 160c0-34 24-52 58-52s58 18 58 52" fill="#f472b6"/>
+  </g>
 </svg>
