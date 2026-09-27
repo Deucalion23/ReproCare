@@ -533,29 +533,33 @@
             border:none;
         }
         .learn-filter-card > .card-body { padding:0.85rem !important; }
-        .learn-mobile-head { padding:0 0.15rem 0.65rem; }
-        .learn-label { margin-bottom:0.25rem !important; }
-        .learn-input, .learn-search-group .learn-search-icon { min-height:48px !important; }
+        .learn-mobile-head { padding:0 0.15rem 0.65rem; align-items:center; }
+        .learn-mobile-title { font-size:0.88rem !important; }
+        .learn-mobile-reset { font-size:0.74rem !important; min-height:0 !important; padding:0.25rem !important; }
+        .learn-mobile-count { font-size:0.62rem !important; }
+        .learn-label { margin-bottom:0.25rem !important; font-size:0.6rem !important; letter-spacing:0.3px; text-align:left; }
+        .learn-input, .learn-search-group .learn-search-icon { min-height:44px !important; }
         .learn-input {
-            font-size:0.88rem !important;
-            max-width:100%; width:100%;
+            font-size:0.78rem !important;
+            max-width:100%; width:100%; text-align:left;
         }
         .learn-field-format .learn-input, .learn-field-category .learn-input {
             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
         }
-        .learn-btn-apply { min-height:48px; font-size:0.9rem; }
-        .learn-btn-clear { width:48px; height:48px; min-height:48px; }
+        .learn-btn-apply { min-height:44px; font-size:0.8rem; justify-content:center; }
+        .learn-btn-clear { width:44px; height:44px; min-height:44px; }
+        .learn-actions { align-items:center; }
 
         /* Phones: YouTube-style 2-col video grid — compact cards fit side by side */
         .learn-media-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.65rem; }
         .learn-media-grid > [class*="col-"] { width:auto !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; margin-top:0 !important; }
         .learn-media-grid .video-media-card { border-radius:14px !important; }
         .learn-media-grid .video-media-card > .position-relative.overflow-hidden { height:120px !important; border-radius:14px 14px 0 0 !important; }
-        .learn-media-grid .video-media-card .card-body { padding:0.6rem 0.65rem !important; }
-        .learn-media-grid .video-media-card h6 { font-size:0.7rem !important; line-height:1.35 !important; margin-bottom:0.25rem !important; }
+        .learn-media-grid .video-media-card .card-body { padding:0.6rem 0.65rem !important; text-align:left; }
+        .learn-media-grid .video-media-card h6 { font-size:0.7rem !important; line-height:1.35 !important; margin-bottom:0.25rem !important; text-align:left; }
         .learn-media-grid .video-media-card .card-body p { display:none !important; }
-        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.3rem !important; }
-        .learn-media-grid .video-media-card small { font-size:0.6rem !important; }
+        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.3rem !important; justify-content:flex-start !important; }
+        .learn-media-grid .video-media-card small { font-size:0.6rem !important; text-align:left; }
         .learn-media-grid .video-media-card .btn { display:none !important; }
         .learn-media-grid .yt-watch-btn.rounded-circle { width:42px !important; height:42px !important; }
     }
