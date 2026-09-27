@@ -761,37 +761,40 @@
         }
         .recent-timeline { margin:0; padding:0; }
         .timeline-row, .recent-timeline-row {
-            padding-left:42px !important;
-            margin-bottom:0.9rem !important;
+            padding-left:38px !important;
+            margin-bottom:0.8rem !important;
             position:relative;
         }
         .recent-timeline-row:last-child { margin-bottom:0 !important; }
-        .maternal-timeline::before { left:16px !important; top:14px; bottom:14px; }
-        .timeline-dot-icon { left:2px !important; width:28px !important; height:28px !important; font-size:0.8rem !important; top:1px !important; }
+        .maternal-timeline::before { left:13px !important; top:12px; bottom:12px; width:2px !important; }
+        .timeline-dot-icon { left:1px !important; width:24px !important; height:24px !important; font-size:0.7rem !important; top:2px !important; }
         .timeline-content { min-width:0; flex:1 1 auto; }
         .timeline-title {
-            font-size:0.88rem !important;
-            line-height:1.4 !important;
+            font-size:0.8rem !important;
+            line-height:1.35 !important;
             overflow-wrap:anywhere;
-            margin-bottom:3px !important;
+            margin-bottom:2px !important;
         }
         .timeline-meta {
             display:flex !important;
-            flex-wrap:wrap !important;
+            flex-wrap:nowrap !important;
             align-items:center !important;
-            column-gap:6px !important;
-            row-gap:5px !important;
-            font-size:0.78rem !important;
-            line-height:1.45 !important;
+            column-gap:5px !important;
+            row-gap:4px !important;
+            font-size:0.7rem !important;
+            line-height:1.4 !important;
+            min-width:0;
         }
-        .timeline-date { white-space:nowrap; }
-        .timeline-dot { opacity:0.6; }
+        .timeline-date { white-space:nowrap; flex-shrink:0; }
+        .timeline-dot { opacity:0.6; flex-shrink:0; }
         .timeline-status {
-            font-size:0.68rem !important;
+            font-size:0.6rem !important;
             font-weight:700 !important;
-            padding:0.22rem 0.65rem !important;
+            padding:0.16rem 0.5rem !important;
             border-radius:9999px !important;
             white-space:nowrap;
+            flex-shrink:0;
+            line-height:1.3 !important;
         }
 
         /* Community (mobile: keep header on one row, avatar + meta tight) */
