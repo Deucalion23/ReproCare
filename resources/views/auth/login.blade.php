@@ -95,6 +95,7 @@
         .login-page .public-brand { transform:translateY(-1px); }
         .login-page .public-brand-mark { transform:translateY(-11px); }
         .login-page .public-brand-name { transform:translateY(3px); }
+        .fb-hero { display:none; }
         .fb-hero { padding:38px 20px 35px; }
         .fb-hero::before { width:270px; height:270px; right:-170px; top:-155px; border-width:38px; }
         .fb-hero h1 { font-size:2.45rem; margin-bottom:24px; }
