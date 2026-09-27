@@ -517,8 +517,34 @@
     @media (max-width: 575.98px) {
         .learn-hero-icon { width:42px; height:42px; font-size:1.2rem; }
         .learn-hero-count { width:100%; justify-content:center; }
-        .learn-filter-grid { padding:0.65rem; gap:0.6rem; }
-        .learn-input { font-size:0.88rem !important; }
+
+        /* Phones: drop the nested sheet (single flat card), stack selects
+           full-width so option text never truncates side-by-side. */
+        .learn-filter-grid {
+            grid-template-columns:minmax(0, 1fr);
+            grid-template-areas:
+                "search"
+                "format"
+                "category"
+                "actions";
+            gap:0.55rem;
+            padding:0;
+            background:transparent;
+            border:none;
+        }
+        .learn-filter-card > .card-body { padding:0.85rem !important; }
+        .learn-mobile-head { padding:0 0.15rem 0.65rem; }
+        .learn-label { margin-bottom:0.25rem !important; }
+        .learn-input, .learn-search-group .learn-search-icon { min-height:48px !important; }
+        .learn-input {
+            font-size:0.88rem !important;
+            max-width:100%; width:100%;
+        }
+        .learn-field-format .learn-input, .learn-field-category .learn-input {
+            white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+        }
+        .learn-btn-apply { min-height:48px; font-size:0.9rem; }
+        .learn-btn-clear { width:48px; height:48px; min-height:48px; }
     }
 </style>
 @endpush
