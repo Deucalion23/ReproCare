@@ -109,12 +109,12 @@
         margin-bottom:auto;
     }
     .reg-brand img {
-        width:36px; height:36px;
+        width:64px; height:64px;
         object-fit:contain; border-radius:8px;
     }
     .reg-brand-name {
         font-family:'Plus Jakarta Sans', sans-serif;
-        font-size:1.35rem; font-weight:800;
+        font-size:1.75rem; font-weight:800;
         color:var(--color-on-solid); letter-spacing:-0.02em;
     }
     .reg-brand-name span {

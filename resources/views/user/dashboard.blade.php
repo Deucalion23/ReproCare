@@ -72,9 +72,10 @@
         display:inline-flex;
         align-items:center;
         gap:8px;
-        background:var(--color-secondary-soft);
-        color:var(--color-secondary-text);
-        border:none;
+        background:#F1F5F9 !important;
+        background-color:#F1F5F9 !important;
+        color:#743AFF !important;
+        border:1px solid transparent !important;
         padding:0.65rem 1.45rem;
         border-radius:9999px;
         font-size:0.9rem;
@@ -84,11 +85,21 @@
         transition:all 0.2s ease;
     }
 
+    .btn-hero-action span, .btn-hero-action i {
+        color:#743AFF !important;
+    }
+
     .btn-hero-action:hover {
-        background:var(--color-secondary-soft);
-        color:var(--color-secondary-text);
+        background:#E8EEF5 !important;
+        background-color:#E8EEF5 !important;
+        color:#6431DE !important;
+        border-color:transparent !important;
         transform:translateY(-2px);
         box-shadow:0 12px 28px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 45%, transparent);
+    }
+
+    .btn-hero-action:hover span, .btn-hero-action:hover i {
+        color:#6431DE !important;
     }
 
     .patient-chips-row {
@@ -113,13 +124,13 @@
         color:var(--color-secondary-text);
     }
 
-    /* ── STAT CARDS ── */
+    /* ── STAT CARDS ── match screenshot pastels: slate / peach / mint / lavender */
     .women-stat-card {
         background:var(--color-surface);
         border:none;
         border-radius:20px;
         padding:1.4rem;
-        box-shadow:var(--wp-shadow-sm);
+        box-shadow:0 2px 8px rgb(var(--color-shadow-rgb) / .05);
         height:100%;
         display:flex;
         flex-direction:column;
@@ -134,6 +145,13 @@
         box-shadow:var(--wp-shadow-md);
     }
 
+    /* Fixed pastel tints exactly like the reference picture (light mode look
+       preserved even when a custom brand theme or dark mode is active). */
+    .women-stat-card.card-slate { background:#EAF0F7 !important; }
+    .women-stat-card.card-peach { background:#FFF0E6 !important; }
+    .women-stat-card.card-mint { background:#E7F7F0 !important; }
+    .women-stat-card.card-lavender { background:#EEE9FF !important; }
+
     .stat-top-row {
         display:flex;
         align-items:center;
@@ -142,11 +160,12 @@
     }
 
     .stat-dark-icon {
-        width:40px;
-        height:40px;
+        width:42px;
+        height:42px;
         border-radius:50%;
-        background:var(--color-surface-strong);
-        color:var(--color-on-solid);
+        background:#1E293B !important;
+        background-color:#1E293B !important;
+        color:#FFFFFF !important;
         display:flex;
         align-items:center;
         justify-content:center;
@@ -154,6 +173,7 @@
         margin-bottom:0.7rem;
         flex-shrink:0;
     }
+    .stat-dark-icon i { color:#FFFFFF !important; }
 
     .stat-badge-icon {
         width:44px;
@@ -170,14 +190,14 @@
         font-weight:700;
         text-transform:uppercase;
         letter-spacing:0.05em;
-        color:var(--wp-text-soft);
+        color:#64748B !important;
     }
 
     .stat-big-value {
         font-family:'Plus Jakarta Sans', sans-serif;
         font-size:2.2rem;
         font-weight:800;
-        color:var(--color-text);
+        color:#0F172A !important;
         line-height:1.1;
         letter-spacing:-0.02em;
         margin-bottom:0.35rem;
@@ -186,11 +206,12 @@
     .stat-footnote {
         font-size:0.82rem;
         font-weight:600;
-        color:var(--wp-text-soft);
+        color:#475569 !important;
         display:flex;
         align-items:center;
         gap:5px;
     }
+    .stat-footnote a, .stat-footnote i { color:#334155 !important; }
 
     /* ── QUICK ACTION PILLS ── */
     .action-pill {
@@ -223,6 +244,7 @@
         font-size:0.85rem;
         flex-shrink:0;
     }
+    .women-action-tile {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -424,9 +446,10 @@
         display:inline-flex;
         align-items:center;
         gap:7px;
-        background:var(--color-surface-strong);
-        border:1px solid var(--color-text);
-        color:var(--color-on-solid);
+        background:#1E293B !important;
+        background-color:#1E293B !important;
+        border:1px solid #1E293B !important;
+        color:#FFFFFF !important;
         font-weight:700;
         font-size:0.85rem;
         padding:0.62rem 1.25rem;
@@ -437,12 +460,21 @@
         transition:all 0.2s ease;
     }
 
+    .btn-hs-dark span, .btn-hs-dark i {
+        color:#FFFFFF !important;
+    }
+
     .btn-hs-dark:hover {
-        background:var(--color-surface-strong);
-        border-color:var(--color-text);
-        color:var(--color-on-solid);
+        background:#0F172A !important;
+        background-color:#0F172A !important;
+        border-color:#0F172A !important;
+        color:#FFFFFF !important;
         transform:translateY(-1px);
         box-shadow:0 12px 26px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 32%, transparent);
+    }
+
+    .btn-hs-dark:hover span, .btn-hs-dark:hover i {
+        color:#FFFFFF !important;
     }
 
     @media (max-width: 768px) {
@@ -499,12 +531,12 @@
 
             @if(!$activePregnancy)
                 <a href="{{ route('user.pregnancies.create') }}" class="btn-hero-action">
-                    <i class="bi bi-plus-circle-fill" style="color:var(--color-secondary-text);"></i>
+                    <i class="bi bi-plus-circle-fill"></i>
                     <span>Start Pregnancy Tracking</span>
                 </a>
             @else
                 <a href="{{ route('user.pregnancies.index') }}" class="btn-hero-action">
-                    <i class="bi bi-heart-pulse-fill" style="color:var(--color-secondary-text);"></i>
+                    <i class="bi bi-heart-pulse-fill"></i>
                     <span>View Pregnancy Journey</span>
                 </a>
             @endif
@@ -562,7 +594,7 @@
 
     <div class="d-flex align-items-center gap-2 flex-wrap">
         <a href="{{ route('user.messages.create') }}" class="btn-hs-dark">
-            <i class="bi bi-chat-heart-fill"></i> Message Health Worker
+            <i class="bi bi-chat-heart-fill"></i> <span>Message Health Worker</span>
         </a>
     </div>
 </div>
@@ -572,9 +604,9 @@
    ═══════════════════════════════════════════════ --}}
 <div class="row g-3 mb-4">
 
-    {{-- Pregnancy Card --}}
+    {{-- Pregnancy Card — slate gray-blue like picture --}}
     <div class="col-6 col-lg-3">
-        <div class="women-stat-card" style="background:var(--color-secondary-soft);">
+        <div class="women-stat-card card-slate">
             <div>
                 <div class="stat-dark-icon">
                     <i class="bi bi-heart-pulse-fill"></i>
@@ -596,9 +628,9 @@
         </div>
     </div>
 
-    {{-- Next Period / Cycle Card --}}
+    {{-- Next Period / Cycle Card — peach like picture --}}
     <div class="col-6 col-lg-3">
-        <div class="women-stat-card" style="background:var(--color-peach-soft);">
+        <div class="women-stat-card card-peach">
             <div>
                 <div class="stat-dark-icon">
                     <i class="bi bi-calendar2-heart-fill"></i>
@@ -620,9 +652,9 @@
         </div>
     </div>
 
-    {{-- Upcoming Checkups Card --}}
+    {{-- Upcoming Checkups Card — mint green like picture --}}
     <div class="col-6 col-lg-3">
-        <div class="women-stat-card" style="background:var(--color-success-soft);">
+        <div class="women-stat-card card-mint">
             <div>
                 <div class="stat-dark-icon">
                     <i class="bi bi-clipboard2-pulse-fill"></i>
@@ -648,7 +680,7 @@
                 ->where('is_read', false)
                 ->count();
         @endphp
-        <div class="women-stat-card" style="background:var(--color-primary-soft);">
+        <div class="women-stat-card card-lavender">
             <div>
                 <div class="stat-dark-icon">
                     <i class="bi bi-chat-heart-fill"></i>

@@ -74,9 +74,9 @@
     .notif-view-pill { font-size:0.72rem; font-weight:800; padding:0.35rem 0.85rem; border:none; border-radius:999px; color:var(--color-text); background:var(--color-surface-soft); background-color:var(--color-surface-soft); white-space:nowrap; }
 
     .mark-all-btn {
-        background:var(--color-secondary-soft); background-color:var(--color-secondary-soft);
+        background:#F1F5F9; background-color:#F1F5F9;
         border:none;
-        color:var(--color-secondary-text);
+        color:#743AFF;
         font-size:0.78rem;
         font-weight:800;
         padding:0.45em 1.1em;
@@ -87,7 +87,7 @@
         align-items:center;
         gap:0.4rem;
     }
-    .mark-all-btn:hover { background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid); }
+    .mark-all-btn:hover { background:#E8EEF5; background-color:#E8EEF5; color:#6431DE; }
     .mark-all-btn:disabled { opacity:0.4; cursor:not-allowed; }
 </style>
 @endpush

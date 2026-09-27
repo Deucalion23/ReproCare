@@ -78,8 +78,12 @@
     .fb-forgot:hover { color:var(--color-primary-hover); }
     .fb-demo { border-radius:16px; }
     .login-page .public-header { border-bottom:1px solid var(--color-border); }
-    .login-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
-    .login-page .public-brand, .login-page .public-brand-mark, .login-page .public-brand-name { transform:none; }
+    .login-page .header-inner { width:100%; min-height:84px; padding-inline:clamp(28px,5vw,72px); }
+    .login-page .public-brand, .login-page .public-brand-name { transform:none; }
+    .login-page .public-brand { gap:2px; font-size:28px; }
+    .login-page .public-brand-name { margin-left:-6px; }
+    .login-page .public-brand-mark { width:64px; height:64px; flex-basis:64px; transform:translateY(-5px); }
+    .login-page .public-brand-mark img { width:64px; height:64px; }
     .fb-hero { justify-content:flex-start; padding-top:24px; }
     .fb-side { align-items:flex-start; padding-top:34px; }
     @media (max-width:900px) {
@@ -89,8 +93,12 @@
         .fb-collage { height:340px; max-width:580px; margin-inline:auto; transform:none; }
     }
     @media (max-width:600px) {
-        .login-page .header-inner { min-height:62px; padding-inline:20px; }
-        .login-page .public-brand, .login-page .public-brand-mark, .login-page .public-brand-name { transform:none; }
+        .login-page .header-inner { min-height:78px; padding-inline:20px; }
+        .login-page .public-brand, .login-page .public-brand-name { transform:none; }
+        .login-page .public-brand { gap:2px; font-size:24px; }
+        .login-page .public-brand-name { margin-left:-6px; }
+        .login-page .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-11px); }
+        .login-page .public-brand-mark img { width:52px; height:52px; }
         .fb-hero { display:none; }
         .fb-hero { padding:38px 20px 35px; }
         .fb-hero::before { width:270px; height:270px; right:-170px; top:-155px; border-width:38px; }

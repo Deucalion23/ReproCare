@@ -213,7 +213,7 @@ class UserController extends Controller
         }
 
         return redirect()->route('user.pregnancies.index')
-            ->with('success', 'Pregnancy reported successfully. Your midwife and health worker have been notified.');
+            ->with('success', 'Pregnancy submitted for clinical verification. Your midwife and health worker have been notified.');
     }
 
     // Show single pregnancy details

@@ -27,10 +27,10 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-container { width:min(1180px,calc(100% - 80px)); margin-inline:auto; }
 .public-header { background:color-mix(in srgb, var(--color-bg) 96%, transparent); border-bottom:1px solid var(--public-line); }
 .header-inner { min-height:88px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
-.public-brand { display:inline-flex; align-items:center; gap:10px; font-family:'Plus Jakarta Sans',sans-serif; font-size:24px; font-weight:800; letter-spacing:-1px; line-height:1; flex-shrink:0; transform:none; }
-.public-brand-mark { width:42px; height:42px; display:grid; place-items:center; overflow:visible; flex:0 0 42px; transform:none; }
-.public-brand-mark img { width:58px; height:58px; max-width:none; object-fit:contain; display:block; }
-.public-brand-name { display:inline-flex; align-items:center; line-height:1; transform:none; }
+.public-brand { display:inline-flex; align-items:center; gap:2px; font-family:'Plus Jakarta Sans',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1px; line-height:1; flex-shrink:0; transform:none; }
+.public-brand-mark { width:64px; height:64px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 64px; transform:translateY(-5px); }
+.public-brand-mark img { width:64px; height:64px; max-width:none; object-fit:contain; display:block; }
+.public-brand-name { display:inline-flex; align-items:center; line-height:1; padding-bottom:1px; margin-left:-6px; transform:none; }
 /* Match the wordmark accent to the lavender used by the supplied logo. */
 .public-brand .brand-accent { color:#B7A8D3 !important; }
 .public-nav,.nav-account { display:flex; align-items:center; gap:30px; font-size:13px; font-weight:600; }
@@ -146,8 +146,13 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 /* Landing page: a warm, photo-led introduction to local maternal care. */
 .landing-page { background:linear-gradient(180deg, var(--color-bg) 0, var(--color-bg) 67%, var(--color-secondary-soft) 100%); }
 .landing-page .public-header { background:color-mix(in srgb, var(--color-bg) 92%, transparent); }
-.landing-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
-.landing-page .public-brand, .landing-page .public-brand-mark, .landing-page .public-brand-name { transform:none; }
+.landing-page .header-inner { width:100%; min-height:84px; padding-inline:clamp(28px,5vw,72px); }
+.landing-page .public-brand, .landing-page .public-brand-name,
+.login-page .public-brand, .login-page .public-brand-name,
+.signup-page .public-brand, .signup-page .public-brand-name { transform:none; }
+.landing-page .public-brand, .login-page .public-brand, .signup-page .public-brand { gap:2px; font-size:28px; }
+.landing-page .public-brand-mark, .login-page .public-brand-mark, .signup-page .public-brand-mark { width:64px; height:64px; flex-basis:64px; transform:translateY(-5px); }
+.landing-page .public-brand-mark img, .login-page .public-brand-mark img, .signup-page .public-brand-mark img { width:64px; height:64px; }
 .landing-page .landing-hero { min-height:615px; padding-block:64px 88px; gap:72px; }
 .landing-page .hero-copy { position:relative; z-index:1; }
 .landing-page .hero-copy .eyebrow { margin-bottom:20px; box-shadow:0 8px 20px color-mix(in srgb, var(--color-primary) 10%, transparent); }
@@ -205,8 +210,9 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .landing-page .how-steps li { padding-top:2px; }
 /* Keep the Create Account header consistent with landing and sign-in. */
 .signup-page .public-header { border-bottom:1px solid var(--color-border); }
-.signup-page .header-inner { width:100%; min-height:68px; padding-inline:clamp(28px,5vw,72px); }
-.signup-page .public-brand, .signup-page .public-brand-mark, .signup-page .public-brand-name { transform:none; }
+.signup-page .header-inner { width:100%; min-height:84px; padding-inline:clamp(28px,5vw,72px); }
+.login-page .public-header { border-bottom:1px solid var(--color-border); }
+.login-page .header-inner { width:100%; min-height:84px; padding-inline:clamp(28px,5vw,72px); }
 /* Registration keeps its existing fields, step validation and ID capture controls. */
 .signup-page {;;; --primary-sub:var(--color-secondary-soft); --green:var(--color-secondary-text); --green-deep:var(--color-surface-strong); --green-light:var(--color-secondary-soft); --green-dark:var(--color-secondary-text); --green-dim:var(--color-secondary-soft); --pink:var(--color-secondary-text);; --text-faint:var(--color-text-muted);; }
 .signup-page .reg-page { width:min(1100px,calc(100% - 80px)); margin:22px auto 48px; min-height:calc(100vh - 235px); background:transparent; gap:75px; align-items:flex-start; }
@@ -252,7 +258,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
     .signup-page .reg-page { width:calc(100% - 48px); gap:40px; } .signup-page .reg-left { width:300px; } .signup-page .reg-left-content { padding:25px; }
 }
 @media (max-width:820px) {
-    .public-nav { display:none; } .header-inner { min-height:76px; }
+    .public-nav { display:none; } .header-inner { min-height:80px; }
     .hero { gap:28px; padding-block:48px; } .hero h1 { font-size:40px; } .hero-copy > p { font-size:14px; }
     .hero-photo { height:375px; border-radius:24px; } .care-note { padding:13px; left:-10px; gap:9px; } .care-note small { font-size:10px; }
     .community-strip { flex-wrap:wrap; justify-content:center; } .community-strip > span:first-child { width:100%; max-width:none; text-align:center; }
@@ -261,8 +267,8 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
     .signup-page .reg-page { max-width:580px; margin-top:25px; } .signup-page .reg-left { display:none; } .signup-page .reg-right-inner { max-width:none; }
 }
 @media (max-width:600px) {
-    .public-container { width:calc(100% - 40px); } .header-inner { min-height:72px; gap:12px; }
-    .public-brand { font-size:21px; gap:10px; } .public-brand-mark { width:34px; height:34px; flex-basis:34px; } .public-brand-mark img { width:52px; height:52px; }
+    .public-container { width:calc(100% - 40px); } .header-inner { min-height:78px; gap:12px; }
+    .public-brand { font-size:24px; gap:2px; } .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-11px); } .public-brand-mark img { width:52px; height:52px; }
     .nav-account { gap:15px; font-size:12px; } .public-page .button-small { min-height:38px; padding:8px 13px; font-size:11px; }
     .hero { grid-template-columns:1fr; padding-block:40px; gap:36px; } .hero h1 { font-size:45px; max-width:400px; } .hero .eyebrow { font-size:10px; letter-spacing:1.5px; margin-bottom:20px; }
     .hero-copy > p { font-size:14px; margin-bottom:23px; } .hero-note { font-size:11px; margin-top:18px; }
@@ -301,10 +307,13 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
     .landing-page .care-gallery-copy p { max-width:560px; }
 }
 @media (max-width:600px) {
-    .landing-page .header-inner { min-height:62px; padding-inline:20px; }
-    .landing-page .public-brand, .landing-page .public-brand-mark, .landing-page .public-brand-name { transform:none; }
-    .signup-page .header-inner { min-height:62px; padding-inline:20px; }
-    .signup-page .public-brand, .signup-page .public-brand-mark, .signup-page .public-brand-name { transform:none; }
+    .landing-page .header-inner, .login-page .header-inner, .signup-page .header-inner { min-height:78px; padding-inline:20px; }
+    .landing-page .public-brand, .landing-page .public-brand-name,
+    .login-page .public-brand, .login-page .public-brand-name,
+    .signup-page .public-brand, .signup-page .public-brand-name { transform:none; }
+    .landing-page .public-brand, .login-page .public-brand, .signup-page .public-brand { gap:2px; font-size:24px; }
+    .landing-page .public-brand-mark, .login-page .public-brand-mark, .signup-page .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-11px); }
+    .landing-page .public-brand-mark img, .login-page .public-brand-mark img, .signup-page .public-brand-mark img { width:52px; height:52px; }
     .landing-page .landing-hero { padding-block:40px 42px; gap:32px; }
     .landing-page .hero h1 { font-size:clamp(2.65rem, 12vw, 3.45rem); line-height:1.05; }
     .landing-page .hero-copy > p { font-size:14px; line-height:1.75; }

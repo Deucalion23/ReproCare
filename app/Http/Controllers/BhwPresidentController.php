@@ -166,6 +166,10 @@ class BhwPresidentController extends Controller
             $imageName = time() . '.' . $request->profile_image->extension();
             $request->profile_image->move(public_path('images/uploads/profile'), $imageName);
             $data['profile_image'] = 'uploads/profile/' . $imageName;
+            $inline = \App\Models\User::makeAvatarDataUrl($request->file('profile_image'));
+            if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                $data['profile_image_data'] = $inline;
+            }
         }
 
         $bhw = User::create($data);
@@ -824,6 +828,10 @@ class BhwPresidentController extends Controller
             $me->contact_number = $data['contact_number'] ?? $me->contact_number;
             if ($request->hasFile('profile_image')) {
                 $me->profile_image = $request->file('profile_image')->store('uploads/profile', 'public');
+                $inline = \App\Models\User::makeAvatarDataUrl($request->file('profile_image'));
+                if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                    $me->profile_image_data = $inline;
+                }
             }
             $me->save();
 

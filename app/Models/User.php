@@ -74,6 +74,7 @@ class User extends Authenticatable
         'role',
         'status',
         'profile_image',
+        'profile_image_data',
         'rejection_reason',
         'archived_at',
         'archived_reason',
@@ -430,8 +431,74 @@ class User extends Authenticatable
     }
 
     // Profile Image Handling
+    //
+    // profile_image_data holds a small resized data-URL copy of the avatar
+    // in the database (survives ephemeral disks, renders on every device).
+    // The file path in profile_image remains as a fallback.
+    public static function makeAvatarDataUrl($file): ?string
+    {
+        try {
+            if (! $file || ! method_exists($file, 'getRealPath') || ! is_file($file->getRealPath())) {
+                return null;
+            }
+
+            // Preferred: resized JPEG via GD (max 256px, ~15-30KB).
+            if (function_exists('imagecreatefromstring') && function_exists('imagecreatetruecolor')
+                && function_exists('imagejpeg') && function_exists('imagesx') && function_exists('imagesy')) {
+                $raw = @file_get_contents($file->getRealPath());
+                if ($raw !== false) {
+                    $src = @imagecreatefromstring($raw);
+                    if ($src !== false) {
+                        $w = imagesx($src);
+                        $h = imagesy($src);
+                        if ($w > 0 && $h > 0) {
+                            $max = 256;
+                            $scale = min(1, $max / max($w, $h));
+                            $nw = max(1, (int) round($w * $scale));
+                            $nh = max(1, (int) round($h * $scale));
+                            $dst = imagecreatetruecolor($nw, $nh);
+                            imagecopyresampled($dst, $src, 0, 0, 0, 0, $nw, $nh, $w, $h);
+                            ob_start();
+                            imagejpeg($dst, null, 72);
+                            $jpeg = ob_get_clean();
+                            imagedestroy($src);
+                            imagedestroy($dst);
+                            if ($jpeg !== false && strlen($jpeg) <= 90000) {
+                                return 'data:image/jpeg;base64,' . base64_encode($jpeg);
+                            }
+                        } else {
+                            imagedestroy($src);
+                        }
+                    }
+                }
+            }
+
+            // Fallback when GD is unavailable: embed only tiny originals.
+            $size = method_exists($file, 'getSize') ? (int) $file->getSize() : 0;
+            if ($size > 0 && $size <= 49152) {
+                $mime = method_exists($file, 'getMimeType') ? ($file->getMimeType() ?: 'image/jpeg') : 'image/jpeg';
+                if (! str_starts_with($mime, 'image/')) {
+                    return null;
+                }
+                $raw = @file_get_contents($file->getRealPath());
+                if ($raw !== false) {
+                    return 'data:' . $mime . ';base64,' . base64_encode($raw);
+                }
+            }
+        } catch (\Throwable $e) {
+            // Never break an upload because the inline copy failed.
+        }
+
+        return null;
+    }
+
     public function getProfileImageUrlAttribute()
     {
+        $inline = $this->getAttribute('profile_image_data');
+        if (is_string($inline) && str_starts_with($inline, 'data:image')) {
+            return $inline;
+        }
+
         if ($this->profile_image) {
             $publicDisk = Storage::disk('public');
             $filename = basename($this->profile_image);
@@ -464,6 +531,11 @@ class User extends Authenticatable
 
     public function hasProfileImage()
     {
+        $inline = $this->getAttribute('profile_image_data');
+        if (is_string($inline) && str_starts_with($inline, 'data:image')) {
+            return true;
+        }
+
         return !empty($this->profile_image);
     }
 

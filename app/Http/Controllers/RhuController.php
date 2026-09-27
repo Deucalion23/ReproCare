@@ -768,6 +768,10 @@ class RhuController extends Controller
                     \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_image);
                 }
                 $data['profile_image'] = $request->file('profile_image')->store('uploads/profile', 'public');
+                $inline = \App\Models\User::makeAvatarDataUrl($request->file('profile_image'));
+                if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                    $data['profile_image_data'] = $inline;
+                }
             }
 
             $user->update($data);

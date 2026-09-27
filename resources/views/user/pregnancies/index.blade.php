@@ -13,6 +13,10 @@
 .preg-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
 .preg-active-badge { display:inline-flex; align-items:center; gap:6px; background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; font-size:0.82rem; padding:0.5em 1.05em; border-radius:999px; font-weight:800; }
 .preg-active-badge i { color:var(--color-danger); }
+.preg-verification-banner { display:flex; align-items:flex-start; gap:0.8rem; background:var(--color-primary-soft); border:1px solid color-mix(in srgb, var(--color-primary) 25%, var(--color-border)); border-radius:16px; padding:0.95rem 1.1rem; margin-bottom:1.25rem; color:var(--color-primary-text); }
+.preg-verification-banner > i { font-size:1.25rem; line-height:1.25; color:var(--color-primary); }
+.preg-verification-banner strong { display:block; font-size:0.9rem; margin-bottom:0.15rem; }
+.preg-verification-banner span { display:block; font-size:0.83rem; line-height:1.5; color:var(--color-text-muted); }
 
 .preg-hero {
     background:var(--color-surface); background-color:var(--color-surface);
@@ -110,6 +114,9 @@
     @php
         $activePreg = $pregnancies->firstWhere('is_active', true);
         $pastPregs = $pregnancies->filter(fn($p) => !$p->is_active);
+        $verificationPending = $activePreg && in_array($activePreg->workflow_status, [
+            'submitted_to_bhw_president', 'bhw_president_review', 'bhw_president_approved',
+        ], true);
         $weekData = [
             1=>['🌱','Tiny Seed','Your pregnancy begins. The fertilized egg is implanting.'],
             4=>['🫘','Poppy Seed','The embryo is the size of a poppy seed. Heart begins forming.'],
@@ -174,6 +181,16 @@
         <div class="alert alert-success alert-dismissible fade show mb-4">
             <i class="bi bi-check-circle me-2"></i>{{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
+    @if($verificationPending)
+        <div class="preg-verification-banner" role="status">
+            <i class="bi bi-patch-check-fill"></i>
+            <div>
+                <strong>Pending Clinical Verification</strong>
+                <span>Your self-reported pregnancy details are available for personal tracking and will be reviewed by your BHW or midwife at your next visit.</span>
+            </div>
         </div>
     @endif
 

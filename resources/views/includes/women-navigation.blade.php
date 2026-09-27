@@ -40,13 +40,18 @@
         --nav-rose-dark:var(--color-secondary-text);
         --nav-teal:var(--color-info-text);
         --nav-teal-dark:var(--color-info-text);
+        --nav-login-lavender:#9B6CB8;
+        --nav-login-lavender-hover:#8958A8;
+        --nav-hover-bg:#DCC9EE;
+        --nav-hover-text:#74499E;
+        --nav-hover-border:#C6A9E2;
     }
 
     /* ── 1. Structural Parent Container ── */
     .women-navbar {
         width:100% !important;
         min-height:var(--nav-bar-min-h) !important;
-        background:var(--nav-bg) !important;
+        background:var(--color-surface) !important;
         border-bottom:1px solid var(--nav-border) !important;
         position:sticky;
         top:0;
@@ -82,26 +87,30 @@
     .women-brand-link {
         display:flex;
         align-items:center;
-        gap:10px;
+        gap:9px;
         text-decoration:none;
+        line-height:1;
     }
 
     .women-brand-mark {
-        width:42px;
-        height:42px;
-        display:grid;
-        place-items:center;
+        width:36px;
+        height:36px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
         overflow:visible;
-        flex:0 0 42px;
+        flex:0 0 36px;
+        transform:translateY(-1.5px);
     }
 
     .women-brand-mark img {
-        width:58px !important;
-        height:58px !important;
+        width:36px !important;
+        height:36px !important;
         max-width:none;
         object-fit:contain;
         display:block;
-        transform:translateY(-10px);
+        transform:none !important;
+        margin:0;
     }
 
     .women-brand-icon {
@@ -120,14 +129,15 @@
     .women-brand-title {
         display:inline-flex;
         align-items:center;
-        min-height:42px;
-        font-family:'Plus Jakarta Sans', sans-serif;
+        min-height:36px;
+        font-family:'Plus Jakarta Sans',sans-serif;
         font-weight:800;
         font-size:1.2rem;
         letter-spacing:-0.025em;
         color:var(--nav-slate-900);
         line-height:1;
         white-space:nowrap;
+        padding-bottom:1px;
     }
 
     .women-brand-title span {
@@ -194,25 +204,38 @@
         transition:color 0.18s ease-in-out;
     }
 
-    /* Hover State (Inactive) - dark pink icon */
-    .women-tab-link:hover {
-        background:var(--color-secondary-soft) !important;
-        color:var(--color-secondary-text) !important;
+    /* Hover State (Inactive) */
+    .women-tab-link:not(.active):hover {
+        background:var(--nav-slate-100) !important;
+        border-color:transparent !important;
+        color:var(--nav-primary) !important;
     }
 
-    .women-tab-link:hover i.nav-icon {
-        color:var(--color-secondary-text) !important;
+    .women-tab-link:not(.active):hover i.nav-icon {
+        color:var(--nav-primary) !important;
     }
 
-    /* Active Pill State - dark highlight */
+    /* Active Pill State */
     .women-tab-link.active {
         background:var(--color-surface-strong) !important;
+        border-color:var(--color-surface-strong) !important;
         color:var(--color-on-solid) !important;
         font-weight:700 !important;
         box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent);
     }
 
     .women-tab-link.active i.nav-icon {
+        color:var(--color-on-solid) !important;
+    }
+
+    /* Keep the selected tab stable when hovered. */
+    .women-tab-link.active:hover {
+        background:var(--color-surface-strong) !important;
+        border-color:var(--color-surface-strong) !important;
+        color:var(--color-on-solid) !important;
+    }
+
+    .women-tab-link.active:hover i.nav-icon {
         color:var(--color-on-solid) !important;
     }
 
@@ -270,14 +293,60 @@
         color:var(--nav-slate-500);
     }
 
-    .women-dropdown-item:hover, .women-dropdown-item.active {
-        background:var(--nav-slate-100);
-        color:var(--nav-slate-900);
+.women-dropdown-item:hover, .women-dropdown-item.active {
+        background:var(--nav-slate-100) !important;
+        color:var(--nav-slate-900) !important;
         font-weight:600;
     }
 
+    /* Keep both Care Records menu entries in the same dark slate used by the navigation. */
+    .women-nav-dropdown-menu .women-dropdown-item,
+    .women-nav-dropdown-menu .women-dropdown-item.active,
+    .women-nav-dropdown-menu .women-dropdown-item:hover,
+    .women-nav-dropdown-menu .women-dropdown-item i,
+    .women-nav-dropdown-menu .women-dropdown-item.active i,
+    .women-nav-dropdown-menu .women-dropdown-item:hover i {
+        color:var(--nav-slate-600) !important;
+    }
+
     .women-dropdown-item:hover i, .women-dropdown-item.active i {
-        color:var(--nav-teal);
+        color:var(--nav-teal) !important;
+    }
+
+    /* Dark mode needs its own navigation states: the shared `surface-strong`
+       token is the same shade as the dark navbar, which made the selected tab
+       disappear and left hovered dropdown labels too muted to read. */
+    [data-theme="dark"] .women-tab-link:not(.active):hover {
+        background:var(--color-surface-soft) !important;
+        border-color:var(--color-border) !important;
+        color:var(--color-text) !important;
+    }
+
+    [data-theme="dark"] .women-tab-link:not(.active):hover i.nav-icon {
+        color:var(--color-text) !important;
+    }
+
+    [data-theme="dark"] .women-tab-link.active,
+    [data-theme="dark"] .women-tab-link.active:hover {
+        background:#0F172A !important;
+        border-color:#0F172A !important;
+        color:#FFFFFF !important;
+    }
+
+    [data-theme="dark"] .women-tab-link.active i.nav-icon,
+    [data-theme="dark"] .women-tab-link.active:hover i.nav-icon {
+        color:#FFFFFF !important;
+    }
+
+    [data-theme="dark"] .women-dropdown-item:hover,
+    [data-theme="dark"] .women-dropdown-item.active {
+        background:var(--color-surface-soft) !important;
+        color:var(--color-text) !important;
+    }
+
+    [data-theme="dark"] .women-dropdown-item:hover i,
+    [data-theme="dark"] .women-dropdown-item.active i {
+        color:var(--color-text) !important;
     }
 
     /* ── 4. SECTION 3: Right Actions Container ── */
@@ -297,9 +366,9 @@
         gap:6px;
         height:var(--nav-btn-h) !important;
         padding:0 12px !important;
-        background:var(--color-secondary-soft) !important;
+        background:#F1F5F9 !important;
         border:none !important;
-        color:var(--nav-primary) !important;
+        color:#743AFF !important;
         border-radius:var(--nav-btn-r) !important;
         font-size:var(--nav-font-sz) !important;
         font-weight:600 !important;
@@ -313,18 +382,18 @@
 
     .btn-care-support i {
         font-size:14px;
-        color:var(--nav-primary);
+        color:#743AFF;
     }
 
     .btn-care-support:hover {
-        background:var(--nav-primary) !important;
-        border-color:var(--nav-primary) !important;
-        color:var(--color-on-solid) !important;
+        background:#E8EEF5 !important;
+        border-color:transparent !important;
+        color:#6431DE !important;
         box-shadow:0 8px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent);
     }
 
     .btn-care-support:hover i {
-        color:var(--color-on-solid) !important;
+        color:#6431DE !important;
     }
 
     /* Bell Button */
@@ -458,7 +527,7 @@
             gap:0.75rem;
         }
         .women-brand-title {
-            font-size:1.05rem;
+            font-size:1.2rem;
         }
         .btn-care-support span {
             display:none;
@@ -670,9 +739,9 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
     <div class="offcanvas-header border-bottom px-4 py-3">
         <div class="d-flex align-items-center" style="gap:10px;">
-            <span aria-hidden="true" style="width:38px; height:38px; display:grid; place-items:center; overflow:visible; flex:0 0 38px;"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:52px; height:52px; max-width:none; object-fit:contain; display:block; transform:translateY(-10px);"></span>
+            <span aria-hidden="true" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 36px; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;"></span>
             <div>
-                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:19px;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:36px; line-height:1; padding-bottom:1px;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>

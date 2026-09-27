@@ -123,10 +123,10 @@
 
 .cycle-tabs { display:inline-flex; align-items:center; gap:4px; background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:999px; padding:4px; }
 .cycle-nav-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:999px; font-size:0.82rem; font-weight:800; padding:0.55rem 1.35rem; text-decoration:none; transition:all 0.2s ease; white-space:nowrap; }
-.cycle-nav-dark { background:var(--color-danger); color:#fff; box-shadow:none; }
-.cycle-nav-dark:hover { background:var(--color-danger-hover); color:#fff; transform:translateY(-1px); }
-.cycle-nav-soft { background:transparent; color:var(--color-danger-text); }
-.cycle-nav-soft:hover { background:var(--color-danger-soft); color:var(--color-danger-text); transform:translateY(-1px); }
+.cycle-nav-dark { background:#1E293B; color:#fff; box-shadow:0 8px 18px rgb(var(--color-shadow-rgb) / .16); }
+.cycle-nav-dark:hover { background:#0F172A; color:#fff; transform:translateY(-1px); }
+.cycle-nav-soft { background:#F1F5F9; color:#743AFF; }
+.cycle-nav-soft:hover { background:#E8EEF5; color:#6431DE; transform:translateY(-1px); }
 
 .history-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; box-shadow:var(--wp-shadow-sm); overflow:hidden; }
 .history-count { background:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; font-size:0.72rem; font-weight:800; padding:0.35em 0.9em; border-radius:999px; }

@@ -55,12 +55,12 @@
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:10px;">
-                <span aria-hidden="true" style="width:42px; height:42px; display:grid; place-items:center; overflow:visible; flex:0 0 42px;">
+            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:9px; line-height:1;">
+                <span aria-hidden="true" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 36px; transform:translateY(-1.5px);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
-                         style="width:58px; height:58px; max-width:none; object-fit:contain; display:block; transform:translateY(-10px);">
+                         style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;">
                 </span>
-                <span class="fw-800 d-inline-flex align-items-center" style="min-height:42px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1;">
+                <span class="fw-800 d-inline-flex align-items-center" style="min-height:36px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
                     Repro<span style="color:#B7A8D3;">Care</span>
                 </span>
             </a>

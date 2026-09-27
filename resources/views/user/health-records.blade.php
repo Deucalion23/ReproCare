@@ -121,32 +121,32 @@
     white-space:nowrap;
 }
 .btn-hero-action.btn-log {
-    background:var(--color-surface-strong);
-    color:var(--color-on-solid);
+    background:#1E293B;
+    color:#FFFFFF;
     box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent);
 }
 .btn-hero-action.btn-log:hover {
-    background:var(--color-surface-strong);
-    color:var(--color-on-solid);
+    background:#0F172A;
+    color:#FFFFFF;
     transform:translateY(-1px);
 }
 .btn-hero-action.btn-support {
-    background:var(--color-surface-soft);
-    color:var(--color-text);
+    background:#F1F5F9;
+    color:#743AFF;
     border:none;
 }
 [data-theme="light"] .btn-hero-action.btn-support {
-    background:var(--color-surface-soft);
-    color:var(--color-text);
+    background:#F1F5F9;
+    color:#743AFF;
     border:none;
 }
 .btn-hero-action.btn-support:hover {
-    background:var(--color-border);
-    color:var(--color-text);
+    background:#E8EEF5;
+    color:#6431DE;
 }
 [data-theme="light"] .btn-hero-action.btn-support:hover {
     border:none;
-    color:var(--color-text);
+    color:#6431DE;
 }
 
 /* ── Latest Vitals Summary Grid ── */

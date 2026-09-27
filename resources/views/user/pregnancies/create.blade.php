@@ -2,13 +2,37 @@
 
 @section('title', 'Add Pregnancy - ReproCare')
 
+@push('styles')
+<style>
+    .self-report-card { border:0; border-radius:24px; overflow:hidden; box-shadow:0 12px 34px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent); }
+    .self-report-card .card-header { padding:1.35rem 1.5rem; background:var(--color-surface) !important; color:var(--color-text) !important; border-bottom:1px solid var(--color-border); }
+    .self-report-heading { display:flex; align-items:center; gap:.8rem; }
+    .self-report-heading-icon { width:42px; height:42px; display:grid; place-items:center; border-radius:13px; color:var(--color-primary-on); background:var(--color-primary); }
+    .verification-notice { display:flex; align-items:flex-start; gap:.85rem; padding:1rem 1.05rem; margin-bottom:1.35rem; border:1px solid color-mix(in srgb, var(--color-primary) 25%, transparent); border-radius:16px; background:var(--color-primary-soft); color:var(--color-text); }
+    .verification-notice i { color:var(--color-primary-text); font-size:1.2rem; line-height:1.35; }
+    .verification-notice strong { display:block; font-size:.9rem; margin-bottom:.18rem; }
+    .verification-notice p { margin:0; font-size:.82rem; line-height:1.55; color:var(--color-text-muted); }
+    .preg-form-section { margin:1.45rem 0 .85rem; padding-top:1.2rem; border-top:1px solid var(--color-border); }
+    .preg-form-section h6 { margin:0; font-size:.75rem; font-weight:800; letter-spacing:.08em; text-transform:uppercase; color:var(--color-primary-text); }
+    .preg-form-section p { margin:.25rem 0 0; font-size:.78rem; color:var(--color-text-muted); }
+    .self-report-disclaimer { display:flex; gap:.7rem; margin-top:1.35rem; padding:.9rem 1rem; border-radius:14px; background:var(--color-surface-soft); color:var(--color-text-muted); font-size:.78rem; line-height:1.55; }
+    .self-report-disclaimer i { color:var(--color-primary-text); font-size:1rem; }
+</style>
+@endpush
+
 @section('user-content')
 <div class="py-4">
     <div class="row">
         <div class="col-lg-9 mx-auto">
-            <div class="card shadow">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Add Pregnancy Record</h5>
+            <div class="card self-report-card">
+                <div class="card-header">
+                    <div class="self-report-heading">
+                        <span class="self-report-heading-icon"><i class="bi bi-heart-pulse"></i></span>
+                        <div>
+                            <h5 class="mb-1 fw-800">Report a Pregnancy</h5>
+                            <p class="mb-0 small text-muted">Start personal tracking with details you know today.</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="card-body">
                     @if ($errors->any())
@@ -21,9 +45,21 @@
                         </div>
                     @endif
 
+                    <div class="verification-notice" role="note">
+                        <i class="bi bi-patch-check-fill" aria-hidden="true"></i>
+                        <div>
+                            <strong>Pending Clinical Verification</strong>
+                            <p>This is a self-reported record for your personal tracking. Your BHW or midwife will review and confirm the details during your next visit.</p>
+                        </div>
+                    </div>
+
                     <form method="POST" action="{{ route('user.pregnancies.store') }}" id="userPregnancyForm">
                         @csrf
 
+                        <div class="preg-form-section mt-0 pt-0 border-0">
+                            <h6>Your pregnancy dates</h6>
+                            <p>Your estimated due date and pregnancy age are calculated from your last menstrual period.</p>
+                        </div>
                         <div class="row g-3">
                             <div class="col-md-4">
                                 <label class="form-label">Birthdate</label>
@@ -40,17 +76,21 @@
                             </div>
 
                             <div class="col-md-4">
-                                <label for="lmp" class="form-label">LMP</label>
-                                <input type="date" class="form-control" id="lmp" name="lmp" value="{{ old('lmp') }}" required>
+                                <label for="lmp" class="form-label">Last menstrual period (LMP) <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control" id="lmp" name="lmp" value="{{ old('lmp') }}" max="{{ now()->subDay()->format('Y-m-d') }}" aria-describedby="lmp-help" required>
+                                <div class="form-text" id="lmp-help">Choose the first day of your last period.</div>
                             </div>
                             <div class="col-md-4">
-                                <label for="edd" class="form-label">EDD</label>
-                                <input type="date" class="form-control" id="edd" readonly>
+                                <label for="edd" class="form-label">Estimated due date</label>
+                                <input type="date" class="form-control" id="edd" aria-describedby="edd-help" readonly>
+                                <div class="form-text" id="edd-help">Calculated automatically (40 weeks from LMP).</div>
                             </div>
                             <div class="col-md-2">
                                 <label for="gravida" class="form-label">Gravida</label>
                                 <input type="number" class="form-control" id="gravida" name="gravida" value="{{ old('gravida', 1) }}" min="1" required>
                             </div>
+
+                            <div class="col-12"><div class="preg-form-section"><h6>Optional health details</h6><p>Share only details you know. Your care team will verify them with you.</p></div></div>
                             <div class="col-md-2">
                                 <label for="para" class="form-label">Para</label>
                                 <input type="number" class="form-control" id="para" name="para" value="{{ old('para', 0) }}" min="0" required>
@@ -119,9 +159,14 @@
                             </div>
                         </div>
 
+                        <div class="self-report-disclaimer">
+                            <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+                            <span>Self-reported information does not replace medical advice, diagnosis, or a prenatal checkup. Please contact your health worker promptly for urgent concerns.</span>
+                        </div>
+
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-primary">
-                                <i class="bi bi-save"></i> Save Pregnancy Record
+                                <i class="bi bi-send-check"></i> Submit for Clinical Verification
                             </button>
                             <a href="{{ route('user.pregnancies.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left"></i> Back to Pregnancies

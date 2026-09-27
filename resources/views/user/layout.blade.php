@@ -13,10 +13,13 @@
 
     :root { --wp-radius:24px; }
 
+    /* Match patient primary actions to the lavender used on the public landing page. */
+    .women-shell { --women-action:#9B6CB8; --women-action-hover:#8958A8; --women-action-soft:#F1EBFA; }
+
     /* Outer Shell - Full width, clean background, no administrative sidebar gap */
     body { background-color:var(--color-surface) !important; }
     .women-shell {
-        background-color:var(--color-surface);
+        background:var(--color-surface);
         min-height:calc(100vh - 64px);
         width:100%;
         padding-bottom:3.5rem;
@@ -145,11 +148,12 @@
         padding:1.4rem !important;
     }
 
-    /* Buttons — Pill Style (OneBank / Ai Aether) */
-    .btn-primary {
-        background:linear-gradient(135deg, var(--wp-primary) 0%, var(--wp-primary-dk) 100%) !important;
-        border-color:var(--wp-primary) !important;
-        color:var(--color-on-solid) !important;
+    /* Women portal button system: navy for committed actions, soft lavender for
+       navigation and secondary actions.  All variants use the same pill shape. */
+    .btn-primary, .btn-success {
+        background:#1E293B !important;
+        border-color:#1E293B !important;
+        color:#FFFFFF !important;
         border-radius:9999px !important;
         font-weight:700 !important;
         padding:0.55rem 1.35rem !important;
@@ -157,17 +161,18 @@
         transition:all 0.2s ease !important;
     }
 
-    .btn-primary:hover {
-        background:linear-gradient(135deg, var(--wp-primary-dk) 0%, var(--color-secondary-text) 100%) !important;
+    .btn-primary:hover, .btn-success:hover {
+        background:#0F172A !important;
+        border-color:#0F172A !important;
         transform:translateY(-1px) !important;
         box-shadow:0 10px 24px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 24%, transparent) !important;
         color:var(--color-on-solid) !important;
     }
 
     .btn-outline-primary {
-        color:var(--wp-primary) !important;
-        border:1.5px solid var(--color-secondary-soft) !important;
-        background:var(--color-surface) !important;
+        color:#743AFF !important;
+        border:1px solid transparent !important;
+        background:#F1F5F9 !important;
         border-radius:9999px !important;
         font-weight:700 !important;
         padding:0.52rem 1.3rem !important;
@@ -175,16 +180,16 @@
     }
 
     .btn-outline-primary:hover {
-        background:var(--wp-rose-light) !important;
-        color:var(--wp-primary-dk) !important;
-        border-color:var(--wp-primary) !important;
+        background:#E8EEF5 !important;
+        color:#6431DE !important;
+        border-color:transparent !important;
         transform:translateY(-1px) !important;
     }
 
     .btn-black-pill, .btn-dark {
-        background:var(--color-surface-strong) !important;
-        color:var(--color-on-solid) !important;
-        border:1px solid var(--color-text) !important;
+        background:#1E293B !important;
+        color:#FFFFFF !important;
+        border:1px solid #1E293B !important;
         border-radius:9999px !important;
         font-weight:700 !important;
         padding:0.55rem 1.35rem !important;
@@ -192,9 +197,60 @@
     }
 
     .btn-black-pill:hover, .btn-dark:hover {
-        background:var(--color-surface-strong) !important;
-        color:var(--color-on-solid) !important;
+        background:#0F172A !important;
+        color:#FFFFFF !important;
         transform:translateY(-1px) !important;
+    }
+
+    /* High-specificity variants keep theme.css from recoloring the portal. */
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill) {
+        background:#1E293B !important;
+        background-color:#1E293B !important;
+        border-color:#1E293B !important;
+        color:#FFFFFF !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill) :is(span, i, svg),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill) :is(span, i, svg) {
+        color:#FFFFFF !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible) {
+        background:#0F172A !important;
+        background-color:#0F172A !important;
+        border-color:#0F172A !important;
+        color:#FFFFFF !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible) :is(span, i, svg),
+    body .women-shell :is(.btn-primary, .btn-success, .btn-dark, .btn-black-pill):is(:hover, :active, :focus-visible) :is(span, i, svg) {
+        color:#FFFFFF !important;
+    }
+
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-outline-primary, .btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-dark),
+    body .women-shell :is(.btn-outline-primary, .btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-dark) {
+        background:#F1F5F9 !important;
+        background-color:#F1F5F9 !important;
+        border-color:transparent !important;
+        color:#475569 !important;
+        border-radius:9999px !important;
+        font-weight:700 !important;
+        box-shadow:0 8px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent) !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-shell .btn-outline-primary,
+    body .women-shell .btn-outline-primary {
+        color:#743AFF !important;
+    }
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-outline-primary, .btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-dark):is(:hover, :active, :focus-visible),
+    body .women-shell :is(.btn-outline-primary, .btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-dark):is(:hover, :active, :focus-visible) {
+        background:#E8EEF5 !important;
+        background-color:#E8EEF5 !important;
+        border-color:transparent !important;
+        color:#6431DE !important;
+        transform:translateY(-1px);
+    }
+    :root[data-theme][data-bs-theme] body .women-shell :is(.btn-outline-primary, .btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-dark) :is(span, i, svg),
+    body .women-shell :is(.btn-outline-primary, .btn-outline-secondary, .btn-secondary, .btn-light, .btn-outline-dark) :is(span, i, svg) {
+        color:currentColor !important;
     }
 
     /* Care Emergency Modal */

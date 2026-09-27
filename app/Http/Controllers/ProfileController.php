@@ -220,7 +220,8 @@ class ProfileController extends Controller
             $updateData['partner_contact'] = $request->filled('partner_contact') ? $request->partner_contact : null;
         }
 
-        // Handle profile image upload
+        // Handle profile image upload. The resized data-URL copy keeps the
+        // photo visible on every device even when the container disk is wiped.
         if ($request->hasFile('profile_image')) {
             // Delete old image if exists
             $this->deleteProfileImage($user->profile_image);
@@ -230,6 +231,11 @@ class ProfileController extends Controller
             $filename = uniqid() . '_' . time() . '.' . $image->getClientOriginalExtension();
             $path = $image->storeAs('uploads/profile', $filename, 'public');
             $updateData['profile_image'] = $path;
+
+            $inline = User::makeAvatarDataUrl($image);
+            if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                $updateData['profile_image_data'] = $inline;
+            }
         }
 
         // Handle password update if provided — requires current password
@@ -272,7 +278,11 @@ class ProfileController extends Controller
         if (!$user) return redirect()->route('login');
 
         if ($this->deleteProfileImage($user->profile_image)) {
-            $user->update(['profile_image' => null]);
+            $cleared = ['profile_image' => null];
+            if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                $cleared['profile_image_data'] = null;
+            }
+            $user->update($cleared);
         }
 
         // Redirect to previous page or role settings page (profile lives in Settings)
