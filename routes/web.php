@@ -714,6 +714,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
     Route::post('/patients', [RhuController::class, 'storePatient'])->name('patients.store');
     Route::get('/pending-patients', [RhuController::class, 'pendingPatients'])->name('pending-patients');
     Route::post('/pending-patients/{id}/approve', [RhuController::class, 'approvePatient'])->name('approve-patient');
+    Route::post('/pending-patients/{id}/reactivate', [RhuController::class, 'reactivatePatient'])->name('reactivate-patient');
     Route::post('/pending-patients/{id}/reject', [RhuController::class, 'rejectPatient'])->name('reject-patient');
     Route::post('/pending-patients/{id}/link', [RhuController::class, 'linkDuplicate'])->name('link-duplicate');
     Route::post('/pending-patients/{id}/dismiss', [RhuController::class, 'dismissDuplicate'])->name('dismiss-duplicate');

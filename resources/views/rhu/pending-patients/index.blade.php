@@ -112,7 +112,11 @@
                             <div style="min-width:0;">
                                 <a href="{{ route('profile.view', $woman->id) }}" class="pp-patient-name">{{ $woman->name }}</a>
                                 <div class="pp-badges">
-                                    <span class="pp-badge-pending"><i class="bi bi-clock"></i> Verification Pending</span>
+                                    @if($woman->status === 'inactive')
+                                        <span class="pp-badge-pending" style="background:var(--color-danger-soft);color:var(--color-danger-text);"><i class="bi bi-lock-fill"></i> Locked — failed logins</span>
+                                    @else
+                                        <span class="pp-badge-pending"><i class="bi bi-clock"></i> Verification Pending</span>
+                                    @endif
                                     @if(!empty($duplicates[$woman->id] ?? []))
                                         <button class="pp-badge-dup" type="button" data-bs-toggle="collapse" data-bs-target="#dup-{{ $woman->id }}">
                                             <i class="bi bi-people-fill"></i> {{ count($duplicates[$woman->id]) }} possible match{{ count($duplicates[$woman->id]) > 1 ? 'es' : '' }} — review
@@ -185,17 +189,27 @@
                         <div class="pp-decision">
                             <div class="pp-foot-title"><i class="bi bi-check2-square"></i> Decision</div>
                             <div class="pp-decision-btns">
-                                <form action="{{ route('rhu.approve-patient', $woman->id) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="btn btn-sm btn-success w-100"
-                                        onclick="return confirm('Approve and activate {{ $woman->name }}?')">
-                                        <i class="bi bi-check-lg me-1"></i> Approve
+                                @if($woman->status === 'inactive')
+                                    <form action="{{ route('rhu.reactivate-patient', $woman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success w-100"
+                                            onclick="return confirm('Reactivate {{ $woman->name }}? They will be able to log in again.')">
+                                            <i class="bi bi-unlock-fill me-1"></i> Reactivate
+                                        </button>
+                                    </form>
+                                @else
+                                    <form action="{{ route('rhu.approve-patient', $woman->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success w-100"
+                                            onclick="return confirm('Approve and activate {{ $woman->name }}?')">
+                                            <i class="bi bi-check-lg me-1"></i> Approve
+                                        </button>
+                                    </form>
+                                    <button class="btn btn-sm btn-outline-danger w-100" type="button"
+                                        data-bs-toggle="collapse" data-bs-target="#reject-{{ $woman->id }}">
+                                        <i class="bi bi-x-lg me-1"></i> Reject
                                     </button>
-                                </form>
-                                <button class="btn btn-sm btn-outline-danger w-100" type="button"
-                                    data-bs-toggle="collapse" data-bs-target="#reject-{{ $woman->id }}">
-                                    <i class="bi bi-x-lg me-1"></i> Reject
-                                </button>
+                                @endif
                             </div>
                             <div class="collapse" id="reject-{{ $woman->id }}">
                                 <form action="{{ route('rhu.reject-patient', $woman->id) }}" method="POST" class="p-3 border rounded-3 text-start" style="background:var(--color-danger-soft); border-color:var(--color-danger-soft);">
