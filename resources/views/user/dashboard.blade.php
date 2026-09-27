@@ -656,6 +656,40 @@
         .card-header { padding:0.9rem 1rem !important; flex-wrap:wrap; gap:0.5rem; }
         .card-header h5 { font-size:1rem; }
         .card-body { padding:1rem !important; }
+        .recent-activity-card { border-radius:18px; overflow:hidden; }
+        .recent-activity-head {
+            flex-direction:row;
+            align-items:center !important;
+            justify-content:space-between !important;
+            gap:0.5rem !important;
+            padding:0.85rem 1rem !important;
+        }
+        .recent-activity-title {
+            font-size:0.98rem !important;
+            line-height:1.3 !important;
+            flex:1 1 auto;
+            min-width:0;
+        }
+        .recent-activity-link {
+            flex-shrink:0;
+            font-size:0.78rem !important;
+            padding:0.25rem 0.4rem !important;
+            white-space:nowrap;
+        }
+        .recent-activity-empty { padding:1.75rem 1.25rem !important; }
+        .recent-activity-empty-icon {
+            width:48px !important;
+            height:48px !important;
+            font-size:1.25rem !important;
+            margin-bottom:0.65rem !important;
+        }
+        .recent-activity-empty-title { font-size:0.95rem !important; }
+        .recent-activity-empty-text {
+            font-size:0.8rem !important;
+            line-height:1.55 !important;
+            max-width:300px;
+            margin-inline:auto;
+        }
         .timeline-row { padding-left:44px; margin-bottom:1rem; }
         .maternal-timeline::before { left:17px; }
         .timeline-dot-icon { left:4px; width:26px; height:26px; font-size:0.75rem; }
@@ -994,11 +1028,11 @@
         @endif
 
         {{-- Recent Maternal Activity & Checkups Timeline --}}
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="fw-800 text-dark mb-0" style="font-family:'Plus Jakarta Sans', sans-serif;">Recent Health Activity
+        <div class="card mb-4 recent-activity-card">
+            <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap recent-activity-head">
+                <h5 class="fw-800 text-dark mb-0 recent-activity-title" style="font-family:'Plus Jakarta Sans', sans-serif;">Recent Health Activity
                 </h5>
-                <a href="{{ route('user.checkups') }}" class="btn btn-sm btn-link text-decoration-none fw-700" style="color:var(--color-secondary-text);">
+                <a href="{{ route('user.checkups') }}" class="btn btn-sm btn-link text-decoration-none fw-700 recent-activity-link" style="color:var(--color-secondary-text);">
                     View Checkups &rarr;
                 </a>
             </div>
@@ -1044,12 +1078,12 @@
                         @endforeach
                     </div>
                 @else
-                    <div class="text-center py-4">
-                        <div style="width:56px; height:56px; border-radius:50%; background:var(--wp-cream); border:1px solid var(--wp-border); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem; font-size:1.5rem; color:var(--wp-text-soft);">
+                    <div class="text-center py-4 recent-activity-empty">
+                        <div class="recent-activity-empty-icon" style="width:56px; height:56px; border-radius:50%; background:var(--wp-cream); border:1px solid var(--wp-border); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem; font-size:1.5rem; color:var(--wp-text-soft);">
                             <i class="bi bi-clipboard2-heart"></i>
                         </div>
-                        <h6 class="fw-700 text-dark mb-1">No recorded activity yet</h6>
-                        <p class="text-muted mb-0" style="font-size:0.85rem;">Your prenatal visits, symptoms, and cycle entries will appear here.</p>
+                        <h6 class="fw-700 text-dark mb-1 recent-activity-empty-title">No recorded activity yet</h6>
+                        <p class="text-muted mb-0 recent-activity-empty-text" style="font-size:0.85rem;">Your prenatal visits, symptoms, and cycle entries will appear here.</p>
                     </div>
                 @endif
             </div>

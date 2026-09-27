@@ -51,7 +51,7 @@
     .women-navbar {
         width:100% !important;
         min-height:var(--nav-bar-min-h) !important;
-        background:var(--color-surface) !important;
+        background:#F4F3F8 !important;
         border-bottom:1px solid var(--nav-border) !important;
         position:sticky;
         top:0;
@@ -59,6 +59,12 @@
         display:flex;
         align-items:center;
         box-shadow:0 1px 2px 0 color-mix(in srgb, rgb(var(--color-shadow-rgb)) 3%, transparent);
+    }
+
+    /* Preserve the portal's dark-mode surface while the light theme follows the
+       pale lilac-gray navigation background from the supplied reference. */
+    [data-theme="dark"] .women-navbar {
+        background:var(--color-surface) !important;
     }
 
     .women-nav-container {
