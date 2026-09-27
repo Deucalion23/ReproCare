@@ -2388,7 +2388,8 @@
 
         /* Patient Portal Overrides (No admin sidebar, full-width consumer experience) */
         body.patient-portal-body {
-            background-color:var(--color-peach-soft) !important;
+            background-color:#F1EBFA !important;
+            background-image:radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--color-primary) 11%, transparent), transparent 32%);
             font-family:'Inter', sans-serif;
             overflow-x:hidden;
             padding-top:0 !important;
@@ -2399,6 +2400,8 @@
             max-width:100% !important;
             padding:0 !important;
             min-height:calc(100vh - 120px);
+            background-color:#F1EBFA !important;
+            background-image:radial-gradient(circle at 92% 0%, color-mix(in srgb, var(--color-primary) 11%, transparent), transparent 32%);
         }
         body.patient-portal-body .sidebar,
         body.patient-portal-body .sidebar-overlay {
