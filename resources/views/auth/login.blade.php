@@ -82,8 +82,8 @@
     .login-page .public-brand { transform:translateY(-2px); }
     .login-page .public-brand-mark { transform:translateY(-8px); }
     .login-page .public-brand-name { transform:translateY(4px); }
-    .fb-hero { justify-content:flex-start; padding-top:48px; }
-    .fb-side { align-items:flex-start; padding-top:58px; }
+    .fb-hero { justify-content:flex-start; padding-top:24px; }
+    .fb-side { align-items:flex-start; padding-top:34px; }
     @media (max-width:900px) {
         .fb-auth { grid-template-columns:1fr; }
         .fb-hero { padding:46px 28px 54px; }
