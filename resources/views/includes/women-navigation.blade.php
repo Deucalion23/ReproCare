@@ -726,6 +726,12 @@
             height:32px !important;
         }
         .women-bell-btn i { font-size:13px; }
+        .women-nav-right .dropdown {
+            display:flex !important;
+            align-items:center !important;
+            align-self:center !important;
+            margin:0 !important;
+        }
         .women-profile-pill {
             width:32px !important;
             height:32px !important;
@@ -735,8 +741,12 @@
             border-radius:50% !important;
             overflow:hidden !important;
             background:var(--color-surface-soft) !important;
-            border:1px solid var(--nav-border) !important;
+            border:2px solid var(--nav-rose) !important;
+            box-shadow:0 0 0 2px color-mix(in srgb, var(--nav-rose) 25%, transparent) !important;
             flex-shrink:0 !important;
+            align-self:center !important;
+            margin:0 !important;
+            vertical-align:middle !important;
         }
         .women-profile-pill .women-profile-name,
         .women-profile-pill .bi-chevron-down { display:none !important; }
