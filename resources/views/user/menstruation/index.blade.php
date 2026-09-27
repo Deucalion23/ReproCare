@@ -52,24 +52,28 @@
     .cycle-right .cycle-hero-sub { margin-left:auto; margin-right:auto; }
 }
 @media (max-width:600px) {
-    .menstruation-page .page-title { font-size:1.3rem; }
-    .menstruation-page .page-subtitle { font-size:0.82rem; }
+    .menstruation-page .page-title { font-size:1.05rem; }
+    .menstruation-page .page-subtitle { font-size:0.76rem; }
+    .cycle-top-card { padding:1rem !important; }
     .cycle-hero { padding:1.25rem 1rem; border-radius:20px; margin-bottom:1.25rem; }
     .cycle-left { min-width:0; width:100%; }
     .cycle-ring { width:140px; height:140px; }
     .cycle-ring::before { width:112px; height:112px; }
-    .cycle-ring-inner .day-num { font-size:2rem; }
-    .cycle-ring-inner .day-label { font-size:0.62rem; }
+    .cycle-ring-inner .day-num { font-size:1.8rem; }
+    .cycle-ring-inner .day-label { font-size:0.58rem; }
     .cycle-tabs { width:100%; display:grid; grid-template-columns:1fr 1fr; gap:4px; }
-    .cycle-nav-btn { font-size:0.78rem; padding:0.55rem 0.5rem; white-space:nowrap; min-width:0; }
-    .cycle-hero-title { font-size:1.3rem; overflow-wrap:anywhere; }
-    .cycle-hero-sub { font-size:0.82rem; }
-    .cycle-phase-badge { font-size:0.66rem; max-width:100%; overflow-wrap:anywhere; }
+    .cycle-nav-btn { font-size:0.72rem; padding:0.5rem 0.5rem; white-space:nowrap; min-width:0; }
+    .cycle-hero-title { font-size:1.1rem; overflow-wrap:anywhere; }
+    .cycle-hero-sub { font-size:0.76rem; }
+    .cycle-hero-meta { font-size:0.72rem; }
+    .cycle-phase-badge { font-size:0.6rem; max-width:100%; overflow-wrap:anywhere; }
     .period-record-card { padding:0.85rem; gap:0.65rem !important; flex-wrap:wrap; }
-    .period-date-num { font-size:1.25rem; }
-    .period-range { font-size:0.85rem; overflow-wrap:anywhere; }
-    .period-days-badge { font-size:0.66rem; white-space:nowrap; }
+    .period-date-num { font-size:1.1rem; }
+    .period-date-mon { font-size:0.6rem; }
+    .period-range { font-size:0.78rem; overflow-wrap:anywhere; }
+    .period-days-badge { font-size:0.6rem; white-space:nowrap; }
     .history-card .card-header { flex-wrap:wrap; gap:0.5rem; }
+    .history-card .card-header h5 { font-size:0.9rem; }
 }
 
 .cycle-phase-badge {

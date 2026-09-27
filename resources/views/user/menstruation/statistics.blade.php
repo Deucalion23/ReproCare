@@ -28,9 +28,11 @@
     }
     .cycle-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
     @media (max-width:600px) {
-        .cycle-top-card { padding:1.1rem 1.15rem; border-radius:18px; margin-bottom:1.15rem; flex-direction:column; align-items:stretch !important; }
+        .cycle-top-card { padding:1rem; border-radius:18px; margin-bottom:1.15rem; flex-direction:column; align-items:stretch !important; }
+        .cycle-top-card .page-title { font-size:1.05rem; }
+        .cycle-top-card .page-subtitle { font-size:0.76rem; }
         .cycle-top-card .d-flex.gap-2 { flex-wrap:wrap; }
-        .cycle-top-card .btn { flex:1 1 auto; justify-content:center; }
+        .cycle-top-card .btn { flex:1 1 auto; justify-content:center; font-size:0.76rem; }
     }
 </style>
 @endpush
