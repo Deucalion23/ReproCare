@@ -105,9 +105,38 @@
     .brgy-empty-state { padding:1rem; text-align:center; color:var(--text-muted); font-size:0.82rem; }
 
     @media (max-width: 768px) {
-        .settings-wrap { flex-direction:column; }
-        .settings-sidebar { width:100%; position:static; }
+        /* Phones: nav becomes a top scroll-tab row, content full width below. */
+        .settings-wrap { flex-direction:column; gap:0.85rem; }
+        .settings-sidebar { width:100%; max-width:none; position:static; }
+        .settings-nav { display:flex; gap:0.4rem; overflow-x:auto; padding:0.4rem; border-radius:14px; scrollbar-width:none; }
+        .settings-nav::-webkit-scrollbar { display:none; }
+        .settings-nav-item { font-size:0.7rem; padding:0.5rem 0.7rem; gap:0.4rem; white-space:nowrap; flex-shrink:0; margin-bottom:0; }
+        .settings-nav-item i { font-size:0.85rem; width:1rem; }
+        .settings-content { width:100%; }
         .theme-option-grid { grid-template-columns:1fr 1fr; }
+        .settings-section { scroll-margin-top:76px; }
+        .settings-page-header h1 { font-size:1.05rem; }
+        .settings-page-header p { font-size:0.72rem; }
+        .pref-card { border-radius:14px; margin-bottom:1rem; }
+        .pref-card-header { padding:0.75rem 0.85rem; gap:0.55rem; flex-wrap:wrap; }
+        .pref-card-header-icon { width:30px; height:30px; font-size:0.85rem; border-radius:9px; }
+        .pref-card-header h6 { font-size:0.76rem; }
+        .pref-card-header p { font-size:0.64rem; }
+        .pref-card-body { padding:0.85rem; font-size:0.78rem; }
+        .pref-card-body h5 { font-size:0.88rem !important; }
+        .pref-card-body .small, .pref-card-body small { font-size:0.68rem; }
+        .info-grid-2 { grid-template-columns:1fr; gap:0.6rem; }
+        .info-card-box { padding:0.7rem 0.8rem; border-radius:12px; }
+        .info-card-label { font-size:0.6rem; }
+        .info-card-value { font-size:0.78rem; }
+        .pref-row { padding:0.7rem 0; }
+        .pref-row-label h6 { font-size:0.78rem; }
+        .pref-row-label p { font-size:0.68rem; }
+        .pref-card-body .btn { font-size:0.72rem; }
+        #editProfileBtn { font-size:0.66rem; padding:0.35rem 0.6rem; white-space:nowrap; }
+        .form-label { font-size:0.72rem; }
+        .form-control, .form-select { font-size:0.8rem; }
+    }
         .info-grid-2 { grid-template-columns:1fr; }
     }
 </style>
@@ -202,9 +231,6 @@
                             <div style="flex:1;">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
                                     <h5 class="mb-0" style="font-weight:800;color:var(--text);">{{ auth()->user()->name }}</h5>
-                                    <span class="badge bg-primary-subtle text-primary border px-2.5 py-1" style="font-size:0.75rem;">
-                                        <i class="bi bi-person-heart me-1"></i> Patient / Woman
-                                    </span>
                                 </div>
                                 <p class="text-muted small mb-0 mt-1">
                                     <i class="bi bi-envelope me-1"></i>{{ auth()->user()->email }}
@@ -254,12 +280,6 @@
                                 <div class="info-card-label"><i class="bi bi-telephone-plus"></i> Partner Contact</div>
                                 <div class="info-card-value">{{ auth()->user()->partner_contact ?? 'Not specified' }}</div>
                             </div>
-                        </div>
-
-                        <div class="mt-4 pt-2 border-top">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleProfileEdit(true)">
-                                <i class="bi bi-pencil me-1"></i> Edit Profile Information
-                            </button>
                         </div>
                     </div>
 
@@ -385,12 +405,6 @@
                                 <div class="info-card-label"><i class="bi bi-map"></i> Province</div>
                                 <div class="info-card-value">Pangasinan</div>
                             </div>
-                        </div>
-
-                        <div class="mt-4 pt-2 border-top">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAddressEdit(true)">
-                                <i class="bi bi-pencil me-1"></i> Edit Address Details
-                            </button>
                         </div>
                     </div>
 
@@ -833,6 +847,8 @@ function showSection(id, el) {
             c.classList.remove('visible');
             setTimeout(() => c.classList.add('visible'), i * 60 + 30);
         });
+        // Bring the selected content into view (it sits below the nav on phones).
+        try { target.scrollIntoView({ behavior:'smooth', block:'start' }); } catch (e) { target.scrollIntoView(); }
     }
 }
 
