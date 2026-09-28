@@ -30,9 +30,10 @@
         width:100%;
     }
 
-    /* ── Page hero: white card, soft shadow, aligned ── */
+    /* ── Page hero: flat light card, soft shadow, aligned ── */
     .page-hero {
-        background:var(--color-surface) !important;
+        background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important;
+        background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important;
         border:1px solid var(--mw-border) !important;
         border-radius:18px !important;
         padding:1.75rem 2rem !important;

@@ -800,34 +800,28 @@
 
         /* ── 8. PAGE HERO ── */
         .page-hero {
-            background:linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-text) 50%, var(--color-primary) 100%);
-            border-radius:24px;
+            background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
+            border-radius:20px;
             padding:1.85rem 2.25rem;
             margin-bottom:1.75rem;
             position:relative;
             overflow:hidden;
-            box-shadow:0 12px 36px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent);
+            box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);
         }
         .page-hero::before {
-            content:'';
-            position:absolute;
-            width:320px; height:320px;
-            border-radius:50%;
-            background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 18%, transparent) 0%, transparent 70%);
-            top:-100px; right:-80px;
-            pointer-events:none;
+            display:none;
         }
         .page-hero-title {
             font-family:'Plus Jakarta Sans', sans-serif;
             font-size:1.6rem;
             font-weight:800;
-            color:var(--color-on-solid);
+            color:var(--color-text);
             margin-bottom:0.3rem;
             position:relative;
         }
         .page-hero-subtitle {
             font-size:0.9rem;
-            color:color-mix(in srgb, var(--color-on-solid) 85%, transparent);
+            color:var(--color-text-muted);
             margin:0;
             position:relative;
         }
@@ -1954,41 +1948,28 @@
             border-radius:20px;
             padding:1.75rem 2rem;
             margin-bottom:1.75rem;
-            background:linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--accent-pink) 100%);
-            box-shadow:0 8px 40px var(--primary-glow), 0 2px 0 color-mix(in srgb, rgb(var(--color-shadow-rgb)) 7%, transparent) inset;
+            background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
+            box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);
             transition:box-shadow 0.3s ease;
         }
         /* Orb decorations */
         .page-hero::before {
-            content:'';
-            position:absolute;
-            top:-60px; right:-60px;
-            width:220px; height:220px;
-            background:color-mix(in srgb, var(--color-surface) 6%, transparent);
-            border-radius:50%;
-            pointer-events:none;
+            display:none;
         }
         .page-hero::after {
-            content:'';
-            position:absolute;
-            bottom:-50px; left:35%;
-            width:160px; height:160px;
-            background:color-mix(in srgb, var(--color-surface) 4%, transparent);
-            border-radius:50%;
-            pointer-events:none;
+            display:none;
         }
         .page-hero-title {
             font-family:'Plus Jakarta Sans', sans-serif;
             font-size:1.4rem;
             font-weight:800;
-            color:var(--color-on-solid);
+            color:var(--color-text);
             letter-spacing:-0.5px;
-            text-shadow:0 1px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent);
             margin:0;
         }
         .page-hero-subtitle {
             font-size:0.875rem;
-            color:color-mix(in srgb, var(--color-on-solid) 75%, transparent);
+            color:var(--color-text-muted);
             margin:0.3rem 0 0;
         }
 
@@ -2485,7 +2466,7 @@
 
         /* ── Layout surfaces (all role portals) ── */
         [data-theme="dark"] .main-content { background-color:var(--color-bg) !important; color:var(--color-text) !important; }
-        [data-theme="dark"] .page-hero { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-border) !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 45%, transparent) !important; color:var(--color-text) !important; }
+        [data-theme="dark"] .page-hero { background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important; background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important; border:1px solid var(--color-border) !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 45%, transparent) !important; color:var(--color-text) !important; }
         [data-theme="dark"] .page-hero-title, [data-theme="dark"] .page-title { color:var(--color-text) !important; }
         [data-theme="dark"] .page-hero-subtitle, [data-theme="dark"] .page-subtitle { color:var(--color-text-muted) !important; }
         [data-theme="dark"] .card, [data-theme="dark"] .glass-card, [data-theme="dark"] .table-card { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border-color:var(--color-border) !important; color:var(--color-text) !important; }
