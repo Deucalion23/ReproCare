@@ -13,6 +13,9 @@
 
     :root { --wp-radius:24px; }
 
+    /* Smooth cross-page navigation (no white flash) on supporting browsers. */
+    @view-transition { navigation: auto; }
+
     /* Match patient primary actions to the lavender used on the public landing page. */
     .women-shell { --women-action:#9B6CB8; --women-action-hover:#8958A8; --women-action-soft:#F1EBFA; }
 
@@ -32,13 +35,54 @@
     .women-content-wrap {
         max-width:1280px;
         margin:0 auto;
-        padding:2rem 1.5rem;
+        padding:1.25rem 1.5rem 2rem;
         position:relative;
         z-index:1;
     }
 
     /* Borderless card surfaces across the patient portal */
     .women-content-wrap .card { border:none !important; }
+
+    /* ── Shared greeting-hero look for every top card (dashboard style),
+          pulled up tight to the top of the content ── */
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card) {
+        position:relative;
+        overflow:hidden;
+        border:none !important;
+        border-radius:24px !important;
+        padding:2rem 2.25rem;
+        margin-top:0 !important;
+        margin-bottom:1.5rem;
+        background:var(--color-surface) !important;
+        background-color:var(--color-surface) !important;
+        box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent) !important;
+    }
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card)::before {
+        content:'';
+        position:absolute;
+        top:-40px;
+        right:-30px;
+        width:260px;
+        height:260px;
+        border-radius:50%;
+        background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%);
+        pointer-events:none;
+    }
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card)::after {
+        content:'';
+        position:absolute;
+        bottom:-50px;
+        left:20%;
+        width:180px;
+        height:180px;
+        border-radius:50%;
+        background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%);
+        pointer-events:none;
+    }
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card) > * {
+        position:relative;
+        z-index:1;
+    }
 
     @media (max-width: 768px) {
         .women-content-wrap {
@@ -225,10 +269,10 @@
             padding-top:0.35rem;
         }
 
-        /* ── Portal-wide mobile shrink: one consistent top-card text size ── */
+        /* ── Portal-wide mobile: every top card matches the dashboard greeting ── */
         .women-content-wrap .page-title { font-size:0.95rem !important; line-height:1.3 !important; }
         .women-content-wrap .page-subtitle { font-size:0.7rem !important; line-height:1.5 !important; }
-        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) { padding:1rem !important; border-radius:18px !important; margin-bottom:1.15rem !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) { padding:1.4rem 1.1rem !important; border-radius:20px !important; margin-bottom:1.25rem !important; }
         .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) :is(h1, h2, .patient-hero-title, .preg-hero-title, .cycle-hero-title) { font-size:0.95rem !important; line-height:1.3 !important; }
         .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) :is(p, .patient-hero-subtitle, .preg-hero-sub, .cycle-hero-sub) { font-size:0.7rem !important; line-height:1.5 !important; }
         .women-content-wrap .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
@@ -530,3 +574,26 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    /* Keep the selected bottom-dock tab visible: page reloads reset the
+       horizontal scroll to the far left, so center the active tab instead. */
+    (function () {
+        function centerActiveDockTab() {
+            var bar = document.querySelector('.women-dock-items');
+            if (!bar) return;
+            var active = bar.querySelector('.women-dock-link.active');
+            if (!active) return;
+            var target = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
+            bar.scrollLeft = Math.max(0, target);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', centerActiveDockTab);
+        } else {
+            centerActiveDockTab();
+        }
+        window.addEventListener('load', centerActiveDockTab);
+    })();
+</script>
+@endpush

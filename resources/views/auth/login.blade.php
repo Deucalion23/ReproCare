@@ -76,7 +76,7 @@
     .login-page .public-brand, .login-page .public-brand-name { transform:none; }
     .login-page .public-brand { gap:2px; font-size:28px; }
     .login-page .public-brand-name { margin-left:-6px; }
-    .login-page .public-brand-mark { width:64px; height:64px; flex-basis:64px; transform:translateY(-5px); }
+    .login-page .public-brand-mark { width:64px; height:64px; flex-basis:64px; transform:translateY(-0.18em); }
     .login-page .public-brand-mark img { width:64px; height:64px; }
     .fb-hero { justify-content:flex-start; padding-top:24px; }
     .fb-side { align-items:flex-start; padding-top:34px; }
@@ -91,7 +91,7 @@
         .login-page .public-brand, .login-page .public-brand-name { transform:none; }
         .login-page .public-brand { gap:2px; font-size:24px; }
         .login-page .public-brand-name { margin-left:-6px; }
-        .login-page .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-11px); }
+        .login-page .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-0.18em); }
         .login-page .public-brand-mark img { width:52px; height:52px; }
         .fb-hero { display:none; }
         .fb-hero { padding:38px 20px 35px; }
