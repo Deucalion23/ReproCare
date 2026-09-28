@@ -108,6 +108,17 @@
         .settings-wrap { flex-direction:column; }
         .settings-sidebar { width:100%; position:static; }
         .theme-option-grid { grid-template-columns:1fr 1fr; }
+        .settings-section { scroll-margin-top:76px; }
+        .settings-nav-item { font-size:0.8rem; padding:0.6rem 0.75rem; }
+        .settings-page-header h1 { font-size:1.15rem; }
+        .settings-page-header p { font-size:0.78rem; }
+        .pref-card-header { padding:0.9rem 1rem; }
+        .pref-card-header h6 { font-size:0.85rem; }
+        .pref-card-header p { font-size:0.72rem; }
+        .pref-card-body { padding:1rem; }
+        .info-grid-2 { grid-template-columns:1fr; }
+        .info-card-value { font-size:0.85rem; }
+    }
         .info-grid-2 { grid-template-columns:1fr; }
     }
 </style>
@@ -202,9 +213,6 @@
                             <div style="flex:1;">
                                 <div class="d-flex align-items-center gap-2 flex-wrap">
                                     <h5 class="mb-0" style="font-weight:800;color:var(--text);">{{ auth()->user()->name }}</h5>
-                                    <span class="badge bg-primary-subtle text-primary border px-2.5 py-1" style="font-size:0.75rem;">
-                                        <i class="bi bi-person-heart me-1"></i> Patient / Woman
-                                    </span>
                                 </div>
                                 <p class="text-muted small mb-0 mt-1">
                                     <i class="bi bi-envelope me-1"></i>{{ auth()->user()->email }}
@@ -833,6 +841,8 @@ function showSection(id, el) {
             c.classList.remove('visible');
             setTimeout(() => c.classList.add('visible'), i * 60 + 30);
         });
+        // Bring the selected content into view (it sits below the nav on phones).
+        try { target.scrollIntoView({ behavior:'smooth', block:'start' }); } catch (e) { target.scrollIntoView(); }
     }
 }
 
