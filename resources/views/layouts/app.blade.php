@@ -1721,7 +1721,9 @@
                 z-index:1040;
                 box-shadow:4px 0 30px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 40%, transparent);
             }
-            .sidebar.show { transform:translateX(0); }
+            /* Open drawer slides over the fixed navbar (never under it). */
+            .sidebar.show { transform:translateX(0); z-index:1060; top:0; }
+            .sidebar-overlay.show { z-index:1055; }
         }
 
         @media (max-width: 768px) {

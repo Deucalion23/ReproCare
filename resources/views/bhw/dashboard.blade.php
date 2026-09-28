@@ -36,7 +36,7 @@
 </div>
 
 {{-- STAT CARDS: equal height, aligned --}}
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 bhw-stat-row">
 
     <div class="col-xl-3 col-md-6 d-flex">
         <div class="stat-card w-100">
