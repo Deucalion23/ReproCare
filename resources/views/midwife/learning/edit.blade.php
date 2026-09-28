@@ -1,6 +1,7 @@
 @php
-    $layout = auth()->user()?->isCho() ? 'cho.layout' : 'midwife.layout';
-    $section = auth()->user()?->isCho() ? 'cho-content' : 'midwife-content';
+    $layout = $layout ?? (auth()->user()?->isCho() ? 'cho.layout' : 'rhu.layout');
+    $section = $section ?? (auth()->user()?->isCho() ? 'cho-content' : 'rhu-content');
+    $routeBase = $routeBase ?? (auth()->user()?->isCho() ? 'cho.learning' : 'rhu.learning');
 @endphp
 
 @extends($layout)
@@ -15,7 +16,7 @@
             <div class="page-hero-title">Edit Learning Material</div>
             <p class="page-hero-subtitle">Revise title, body, or attachment.</p>
         </div>
-        <a href="{{ route('midwife.learning.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius:10px;">
+        <a href="{{ route($routeBase.'index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius:10px;">
                 <i class="bi bi-arrow-left"></i> Back to Learning Materials
         </a>
     </div>
@@ -41,7 +42,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('midwife.learning.update', $material->id) }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route($routeBase.'update', $material->id) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
@@ -158,7 +159,7 @@
                             <button type="submit" class="btn btn-primary fw-700 py-2.5" style="border-radius:10px;">
                                 <i class="bi bi-save me-1"></i> Update Media Material
                             </button>
-                            <a href="{{ route('midwife.learning.index') }}" class="btn btn-light border py-2" style="border-radius:10px;">Cancel</a>
+                            <a href="{{ route($routeBase.'index') }}" class="btn btn-light border py-2" style="border-radius:10px;">Cancel</a>
                         </div>
                     </div>
                 </div>

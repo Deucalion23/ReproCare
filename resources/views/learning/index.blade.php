@@ -41,16 +41,15 @@
         <span class="learn-hero-count flex-shrink-0" title="Total materials">
             <i class="bi bi-collection-play-fill"></i> {{ $materials->total() }}
         </span>
-    @if($learningUser?->isMidwife() || $learningUser?->isCho())
+    @if($learningUser?->isRhu() || $learningUser?->isCho())
+        @php $manageBase = $learningUser->isCho() ? 'cho.learning' : 'rhu.learning'; @endphp
         <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
-            <a href="{{ route('midwife.learning.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
+            <a href="{{ route($manageBase . '.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
                 <i class="bi bi-plus-lg"></i> Add New Video / Material
             </a>
-            @if($learningUser?->isMidwife())
-                <a href="{{ route('midwife.learning.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius:10px;">
-                    <i class="bi bi-gear"></i> Manage Materials
-                </a>
-            @endif
+            <a href="{{ route($manageBase . '.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius:10px;">
+                <i class="bi bi-gear"></i> Manage Materials
+            </a>
         </div>
     @endif
     </div>

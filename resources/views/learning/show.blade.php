@@ -46,7 +46,7 @@
 
 <div class="d-flex align-items-center justify-content-between gap-3 mb-4 fade-in-card flex-wrap">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ $learningUser?->isMidwife() ? route('midwife.learning.index') : route('learning.index') }}" class="btn btn-sm btn-outline-secondary">
+        <a href="{{ ($learningUser?->isRhu() || $learningUser?->isCho()) ? route(($learningUser->isCho() ? 'cho.learning' : 'rhu.learning') . '.index') : route('learning.index') }}" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back to Materials
         </a>
         <div>

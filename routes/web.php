@@ -203,17 +203,6 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
         Route::get('/patient/{userId}', [MenstruationController::class, 'patientRecords'])->name('patient');
     });
     
-    // Learning Materials
-    Route::prefix('learning')->name('learning.')->group(function () {
-        Route::get('/', [LearningController::class, 'adminIndex'])->name('index');
-        Route::get('/create', [LearningController::class, 'create'])->name('create');
-        Route::post('/', [LearningController::class, 'store'])->name('store');
-        Route::get('/{id}', [LearningController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [LearningController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [LearningController::class, 'update'])->name('update');
-        Route::delete('/{id}', [LearningController::class, 'destroy'])->name('destroy');
-    });
-    
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [MidwifeController::class, 'reportsIndex'])->name('index');
@@ -238,20 +227,7 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
 
     // Risk Alerts inbox (clinical review queue)
     Route::get('/risk-alerts', [MidwifeController::class, 'riskAlerts'])->name('risk-alerts');
-    
-    // Forum Administration
-    Route::prefix('forum-admin')->name('forum.admin.')->group(function () {
-        Route::get('/', [ForumController::class, 'adminIndex'])->name('index');
-        Route::get('/create', [ForumController::class, 'adminCreate'])->name('create');
-        Route::post('/', [ForumController::class, 'adminStore'])->name('store');
-        Route::delete('/bulk', [ForumController::class, 'bulkDelete'])->name('bulk-delete');
-        Route::get('/{id}', [ForumController::class, 'adminShow'])->name('show');
-        Route::get('/{id}/edit', [ForumController::class, 'adminEdit'])->name('edit');
-        Route::put('/{id}', [ForumController::class, 'adminUpdate'])->name('update');
-        Route::delete('/{id}', [ForumController::class, 'adminDestroy'])->name('destroy');
-        Route::post('/{id}/restore', [ForumController::class, 'restorePost'])->name('restore');
-    });
-    
+
     // Notifications
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/create', [NotificationController::class, 'create'])->name('create');
@@ -683,6 +659,16 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/bhws', [ChoController::class, 'bhws'])->name('bhws');
     });
 
+    // Learning Materials Management (upload / edit / archive — CHO only here)
+    Route::prefix('learning')->name('learning.')->group(function () {
+        Route::get('/', [LearningController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [LearningController::class, 'create'])->name('create');
+        Route::post('/', [LearningController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [LearningController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [LearningController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LearningController::class, 'destroy'])->name('destroy');
+    });
+
     // Database Management
     Route::prefix('database')->name('database.')->group(function () {
         Route::get('/', [DatabaseBackupController::class, 'index'])->name('index');
@@ -818,6 +804,16 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/{id}', [RhuController::class, 'reportDetails'])->name('show');
         Route::get('/export/csv', [RhuController::class, 'exportCsv'])->name('export.csv');
         Route::get('/export/pdf', [RhuController::class, 'exportPdf'])->name('export.pdf');
+    });
+
+    // Learning Materials Management (upload / edit / archive — RHU only here)
+    Route::prefix('learning')->name('learning.')->group(function () {
+        Route::get('/', [LearningController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [LearningController::class, 'create'])->name('create');
+        Route::post('/', [LearningController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [LearningController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [LearningController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LearningController::class, 'destroy'])->name('destroy');
     });
 
     // GIS Maternal Risk Heat Map
