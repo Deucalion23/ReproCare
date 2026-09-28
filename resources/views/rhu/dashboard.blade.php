@@ -214,22 +214,47 @@
                 </h5>
             </div>
             <div class="card-body">
-                <div class="d-grid gap-2">
-                    <a href="{{ route('rhu.midwives.create') }}" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-person-plus-fill me-2"></i> Register New Midwife
-                    </a>
-                    <a href="{{ route('rhu.bhw-presidents.create') }}" class="btn btn-outline-primary text-start">
-                        <i class="bi bi-person-badge-fill me-2"></i> Appoint BHW President
-                    </a>
-                    <a href="{{ route('rhu.maternal-deaths.create') }}" class="btn btn-outline-danger text-start">
-                        <i class="bi bi-journal-x me-2"></i> Record Maternal Mortality
-                    </a>
-                    <a href="{{ route('rhu.morbidities.create') }}" class="btn btn-outline-warning text-start">
-                        <i class="bi bi-heart-pulse-fill me-2"></i> Record Morbidity Event
-                    </a>
-                    <a href="{{ route('rhu.reports.index') }}" class="btn btn-outline-success text-start">
-                        <i class="bi bi-file-earmark-bar-graph-fill me-2"></i> FHSIS Reports Dashboard
-                    </a>
+                <div class="row g-2 row-cols-2">
+                    <div class="col">
+                        <a href="{{ route('rhu.midwives.create') }}" class="text-decoration-none">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center" style="background:var(--color-success-soft); border-radius:16px; padding:1.1rem 0.5rem; min-height:118px; height:100%;">
+                                <i class="bi bi-person-plus-fill" style="font-size:1.5rem; color:var(--color-success-text);"></i>
+                                <span style="font-size:0.82rem; font-weight:700; color:var(--color-text);">Register New Midwife</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{{ route('rhu.bhw-presidents.create') }}" class="text-decoration-none">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center" style="background:var(--color-primary-soft); border-radius:16px; padding:1.1rem 0.5rem; min-height:118px; height:100%;">
+                                <i class="bi bi-person-badge-fill" style="font-size:1.5rem; color:var(--color-primary-text);"></i>
+                                <span style="font-size:0.82rem; font-weight:700; color:var(--color-text);">Appoint BHW President</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{{ route('rhu.maternal-deaths.create') }}" class="text-decoration-none">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center" style="background:var(--color-danger-soft); border-radius:16px; padding:1.1rem 0.5rem; min-height:118px; height:100%;">
+                                <i class="bi bi-journal-x" style="font-size:1.5rem; color:var(--color-danger-text);"></i>
+                                <span style="font-size:0.82rem; font-weight:700; color:var(--color-text);">Record Maternal Mortality</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col">
+                        <a href="{{ route('rhu.morbidities.create') }}" class="text-decoration-none">
+                            <div class="d-flex flex-column align-items-center justify-content-center gap-2 text-center" style="background:var(--color-peach-soft); border-radius:16px; padding:1.1rem 0.5rem; min-height:118px; height:100%;">
+                                <i class="bi bi-heart-pulse-fill" style="font-size:1.5rem; color:var(--color-peach-text);"></i>
+                                <span style="font-size:0.82rem; font-weight:700; color:var(--color-text);">Record Morbidity Event</span>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-12">
+                        <a href="{{ route('rhu.reports.index') }}" class="text-decoration-none">
+                            <div class="d-flex align-items-center justify-content-center gap-2 text-center" style="background:var(--color-info-soft); border-radius:16px; padding:0.9rem 0.5rem;">
+                                <i class="bi bi-file-earmark-bar-graph-fill" style="font-size:1.25rem; color:var(--color-info-text);"></i>
+                                <span style="font-size:0.82rem; font-weight:700; color:var(--color-text);">FHSIS Reports Dashboard</span>
+                            </div>
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
