@@ -323,7 +323,7 @@
 
     @if($bhws->count() > 0)
         <div class="table-responsive">
-            <table class="table table-hover table-sticky-head mb-0 align-middle">
+            <table class="table table-hover table-sticky-head mb-0 align-middle table-cards-mobile">
                 <thead>
                     <tr>
                         <th>BHW</th>
@@ -340,7 +340,7 @@
                     @foreach($bhws as $bhw)
                         @php($assignedPurok = $bhw->purok ?? $bhw->activeBhwAssignment?->purok)
                         <tr class="bhw-row">
-                            <td>
+                            <td class="no-card-label" data-label="BHW">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="bhw-avatar">
                                         @if($bhw->profile_image)
@@ -357,38 +357,38 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Barangay">
                                 <div style="font-weight:700;color:var(--text);">{{ $bhw->barangay ?? 'N/A' }}</div>
                             </td>
-                            <td>
+                            <td data-label="Assigned Purok">
                                 <div style="font-weight:700;color:var(--text);">{{ $assignedPurok?->name ?? 'Not assigned' }}</div>
                                 <div style="font-size:0.76rem;color:var(--text-muted);">{{ $assignedPurok?->barangay ?? 'Assign a purok from details' }}</div>
                             </td>
-                            <td>
+                            <td data-label="Status">
                                 <span class="status-badge-custom status-{{ $bhw->status }}">
                                     <i class="bi bi-circle-fill" style="font-size:0.45rem;"></i>
                                     {{ ucfirst($bhw->status ?? 'unknown') }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Health Records">
                                 <span class="metric-chip metric-chip-records">
                                     <i class="bi bi-file-medical"></i>
                                     {{ $bhw->health_records_count }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Checkups">
                                 <span class="metric-chip metric-chip-checkups">
                                     <i class="bi bi-calendar-check"></i>
                                     {{ $bhw->checkups_scheduled }}
                                 </span>
                             </td>
-                            <td>
+                            <td data-label="Reports">
                                 <span class="metric-chip metric-chip-reports">
                                     <i class="bi bi-file-earmark-bar-graph"></i>
                                     {{ $bhw->monthly_reports_count }}
                                 </span>
                             </td>
-                            <td class="bhw-actions-col">
+                            <td class="bhw-actions-col no-card-label" data-label="Actions">
                                 <div class="bhw-actions">
                                     <a href="{{ route('bhw-president.bhws.details', $bhw->id) }}"
                                        class="bhw-action-btn view"

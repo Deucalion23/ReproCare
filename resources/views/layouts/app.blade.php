@@ -858,6 +858,34 @@
         }
         .tbl-icon-btn > i { line-height:1; margin:0 !important; }
 
+        /* ── Mobile: tagged tables collapse into stacked cards ── */
+        @media (max-width: 640px) {
+            table.table-cards-mobile thead { display:none !important; }
+            table.table-cards-mobile,
+            table.table-cards-mobile tbody,
+            table.table-cards-mobile tr,
+            table.table-cards-mobile td { display:block !important; width:100% !important; }
+            table.table-cards-mobile tbody tr {
+                background:var(--color-surface);
+                border:1px solid var(--color-border) !important;
+                border-radius:16px;
+                margin-bottom:0.75rem;
+                padding:0.3rem 0;
+                box-shadow:0 2px 10px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);
+            }
+            table.table-cards-mobile td { border:none !important; padding:0.55rem 1rem !important; }
+            table.table-cards-mobile td::before {
+                content:attr(data-label);
+                display:block;
+                font-size:0.66rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em;
+                color:var(--color-text-muted);
+                margin-bottom:0.25rem;
+            }
+            table.table-cards-mobile td.no-card-label::before { display:none; }
+            table.table-cards-mobile td .justify-content-center { justify-content:flex-start !important; }
+            table.table-cards-mobile td[data-label="Actions"] > div { justify-content:flex-start !important; }
+        }
+
         .btn-primary {
             background:var(--color-surface-strong);
             background-color:var(--color-surface-strong);
