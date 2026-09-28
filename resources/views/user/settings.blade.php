@@ -281,12 +281,6 @@
                                 <div class="info-card-value">{{ auth()->user()->partner_contact ?? 'Not specified' }}</div>
                             </div>
                         </div>
-
-                        <div class="mt-4 pt-2 border-top">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleProfileEdit(true)">
-                                <i class="bi bi-pencil me-1"></i> Edit Profile Information
-                            </button>
-                        </div>
                     </div>
 
                     {{-- EDIT MODE (Hidden by default) --}}
@@ -411,12 +405,6 @@
                                 <div class="info-card-label"><i class="bi bi-map"></i> Province</div>
                                 <div class="info-card-value">Pangasinan</div>
                             </div>
-                        </div>
-
-                        <div class="mt-4 pt-2 border-top">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="toggleAddressEdit(true)">
-                                <i class="bi bi-pencil me-1"></i> Edit Address Details
-                            </button>
                         </div>
                     </div>
 
