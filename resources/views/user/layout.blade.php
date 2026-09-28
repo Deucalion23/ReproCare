@@ -269,10 +269,10 @@
             padding-top:0.35rem;
         }
 
-        /* ── Portal-wide mobile shrink: one consistent top-card text size ── */
+        /* ── Portal-wide mobile: every top card matches the dashboard greeting ── */
         .women-content-wrap .page-title { font-size:0.95rem !important; line-height:1.3 !important; }
         .women-content-wrap .page-subtitle { font-size:0.7rem !important; line-height:1.5 !important; }
-        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) { padding:1rem !important; border-radius:18px !important; margin-bottom:1.15rem !important; }
+        .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) { padding:1.4rem 1.1rem !important; border-radius:20px !important; margin-bottom:1.25rem !important; }
         .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) :is(h1, h2, .patient-hero-title, .preg-hero-title, .cycle-hero-title) { font-size:0.95rem !important; line-height:1.3 !important; }
         .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card, .page-hero, .patient-hero, .preg-hero, .cycle-hero, .learn-hero) :is(p, .patient-hero-subtitle, .preg-hero-sub, .cycle-hero-sub) { font-size:0.7rem !important; line-height:1.5 !important; }
         .women-content-wrap .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
