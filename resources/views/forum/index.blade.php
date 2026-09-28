@@ -388,6 +388,43 @@
         flex-shrink:0;
         margin-top:2px;
     }
+
+    @media (max-width: 575.98px) {
+        /* Phones: compact hero, no oversized banner. */
+        .forum-hero {
+            border-radius:16px !important;
+            padding:1.1rem 1rem !important;
+            margin-bottom:1rem !important;
+            gap:0.8rem !important;
+            flex-direction:column !important;
+            align-items:flex-start !important;
+        }
+        .forum-hero-title { font-size:1.25rem !important; gap:0.45rem !important; }
+        .forum-hero-sub { font-size:0.82rem !important; }
+        .forum-role-badge { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
+        .forum-composer-btn { width:100% !important; justify-content:center !important; }
+
+        /* Phones: tighter composer + post cards. */
+        .quick-composer-card { padding:0.9rem !important; border-radius:16px !important; margin-bottom:1rem !important; }
+        .composer-user-avatar { width:38px !important; height:38px !important; }
+        .quick-composer-btn { font-size:0.82rem !important; padding:0.65rem 1rem !important; }
+        .forum-post-card { padding:1rem !important; border-radius:16px !important; margin-bottom:1rem !important; }
+        .author-avatar { width:40px !important; height:40px !important; }
+        .author-name { font-size:0.88rem !important; }
+        .post-text-body { font-size:0.88rem !important; line-height:1.6 !important; }
+        .post-media-frame { max-height:220px !important; border-radius:12px !important; }
+        .post-media-frame img { max-height:220px !important; }
+
+        /* Phones: engagement buttons wrap small. */
+        .post-engagement-bar { flex-wrap:wrap !important; gap:0.5rem !important; }
+        .btn-engage { font-size:0.75rem !important; padding:0.4rem 0.75rem !important; }
+        .comments-tray { padding:0.85rem !important; }
+        .comment-bubble { padding:0.6rem 0.75rem !important; }
+
+        /* Phones: sidebar cards go full-width below the feed, compact. */
+        .forum-side-card { padding:1rem !important; border-radius:16px !important; }
+        .side-card-title { font-size:0.95rem !important; }
+    }
 </style>
 @endpush
 
