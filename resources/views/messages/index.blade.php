@@ -149,13 +149,13 @@
                 <div class="rc-panel-head-top" style="margin-bottom:0;">
                     <h3>Available Contacts</h3>
                 </div>
-                <p class="rc-panel-sub">@if($currentUserRole === 'user') BHW staff assigned to your barangay. @else Staff &amp; patient directory. @endif</p>
+                <p class="rc-panel-sub">@if($currentUserRole === 'user') BHW staff assigned to your barangay. @elseif($currentUserRole === 'midwife') BHW Presidents in your designated barangays. @else Staff &amp; patient directory. @endif</p>
             </div>
             @if($contacts->isEmpty())
                 <div class="rc-empty">
                     <i class="bi bi-people"></i>
                     <h6>No contacts found</h6>
-                    <p>@if($currentUserRole === 'user') No BHW is assigned to your barangay right now. @else No available contacts under your health center right now. @endif</p>
+                    <p>@if($currentUserRole === 'user') No BHW is assigned to your barangay right now. @elseif($currentUserRole === 'midwife') No BHW President is assigned to your designated barangays yet. @else No available contacts under your health center right now. @endif</p>
                 </div>
             @else
                 <div class="rc-contacts-grid">
