@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        // Portal pages are personalized — never let browsers/proxies
+        // serve stale HTML or redirect targets after a deploy.
+        $middleware->append(\App\Http\Middleware\NoCacheResponses::class);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'prevent-back' => \App\Http\Middleware\PreventBackButton::class,
