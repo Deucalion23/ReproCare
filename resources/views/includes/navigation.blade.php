@@ -48,7 +48,8 @@
 <style>
     /* Staff navbar stays a single fixed top row at any zoom or width. */
     .navbar { flex-wrap:nowrap !important; }
-    .navbar .container-fluid { flex-wrap:nowrap !important; gap:0.5rem; }
+    .navbar .container-fluid { flex-wrap:nowrap !important; gap:0.5rem; align-items:center !important; }
+    .navbar .container-fluid > div { align-self:center !important; }
     .navbar .navbar-brand { white-space:nowrap !important; flex-shrink:1; min-width:0; font-size:clamp(1rem, 2.5vw + 0.6rem, 1.25rem); }
     .navbar .navbar-brand > span:last-child { overflow:hidden; text-overflow:ellipsis; }
     .navbar .d-flex.align-items-center.gap-2.ms-auto { flex-shrink:0; margin-left:auto; }
