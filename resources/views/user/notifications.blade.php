@@ -95,10 +95,10 @@
         position:relative;
         overflow:hidden;
         border:none;
-        border-radius:24px;
-        padding:1.5rem 1.75rem;
+        border-radius:20px;
+        padding:1.25rem 1.4rem;
         margin-top:0;
-        margin-bottom:1.5rem;
+        margin-bottom:1.25rem;
         background:var(--color-surface);
         background-color:var(--color-surface);
         box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent);
@@ -125,24 +125,24 @@
         background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%);
         pointer-events:none;
     }
-    .page-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.1rem; font-weight:800; color:var(--color-text); letter-spacing:-0.01em; line-height:1.3; }
-    .page-hero-subtitle { font-size:0.78rem; color:var(--color-text-muted); margin:0.2rem 0 0; line-height:1.5; }
+    .page-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; color:var(--color-text); letter-spacing:-0.01em; line-height:1.3; }
+    .page-hero-subtitle { font-size:0.74rem; color:var(--color-text-muted); margin:0.2rem 0 0; line-height:1.5; }
 
     /* ── Mobile: smaller text, stacked cards ── */
     @media (max-width:600px) {
         .notif-wrap { max-width:100%; }
-        .page-hero { padding:1.4rem 1.1rem; border-radius:20px; margin-bottom:1.25rem; }
-        .page-hero-title { font-size:0.95rem; }
-        .page-hero-subtitle { font-size:0.7rem; }
-        .notif-count-pill { font-size:0.68rem; }
-        .mark-all-btn { font-size:0.7rem; width:100%; justify-content:center; }
-        .notif-card { padding:0.9rem 1rem; gap:0.7rem; border-radius:16px; flex-wrap:wrap; }
-        .notif-icon { width:36px; height:36px; font-size:0.95rem; border-radius:10px; }
-        .notif-title { font-size:0.8rem; }
-        .notif-message { font-size:0.76rem; }
-        .notif-time { font-size:0.66rem; flex-wrap:wrap; }
-        .notif-view-pill { font-size:0.66rem; }
-        .type-badge { font-size:0.58rem; }
+        .page-hero { padding:1.1rem 1rem; border-radius:18px; margin-bottom:1rem; }
+        .page-hero-title { font-size:0.85rem; }
+        .page-hero-subtitle { font-size:0.66rem; }
+        .notif-count-pill { font-size:0.62rem; }
+        .mark-all-btn { font-size:0.66rem; width:100%; justify-content:center; }
+        .notif-card { padding:0.8rem 0.9rem; gap:0.6rem; border-radius:14px; flex-wrap:wrap; }
+        .notif-icon { width:32px; height:32px; font-size:0.85rem; border-radius:9px; }
+        .notif-title { font-size:0.75rem; }
+        .notif-message { font-size:0.7rem; }
+        .notif-time { font-size:0.62rem; flex-wrap:wrap; }
+        .notif-view-pill { font-size:0.62rem; }
+        .type-badge { font-size:0.56rem; }
     }
 </style>
 @endpush
