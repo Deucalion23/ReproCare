@@ -585,6 +585,10 @@
         font-size:15px;
     }
 
+    /* Theme toggle: moon in light mode, sun in dark mode (never both). */
+    :root:not([data-theme="dark"]) .rc-theme-toggle .icon-sun { display:none !important; }
+    [data-theme="dark"] .rc-theme-toggle .icon-moon { display:none !important; }
+
     .women-bell-btn:hover {
         background:var(--nav-slate-100) !important;
         color:var(--nav-slate-900) !important;
