@@ -1,13 +1,13 @@
 @extends('midwife.layout')
 
-@section('title', 'Midwife Monthly Reports - Midwife Portal | ReproCare')
+@section('title', 'BHW President Monthly Reports - Midwife Portal | ReproCare')
 
 @section('midwife-content')
 <div class="workspace-stack">
     <div class="page-hero fade-in-card">
         <div class="workspace-toolbar" style="position:relative;z-index:1;">
             <div>
-                <div class="page-hero-title">Midwife Monthly Reports</div>
+                <div class="page-hero-title">BHW President Monthly Reports</div>
                 <p class="page-hero-subtitle">Validation queue for reports approved by the BHW president and waiting for midwife action.</p>
             </div>
         </div>

@@ -35,7 +35,7 @@
         <p class="text-muted">No health records need revision. 🎉</p>
     @endforelse
 
-    <h5 class="mt-4">Midwife Monthly Reports ({{ $reports->count() }})</h5>
+    <h5 class="mt-4">Monthly Reports ({{ $reports->count() }})</h5>
     @forelse ($reports as $report)
         <div class="card mb-2 border-warning">
             <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-2">

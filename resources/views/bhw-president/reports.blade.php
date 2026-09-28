@@ -47,7 +47,7 @@
     <div class="page-hero fade-in-card">
         <div class="workspace-toolbar" style="position:relative;z-index:1;">
             <div>
-                <div class="page-hero-title">Midwife Monthly Reports</div>
+                <div class="page-hero-title">BHW Reports</div>
                 <p class="page-hero-subtitle">Review submissions from BHWs, add notes, and forward approved reports to the midwife.</p>
             </div>
         </div>

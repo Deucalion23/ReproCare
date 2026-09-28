@@ -1,6 +1,6 @@
 @extends('bhw.layout')
 
-@section('title', 'Midwife Monthly Reports - BHW Portal')
+@section('title', 'Monthly Reports - BHW Portal')
 
 @push('styles')
 <style>
@@ -47,7 +47,7 @@
     <div class="page-hero fade-in-card">
         <div class="workspace-toolbar" style="position:relative;z-index:1;">
             <div>
-                <div class="page-hero-title">Midwife Monthly Reports</div>
+                <div class="page-hero-title">Monthly Reports</div>
                 <p class="page-hero-subtitle">Create, track, and submit your health records and pregnancy reports for review.</p>
             </div>
             <a href="{{ route('bhw.reports.create') }}" class="btn-hero-primary"><i class="bi bi-plus-circle-fill"></i>Create Report</a>

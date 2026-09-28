@@ -550,7 +550,7 @@
                 <a class="nav-link {{ request()->routeIs('midwife.monthly-reports*') ? 'active' : '' }}"
                    href="{{ route('midwife.monthly-reports.index') }}">
                     <i class="bi bi-file-earmark-text-fill"></i>
-                    <span>Midwife Monthly Reports</span>
+                    <span>BHW President Monthly Reports</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -661,7 +661,7 @@
                 <a class="nav-link {{ request()->routeIs('bhw-president.reports*') ? 'active' : '' }}"
                    href="{{ route('bhw-president.reports.index') }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                    <span>Midwife Monthly Reports</span>
+                    <span>BHW Reports</span>
                 </a>
             </li>
         </ul>
@@ -789,7 +789,7 @@
                 <a class="nav-link {{ request()->routeIs('bhw.reports*') ? 'active' : '' }}"
                    href="{{ route('bhw.reports.index') }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                    <span>Midwife Monthly Reports</span>
+                    <span>Reports</span>
                 </a>
             </li>
             <li class="nav-item">
