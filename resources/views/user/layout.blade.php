@@ -13,6 +13,9 @@
 
     :root { --wp-radius:24px; }
 
+    /* Smooth cross-page navigation (no white flash) on supporting browsers. */
+    @view-transition { navigation: auto; }
+
     /* Match patient primary actions to the lavender used on the public landing page. */
     .women-shell { --women-action:#9B6CB8; --women-action-hover:#8958A8; --women-action-soft:#F1EBFA; }
 
