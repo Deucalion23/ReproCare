@@ -187,6 +187,8 @@
         min-height:46px;
         resize:none;
         overflow:hidden;
+        white-space:nowrap !important;
+        text-overflow:ellipsis !important;
         padding-top:0 !important;
         padding-bottom:0 !important;
         line-height:44px !important;
@@ -194,6 +196,7 @@
     .quick-composer-card:focus-within .quick-inline-input {
         border-radius:14px !important;
         min-height:88px;
+        white-space:normal !important;
         padding-top:0.72rem !important;
         padding-bottom:0.72rem !important;
         line-height:1.5 !important;
