@@ -846,6 +846,18 @@
         .btn:hover::after { transform:translateX(100%); }
         .btn:active { transform:scale(0.97) !important; }
 
+        /* ── Equal-size icon-only table action buttons ── */
+        .tbl-icon-btn {
+            width:34px !important;
+            height:34px !important;
+            padding:0 !important;
+            display:inline-flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+            flex-shrink:0;
+        }
+        .tbl-icon-btn > i { line-height:1; margin:0 !important; }
+
         .btn-primary {
             background:var(--color-surface-strong);
             background-color:var(--color-surface-strong);
