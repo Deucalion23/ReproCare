@@ -984,32 +984,14 @@
 {{-- ═══════════════════════════════════════════════
      MOBILE OFFCANVAS DRAWER (Preserved for small screens)
    ═══════════════════════════════════════════════ --}}
-<style>
-    /* Drawer sized for phones: compact type, tappable rows, distinct actions. */
-    #womenMobileDrawer { width:min(86vw, 320px); }
-    #womenMobileDrawer .offcanvas-body { padding:1.1rem !important; display:flex; flex-direction:column; }
-    #womenMobileDrawer .drawer-head { align-items:center; }
-    #womenMobileDrawer .d-flex.flex-column.gap-1 a { font-size:0.84rem; padding:0.6rem 0.7rem !important; }
-    #womenMobileDrawer .d-flex.flex-column.gap-1 a i { font-size:1rem; }
-    #womenMobileDrawer .drawer-emergency { font-size:0.78rem; padding:0.55rem 0.75rem; }
-    #womenMobileDrawer .drawer-logout {
-        font-size:0.8rem; padding:0.6rem 0.75rem;
-        background:#B91C1C !important; background-color:#B91C1C !important;
-        border:1px solid #B91C1C !important; color:#FFFFFF !important;
-    }
-    #womenMobileDrawer .drawer-logout:hover,
-    #womenMobileDrawer .drawer-logout:active {
-        background:#991B1B !important; background-color:#991B1B !important;
-        border-color:#991B1B !important; color:#FFFFFF !important;
-    }
-    #womenMobileDrawer .drawer-logout i { color:#FFFFFF !important; }
-</style>
 <div class="offcanvas offcanvas-start" tabindex="-1" id="womenMobileDrawer" aria-labelledby="womenMobileDrawerLabel" style="border-radius:0 20px 20px 0; background:var(--color-peach-soft);">
-    <div class="offcanvas-header drawer-head border-bottom px-4 py-3">
-        <div class="d-flex align-items-center" style="gap:0.55rem;">
-            <span aria-hidden="true" style="width:2rem; height:2rem; display:inline-flex; align-items:center; justify-content:center; flex:0 0 2rem;"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
-            <h6 class="offcanvas-title fw-800 text-dark mb-0" style="line-height:1; font-size:0.95rem;" id="womenMobileDrawerLabel">Repro<span style="color:#9B64B9;">Care</span></h6>
-        </div>
+    <div class="offcanvas-header border-bottom px-4 py-3">
+        <div class="d-flex align-items-center" style="gap:0.125rem;">
+            <span aria-hidden="true" style="width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 2rem; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
+            <div style="margin-left:-0.2rem; min-width:0;">
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem;" id="womenMobileDrawerLabel">Repro<span style="color:#9B64B9;">Care</span></h6>
+                <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
+            </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
@@ -1065,14 +1047,14 @@
         {{-- Emergency Support Button in Drawer --}}
         <div class="mt-auto pt-3 border-top">
             <button type="button"
-                    class="btn btn-outline-danger w-100 rounded-3 fw-700 d-flex align-items-center justify-content-center gap-2 mb-2 drawer-emergency"
+                    class="btn btn-outline-danger w-100 py-2.5 rounded-3 fw-700 d-flex align-items-center justify-content-center gap-2 mb-3"
                     data-bs-toggle="modal"
                     data-bs-target="#careEmergencyModal">
-                <i class="bi bi-telephone-plus-fill"></i> Emergency Contacts
+                <i class="bi bi-telephone-plus-fill"></i> Health Center Emergency Contacts
             </button>
             <form method="POST" action="{{ route('logout') }}" class="js-logout-form" data-user-name="{{ $currentUser->first_name ?? $currentUser->name }}">
                 @csrf
-                <button type="submit" class="btn w-100 rounded-3 fw-700 d-flex align-items-center justify-content-center drawer-logout">
+                <button type="submit" class="btn btn-light border text-danger w-100 py-2 rounded-3 fw-600">
                     <i class="bi bi-box-arrow-right me-2"></i> Log Out
                 </button>
             </form>
