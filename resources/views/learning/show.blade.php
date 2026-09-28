@@ -39,6 +39,22 @@
     .category-pill { background:var(--primary-subtle); color:var(--primary-light); padding:0.25em 0.85em; border-radius:20px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; }
     .meta-row { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem; font-size:0.8rem; color:var(--text-muted); }
     .consultation-badge { background:linear-gradient(135deg, var(--color-success), var(--color-success-text)); color:var(--color-on-solid); padding:0.35rem 0.85rem; border-radius:20px; font-size:0.75rem; font-weight:700; }
+
+    /* ── Mobile: compact guide view ── */
+    @media (max-width:600px) {
+        .page-title { font-size:0.95rem !important; line-height:1.3 !important; }
+        .page-subtitle { font-size:0.7rem !important; }
+        .material-hero { border-radius:18px; margin-bottom:1.25rem; }
+        .material-banner { height:160px; }
+        .material-body { padding:1rem; }
+        .material-title { font-size:1.05rem; margin-bottom:0.75rem; }
+        .material-prose { font-size:0.82rem; line-height:1.7; }
+        .meta-row { gap:0.45rem; font-size:0.7rem; margin-bottom:1rem; }
+        .category-pill { font-size:0.64rem; }
+        .video-embed-container { border-radius:12px; margin-bottom:1rem; }
+        .html5-video-player { border-radius:12px; margin-bottom:1rem; max-height:240px; }
+        .consultation-badge { font-size:0.66rem; width:100%; justify-content:center; }
+    }
 </style>
 @endpush
 

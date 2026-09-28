@@ -81,21 +81,21 @@
                 <label for="learnFormat" class="form-label learn-label">Format</label>
                 <select id="learnFormat" name="type" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Formats</option>
-                    <option value="video" {{ $activeFilter === 'video' ? 'selected' : '' }}>🎬 Playable Videos</option>
-                    <option value="article" {{ $activeFilter === 'article' ? 'selected' : '' }}>📄 Articles &amp; Guides</option>
-                    <option value="file" {{ $activeFilter === 'file' ? 'selected' : '' }}>📁 Downloadable Files</option>
-                    <option value="link" {{ $activeFilter === 'link' ? 'selected' : '' }}>🔗 External Links</option>
+                    <option value="video" {{ $activeFilter === 'video' ? 'selected' : '' }}>Playable Videos</option>
+                    <option value="article" {{ $activeFilter === 'article' ? 'selected' : '' }}>Articles &amp; Guides</option>
+                    <option value="file" {{ $activeFilter === 'file' ? 'selected' : '' }}>Downloadable Files</option>
+                    <option value="link" {{ $activeFilter === 'link' ? 'selected' : '' }}>External Links</option>
                 </select>
             </div>
             <div class="learn-field learn-field-category">
                 <label for="learnCategory" class="form-label learn-label">Category</label>
                 <select id="learnCategory" name="category" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Categories</option>
-                    <option value="prenatal-care" {{ $activeCategory === 'prenatal-care' ? 'selected' : '' }}>🤰 Prenatal Care</option>
-                    <option value="nutrition" {{ $activeCategory === 'nutrition' ? 'selected' : '' }}>🥗 Nutrition</option>
-                    <option value="warning-signs" {{ $activeCategory === 'warning-signs' ? 'selected' : '' }}>⚠️ Warning Signs</option>
-                    <option value="family-planning" {{ $activeCategory === 'family-planning' ? 'selected' : '' }}>👨‍👩‍👧 Family Planning</option>
-                    <option value="postpartum" {{ $activeCategory === 'postpartum' ? 'selected' : '' }}>👶 Postpartum &amp; Newborn</option>
+                    <option value="prenatal-care" {{ $activeCategory === 'prenatal-care' ? 'selected' : '' }}>Prenatal Care</option>
+                    <option value="nutrition" {{ $activeCategory === 'nutrition' ? 'selected' : '' }}>Nutrition</option>
+                    <option value="warning-signs" {{ $activeCategory === 'warning-signs' ? 'selected' : '' }}>Warning Signs</option>
+                    <option value="family-planning" {{ $activeCategory === 'family-planning' ? 'selected' : '' }}>Family Planning</option>
+                    <option value="postpartum" {{ $activeCategory === 'postpartum' ? 'selected' : '' }}>Postpartum &amp; Newborn</option>
                 </select>
             </div>
             <div class="learn-actions">
@@ -132,19 +132,20 @@
                         <img src="{{ $material->image_url }}" alt="{{ $material->title }}" class="w-100 h-100" style="object-fit:cover; opacity:0.9;">
                     @else
                         @php
-                            $cover = match($material->category) {
-                                'nutrition' => ['bi-apple', '#14744B', '#22A06B'],
-                                'family-planning' => ['bi-people-fill', '#964B2D', '#F59E7A'],
-                                'teen-pregnancy' => ['bi-mortarboard-fill', '#6D28D9', '#A78BFA'],
-                                'breastfeeding' => ['bi-heart-fill', '#AD2851', '#F472A0'],
-                                'prenatal-care' => ['bi-clipboard2-pulse-fill', '#176C63', '#2A9D8F'],
-                                'pregnancy-guide' => ['bi-journal-medical', '#1D4ED8', '#60A5FA'],
-                                default => ['bi-file-earmark-text', '#4C1D95', '#8B5CF6'],
+                            // Single default cover color (no thumbnail) on all screen sizes.
+                            $coverIcon = match($material->category) {
+                                'nutrition' => 'bi-apple',
+                                'family-planning' => 'bi-people-fill',
+                                'teen-pregnancy' => 'bi-mortarboard-fill',
+                                'breastfeeding' => 'bi-heart-fill',
+                                'prenatal-care' => 'bi-clipboard2-pulse-fill',
+                                'pregnancy-guide' => 'bi-journal-medical',
+                                default => 'bi-file-earmark-text',
                             };
                         @endphp
                         <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white text-center px-3"
-                             style="background:linear-gradient(135deg, {{ $cover[1] }}, {{ $cover[2] }});">
-                            <i class="bi {{ $cover[0] }}" style="font-size:2.4rem; opacity:0.85;"></i>
+                             style="background:linear-gradient(135deg, #4C1D95, #8B5CF6);">
+                            <i class="bi {{ $coverIcon }}" style="font-size:2.4rem; opacity:0.85;"></i>
                             <div class="fw-bold mt-2" style="font-size:0.85rem; line-height:1.35;">{{ \Illuminate\Support\Str::limit($material->title, 60) }}</div>
                         </div>
                     @endif
