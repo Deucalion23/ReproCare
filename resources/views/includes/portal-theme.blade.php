@@ -513,7 +513,7 @@
     .navbar .navbar-brand div.rounded-3 {
         background:linear-gradient(135deg, var(--color-secondary-soft), var(--color-secondary)) !important;
     }
-    .navbar .navbar-brand span span { color:var(--color-secondary-text) !important; }
+    .navbar .navbar-brand span span { color:#9B64B9 !important; }
 
     /* ── Badges / pills: soft pink default ── */
     .main-content .badge.bg-primary { background:var(--color-secondary-soft) !important; color:var(--color-secondary-text) !important; border:1px solid var(--color-secondary-soft); }

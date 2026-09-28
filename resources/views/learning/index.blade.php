@@ -25,7 +25,7 @@
 @section($learningSection)
 
 {{-- Header Banner (compact — no dead space when no staff actions) --}}
-<div class="card mb-4 learn-hero" style="border:none; border-radius:18px; background:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
+<div class="card mb-4 learn-hero" style="border:none; border-radius:18px; background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); box-shadow:var(--wp-shadow-sm);">
     <div class="card-body learn-hero-body d-flex align-items-center gap-3 p-3 p-md-4">
         <div class="learn-hero-icon" aria-hidden="true">
             <i class="bi bi-mortarboard-fill"></i>
