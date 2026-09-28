@@ -55,12 +55,23 @@
     /* Circles stay circles: never let crowded bars squash buttons or icons. */
     .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; }
     .navbar .staff-action-btn i { flex-shrink:0; }
+    /* Brand accent: lavender Care everywhere this navbar renders. */
+    .navbar .navbar-brand .brand-care { color:#9B64B9 !important; }
     /* Staff actions match the patient portal's circular bordered buttons. */
     :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
     [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
     @media (max-width: 576px) {
-        .navbar .staff-action-btn { width:34px !important; height:34px !important; }
-        .navbar .staff-profile-pill { padding:2px 2px 2px 2px !important; }
+        .navbar { height:58px !important; }
+        .navbar .container-fluid { gap:0.375rem !important; padding-left:0.6rem !important; padding-right:0.6rem !important; }
+        .navbar .navbar-brand { gap:2px !important; }
+        .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
+        .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
+        .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
+        .navbar #sidebarToggleBtn { width:32px !important; height:32px !important; }
+        .navbar .staff-action-btn { width:34px !important; height:34px !important; min-width:34px !important; padding:0 !important; }
+        .navbar .staff-profile-pill { padding:2px !important; gap:0 !important; }
+        .navbar .staff-profile-pill img { width:30px !important; height:30px !important; }
+        .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
     }
 </style>
 <nav class="navbar navbar-expand-lg border-bottom" style="background:var(--color-surface); border-color:var(--color-border) !important; height:64px;">
