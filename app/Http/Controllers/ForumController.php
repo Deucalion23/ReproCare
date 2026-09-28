@@ -76,15 +76,8 @@ class ForumController extends Controller
         }
 
         $posts = $query->latest()->paginate(10)->withQueryString();
-        $userType = $this->getUserType();
 
-        // Use different views based on user role
-        if ($userType === 'midwife') {
-            return view('midwife.forum.index', compact('posts', 'filter', 'search'));
-        } elseif ($userType === 'bhw' || $userType === 'bhw-president') {
-            return view('bhw.forum.index', compact('posts', 'filter', 'search'));
-        }
-
+        // One shared community design for every role.
         return view('forum.index', compact('posts', 'filter', 'search'));
     }
 
@@ -105,15 +98,7 @@ class ForumController extends Controller
             })
             ->findOrFail($id);
 
-        $userType = $this->getUserType();
-        
-        // Use different views based on user role
-        if ($userType === 'midwife') {
-            return view('midwife.forum.show', compact('post'));
-        } elseif ($userType === 'bhw' || $userType === 'bhw-president') {
-            return view('bhw.forum.show', compact('post'));
-        }
-
+        // One shared community design for every role.
         return view('forum.show', compact('post'));
     }
 
@@ -123,15 +108,7 @@ class ForumController extends Controller
         $currentUser = $this->getCurrentUser();
         if (!$currentUser) return redirect()->route('login');
 
-        $userType = $this->getUserType();
-
-        // Use different views based on user role
-        if ($userType === 'midwife') {
-            return view('midwife.forum.create');
-        } elseif ($userType === 'bhw' || $userType === 'bhw-president') {
-            return view('bhw.forum.create');
-        }
-
+        // One shared community design for every role.
         return view('forum.create');
     }
 
@@ -179,15 +156,7 @@ class ForumController extends Controller
             abort(403);
         }
 
-        $userType = $this->getUserType();
-
-        // Use different views based on user role
-        if ($userType === 'midwife') {
-            return view('midwife.forum.edit', compact('post'));
-        } elseif ($userType === 'bhw' || $userType === 'bhw-president') {
-            return view('bhw.forum.edit', compact('post'));
-        }
-
+        // One shared community design for every role.
         return view('forum.edit', compact('post'));
     }
 

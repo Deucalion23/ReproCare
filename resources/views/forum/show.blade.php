@@ -1,7 +1,21 @@
 @php
     $forumUser = auth()->user();
-    $forumLayout = $forumUser?->role === 'bhw_president' ? 'bhw-president.layout' : 'user.layout';
-    $forumSection = $forumUser?->role === 'bhw_president' ? 'bhw-president-content' : 'user-content';
+    $forumLayout = match($forumUser?->role) {
+        'bhw_president' => 'bhw-president.layout',
+        'midwife' => 'midwife.layout',
+        'bhw' => 'bhw.layout',
+        'rhu' => 'rhu.layout',
+        'cho' => 'cho.layout',
+        default => 'user.layout',
+    };
+    $forumSection = match($forumUser?->role) {
+        'bhw_president' => 'bhw-president-content',
+        'midwife' => 'midwife-content',
+        'bhw' => 'bhw-content',
+        'rhu' => 'rhu-content',
+        'cho' => 'cho-content',
+        default => 'user-content',
+    };
 @endphp
 
 @extends($forumLayout)
