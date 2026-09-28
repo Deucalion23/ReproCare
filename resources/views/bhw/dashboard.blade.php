@@ -106,7 +106,7 @@
             <div class="card-body p-0">
                 @if($upcomingCheckups->count() > 0)
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
+                        <table class="table table-hover mb-0 table-cards-mobile">
                             <thead>
                                 <tr>
                                     <th>Patient</th>
@@ -119,7 +119,7 @@
                             <tbody>
                                 @foreach($upcomingCheckups as $checkup)
                                     <tr>
-                                        <td>
+                                        <td class="no-card-label" data-label="Patient">
                                             <div class="d-flex align-items-center gap-2">
                                                 <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--color-info),var(--color-info));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);flex-shrink:0;">
                                                     {{ strtoupper(substr(optional($checkup->patient)->name ?? 'N/A', 0, 1)) }}
@@ -127,14 +127,14 @@
                                                 <span style="font-weight:500;">{{ optional($checkup->patient)->name ?? 'Unknown Patient' }}</span>
                                             </div>
                                         </td>
-                                        <td style="color:var(--text-muted);font-size:0.875rem;">
+                                        <td data-label="Date" style="color:var(--text-muted);font-size:0.875rem;white-space:nowrap;">
                                             {{ $checkup->scheduled_date->format('M j, Y') }}
                                         </td>
-                                        <td style="font-size:0.875rem;">{{ $checkup->purpose }}</td>
-                                        <td style="font-size:0.875rem;color:var(--text-muted);">
+                                        <td data-label="Purpose" style="font-size:0.875rem;">{{ $checkup->purpose }}</td>
+                                        <td data-label="Midwife" style="font-size:0.875rem;color:var(--text-muted);">
                                             {{ $checkup->midwife ? $checkup->midwife->name : 'Not assigned' }}
                                         </td>
-                                        <td>
+                                        <td data-label="Status">
                                             <span class="status-{{ strtolower($checkup->status) }}">
                                                 {{ ucfirst($checkup->status) }}
                                             </span>

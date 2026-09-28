@@ -22,7 +22,7 @@
 <div class="card fade-in-card">
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
+            <table class="table table-hover align-middle mb-0 table-cards-mobile">
                 <thead>
                     <tr>
                         <th class="px-4 py-3">Patient</th>
@@ -36,23 +36,23 @@
                 <tbody>
                     @forelse($healthRecords as $record)
                         <tr>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 no-card-label" data-label="Patient">
                                 <div class="fw-semibold">{{ $record->patient_name }}</div>
                                 <div class="small text-muted">{{ $record->patient_barangay ?? 'No barangay' }}</div>
                             </td>
-                            <td class="px-4 py-3">{{ optional($record->recordedBy)->name ?? 'Unknown' }}</td>
-                            <td class="px-4 py-3">{{ $record->created_at->format('M j, Y g:i A') }}</td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3" data-label="BHW">{{ optional($record->recordedBy)->name ?? 'Unknown' }}</td>
+                            <td class="px-4 py-3" data-label="Date" style="white-space:nowrap;">{{ $record->created_at->format('M j, Y g:i A') }}</td>
+                            <td class="px-4 py-3" data-label="Vitals">
                                 BP: {{ $record->bp ?? '—' }}<br>
                                 Weight: {{ $record->weight ?? '—' }} kg<br>
                                 Risk: {{ $record->risk_level ?? '—' }}
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3" data-label="Workflow">
                                 <span class="badge bg-{{ $record->workflow_status === 'submitted_to_midwife' ? 'success' : ($record->workflow_status === 'accepted_by_midwife' ? 'primary' : 'warning') }}">
                                     {{ str_replace('_', ' ', $record->workflow_status) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-end">
+                            <td class="px-4 py-3 text-end no-card-label" data-label="Actions">
                                 <div class="d-flex justify-content-end gap-2 flex-wrap">
                                     @if($record->recordedBy)
                                         <a href="{{ route('bhw-president.messages.create', ['to' => $record->recordedBy->id, 'role' => 'bhw']) }}" class="btn btn-sm btn-outline-secondary">
