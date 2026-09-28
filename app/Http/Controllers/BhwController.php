@@ -25,6 +25,61 @@ class BhwController extends Controller
         $this->middleware('auth');
     }
 
+    /**
+     * BHW data jurisdiction: a BHW only sees women whose home barangay
+     * matches their own designated barangay (shared normalize-and-overlap
+     * rule so legacy spellings resolve to the same area).
+     */
+    private function ownBarangay(): ?string
+    {
+        return auth()->user()->barangay ?? null;
+    }
+
+    /** Query-scope helper: constrain a barangay column to the BHW's area. */
+    private function areaScope(): callable
+    {
+        $barangay = $this->ownBarangay();
+
+        return fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $barangay, $column);
+    }
+
+    /** True when the given barangay belongs to the BHW's area. */
+    private function inOwnBarangay(?string $barangay): bool
+    {
+        $mine = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($this->ownBarangay());
+        if ($mine === '') {
+            return true;
+        }
+        $theirs = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($barangay);
+        if ($theirs === '') {
+            return false;
+        }
+
+        return $mine === $theirs || str_contains($mine, $theirs) || str_contains($theirs, $mine);
+    }
+
+    /** 404 unless the barangay belongs to the BHW's area. */
+    private function abortUnlessOwnBarangay(?string $barangay): void
+    {
+        if (!$this->inOwnBarangay($barangay)) {
+            abort(404);
+        }
+    }
+
+    /**
+     * Validation-style area check for submitted barangay values (typed or
+     * picked in a form): sends the BHW back with an explanation instead
+     * of a bare 404.
+     */
+    private function ensureSubmittedInBarangay(?string $barangay, string $field = 'barangay'): void
+    {
+        if (!$this->inOwnBarangay($barangay)) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                $field => 'This must be inside your designated barangay.',
+            ]);
+        }
+    }
+
     // Dashboard
     public function dashboard()
     {
@@ -120,6 +175,9 @@ class BhwController extends Controller
             'emergency_relationship_1' => 'nullable|string|max:255',
             'emergency_contact_number_1' => 'nullable|string|max:255',
         ]);
+
+        // BHWs register women living in their own designated barangay.
+        $this->ensureSubmittedInBarangay($request->barangay);
 
         $userId = null;
 
@@ -371,6 +429,7 @@ class BhwController extends Controller
                 $q->with('recordedBy')->latest()->select('id', 'user_id', 'recorded_by_id', 'bp', 'weight', 'heart_rate', 'temperature', 'risk_level', 'notes', 'created_at')->take(50);
             }
         ])->select('id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay', 'purok_id', 'date_of_birth', 'contact_number', 'partner_name', 'partner_contact', 'profile_image', 'gender', 'created_at')->findOrFail($id);
+        $this->abortUnlessOwnBarangay($woman->barangay);
 
         // Patient-seen status for the latest risk alert so the managing
         // BHW can tell whether the patient opened it.
@@ -388,6 +447,7 @@ class BhwController extends Controller
     public function patientMenstruation($id)
     {
         $woman = User::where('role', 'user')->findOrFail($id);
+        $this->abortUnlessOwnBarangay($woman->barangay);
         $records = $woman->cycles()
             ->orderBy('period_start_date', 'desc')
             ->get();
@@ -402,6 +462,7 @@ class BhwController extends Controller
     public function patientMenstruationReport($id)
     {
         $woman = User::where('role', 'user')->findOrFail($id);
+        $this->abortUnlessOwnBarangay($woman->barangay);
         $records = $woman->cycles()
             ->orderBy('period_start_date', 'desc')
             ->get();
@@ -431,6 +492,7 @@ class BhwController extends Controller
     public function patientMenstruationExport($id)
     {
         $woman = User::where('role', 'user')->findOrFail($id);
+        $this->abortUnlessOwnBarangay($woman->barangay);
         $records = $woman->cycles()
             ->orderBy('period_start_date', 'desc')
             ->get();
@@ -505,13 +567,16 @@ class BhwController extends Controller
     {
         if ($userId) {
             $woman = User::where('role', 'user')->findOrFail($userId);
+            $this->abortUnlessOwnBarangay($woman->barangay);
             return view('bhw.health-records.create', compact('woman'));
         } elseif ($walkInPatientId) {
             $walkInPatient = WalkInPatient::findOrFail($walkInPatientId);
+            $this->abortUnlessOwnBarangay($walkInPatient->barangay);
             return view('bhw.health-records.create-walk-in', compact('walkInPatient'));
         }
-        $women = User::where('role', 'user')->where('status', 'approved')->orderBy('first_name')->limit(100)->get();
-        $walkIns = WalkInPatient::notConverted()->latest()->limit(50)->get();
+        $inArea = $this->areaScope();
+        $women = User::where('role', 'user')->where('status', 'approved')->tap($inArea)->orderBy('first_name')->limit(100)->get();
+        $walkIns = WalkInPatient::notConverted()->tap($inArea)->latest()->limit(50)->get();
         return view('bhw.health-records.create-picker', compact('women', 'walkIns'));
     }
 
@@ -562,6 +627,8 @@ class BhwController extends Controller
             $age = $patient?->age;
             $barangay = $patient?->barangay;
         }
+
+        $this->ensureSubmittedInBarangay($barangay, $patientType === 'walk_in' ? 'walk_in_patient_id' : 'user_id');
 
         $riskMode = $request->input('risk_assessment_mode', 'automatic');
         if ($riskMode === 'manual') {
@@ -753,6 +820,7 @@ class BhwController extends Controller
     public function createCheckup($userId)
     {
         $woman = User::where('role', 'user')->findOrFail($userId);
+        $this->abortUnlessOwnBarangay($woman->barangay);
         return view('bhw.checkups.create', compact('woman'));
     }
 
@@ -769,6 +837,7 @@ class BhwController extends Controller
             && $request->scheduled_time <= now()->format('H:i')) {
             return back()->withErrors(['scheduled_time' => 'That time today has already passed.'])->withInput();
         }
+        $this->abortUnlessOwnBarangay(User::where('role', 'user')->findOrFail($request->user_id)->barangay);
         $exists = Checkup::where('user_id', $request->user_id)
             ->whereDate('scheduled_date', $request->scheduled_date)
             ->where('status', 'Scheduled')->exists();
@@ -1127,6 +1196,14 @@ class BhwController extends Controller
             });
         }
 
+        // BHWs see only pregnancies of women living in their own barangay
+        // (applies on top of the creator filter above).
+        $inArea = $this->areaScope();
+        $query->where(function ($outer) use ($inArea) {
+            $outer->whereHas('woman', function ($q) use ($inArea) { $inArea($q); })
+                ->orWhereHas('walkInPatient', function ($q) use ($inArea) { $inArea($q); });
+        });
+
         // Search by patient name
         if ($search) {
             $query->where(function ($outer) use ($search) {
@@ -1171,11 +1248,14 @@ class BhwController extends Controller
     // Already tracked here? Open the existing record instead of duplicating.
     public function createPregnancy()
     {
+        $inArea = $this->areaScope();
         $women = User::where('role', 'user')->where('status', 'approved')
+            ->tap($inArea)
             ->with(['pregnancies' => fn ($query) => $query->active()])
             ->orderBy('last_name')->orderBy('first_name')
             ->get();
         $walkInPatients = WalkInPatient::whereNull('converted_to_user_id')
+            ->tap($inArea)
             ->with(['pregnancies' => fn ($query) => $query->active()])
             ->orderBy('last_name')->orderBy('first_name')
             ->get();
@@ -1213,6 +1293,15 @@ class BhwController extends Controller
             'symptoms' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        // Pregnancy reports are limited to women in the BHW's own barangay.
+        if ($request->patient_type === 'registered') {
+            $this->abortUnlessOwnBarangay(User::where('role', 'user')->findOrFail($request->user_id)->barangay);
+        } elseif ($request->patient_type === 'walk_in') {
+            $this->abortUnlessOwnBarangay(WalkInPatient::findOrFail($request->walk_in_patient_id)->barangay);
+        } else {
+            $this->ensureSubmittedInBarangay($request->barangay);
+        }
 
         // New unlinked woman: capture the field profile inline, then report.
         if ($request->patient_type === 'new_walk_in') {
@@ -1479,8 +1568,9 @@ class BhwController extends Controller
 
     public function createReferral()
     {
-        $women = User::where('role', 'user')->where('status', 'approved')->with('purok')->get(['id', 'first_name', 'middle_initial', 'last_name', 'email', 'purok_id']);
-        $walkInPatients = WalkInPatient::notConverted()->latest()->get();
+        $inArea = $this->areaScope();
+        $women = User::where('role', 'user')->where('status', 'approved')->tap($inArea)->with('purok')->get(['id', 'first_name', 'middle_initial', 'last_name', 'email', 'purok_id']);
+        $walkInPatients = WalkInPatient::notConverted()->tap($inArea)->latest()->get();
         $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
         $midwives = User::where('role', 'midwife')->where('status', 'approved')->orderBy('first_name')->get(['id', 'first_name', 'middle_initial', 'last_name']);
 
@@ -1495,6 +1585,7 @@ class BhwController extends Controller
     {
         $pregnancy = \App\Models\Pregnancy::with(['woman', 'walkInPatient', 'healthRecords.recordedBy', 'referrals.assignedMidwife'])
             ->findOrFail($pregnancyId);
+        $this->abortUnlessOwnBarangay($pregnancy->woman?->barangay ?? $pregnancy->walkInPatient?->barangay);
 
         $records = $pregnancy->healthRecords()->with('recordedBy')->orderByDesc('created_at')->limit(25)->get();
         $midwives = User::where('role', 'midwife')->where('status', 'approved')->orderBy('first_name')->get(['id', 'first_name', 'middle_initial', 'last_name']);
@@ -1585,6 +1676,15 @@ class BhwController extends Controller
         ], [
             'contact_number.regex' => 'Enter a valid PH mobile number (e.g. 09171234567) so the midwife can send SMS alerts.',
         ]);
+
+        // Referrals are limited to patients in the BHW's own barangay.
+        if ($request->patient_type === 'registered') {
+            $this->abortUnlessOwnBarangay(User::where('role', 'user')->findOrFail($request->user_id)->barangay);
+        } elseif ($request->patient_type === 'walk_in') {
+            $this->abortUnlessOwnBarangay(WalkInPatient::findOrFail($request->walk_in_patient_id)->barangay);
+        } else {
+            $this->ensureSubmittedInBarangay($request->barangay);
+        }
 
         $walkInPatientId = null;
         $womanId = null;
@@ -1686,6 +1786,8 @@ class BhwController extends Controller
             'contact_number.regex' => 'Enter a valid PH mobile number (e.g. 09171234567) so the midwife can send SMS alerts.',
         ]);
 
+        $this->ensureSubmittedInBarangay($request->barangay);
+
         WalkInPatient::create([
             'recorded_by_id' => auth()->id(),
             'user_id' => null,
@@ -1710,6 +1812,7 @@ class BhwController extends Controller
     {
         $patient = WalkInPatient::with(['recordedBy', 'purok', 'checkupReferrals'])
             ->findOrFail($id);
+        $this->abortUnlessOwnBarangay($patient->barangay);
         $smsLogs = $patient->contact_number
             ? \App\Models\SmsLog::where('phone_number', $patient->contact_number)
                 ->orWhere('phone_number', $patient->smsPhone())
@@ -1754,6 +1857,8 @@ class BhwController extends Controller
         ], [
             'contact_number.regex' => 'Enter a valid PH mobile number (e.g. 09171234567) so the midwife can send SMS alerts.',
         ]);
+
+        $this->ensureSubmittedInBarangay($request->barangay);
 
         $patient->update([
             'first_name' => $request->first_name,
@@ -1810,6 +1915,7 @@ class BhwController extends Controller
     public function convertWalkInToUser($id)
     {
         $walkInPatient = WalkInPatient::findOrFail($id);
+        $this->abortUnlessOwnBarangay($walkInPatient->barangay);
 
         if ($walkInPatient->converted_to_user_id) {
             return back()->with('error', 'This walk-in patient has already been converted to a registered user.');
@@ -1821,6 +1927,7 @@ class BhwController extends Controller
     public function storeConvertedUser(Request $request, $id)
     {
         $walkInPatient = WalkInPatient::findOrFail($id);
+        $this->abortUnlessOwnBarangay($walkInPatient->barangay);
 
         if ($walkInPatient->converted_to_user_id) {
             return back()->with('error', 'This walk-in patient has already been converted to a registered user.');
@@ -1833,6 +1940,8 @@ class BhwController extends Controller
             'barangay' => 'required|string|max:255',
             'contact_number' => 'required|string|max:20',
         ]);
+
+        $this->ensureSubmittedInBarangay($request->barangay);
 
         // Account Activation: generate portal credentials for a BHW-Managed woman,
         // creating the users row and linking it back (user_id + portal access).

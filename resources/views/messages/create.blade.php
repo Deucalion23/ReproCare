@@ -56,7 +56,7 @@
             <div class="rc-ico" style="display:inline-flex;"><i class="bi bi-pencil-square"></i></div>
             <div>
                 <h2>New Chat</h2>
-                <p>@if(request()->routeIs('user.messages.*')) Choose from the BHW staff in your barangay. @elseif(request()->routeIs('midwife.messages.*')) Choose from the BHW Presidents in your designated barangays. @else Choose a contact, then send a message like a modern chat app. @endif</p>
+                <p>@if(request()->routeIs('user.messages.*')) Choose from the BHW staff in your barangay. @elseif(request()->routeIs('midwife.messages.*')) Choose from the BHW Presidents in your designated barangays. @elseif(request()->routeIs('bhw.messages.*')) Choose from the patients and BHW Presidents in your barangay. @else Choose a contact, then send a message like a modern chat app. @endif</p>
             </div>
         </div>
         <a href="{{ route($messagesRouteBase . '.index') }}" class="rc-btn-ghost"><i class="bi bi-arrow-left"></i> Back to Messages</a>

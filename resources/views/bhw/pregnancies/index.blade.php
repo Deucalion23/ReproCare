@@ -32,7 +32,7 @@
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
             <div>
                 <div class="page-hero-title">Pregnancies</div>
-                <p class="page-hero-subtitle mb-0">View pregnancies you created, those created by other BHWs, or by the midwife.</p>
+                <p class="page-hero-subtitle mb-0">Pregnancies of women living in your designated barangay.</p>
             </div>
             <a href="{{ route('bhw.pregnancies.create') }}" class="btn btn-primary">
                 <i class="bi bi-plus-lg me-1"></i> Report Pregnancy
