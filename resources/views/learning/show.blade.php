@@ -39,6 +39,7 @@
     .category-pill { background:var(--primary-subtle); color:var(--primary-light); padding:0.25em 0.85em; border-radius:20px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; }
     .meta-row { display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap; margin-bottom:1.25rem; font-size:0.8rem; color:var(--text-muted); }
     .consultation-badge { background:linear-gradient(135deg, var(--color-success), var(--color-success-text)); color:var(--color-on-solid); padding:0.35rem 0.85rem; border-radius:20px; font-size:0.75rem; font-weight:700; }
+    .material-back-btn { font-size:0.72rem !important; padding:0.35rem 0.7rem !important; border-radius:10px !important; white-space:nowrap; }
 
     /* ── Mobile: compact guide view ── */
     @media (max-width:600px) {
@@ -62,7 +63,7 @@
 
 <div class="d-flex align-items-center justify-content-between gap-3 mb-4 fade-in-card flex-wrap">
     <div class="d-flex align-items-center gap-3">
-        <a href="{{ ($learningUser?->isRhu() || $learningUser?->isCho()) ? route(($learningUser->isCho() ? 'cho.learning' : 'rhu.learning') . '.index') : route('learning.index') }}" class="btn btn-sm btn-outline-secondary">
+        <a href="{{ ($learningUser?->isRhu() || $learningUser?->isCho()) ? route(($learningUser->isCho() ? 'cho.learning' : 'rhu.learning') . '.index') : route('learning.index') }}" class="btn btn-sm btn-outline-secondary material-back-btn">
             <i class="bi bi-arrow-left me-1"></i> Back to Materials
         </a>
         <div>
