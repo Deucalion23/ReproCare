@@ -29,6 +29,10 @@
         justify-content:center;
     }
     #bhw-hr-table .tbl-actions .btn > i { line-height:1; }
+    /* Compact patient-type radios in the quick-add modal. */
+    #addRecordModal .form-check-input { width:1rem; height:1rem; margin-top:0.25rem; }
+    #addRecordModal .form-check-label { font-size:0.9rem; }
+    #addRecordModal .form-check { min-height:1.5rem; margin-bottom:0; }
 </style>
 @endpush
 
