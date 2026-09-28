@@ -496,10 +496,7 @@ class MessageController extends Controller
                 return false;
             }
 
-            return $this->sharesCatchment(
-                $this->staffBarangays($sender),
-                [$receiver->barangay ?? null, $receiver->assigned_barangay ?? null]
-            );
+            return $this->midwifeCanMessagePresident($sender, $receiver);
         }
 
         if ($sender->role === 'user') {
@@ -578,6 +575,34 @@ class MessageController extends Controller
         }
 
         return false;
+    }
+
+    /**
+     * Midwife → president routing: strict designation match wins; when the
+     * midwife's designations match NO president at all (spelling drift,
+     * missing president barangay), fall back to any president rather than
+     * a dead inbox. Result is cached per request.
+     */
+    private array $midwifeFallbackCache = [];
+
+    private function midwifeCanMessagePresident(User $midwife, User $president): bool
+    {
+        $mine = $this->staffBarangays($midwife);
+        $theirs = [$president->barangay ?? null, $president->assigned_barangay ?? null];
+
+        if ($this->sharesCatchment($mine, $theirs)) {
+            return true;
+        }
+
+        $key = (int) $midwife->id;
+        if (!array_key_exists($key, $this->midwifeFallbackCache)) {
+            $anyDesignated = User::where('role', 'bhw_president')
+                ->get(['barangay', 'assigned_barangay'])
+                ->contains(fn (User $p) => $this->sharesCatchment($mine, [$p->barangay, $p->assigned_barangay]));
+            $this->midwifeFallbackCache[$key] = !$anyDesignated;
+        }
+
+        return $this->midwifeFallbackCache[$key];
     }
 
     private function formatRoleLabel(User $user): string

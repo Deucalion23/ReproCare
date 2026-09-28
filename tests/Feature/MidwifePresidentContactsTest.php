@@ -51,6 +51,22 @@ class MidwifePresidentContactsTest extends AutomationTestCase
         $response->assertDontSee('Pat Ient', false);
     }
 
+    public function test_midwife_without_any_match_still_sees_presidents(): void
+    {
+        $midwife = $this->patient(['role' => 'midwife', 'first_name' => 'Mid', 'last_name' => 'Wife']);
+        $midwife->catchment_barangays = ['Nowhere'];
+        $midwife->save();
+
+        $this->staffer('bhw_president', 'Burgos', 'Near');
+        $this->staffer('bhw_president', 'Tandoc', 'Far');
+
+        $response = $this->actingAs($midwife)->get(route('midwife.messages.index'));
+
+        $response->assertOk();
+        $response->assertSee('Near Staff', false);
+        $response->assertSee('Far Staff', false);
+    }
+
     public function test_midwife_cannot_send_to_non_president(): void
     {
         $midwife = $this->patient(['role' => 'midwife', 'first_name' => 'Mid', 'last_name' => 'Wife']);
