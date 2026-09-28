@@ -61,7 +61,7 @@
                          style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;">
                 </span>
                 <span class="fw-800 d-inline-flex align-items-center" style="min-height:36px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
-                    Repro<span style="color:#9B64B9;">Care</span>
+                    Repro<span class="brand-care">Care</span>
                 </span>
             </a>
         </div>
