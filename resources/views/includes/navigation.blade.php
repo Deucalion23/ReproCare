@@ -65,19 +65,32 @@
         display:inline-flex !important; align-items:center !important; justify-content:center !important;
     }
     .navbar .staff-action-btn i { flex-shrink:0; font-size:13px !important; line-height:1 !important; }
+    /* Keep the unread dot visible: it sits half-outside the bell button. */
+    .navbar a.staff-action-btn.position-relative { overflow:visible !important; }
+    /* Brand accent: lavender Care everywhere this navbar renders. */
+    .navbar .navbar-brand .brand-care { color:#9B64B9 !important; }
     /* Bootstrap adds its own caret to .dropdown-toggle — the pill has its own chevron. */
     .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
     /* Staff actions match the patient portal's circular bordered buttons. */
     :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
     [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
     @media (max-width: 576px) {
+        .navbar { height:58px !important; }
+        .navbar .container-fluid { gap:0.375rem !important; padding-left:0.6rem !important; padding-right:0.6rem !important; }
+        .navbar .navbar-brand { gap:2px !important; }
+        .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
+        .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
+        .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
+        .navbar #sidebarToggleBtn { width:32px !important; height:32px !important; }
         .navbar .staff-action-btn {
             width:28px !important; height:28px !important;
             min-width:28px !important; max-width:28px !important;
             min-height:28px !important; max-height:28px !important;
         }
         .navbar .staff-action-btn i { font-size:12px !important; }
-        .navbar .staff-profile-pill { padding:2px 2px 2px 2px !important; }
+        .navbar .staff-profile-pill { padding:2px !important; gap:0 !important; }
+        .navbar .staff-profile-pill img { width:30px !important; height:30px !important; }
+        .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
         .navbar .staff-profile-pill .dropdown-chevron { display:none !important; }
     }
 </style>
