@@ -105,19 +105,30 @@
     .brgy-empty-state { padding:1rem; text-align:center; color:var(--text-muted); font-size:0.82rem; }
 
     @media (max-width: 768px) {
-        .settings-wrap { flex-direction:column; }
-        .settings-sidebar { width:100%; position:static; }
+        /* Desktop-like side-by-side on phones, compacted to fit. */
+        .settings-wrap { flex-direction:row; gap:0.75rem; align-items:flex-start; }
+        .settings-sidebar { width:42%; max-width:200px; flex-shrink:0; position:sticky; top:76px; }
+        .settings-nav { padding:0.35rem; border-radius:14px; }
+        .settings-content { flex:1; min-width:0; }
         .theme-option-grid { grid-template-columns:1fr 1fr; }
         .settings-section { scroll-margin-top:76px; }
-        .settings-nav-item { font-size:0.8rem; padding:0.6rem 0.75rem; }
+        .settings-nav-item { font-size:0.7rem; padding:0.5rem 0.55rem; gap:0.45rem; margin-bottom:0.1rem; }
+        .settings-nav-item i { font-size:0.85rem; width:1rem; }
         .settings-page-header h1 { font-size:1.15rem; }
         .settings-page-header p { font-size:0.78rem; }
-        .pref-card-header { padding:0.9rem 1rem; }
-        .pref-card-header h6 { font-size:0.85rem; }
-        .pref-card-header p { font-size:0.72rem; }
-        .pref-card-body { padding:1rem; }
-        .info-grid-2 { grid-template-columns:1fr; }
-        .info-card-value { font-size:0.85rem; }
+        .pref-card { border-radius:14px; }
+        .pref-card-header { padding:0.75rem 0.85rem; gap:0.55rem; }
+        .pref-card-header-icon { width:30px; height:30px; font-size:0.85rem; border-radius:9px; }
+        .pref-card-header h6 { font-size:0.78rem; }
+        .pref-card-header p { font-size:0.66rem; }
+        .pref-card-body { padding:0.85rem; }
+        .info-grid-2 { grid-template-columns:1fr; gap:0.6rem; }
+        .info-card-box { padding:0.7rem 0.8rem; border-radius:12px; }
+        .info-card-label { font-size:0.62rem; }
+        .info-card-value { font-size:0.8rem; }
+        .pref-row-label h6 { font-size:0.8rem; }
+        .pref-row-label p { font-size:0.7rem; }
+        #editProfileBtn { font-size:0.68rem; padding:0.35rem 0.65rem; white-space:nowrap; }
     }
         .info-grid-2 { grid-template-columns:1fr; }
     }
