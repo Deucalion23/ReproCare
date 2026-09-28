@@ -155,7 +155,7 @@
 
         @if($pregnancies->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover align-middle" style="font-size:0.9rem;">
+                <table class="table table-hover align-middle" style="font-size:0.9rem; min-width:960px;">
                     <thead>
                         <tr style="color:var(--text-muted); font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px;">
                             <th style="padding:1rem; border:none;">Patient</th>
@@ -178,7 +178,7 @@
                                         </div>
                                         <div>
                                             <div style="font-weight:600; color:var(--text);">{{ $pregnancy->patient_name }}</div>
-                                            <small style="color:var(--text-muted);">
+                                            <small style="color:var(--text-muted); display:block; max-width:230px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                                 @if($pregnancy->user_id && $pregnancy->woman)
                                                     {{ $pregnancy->woman->email }}
                                                 @elseif($pregnancy->walk_in_patient_id)
@@ -189,11 +189,11 @@
                                     </div>
                                 </td>
                                 <td style="padding:1rem;">
-                                    <div style="font-weight:600; color:var(--text);">{{ $pregnancy->formatted_aog }}</div>
+                                    <div style="font-weight:600; color:var(--text); white-space:nowrap;">{{ $pregnancy->formatted_aog }}</div>
                                 </td>
                                 <td style="padding:1rem;">
                                     @if($pregnancy->trimester)
-                                        <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:color-mix(in srgb, var(--color-info) 10%, transparent); color:var(--info); border-radius:20px; font-weight:500; font-size:0.85rem;">
+                                        <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:color-mix(in srgb, var(--color-info) 10%, transparent); color:var(--info); border-radius:20px; font-weight:500; font-size:0.85rem; white-space:nowrap;">
                                             <i class="bi bi-calendar-week"></i>
                                             {{ $pregnancy->trimester_name }}
                                         </div>
@@ -202,12 +202,12 @@
                                     @endif
                                 </td>
                                 <td style="padding:1rem;">
-                                    <div style="font-weight:500; color:var(--text);">
+                                    <div style="font-weight:500; color:var(--text); white-space:nowrap;">
                                         {{ \Carbon\Carbon::parse($pregnancy->lmp)->format('M j, Y') }}
                                     </div>
                                 </td>
                                 <td style="padding:1rem;">
-                                    <div style="font-weight:500; color:var(--text);">
+                                    <div style="font-weight:500; color:var(--text); white-space:nowrap;">
                                         {{ \Carbon\Carbon::parse($pregnancy->lmp)->addDays(280)->format('M j, Y') }}
                                     </div>
                                     @if($pregnancy->is_active)

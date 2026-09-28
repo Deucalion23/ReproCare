@@ -1142,21 +1142,54 @@
             border-radius:22px;
             background:var(--bg-card);
             box-shadow:var(--shadow-md);
+            overflow:hidden;
         }
-        .app-confirm-modal .modal-header,
+        .app-confirm-modal .modal-header {
+            background:transparent;
+            border-bottom:1px solid var(--border);
+            border-radius:22px 22px 0 0;
+            padding:1.1rem 1.4rem 0.75rem;
+            color:var(--color-text);
+        }
+        .app-confirm-modal .modal-header .modal-title {
+            font-family:'Plus Jakarta Sans', sans-serif;
+            font-weight:800;
+            font-size:1.05rem;
+            color:var(--color-text);
+        }
+        .app-confirm-modal .modal-header .btn-close { filter:none; opacity:0.55; }
+        .app-confirm-modal .modal-body {
+            text-align:center;
+            padding:1.4rem 1.75rem 1.25rem;
+        }
         .app-confirm-modal .modal-footer {
             border-color:var(--border);
+            background:transparent;
+            justify-content:center;
+            gap:0.6rem;
+            padding:0.9rem 1.4rem 1.3rem;
+        }
+        .app-confirm-modal .modal-footer .btn {
+            border-radius:999px;
+            padding:0.55rem 1.6rem;
+            font-weight:700;
         }
         .app-confirm-icon {
-            width:54px;
-            height:54px;
-            border-radius:16px;
+            width:64px;
+            height:64px;
+            border-radius:50%;
             display:grid;
             place-items:center;
-            margin-bottom:1rem;
-            background:linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 16%, transparent), color-mix(in srgb, var(--color-secondary) 16%, transparent));
-            color:var(--primary);
-            font-size:1.35rem;
+            margin:0 auto 1rem;
+            background:color-mix(in srgb, var(--color-secondary) 14%, var(--color-surface));
+            border:1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent);
+            color:var(--color-secondary-text);
+            font-size:1.6rem;
+        }
+        .app-confirm-modal #appConfirmMessage {
+            color:var(--color-text);
+            font-size:0.95rem;
+            line-height:1.55;
         }
 
         /* ── Dedicated LOGOUT dialog (all roles) ── */
