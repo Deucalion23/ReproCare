@@ -60,11 +60,11 @@
         <div class="d-flex align-items-center gap-2">
             <button id="sidebarToggleBtn"
                     class="btn btn-sm btn-light border d-flex d-lg-none align-items-center justify-content-center"
-                    style="width:36px; height:36px; border-radius:10px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+                    style="width:32px; height:32px; border-radius:9px; color:var(--color-text-muted); background:var(--color-surface-soft);"
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:9px; line-height:1;">
+            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
                 <span aria-hidden="true" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 36px; transform:translateY(-1.5px);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
                          style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;">
