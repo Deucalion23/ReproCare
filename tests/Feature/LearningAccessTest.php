@@ -8,6 +8,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
 
 class LearningAccessTest extends AutomationTestCase
 {
@@ -24,6 +25,9 @@ class LearningAccessTest extends AutomationTestCase
             $t->timestamps();
             $t->softDeletes();
         });
+
+        View::share('unreadMsgs', 0);
+        View::share('pendingCount', 0);
     }
 
     public function test_midwife_forum_admin_is_removed(): void
@@ -58,6 +62,15 @@ class LearningAccessTest extends AutomationTestCase
                 $this->assertTrue(Route::has($prefix . '.learning.' . $action), $prefix . '.' . $action);
             }
         }
+    }
+
+    public function test_rhu_and_cho_manage_pages_render(): void
+    {
+        $this->actingAs($this->patient(['role' => 'rhu']));
+        $this->get(route('rhu.learning.index'))->assertOk()->assertSee('Learning Materials', false);
+
+        $this->actingAs($this->patient(['role' => 'cho']));
+        $this->get(route('cho.learning.index'))->assertOk()->assertSee('Learning Materials', false);
     }
 
     public function test_only_rhu_and_cho_pass_the_upload_gate(): void
