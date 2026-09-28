@@ -130,7 +130,7 @@
 <div class="table-card fade-in-card">
     @if($patients->count() > 0)
         <div class="table-responsive">
-            <table class="table table-hover table-sticky-head mb-0">
+            <table class="table table-hover table-sticky-head mb-0 table-cards-mobile">
                 <thead>
                     <tr>
                         <th>Woman</th>
@@ -144,7 +144,7 @@
                 <tbody>
                     @foreach($patients as $patient)
                     <tr>
-                        <td>
+                        <td class="no-card-label" data-label="Woman">
                             <div class="patient-name-cell">
                                 <x-patient-avatar :patient="$patient" :size="36" />
                                 <div>
@@ -157,7 +157,7 @@
                                 </div>
                             </div>
                         </td>
-                        <td style="color:var(--text-muted);font-size:0.875rem;">
+                        <td data-label="Contact Number" style="color:var(--text-muted);font-size:0.875rem;white-space:nowrap;">
                             @php
                                 $contact = $patient->type === 'unregistered' 
                                     ? ($patient->contact_number ?? null) 
@@ -165,7 +165,7 @@
                             @endphp
                             {{ $contact ?: '—' }}
                         </td>
-                        <td>
+                        <td data-label="Barangay">
                             @if($patient->barangay)
                                 <div style="font-size:0.875rem;color:var(--text);">
                                     <i class="bi bi-house-fill me-1"></i>{{ $patient->barangay }}
@@ -174,14 +174,14 @@
                                 <span style="font-size:0.875rem;color:var(--text-muted);">—</span>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Account Type">
                             @if($patient->type === 'unregistered')
                                 <span class="badge bg-warning" title="Managed Beneficiary · Field Record Only · no portal login">Unlinked · BHW-Managed</span>
                             @else
                                 <span class="badge bg-success" title="Authenticated Patient · Direct Access · portal login active">Enrolled · Portal-Active</span>
                             @endif
                         </td>
-                        <td>
+                        <td data-label="Pregnancy">
                             @if($patient->type === 'unregistered')
                                 <span style="font-size:0.8rem;color:var(--text-muted);">
                                     Not Pregnant
@@ -198,7 +198,7 @@
                                 <span style="font-size:0.8rem;color:var(--text-muted);">Not Pregnant</span>
                             @endif
                         </td>
-                        <td>
+                        <td class="no-card-label" data-label="Actions">
                             <div class="d-flex gap-1 justify-content-center">
                                 <a href="{{ $patient->type === 'unregistered' ? route('bhw.walk-in-patients.show', [$patient->id, 'from' => 'women']) : route('bhw.patient-details', $patient->id) }}"
                                    class="btn-action btn-action-view" title="View Details">
