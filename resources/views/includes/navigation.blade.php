@@ -74,6 +74,10 @@
     /* Staff actions match the patient portal's circular bordered buttons. */
     :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
     [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
+    /* Roomier profile pill only where the name text actually shows (desktop). */
+    @media (min-width: 992px) {
+        .navbar .staff-profile-pill { padding:2px 10px 2px 2px !important; }
+    }
     @media (max-width: 576px) {
         .navbar { height:58px !important; }
         .navbar .container-fluid { gap:0.375rem !important; padding-left:0.6rem !important; padding-right:0.6rem !important; }
@@ -155,7 +159,7 @@
             <div class="dropdown">
                 <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none staff-profile-pill"
                    href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                   style="border:1px solid var(--color-border); border-radius:9999px; padding:2px 10px 2px 2px !important;">
+                   style="border:1px solid var(--color-border); border-radius:9999px; padding:2px;">
                     <img src="{{ $currentUser->profile_image_url }}"
                          alt="{{ $currentUser->name }}"
                          class="rounded-circle border"
