@@ -87,7 +87,7 @@
     }
     @media (max-width: 576px) {
         .navbar { height:58px !important; }
-        .navbar .container-fluid { gap:0.375rem !important; padding-left:0.6rem !important; padding-right:0.6rem !important; }
+        .navbar .container-fluid { gap:0.25rem !important; padding-left:0.25rem !important; padding-right:0.6rem !important; }
         .navbar .navbar-brand { gap:2px !important; }
         .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
