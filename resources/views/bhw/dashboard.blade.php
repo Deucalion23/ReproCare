@@ -218,8 +218,8 @@
             </div>
         </div>
 
-        {{-- BHW Role Info - Redesigned --}}
-        <div class="card fade-in-card">
+        {{-- BHW Role Info - Redesigned (desktop/tablet only) --}}
+        <div class="card fade-in-card d-none d-md-block">
             <div class="card-header">
                 <h5 class="mb-0" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Your BHW Capabilities
                 </h5>

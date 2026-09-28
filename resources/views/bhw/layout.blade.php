@@ -13,9 +13,10 @@
         .bhw-stat-row > [class*="col-"] { width:auto !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; margin-top:0 !important; }
         /* Lower dashboard sections: tiles, lists, states, alerts. */
         .bhw-quick-card .card-body { padding:0.7rem !important; }
-        .bhw-quick-card .row { gap:0.5rem !important; }
-        .quick-action-tile { font-size:0.7rem !important; padding:0.6rem 0.4rem !important; gap:0.3rem !important; }
-        .quick-action-tile i { font-size:0.95rem !important; }
+        .bhw-quick-card .row { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.5rem !important; }
+        .bhw-quick-card .row > [class*="col-"] { width:auto !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; margin-top:0 !important; }
+        .quick-action-tile { font-size:0.66rem !important; padding:0.55rem 0.4rem !important; gap:0.25rem !important; border-radius:14px !important; }
+        .quick-action-tile i { font-size:0.85rem !important; }
         .main-content .list-group-item span { font-size:0.72rem !important; }
         .main-content .list-group-item { padding:0.6rem 0.85rem !important; }
         .main-content .alert { font-size:0.72rem !important; }
