@@ -568,16 +568,24 @@
         .main-content .row > * { min-width:0; max-width:100%; overflow-wrap:anywhere; }
         .main-content .table-responsive { max-width:100%; }
         .main-content table { word-break:break-word; }
-        .page-hero-title, .page-title, h1.page-title { font-size:1.02rem !important; line-height:1.3 !important; }
-        .page-hero-subtitle, .page-subtitle { font-size:0.74rem !important; line-height:1.5 !important; }
-        .main-content .stat-card { padding:0.9rem !important; border-radius:16px !important; }
-        .main-content .stat-number, .main-content .metric-card-value { font-size:1.45rem !important; }
-        .main-content .stat-label { font-size:0.66rem !important; }
-        .main-content .summary-chip { font-size:0.64rem !important; }
-        .main-content .stat-trend { font-size:0.7rem !important; }
-        .main-content .card-header h5 { font-size:0.9rem !important; }
-        .main-content .table { font-size:0.76rem !important; }
-        .main-content .btn-sm { font-size:0.7rem !important; }
+        .page-hero-title, .page-title, h1.page-title { font-size:0.9rem !important; line-height:1.3 !important; }
+        .page-hero-subtitle, .page-subtitle { font-size:0.68rem !important; line-height:1.5 !important; }
+        .main-content .stat-card { padding:0.8rem !important; border-radius:14px !important; }
+        .main-content .stat-number, .main-content .metric-card-value { font-size:1.25rem !important; }
+        .main-content .stat-label { font-size:0.6rem !important; }
+        .main-content .summary-chip { font-size:0.58rem !important; }
+        .main-content .stat-trend { font-size:0.64rem !important; }
+        .main-content .stat-icon { width:34px !important; height:34px !important; font-size:0.95rem !important; }
+        .main-content .card-header { padding:0.8rem 1rem !important; }
+        .main-content .card-header h5 { font-size:0.82rem !important; }
+        .main-content .card-body { font-size:0.76rem; }
+        .main-content .table { font-size:0.7rem !important; }
+        .main-content .btn { font-size:0.72rem !important; }
+        .main-content .btn-sm { font-size:0.66rem !important; }
+        .main-content .badge { font-size:0.62rem !important; }
+        .main-content .alert { font-size:0.72rem !important; }
+        .main-content .empty-state h6 { font-size:0.8rem !important; }
+        .main-content .empty-state p { font-size:0.7rem !important; }
     }
 </style>
 @endpush
