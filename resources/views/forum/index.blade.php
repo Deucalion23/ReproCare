@@ -451,8 +451,13 @@
         .side-card-title { font-size:0.88rem !important; }
         .guide-item { font-size:0.76rem !important; }
 
-        /* Phones: center the All Discussions / My Posts toggle. */
-        .forum-feed-head { flex-direction:column !important; align-items:center !important; text-align:center !important; }
+        /* Phones: center the All Discussions / My Posts button text. */
+        .forum-feed-head .btn {
+            text-align:center !important;
+            display:inline-flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+        }
     }
 </style>
 @endpush
