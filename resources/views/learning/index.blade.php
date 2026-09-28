@@ -514,8 +514,17 @@
         }
     }
     @media (max-width: 575.98px) {
-        .learn-hero-icon { width:42px; height:42px; font-size:1.2rem; }
-        .learn-hero-count { width:100%; justify-content:center; }
+        /* Phones: stack the hero vertically so nothing squeezes or overflows. */
+        .learn-hero { border-radius:16px !important; }
+        .learn-hero-body {
+            flex-direction:column !important;
+            align-items:flex-start !important;
+            gap:0.7rem !important;
+        }
+        .learn-hero-icon { width:44px; height:44px; font-size:1.25rem; border-radius:13px; }
+        .learn-hero-body h2 { font-size:1.15rem !important; line-height:1.25 !important; overflow-wrap:anywhere; }
+        .learn-hero-body p { font-size:0.82rem !important; }
+        .learn-hero-count { width:auto; justify-content:flex-start; font-size:0.78rem; }
 
         /* Phones: drop the nested sheet (single flat card), stack selects
            full-width so option text never truncates side-by-side. */
@@ -557,9 +566,22 @@
         .learn-media-grid .video-media-card .card-body { padding:0.6rem 0.65rem !important; text-align:left; }
         .learn-media-grid .video-media-card h6 { font-size:0.7rem !important; line-height:1.35 !important; margin-bottom:0.25rem !important; text-align:left; }
         .learn-media-grid .video-media-card .card-body p { display:none !important; }
-        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.3rem !important; justify-content:flex-start !important; }
+        .learn-media-grid .video-media-card .pt-2\.5 {
+            padding-top:0.35rem !important;
+            flex-direction:column !important;
+            align-items:stretch !important;
+            gap:0.35rem !important;
+        }
         .learn-media-grid .video-media-card small { font-size:0.6rem !important; text-align:left; }
-        .learn-media-grid .video-media-card .btn { display:none !important; }
+        /* Keep cards tappable on phones: compact full-width action instead of hidden. */
+        .learn-media-grid .video-media-card .btn {
+            display:inline-flex !important;
+            width:100% !important;
+            justify-content:center !important;
+            align-items:center !important;
+            font-size:0.66rem !important;
+            padding:0.42rem 0.5rem !important;
+        }
         .learn-media-grid .yt-watch-btn.rounded-circle { width:42px !important; height:42px !important; }
     }
 </style>
