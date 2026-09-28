@@ -138,21 +138,21 @@
         <a href="{{ route('bhw-president.high-risk') }}" class="btn btn-sm btn-outline-warning">View All</a>
     </div>
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
-                <thead>
-                    <tr>
-                        <th>Patient</th>
-                        <th>Gestational Age</th>
-                        <th>Risk Factors</th>
-                        <th>Last Checkup</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach($highRiskPregnancies as $pregnancy)
-                    <tr>
-                        <td>
+            <div class="table-responsive">
+                <table class="table table-hover table-cards-mobile">
+                    <thead>
+                        <tr>
+                            <th>Patient</th>
+                            <th>Gestational Age</th>
+                            <th>Risk Factors</th>
+                            <th>Last Checkup</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($highRiskPregnancies as $pregnancy)
+                        <tr>
+                            <td class="no-card-label" data-label="Patient">
                             <div class="d-flex align-items-center gap-2">
                                 <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--warning),var(--danger));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
                                     {{ strtoupper(substr(optional($pregnancy->woman)->name ?? 'U', 0, 1)) }}
@@ -160,10 +160,10 @@
                                 <span style="font-weight:500;">{{ optional($pregnancy->woman)->name ?? 'Unknown' }}</span>
                             </div>
                         </td>
-                        <td>{{ $pregnancy->gestational_age ?? 'N/A' }} weeks</td>
-                        <td><span class="badge bg-danger">High Risk</span></td>
-                        <td>{{ optional($pregnancy->checkups->first())->scheduled_date?->format('M j, Y') ?? 'No checkups' }}</td>
-                        <td>
+                        <td data-label="Gestational Age">{{ $pregnancy->gestational_age ?? 'N/A' }} weeks</td>
+                        <td data-label="Risk Factors"><span class="badge bg-danger">High Risk</span></td>
+                        <td data-label="Last Checkup" style="white-space:nowrap;">{{ optional($pregnancy->checkups->first())->scheduled_date?->format('M j, Y') ?? 'No checkups' }}</td>
+                        <td class="no-card-label" data-label="Action">
                             <a href="{{ route('midwife.patient-details', $pregnancy->user_id) }}" class="btn btn-sm btn-view">View Details</a>
                         </td>
                     </tr>
@@ -188,7 +188,7 @@
             <div class="card-body p-0">
                 @if($recentCheckups->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0 table-cards-mobile">
                         <thead>
                             <tr>
                                 <th>Patient</th>
@@ -199,7 +199,7 @@
                         <tbody>
                             @foreach($recentCheckups as $checkup)
                             <tr>
-                                <td>
+                                <td class="no-card-label" data-label="Patient">
                                     <div class="d-flex align-items-center gap-2">
                                         <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent-violet));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
                                             {{ strtoupper(substr(optional($checkup->woman)->name ?? 'U', 0, 1)) }}
@@ -207,8 +207,8 @@
                                         <span style="font-weight:500;">{{ optional($checkup->woman)->name ?? 'Unknown' }}</span>
                                     </div>
                                 </td>
-                                <td>{{ $checkup->scheduled_date->format('M j, Y') }}</td>
-                                <td>
+                                <td data-label="Date" style="white-space:nowrap;">{{ $checkup->scheduled_date->format('M j, Y') }}</td>
+                                <td data-label="Status">
                                     <span class="badge bg-{{ $checkup->status === 'Completed' ? 'success' : ($checkup->status === 'Missed' ? 'danger' : 'primary') }}">
                                         {{ $checkup->status }}
                                     </span>
@@ -237,7 +237,7 @@
             <div class="card-body p-0">
                 @if($recentHealthRecords->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
+                    <table class="table table-hover mb-0 table-cards-mobile">
                         <thead>
                             <tr>
                                 <th>Patient</th>
@@ -248,7 +248,7 @@
                         <tbody>
                             @foreach($recentHealthRecords as $record)
                             <tr>
-                                <td>
+                                <td class="no-card-label" data-label="Patient">
                                     <div class="d-flex align-items-center gap-2">
                                         <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--success),var(--color-success));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
                                             {{ strtoupper(substr(optional($record->woman)->name ?? 'U', 0, 1)) }}
@@ -256,8 +256,8 @@
                                         <span style="font-weight:500;">{{ optional($record->woman)->name ?? 'Unknown' }}</span>
                                     </div>
                                 </td>
-                                <td>{{ optional($record->recordedBy)->name ?? 'Unknown' }}</td>
-                                <td>{{ $record->created_at->format('M j, Y') }}</td>
+                                <td data-label="Recorded By">{{ optional($record->recordedBy)->name ?? 'Unknown' }}</td>
+                                <td data-label="Date" style="white-space:nowrap;">{{ $record->created_at->format('M j, Y') }}</td>
                             </tr>
                             @endforeach
                         </tbody>

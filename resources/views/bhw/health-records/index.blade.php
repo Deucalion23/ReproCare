@@ -115,7 +115,7 @@
         <div class="card-body p-0">
             @if($healthRecords->count() > 0)
                 <div class="table-responsive">
-                        <table class="table table-hover mb-0" id="bhw-hr-table">
+                        <table class="table table-hover mb-0 table-cards-mobile" id="bhw-hr-table">
                         <thead>
                             <tr>
                                 <th>Patient</th>
@@ -137,21 +137,21 @@
                                     $patientMeta = $record->walkInPatient ? 'Unlinked patient' : ($patient?->email ?? 'Enrolled patient');
                                 @endphp
                                 <tr>
-                                    <td>
+                                    <td class="no-card-label" data-label="Patient">
                                         <div class="fw-semibold">{{ $patientName }}</div>
                                         <small class="text-muted">{{ $patientMeta }}</small>
                                     </td>
-                                    <td class="hr-date">{{ $record->created_at->format('M j, Y') }}<small>{{ $record->created_at->format('g:i A') }}</small></td>
-                                    <td class="hr-nowrap">{{ $record->bp }}</td>
-                                    <td class="hr-nowrap">{{ $record->weight }} kg</td>
-                                    <td class="hr-nowrap">{{ $record->heart_rate }} bpm</td>
-                                    <td class="hr-nowrap">{{ $record->temperature }} C</td>
-                                    <td>
+                                    <td data-label="Date" class="hr-date">{{ $record->created_at->format('M j, Y') }}<small>{{ $record->created_at->format('g:i A') }}</small></td>
+                                    <td data-label="BP" class="hr-nowrap">{{ $record->bp }}</td>
+                                    <td data-label="Weight" class="hr-nowrap">{{ $record->weight }} kg</td>
+                                    <td data-label="Heart Rate" class="hr-nowrap">{{ $record->heart_rate }} bpm</td>
+                                    <td data-label="Temperature" class="hr-nowrap">{{ $record->temperature }} C</td>
+                                    <td data-label="Risk">
                                         <span class="badge {{ $record->risk_level === 'High' ? 'bg-danger' : ($record->risk_level === 'Medium' ? 'bg-warning text-dark' : 'bg-success') }}">
                                             {{ $record->risk_level }}
                                         </span>
                                     </td>
-                                    <td>
+                                    <td data-label="Workflow">
                                         @if($record->workflow_status === 'recorded_by_bhw')
                                             <span class="badge bg-secondary text-nowrap">Draft</span>
                                         @elseif($record->workflow_status === 'submitted_to_bhw_president')
@@ -166,7 +166,7 @@
                                             <span class="badge bg-secondary text-nowrap">{{ str_replace('_', ' ', $record->workflow_status) }}</span>
                                         @endif
                                     </td>
-                                    <td>
+                                    <td class="no-card-label" data-label="Actions">
                                         <div class="d-inline-flex align-items-center gap-1 tbl-actions">
                                             <button type="button" class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#recordModal{{ $record->id }}" title="View record" aria-label="View record">
                                                 <i class="bi bi-eye"></i>
