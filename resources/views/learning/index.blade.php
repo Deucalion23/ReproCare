@@ -77,8 +77,8 @@
         <form method="GET" action="{{ $indexRoute }}" class="learn-filter-grid">
             <div class="learn-field learn-field-search">
                 <label for="learnSearch" class="form-label learn-label">Search Topic / Keyword</label>
-                <div class="input-group learn-search-group">
-                    <span class="input-group-text learn-search-icon"><i class="bi bi-search"></i></span>
+                <div class="learn-search-group">
+                    <i class="bi bi-search" aria-hidden="true"></i>
                     <input id="learnSearch" type="text" name="search" class="form-control learn-input"
                            placeholder="Search videos, articles, counseling guides..." value="{{ request('search') }}"
                            enterkeyhint="search" autocomplete="off">
@@ -429,25 +429,21 @@
         box-shadow:none !important;
         outline:none !important;
     }
-    .learn-search-group:focus-within .learn-search-icon,
-    .learn-search-group:focus-within .learn-input {
+    .learn-search-group:focus-within {
         border-color:var(--color-border) !important;
         box-shadow:none !important;
         outline:none !important;
     }
-    .learn-search-group { flex-wrap:nowrap; }
-    .learn-search-group .learn-search-icon {
-        background:var(--color-surface) !important;
-        border:1.5px solid var(--color-border) !important;
-        border-right:none !important;
-        border-radius:12px 0 0 12px !important;
-        color:var(--color-text-muted) !important;
-        min-height:44px;
-        display:flex; align-items:center;
+    .learn-search-group { position:relative; }
+    .learn-search-group > i {
+        position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+        color:var(--color-text-muted); pointer-events:none; font-size:0.95rem;
     }
     .learn-search-group .learn-input {
-        border-left:none !important;
-        border-radius:0 12px 12px 0 !important;
+        width:100%;
+        padding-left:2.75rem !important;
+        border:1.5px solid var(--color-border) !important;
+        border-radius:12px !important;
     }
     .learn-actions { display:flex; gap:0.5rem; padding-bottom:1px; }
     .learn-btn-apply {
@@ -528,10 +524,8 @@
             font-size:0.68rem !important; letter-spacing:0.4px;
             margin-bottom:0.3rem !important;
         }
-        .learn-input, .learn-search-group .learn-search-icon { min-height:50px !important; }
+        .learn-input, .learn-search-group .learn-input { min-height:50px !important; }
         .learn-input { font-size:0.92rem !important; border-radius:14px !important; }
-        .learn-search-group .learn-search-icon { border-radius:14px 0 0 14px !important; }
-        .learn-search-group .learn-input { border-radius:0 14px 14px 0 !important; }
         .learn-field-format .learn-input, .learn-field-category .learn-input {
             padding-left:0.7rem; padding-right:0.7rem;
             text-overflow:ellipsis;
@@ -578,7 +572,7 @@
         .learn-mobile-reset { font-size:0.7rem !important; min-height:0 !important; padding:0.2rem !important; }
         .learn-mobile-count { font-size:0.6rem !important; padding:0.15rem 0.5rem !important; }
         .learn-label { margin-bottom:0.2rem !important; font-size:0.58rem !important; letter-spacing:0.3px; text-align:left; }
-        .learn-input, .learn-search-group .learn-search-icon { min-height:40px !important; }
+        .learn-input, .learn-search-group .learn-input { min-height:40px !important; }
         .learn-input {
             font-size:0.75rem !important;
             max-width:100%; width:100%; text-align:left;
