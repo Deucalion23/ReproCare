@@ -22,10 +22,11 @@
         });
         document.dispatchEvent(new CustomEvent('rc:theme-changed', { detail: { mode } }));
     }
-    // A city-wide save applies on the next page load. Users can still use the
-    // existing local light/dark toggle until the next city-wide appearance save.
-    const mode = read('rc_appearance_revision') === config.current.revision
-        ? (read('rc_theme') || config.current.mode) : config.current.mode;
+    // A city-wide save refreshes brand colors on the next page load, but a
+    // user's own light/dark choice always wins so nobody gets trapped in
+    // one mode. Fresh visitors (no stored choice) follow the city default.
+    write('rc_appearance_revision', config.current.revision);
+    const mode = read('rc_theme') || config.current.mode;
     setMode(mode);
     window.setRcTheme = setMode;
     window.currentRcTheme = () => root.dataset.theme;
