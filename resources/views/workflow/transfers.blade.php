@@ -1,9 +1,37 @@
-@extends('layouts.app')
+@php
+    $transferLayout = match(auth()->user()?->role) {
+        'midwife' => 'midwife.layout',
+        'bhw' => 'bhw.layout',
+        'bhw_president' => 'bhw-president.layout',
+        'rhu' => 'rhu.layout',
+        'cho' => 'cho.layout',
+        default => 'layouts.app',
+    };
+    $transferSection = match(auth()->user()?->role) {
+        'midwife' => 'midwife-content',
+        'bhw' => 'bhw-content',
+        'bhw_president' => 'bhw-president-content',
+        'rhu' => 'rhu-content',
+        'cho' => 'cho-content',
+        default => 'content',
+    };
+@endphp
 
-@section('content')
+@extends($transferLayout)
+
+@section('title', 'Patient Transfer Requests - ReproCare')
+
+@section($transferSection)
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Patient Transfer Requests</div>
+            <p class="page-hero-subtitle">Barangay-to-barangay / purok reassignment. Approval preserves full pregnancy &amp; checkup history — no deletes, no duplicates.</p>
+        </div>
+    </div>
+</div>
+
 <div class="container">
-    <h4>Patient Transfer Requests</h4>
-    <p class="text-muted">Barangay-to-barangay / purok reassignment. Approval preserves full pregnancy &amp; checkup history — no deletes, no duplicates.</p>
 
     @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     @if (session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
