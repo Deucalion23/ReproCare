@@ -560,5 +560,24 @@
         .main-content .card-header { align-items:flex-start !important; flex-direction:column; }
         .summary-chip { font-size:0.76rem; }
     }
+    /* ── All staff portals: BHW-style compact foundation on phones ── */
+    @media (max-width: 600px) {
+        .main-content { overflow-x:clip; }
+        .main-content > .mw-container { min-width:0; max-width:100%; overflow-x:clip; }
+        .main-content .row { margin-left:0; margin-right:0; }
+        .main-content .row > * { min-width:0; max-width:100%; overflow-wrap:anywhere; }
+        .main-content .table-responsive { max-width:100%; }
+        .main-content table { word-break:break-word; }
+        .page-hero-title, .page-title, h1.page-title { font-size:1.02rem !important; line-height:1.3 !important; }
+        .page-hero-subtitle, .page-subtitle { font-size:0.74rem !important; line-height:1.5 !important; }
+        .main-content .stat-card { padding:0.9rem !important; border-radius:16px !important; }
+        .main-content .stat-number, .main-content .metric-card-value { font-size:1.45rem !important; }
+        .main-content .stat-label { font-size:0.66rem !important; }
+        .main-content .summary-chip { font-size:0.64rem !important; }
+        .main-content .stat-trend { font-size:0.7rem !important; }
+        .main-content .card-header h5 { font-size:0.9rem !important; }
+        .main-content .table { font-size:0.76rem !important; }
+        .main-content .btn-sm { font-size:0.7rem !important; }
+    }
 </style>
 @endpush
