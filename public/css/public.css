@@ -28,7 +28,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .public-header { background:color-mix(in srgb, var(--color-bg) 96%, transparent); border-bottom:1px solid var(--public-line); }
 .header-inner { min-height:88px; display:flex; align-items:center; justify-content:space-between; gap:24px; }
 .public-brand { display:inline-flex; align-items:center; gap:2px; font-family:'Plus Jakarta Sans',sans-serif; font-size:28px; font-weight:800; letter-spacing:-1px; line-height:1; flex-shrink:0; transform:none; }
-.public-brand-mark { width:64px; height:64px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 64px; transform:translateY(-5px); }
+.public-brand-mark { width:64px; height:64px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 64px; transform:translateY(-0.18em); }
 .public-brand-mark img { width:64px; height:64px; max-width:none; object-fit:contain; display:block; }
 .public-brand-name { display:inline-flex; align-items:center; line-height:1; padding-bottom:1px; margin-left:-6px; transform:none; }
 /* Match the wordmark accent to the lavender used by the supplied logo. */
@@ -151,7 +151,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 .login-page .public-brand, .login-page .public-brand-name,
 .signup-page .public-brand, .signup-page .public-brand-name { transform:none; }
 .landing-page .public-brand, .login-page .public-brand, .signup-page .public-brand { gap:2px; font-size:28px; }
-.landing-page .public-brand-mark, .login-page .public-brand-mark, .signup-page .public-brand-mark { width:64px; height:64px; flex-basis:64px; transform:translateY(-5px); }
+.landing-page .public-brand-mark, .login-page .public-brand-mark, .signup-page .public-brand-mark { width:64px; height:64px; flex-basis:64px; transform:translateY(-0.18em); }
 .landing-page .public-brand-mark img, .login-page .public-brand-mark img, .signup-page .public-brand-mark img { width:64px; height:64px; }
 .landing-page .landing-hero { min-height:615px; padding-block:64px 88px; gap:72px; }
 .landing-page .hero-copy { position:relative; z-index:1; }
@@ -268,7 +268,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
 }
 @media (max-width:600px) {
     .public-container { width:calc(100% - 40px); } .header-inner { min-height:78px; gap:12px; }
-    .public-brand { font-size:24px; gap:2px; } .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-11px); } .public-brand-mark img { width:52px; height:52px; }
+    .public-brand { font-size:24px; gap:2px; } .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-0.18em); } .public-brand-mark img { width:52px; height:52px; }
     .nav-account { gap:15px; font-size:12px; } .public-page .button-small { min-height:38px; padding:8px 13px; font-size:11px; }
     .hero { grid-template-columns:1fr; padding-block:40px; gap:36px; } .hero h1 { font-size:45px; max-width:400px; } .hero .eyebrow { font-size:10px; letter-spacing:1.5px; margin-bottom:20px; }
     .hero-copy > p { font-size:14px; margin-bottom:23px; } .hero-note { font-size:11px; margin-top:18px; }
@@ -312,7 +312,7 @@ body.public-page { margin:0; color:var(--public-ink); background:var(--public-bg
     .login-page .public-brand, .login-page .public-brand-name,
     .signup-page .public-brand, .signup-page .public-brand-name { transform:none; }
     .landing-page .public-brand, .login-page .public-brand, .signup-page .public-brand { gap:2px; font-size:24px; }
-    .landing-page .public-brand-mark, .login-page .public-brand-mark, .signup-page .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-11px); }
+    .landing-page .public-brand-mark, .login-page .public-brand-mark, .signup-page .public-brand-mark { width:52px; height:52px; flex-basis:52px; transform:translateY(-0.18em); }
     .landing-page .public-brand-mark img, .login-page .public-brand-mark img, .signup-page .public-brand-mark img { width:52px; height:52px; }
     .landing-page .landing-hero { padding-block:40px 42px; gap:32px; }
     .landing-page .hero h1 { font-size:clamp(2.65rem, 12vw, 3.45rem); line-height:1.05; }
