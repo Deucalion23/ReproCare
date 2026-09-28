@@ -187,11 +187,19 @@
         min-height:46px;
         resize:none;
         overflow:hidden;
-        padding-top:0.72rem !important;
+        white-space:nowrap !important;
+        text-overflow:ellipsis !important;
+        padding-top:0 !important;
+        padding-bottom:0 !important;
+        line-height:44px !important;
     }
     .quick-composer-card:focus-within .quick-inline-input {
         border-radius:14px !important;
         min-height:88px;
+        white-space:normal !important;
+        padding-top:0.72rem !important;
+        padding-bottom:0.72rem !important;
+        line-height:1.5 !important;
     }
     .quick-inline-bar { display:none; }
     .quick-composer-card:focus-within .quick-inline-bar { display:flex; }
@@ -428,9 +436,10 @@
         .quick-composer-btn { font-size:0.78rem !important; padding:0.6rem 0.9rem !important; }
         .composer-textarea-full { font-size:0.82rem !important; padding:0.7rem 0.8rem !important; }
         .forum-post-card { padding:0.9rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
-        .author-avatar { width:36px !important; height:36px !important; }
-        .author-name { font-size:0.82rem !important; }
-        .author-time { font-size:0.68rem !important; }
+        .author-avatar { width:32px !important; height:32px !important; }
+        .author-name { font-size:0.78rem !important; }
+        .author-time { font-size:0.64rem !important; }
+        .author-lockup { gap:0.6rem !important; }
         .role-verified-badge { font-size:0.58rem !important; }
         .post-text-body { font-size:0.82rem !important; line-height:1.55 !important; }
         .post-media-frame { max-height:200px !important; border-radius:10px !important; }
@@ -451,8 +460,13 @@
         .side-card-title { font-size:0.88rem !important; }
         .guide-item { font-size:0.76rem !important; }
 
-        /* Phones: center the All Discussions / My Posts toggle. */
-        .forum-feed-head { flex-direction:column !important; align-items:center !important; text-align:center !important; }
+        /* Phones: center the All Discussions / My Posts button text. */
+        .forum-feed-head .btn {
+            text-align:center !important;
+            display:inline-flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+        }
     }
 </style>
 @endpush

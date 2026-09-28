@@ -990,7 +990,6 @@
             <span aria-hidden="true" style="width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 2rem; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
             <div style="margin-left:-0.2rem; min-width:0;">
                 <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem;" id="womenMobileDrawerLabel">Repro<span style="color:#9B64B9;">Care</span></h6>
-                <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
