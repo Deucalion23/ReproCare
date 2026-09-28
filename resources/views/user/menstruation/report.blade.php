@@ -9,7 +9,7 @@
         .header { background-color: #6d3caf; color: #ffffff; padding: 16px 18px; }
         .header h1 { font-size: 20pt; }
         .header p { font-size: 9pt; margin-top: 4px; color: #f3e8ff; }
-        .section-title { background-color: #f3e8ff; border-left: 4px solid #7c3aed; color: #4c1d95; font-size: 12pt; font-weight: bold; margin: 18px 0 8px; padding: 7px 10px; }
+        .section-title { background-color: #F4EFF8; border-left: 4px solid #9b64b9; color: #4c1d95; font-size: 12pt; font-weight: bold; margin: 18px 0 8px; padding: 7px 10px; }
         .info-table, .stats-table, .report-table { border-collapse: collapse; width: 100%; }
         .info-table td { border: 1px solid #ddd6fe; padding: 8px 10px; }
         .info-label { background-color: #faf5ff; color: #5b21b6; font-weight: bold; width: 25%; }
