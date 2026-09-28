@@ -32,13 +32,54 @@
     .women-content-wrap {
         max-width:1280px;
         margin:0 auto;
-        padding:2rem 1.5rem;
+        padding:1.25rem 1.5rem 2rem;
         position:relative;
         z-index:1;
     }
 
     /* Borderless card surfaces across the patient portal */
     .women-content-wrap .card { border:none !important; }
+
+    /* ── Shared greeting-hero look for every top card (dashboard style),
+          pulled up tight to the top of the content ── */
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card) {
+        position:relative;
+        overflow:hidden;
+        border:none !important;
+        border-radius:24px !important;
+        padding:2rem 2.25rem;
+        margin-top:0 !important;
+        margin-bottom:1.5rem;
+        background:var(--color-surface) !important;
+        background-color:var(--color-surface) !important;
+        box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent) !important;
+    }
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card)::before {
+        content:'';
+        position:absolute;
+        top:-40px;
+        right:-30px;
+        width:260px;
+        height:260px;
+        border-radius:50%;
+        background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%);
+        pointer-events:none;
+    }
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card)::after {
+        content:'';
+        position:absolute;
+        bottom:-50px;
+        left:20%;
+        width:180px;
+        height:180px;
+        border-radius:50%;
+        background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%);
+        pointer-events:none;
+    }
+    .women-content-wrap :is(.preg-top-card, .cycle-top-card, .checkups-top-card) > * {
+        position:relative;
+        z-index:1;
+    }
 
     @media (max-width: 768px) {
         .women-content-wrap {
