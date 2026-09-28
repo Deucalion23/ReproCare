@@ -2,6 +2,7 @@
     $learningUser = auth()->user();
     $learningLayout = match($learningUser?->role) {
         'cho'           => 'cho.layout',
+        'rhu'           => 'rhu.layout',
         'midwife'       => 'midwife.layout',
         'bhw'           => 'bhw.layout',
         'bhw_president' => 'bhw-president.layout',
@@ -9,6 +10,7 @@
     };
     $learningSection = match($learningUser?->role) {
         'cho'           => 'cho-content',
+        'rhu'           => 'rhu-content',
         'midwife'       => 'midwife-content',
         'bhw'           => 'bhw-content',
         'bhw_president' => 'bhw-president-content',
@@ -16,6 +18,9 @@
     };
     $activeFilter = request('type');
     $activeCategory = request('category');
+    // Manage mode (RHU/CHO consoles): same page, plus edit/archive controls.
+    $manageBase = $manageBase ?? null;
+    $indexRoute = $manageBase ? route($manageBase . '.index') : route('learning.index');
 @endphp
 
 @extends($learningLayout)
@@ -47,9 +52,11 @@
             <a href="{{ route($manageBase . '.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
                 <i class="bi bi-plus-lg"></i> Add New Video / Material
             </a>
-            <a href="{{ route($manageBase . '.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius:10px;">
-                <i class="bi bi-gear"></i> Manage Materials
-            </a>
+            @if(empty($manageBase))
+                <a href="{{ route($manageBase . '.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius:10px;">
+                    <i class="bi bi-gear"></i> Manage Materials
+                </a>
+            @endif
         </div>
     @endif
     </div>
@@ -65,9 +72,9 @@
             @if($learnActiveCount > 0)
                 <span class="learn-mobile-count">{{ $learnActiveCount }} active</span>
             @endif
-            <a href="{{ route('learning.index') }}" class="learn-mobile-reset">Reset</a>
+            <a href="{{ $indexRoute }}" class="learn-mobile-reset">Reset</a>
         </div>
-        <form method="GET" action="{{ route('learning.index') }}" class="learn-filter-grid">
+        <form method="GET" action="{{ $indexRoute }}" class="learn-filter-grid">
             <div class="learn-field learn-field-search">
                 <label for="learnSearch" class="form-label learn-label">Search Topic / Keyword</label>
                 <div class="input-group learn-search-group">
@@ -100,7 +107,7 @@
             </div>
             <div class="learn-actions">
                 <button type="submit" class="btn learn-btn-apply" title="Apply filters"><i class="bi bi-funnel-fill"></i><span>Filter</span></button>
-                <a href="{{ route('learning.index') }}" class="btn learn-btn-clear" title="Clear all filters"><i class="bi bi-x-lg"></i><span class="visually-hidden">Clear</span></a>
+                <a href="{{ $indexRoute }}" class="btn learn-btn-clear" title="Clear all filters"><i class="bi bi-x-lg"></i><span class="visually-hidden">Clear</span></a>
             </div>
         </form>
     </div>
@@ -215,6 +222,24 @@
                                     <i class="bi {{ $isVideo ? 'bi-play-fill' : 'bi-eye-fill' }}"></i> {{ $isVideo ? 'Play Video' : 'View Guide' }}
                                 </a>
                             @endif
+                            @if(!empty($manageBase))
+                                <div class="dropdown d-inline-block">
+                                    <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Manage material"
+                                            style="border-radius:999px; border:1px solid var(--color-border); width:32px; height:32px; padding:0; display:inline-flex; align-items:center; justify-content:center;">
+                                        <i class="bi bi-three-dots-vertical" style="color:var(--color-text-muted);"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px; border:1px solid var(--color-border); font-size:0.85rem;">
+                                        <li>
+                                            <a href="{{ route($manageBase . '.edit', $material->id) }}" class="dropdown-item">
+                                                <i class="bi bi-pencil me-2"></i> Edit Material
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <x-archive-form :action="route($manageBase . '.destroy', $material->id)" label="Archive" btnClass="dropdown-item text-warning" icon="bi bi-archive" confirmText="Archive this material? It will be retained in the archives." />
+                                        </li>
+                                    </ul>
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -226,10 +251,15 @@
                 <i class="bi bi-camera-video text-muted mb-3" style="font-size:2.5rem;"></i>
                 <h5 class="fw-700 text-dark">No Media Found</h5>
                 <p class="text-muted text-xs mb-3">No learning materials match your active search or filter category.</p>
-                <div>
-                    <a href="{{ route('learning.index') }}" class="btn btn-sm btn-outline-primary" style="border-radius:10px;">
+                <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    <a href="{{ $indexRoute }}" class="btn btn-sm btn-outline-primary" style="border-radius:10px;">
                         Reset Filter
                     </a>
+                    @if(!empty($manageBase))
+                        <a href="{{ route($manageBase . '.create') }}" class="btn btn-sm btn-primary" style="border-radius:10px; font-weight:700;">
+                            <i class="bi bi-plus-circle me-1"></i> Add First Material
+                        </a>
+                    @endif
                 </div>
             </div>
         </div>

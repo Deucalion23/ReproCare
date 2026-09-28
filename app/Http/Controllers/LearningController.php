@@ -118,6 +118,7 @@ class LearningController extends Controller
     public function adminIndex(Request $request)
     {
         $this->requireLearningAdmin();
+        $ctx = $this->adminViewContext();
 
         $query = LearningMaterial::query();
 
@@ -137,8 +138,14 @@ class LearningController extends Controller
             $query->where('category', $request->category);
         }
 
-        $materials = $query->latest()->paginate(10)->withQueryString();
-        return view('midwife.learning.index', array_merge(compact('materials'), $this->adminViewContext()));
+        $materials = $query->latest()->paginate(12)->withQueryString();
+
+        // Same page as the women's library, plus edit/archive controls.
+        return view('learning.index', array_merge(
+            compact('materials'),
+            $ctx,
+            ['manageBase' => $ctx['routeBase']]
+        ));
     }
 
     public function create()

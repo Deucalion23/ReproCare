@@ -73,6 +73,14 @@ class LearningAccessTest extends AutomationTestCase
         $this->get(route('cho.learning.index'))->assertOk()->assertSee('Learning Materials', false);
     }
 
+    public function test_manage_pages_show_edit_controls(): void
+    {
+        \App\Models\LearningMaterial::create(['title' => 'Manageable Guide', 'material_type' => 'article']);
+
+        $this->actingAs($this->patient(['role' => 'rhu']));
+        $this->get(route('rhu.learning.index'))->assertOk()->assertSee('Edit Material', false);
+    }
+
     public function test_only_rhu_and_cho_pass_the_upload_gate(): void
     {
         foreach (['midwife', 'bhw', 'bhw_president', 'user'] as $role) {
