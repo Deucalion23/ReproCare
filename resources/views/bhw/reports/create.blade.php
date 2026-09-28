@@ -1,13 +1,13 @@
 @extends('bhw.layout')
 
-@section('title', 'Create Monthly Report - BHW Portal')
+@section('title', 'Create Midwife Monthly Report - BHW Portal')
 
 @section('bhw-content')
 <div class="workspace-stack">
     <div class="page-hero fade-in-card">
         <div class="workspace-toolbar" style="position:relative;z-index:1;">
             <div>
-                <div class="page-hero-title">Create Monthly Report</div>
+                <div class="page-hero-title">Create Midwife Monthly Report</div>
                 <p class="page-hero-subtitle">Build a clean monthly summary from your recorded health records or pregnancy monitoring data.</p>
             </div>
             <a href="{{ route('bhw.reports.index') }}" class="btn-hero-secondary"><i class="bi bi-arrow-left"></i>Back to Reports</a>

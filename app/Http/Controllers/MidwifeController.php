@@ -826,6 +826,147 @@ class MidwifeController extends Controller
         return view('midwife.reports.details', compact('woman'));
     }
 
+    // ─── Midwife Monthly Reports Validation ──
+    // Reports validated by the BHW President land here. The midwife
+    // validates them before they advance to the RHU; a rejection sends
+    // the report back to the BHW President for re-check.
+
+    public function monthlyReports()
+    {
+        $filter = request('filter', 'all');
+
+        $reports = BhwMonthlyReport::with(['bhw', 'approvedByPresident'])
+            ->when($filter !== 'all', fn ($query) => $query->where('report_type', $filter))
+            ->latest()
+            ->paginate(10);
+
+        return view('midwife.monthly-reports.index', compact('reports', 'filter'));
+    }
+
+    public function monthlyReportShow($id)
+    {
+        $report = BhwMonthlyReport::with(['bhw', 'approvedByPresident', 'submittedToMidwifeBy'])
+            ->findOrFail($id);
+
+        if ($report->report_type === 'health_records') {
+            $healthRecords = HealthRecord::with(['woman', 'recordedBy'])
+                ->where('recorded_by_id', $report->bhw_id)
+                ->whereMonth('created_at', $report->report_month)
+                ->whereYear('created_at', $report->report_year)
+                ->when(($report->filters['patient_filter'] ?? 'all') === 'selected', function ($query) use ($report) {
+                    $query->whereIn('user_id', $report->filters['user_ids'] ?? []);
+                })
+                ->latest()
+                ->get();
+
+            $uniquePatients = $healthRecords->pluck('user_id')->unique()->count();
+
+            $riskDistribution = [
+                'low' => $healthRecords->where('risk_level', 'Low')->count(),
+                'medium' => $healthRecords->where('risk_level', 'Medium')->count(),
+                'high' => $healthRecords->where('risk_level', 'High')->count(),
+            ];
+
+            return view('midwife.monthly-reports.show', compact(
+                'report',
+                'healthRecords',
+                'uniquePatients',
+                'riskDistribution'
+            ));
+        }
+
+        $pregnancies = Pregnancy::whereNull('ended_at')
+            ->whereMonth('created_at', $report->report_month)
+            ->whereYear('created_at', $report->report_year)
+            ->with('woman')
+            ->when(($report->filters['patient_filter'] ?? 'all') === 'selected', function ($query) use ($report) {
+                $query->whereIn('user_id', $report->filters['user_ids'] ?? []);
+            })
+            ->latest()
+            ->get();
+
+        $uniquePatients = $pregnancies->pluck('user_id')->unique()->count();
+        $riskDistribution = [
+            'low' => $pregnancies->where('is_high_risk', false)->count(),
+            'high' => $pregnancies->where('is_high_risk', true)->count(),
+            'medium' => 0,
+        ];
+
+        return view('midwife.monthly-reports.show-pregnancies', compact(
+            'report',
+            'pregnancies',
+            'uniquePatients',
+            'riskDistribution'
+        ));
+    }
+
+    public function monthlyReportApprove(Request $request, $id)
+    {
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'submitted_to_midwife') {
+            return redirect()->route('midwife.monthly-reports.index')
+                ->with('error', 'This report cannot be validated at this stage.');
+        }
+
+        $report->approveByMidwife(auth()->id(), $request->input('notes'));
+
+        // Transparency: BHW + President learn the report advanced to the RHU.
+        $workflows = app(\App\Services\WorkflowService::class);
+        $workflows->notifyAction(
+            (int) $report->bhw_id,
+            '✅ Monthly Report Validated by Midwife',
+            'Your report "' . ($report->title ?? "#{$report->id}") . '" was validated by the midwife and forwarded to the RHU.',
+            'success',
+            route('bhw.reports.index')
+        );
+        if ($report->approved_by_president) {
+            $workflows->notifyAction(
+                (int) $report->approved_by_president,
+                '✅ Report Validated by Midwife',
+                'Report "' . ($report->title ?? "#{$report->id}") . '" was validated by the midwife and forwarded to the RHU.',
+                'success',
+                route('bhw-president.reports.index')
+            );
+        }
+
+        ActivityLog::log('approve', "Midwife validated monthly report ID: {$report->id} submitted by BHW: {$report->bhw->name}", $report);
+
+        return redirect()->route('midwife.monthly-reports.index')
+            ->with('success', 'Report validated and forwarded to the RHU.');
+    }
+
+    public function monthlyReportReturn(Request $request, $id)
+    {
+        $request->validate(['notes' => 'required|string|max:1000']);
+
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'submitted_to_midwife') {
+            return redirect()->route('midwife.monthly-reports.index')
+                ->with('error', 'This report cannot be returned at this stage.');
+        }
+
+        $report->returnToPresident(auth()->id(), $request->input('notes'));
+
+        // The BHW President owns the next action (re-check, then forward
+        // to the midwife again or bounce to the BHW).
+        if ($report->approved_by_president) {
+            app(\App\Services\WorkflowService::class)->notifyAction(
+                (int) $report->approved_by_president,
+                '↩️ Monthly Report Returned by Midwife',
+                'Report "' . ($report->title ?? "#{$report->id}") . '" was returned for re-check. Midwife note: ' . $request->input('notes'),
+                'warning',
+                route('bhw-president.reports.index')
+            );
+        }
+
+        ActivityLog::log('reject', "Midwife returned monthly report ID: {$report->id} to the BHW President: {$request->input('notes')}", $report);
+
+        return redirect()->route('midwife.monthly-reports.index')
+            ->with('success', 'Report returned to the BHW President with your note.');
+    }
+
     public function reportsExportCsv(Request $request)
     {
         $patients = $this->filteredReportPatients($request);

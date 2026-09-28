@@ -1040,7 +1040,7 @@ class BhwController extends Controller
         $report = BhwMonthlyReport::where('bhw_id', auth()->id())->findOrFail($id);
         $reason = trim((string) $request->input('reason', ''));
         if ($reason === '') {
-            $reason = 'BHW monthly report archived via console';
+            $reason = 'Midwife monthly report archived via console';
         }
 
         try {

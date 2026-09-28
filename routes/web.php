@@ -223,6 +223,14 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
         Route::get('/{id}/details', [MidwifeController::class, 'reportsDetails'])->name('details');
         Route::get('/{id}', [MidwifeController::class, 'reportsDetails'])->name('show');
     });
+
+    // Midwife Monthly Reports Validation (BHW President -> Midwife -> RHU)
+    Route::prefix('monthly-reports')->name('monthly-reports.')->group(function () {
+        Route::get('/', [MidwifeController::class, 'monthlyReports'])->name('index');
+        Route::get('/{id}', [MidwifeController::class, 'monthlyReportShow'])->name('show');
+        Route::post('/{id}/approve', [MidwifeController::class, 'monthlyReportApprove'])->name('approve');
+        Route::post('/{id}/return', [MidwifeController::class, 'monthlyReportReturn'])->name('return');
+    });
     
     // Pregnant Patients
     Route::get('/pregnant-patients', [MidwifeController::class, 'pregnantPatients'])->name('pregnant-patients');
@@ -480,6 +488,8 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
         Route::delete('/{id}', [BhwPresidentController::class, 'reportDelete'])->name('delete');
         Route::post('/{id}/approve', [BhwPresidentController::class, 'reportApprove'])->name('approve');
         Route::post('/{id}/reject', [BhwPresidentController::class, 'reportReject'])->name('reject');
+        Route::post('/{id}/resubmit-to-midwife', [BhwPresidentController::class, 'reportResubmitToMidwife'])->name('resubmit-to-midwife');
+        Route::post('/{id}/send-back', [BhwPresidentController::class, 'reportSendBackToBhw'])->name('send-back');
     });
 
     Route::prefix('messages')->name('messages.')->group(function () {
@@ -814,7 +824,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/data', [GisController::class, 'data'])->name('data');
     });
 
-    // BHW Monthly Reports Approval
+    // Midwife Monthly Reports Approval (President -> Midwife -> RHU)
     Route::prefix('bhw-reports')->name('bhw-reports.')->group(function () {
         Route::get('/', [RhuController::class, 'bhwReports'])->name('index');
         Route::get('/{id}', [RhuController::class, 'bhwReportShow'])->name('show');

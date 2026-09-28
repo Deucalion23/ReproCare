@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>City-Wide BHW Monthly Report — {{ $month }}</title>
+    <title>City-Wide Midwife Monthly Report — {{ $month }}</title>
     <style>
         body { font-family:DejaVu Sans, sans-serif; color:var(--color-text); font-size:12px; }
         h1 { font-size:20px; margin:0 0 4px; }
@@ -17,7 +17,7 @@
     </style>
 </head>
 <body>
-    <h1>City-Wide BHW Monthly Report</h1>
+    <h1>City-Wide Midwife Monthly Report</h1>
     <div class="sub">San Carlos City · {{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }} · Generated {{ now()->format('M d, Y h:i A') }}</div>
 
     <table>

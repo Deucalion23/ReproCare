@@ -180,7 +180,7 @@
                 <div class="col">
                     <h3 class="mb-1">ReproCare</h3>
                     <p class="text-muted mb-0">Reproductive Healthcare Management System</p>
-                    <p class="text-muted mb-0">BHW Monthly Report - RHU Admin View</p>
+                    <p class="text-muted mb-0">Midwife Monthly Report - RHU Admin View</p>
                 </div>
                 <div class="col-auto text-end">
                     <div class="text-muted small">Report Generated</div>

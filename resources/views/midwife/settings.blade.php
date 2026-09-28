@@ -287,7 +287,7 @@
                         <div class="d-flex flex-wrap gap-2 mb-3">
                             <span class="verified-badge warn"><i class="bi bi-person-check-fill"></i> {{ $pendingPatients }} patient approvals</span>
                             <span class="verified-badge warn"><i class="bi bi-clipboard2-pulse-fill"></i> {{ $pendingRecords }} health records</span>
-                            <span class="verified-badge warn"><i class="bi bi-file-earmark-text-fill"></i> {{ $pendingReports }} BHW reports</span>
+                            <span class="verified-badge warn"><i class="bi bi-file-earmark-text-fill"></i> {{ $pendingReports }} monthly reports</span>
                         </div>
                         <div class="mb-3" style="max-width:320px;">
                             <label class="form-label fw-bold" style="font-size:0.8rem;">Reminder frequency</label>
