@@ -61,7 +61,8 @@
     .notif-icon-info    { background:var(--color-primary-soft); background-color:var(--color-primary-soft); color:var(--color-primary-text); }
     .notif-icon-primary { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); }
 
-    .notif-body { flex:1; min-width:0; }
+    .notif-body { flex:1; min-width:0; align-self:center; }
+    .notif-side { align-self:center; flex-shrink:0; }
     .notif-title { font-family:'Plus Jakarta Sans', sans-serif; font-size:0.9rem; font-weight:800; color:var(--color-text); margin-bottom:0.25rem; letter-spacing:-0.01em; }
     .notif-message { font-size:0.86rem; color:var(--color-text); line-height:1.55; margin:0 0 0.4rem; }
     .notif-time { font-size:0.73rem; color:var(--color-text-muted); display:flex; align-items:center; gap:0.35rem; font-weight:600; }
@@ -136,7 +137,8 @@
         .page-hero-subtitle { font-size:0.66rem; }
         .notif-count-pill { font-size:0.62rem; }
         .mark-all-btn { font-size:0.66rem; width:100%; justify-content:center; }
-        .notif-card { padding:0.8rem 0.9rem; gap:0.6rem; border-radius:14px; flex-wrap:wrap; }
+        .notif-card { padding:0.8rem 0.9rem; gap:0.6rem; border-radius:14px; flex-wrap:wrap; align-items:flex-start; }
+        .notif-side { flex-direction:row !important; align-items:center !important; width:100%; justify-content:flex-end; }
         .notif-icon { width:32px; height:32px; font-size:0.85rem; border-radius:9px; }
         .notif-title { font-size:0.75rem; }
         .notif-message { font-size:0.7rem; }
@@ -203,7 +205,7 @@
                 @elseif($notification->category === 'risk' && $notification->last_reminded_at)
                     <p class="small text-muted">Last reminder: {{ $notification->last_reminded_at->format('M j, Y g:i A') }}</p>
                 @endif
-                <div class="d-flex align-items-center gap-2 mt-1">
+                <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                     <span class="type-badge type-badge-{{ $type }}">{{ ucfirst($type) }}</span>
                     <span class="notif-time">
                         <i class="bi bi-clock"></i>
@@ -214,7 +216,7 @@
                     </span>
                 </div>
             </div>
-            <div class="d-flex flex-column align-items-end gap-1">
+            <div class="notif-side d-flex flex-column align-items-end gap-1">
                 @if($isUnread)
                     <span class="notif-badge-new" id="notif-new-badge-{{ $notification->id }}">New</span>
                 @endif

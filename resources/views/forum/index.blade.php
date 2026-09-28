@@ -179,6 +179,23 @@
         align-items:center;
     }
 
+    /* ── Inline composer: pill at rest, expands in place on tap ── */
+    .quick-inline-form { padding-top:0; }
+    .quick-inline-input {
+        border-radius:999px !important;
+        height:46px;
+        min-height:46px;
+        resize:none;
+        overflow:hidden;
+        padding-top:0.72rem !important;
+    }
+    .quick-composer-card:focus-within .quick-inline-input {
+        border-radius:14px !important;
+        min-height:88px;
+    }
+    .quick-inline-bar { display:none; }
+    .quick-composer-card:focus-within .quick-inline-bar { display:flex; }
+
     /* ── Post Feed Cards (Makes reading enjoyable) ── */
     .forum-post-card {
         background:var(--color-surface); background-color:var(--color-surface);
@@ -433,6 +450,9 @@
         .forum-side-card { padding:0.9rem !important; border-radius:14px !important; }
         .side-card-title { font-size:0.88rem !important; }
         .guide-item { font-size:0.76rem !important; }
+
+        /* Phones: center the All Discussions / My Posts toggle. */
+        .forum-feed-head { flex-direction:column !important; align-items:center !important; text-align:center !important; }
     }
 </style>
 @endpush
@@ -472,47 +492,42 @@
         {{-- Left Column: Feed & Composer --}}
         <div class="col-lg-8">
 
-            {{-- Quick Post Creation Card (Easy Sharing) --}}
+            {{-- Quick Post Creation Card (type directly in the pill — expands in place) --}}
             <div class="quick-composer-card fade-in-card">
-                <div class="d-flex align-items-center gap-3">
-                    <img src="{{ $forumUser->profile_image_url }}"
-                         alt="{{ $forumUser->name }}"
-                         class="composer-user-avatar"
-                         onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
-                    <button type="button" class="quick-composer-btn" data-bs-toggle="collapse" data-bs-target="#quickComposerCollapse">
-                        Share a pregnancy tip, ask a midwife, or post an update...
-                    </button>
-                </div>
-
-                <div class="collapse mt-3" id="quickComposerCollapse">
-                    <form action="{{ route('forum.store') }}" method="POST" enctype="multipart/form-data" class="composer-form">
-                        @csrf
-                        <textarea name="content"
-                                  class="composer-textarea-full"
-                                  placeholder="What would you like to share with mothers and health workers in San Carlos City?"
-                                  rows="3"
+                <form action="{{ route('forum.store') }}" method="POST" enctype="multipart/form-data" class="composer-form quick-inline-form">
+                    @csrf
+                    <div class="d-flex align-items-center gap-3">
+                        <img src="{{ $forumUser->profile_image_url }}"
+                             alt="{{ $forumUser->name }}"
+                             class="composer-user-avatar"
+                             onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
+                        <textarea id="quickInlineInput"
+                                  name="content"
+                                  class="composer-textarea-full quick-inline-input"
+                                  placeholder="Share a pregnancy tip, ask a midwife, or post an update..."
+                                  rows="1"
                                   required>{{ old('content') }}</textarea>
+                    </div>
 
-                        <div class="composer-bottom-bar">
-                            <label class="btn-attach-photo" title="Attach a photo">
-                                <i class="bi bi-image text-success"></i> Add Photo
-                                <input type="file" name="post_image" id="quickPostImageInput" accept="image/*" style="display:none;" onchange="handleImageSelected(this)">
-                            </label>
-                            <div id="quickImgPreviewTag" style="display:none;" class="composer-preview-tag">
-                                <i class="bi bi-file-earmark-image"></i>
-                                <span id="quickImgName">photo.jpg</span>
-                                <button type="button" onclick="clearQuickImage()"><i class="bi bi-x-circle-fill"></i></button>
-                            </div>
-                            <button type="submit" class="btn btn-primary" style="border-radius:12px;padding:0.5rem 1.35rem;font-weight:700;">
-                                <i class="bi bi-send-fill me-1"></i> Post
-                            </button>
+                    <div class="composer-bottom-bar quick-inline-bar">
+                        <label class="btn-attach-photo" title="Attach a photo">
+                            <i class="bi bi-image text-success"></i> Add Photo
+                            <input type="file" name="post_image" id="quickPostImageInput" accept="image/*" style="display:none;" onchange="handleImageSelected(this)">
+                        </label>
+                        <div id="quickImgPreviewTag" style="display:none;" class="composer-preview-tag">
+                            <i class="bi bi-file-earmark-image"></i>
+                            <span id="quickImgName">photo.jpg</span>
+                            <button type="button" onclick="clearQuickImage()"><i class="bi bi-x-circle-fill"></i></button>
                         </div>
-                    </form>
-                </div>
+                        <button type="submit" class="btn btn-primary" style="border-radius:12px;padding:0.5rem 1.35rem;font-weight:700;">
+                            <i class="bi bi-send-fill me-1"></i> Post
+                        </button>
+                    </div>
+                </form>
             </div>
 
             {{-- Feed Filters (All Posts vs My Posts) --}}
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 forum-feed-head">
                 <h3 class="forum-feed-title" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.15rem;font-weight:800;color:var(--color-text);margin:0;">
                     Community Feed
                 </h3>
@@ -562,9 +577,11 @@
                             <div>
                                 <h4 class="author-name">
                                     {{ optional($author)->name ?? 'Community Member' }}
+                                    @if($roleClass !== 'member')
                                     <span class="role-verified-badge {{ $roleClass }}">
                                         <i class="bi bi-patch-check-fill"></i> {{ $roleName }}
                                     </span>
+                                    @endif
                                 </h4>
                                 <div class="author-time">
                                     <i class="bi bi-clock"></i>
@@ -691,7 +708,7 @@
                     <p style="color:var(--color-text-muted); max-width:440px; margin:0 auto 1.5rem;">
                         {{ $filter === 'my-posts' ? "You haven't posted in the community yet." : "The community feed is peaceful. Be the first mother or healthcare worker to start a conversation!" }}
                     </p>
-                    <button type="button" class="btn mx-auto forum-composer-btn" data-bs-toggle="collapse" data-bs-target="#quickComposerCollapse">
+                    <button type="button" class="btn mx-auto forum-composer-btn" onclick="focusQuickComposer()">
                         <i class="bi bi-plus-circle-fill me-1"></i> Start First Discussion
                     </button>
                 </div>
@@ -768,6 +785,28 @@ function clearQuickImage() {
     if (input) input.value = '';
     document.getElementById('quickImgPreviewTag').style.display = 'none';
 }
+
+function focusQuickComposer() {
+    var q = document.getElementById('quickInlineInput');
+    if (!q) return;
+    q.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(function () { q.focus({ preventScroll: true }); }, 350);
+}
+
+(function () {
+    var q = document.getElementById('quickInlineInput');
+    if (!q) return;
+    q.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = this.scrollHeight + 'px';
+    });
+    var card = q.closest('.quick-composer-card');
+    if (card) {
+        card.addEventListener('focusout', function () {
+            if (q.value.trim() === '') q.style.height = '';
+        });
+    }
+})();
 
 function sharePost(url) {
     if (navigator.clipboard) {
