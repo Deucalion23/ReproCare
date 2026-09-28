@@ -7,33 +7,35 @@
     .notif-wrap { max-width:720px; margin:0 auto; }
 
     .notif-card {
-        background:var(--bg-card);
-        border:1px solid var(--border);
-        border-radius:16px;
-        padding:1rem 1.25rem;
+        background:var(--color-surface);
+        background-color:var(--color-surface);
+        border:none;
+        border-radius:18px;
+        padding:1.1rem 1.3rem;
         margin-bottom:0.75rem;
         display:flex;
         align-items:flex-start;
         gap:1rem;
-        transition:all 0.2s ease;
+        transition:all 0.22s ease;
         position:relative;
         overflow:hidden;
         text-decoration:none;
         color:inherit;
+        box-shadow:var(--wp-shadow-sm);
     }
 
     .notif-card:hover {
-        border-color:var(--primary);
-        transform:translateX(4px);
-        box-shadow:var(--shadow-sm);
+        border:none;
+        transform:translateY(-2px);
+        box-shadow:var(--wp-shadow-md);
         color:inherit;
     }
 
-    .notif-card.unread { border-left:3px solid var(--primary); background:linear-gradient(90deg, var(--primary-subtle), var(--bg-card)); }
-    .notif-card.type-danger { border-left:3px solid var(--color-danger); background:linear-gradient(90deg, color-mix(in srgb, var(--color-danger) 5%, transparent), var(--bg-card)); }
-    .notif-card.type-warning { border-left:3px solid var(--color-warning); background:linear-gradient(90deg, color-mix(in srgb, var(--color-warning) 5%, transparent), var(--bg-card)); }
-    .notif-card.type-success { border-left:3px solid var(--color-success); background:linear-gradient(90deg, color-mix(in srgb, var(--color-success) 5%, transparent), var(--bg-card)); }
-    .notif-card.type-info { border-left:3px solid var(--color-info); background:linear-gradient(90deg, color-mix(in srgb, var(--color-info) 5%, transparent), var(--bg-card)); }
+    .notif-card.unread { border:none; background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); }
+    .notif-card.unread.type-danger  { border:none; background:var(--color-danger-soft); background-color:var(--color-danger-soft); }
+    .notif-card.unread.type-warning { border:none; background:var(--color-warning-soft); background-color:var(--color-warning-soft); }
+    .notif-card.unread.type-success { border:none; background:var(--color-success-soft); background-color:var(--color-success-soft); }
+    .notif-card.unread.type-info    { border:none; background:var(--color-primary-soft); background-color:var(--color-primary-soft); }
 
     .notif-icon { width:42px; height:42px; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
     .notif-icon-danger { background:color-mix(in srgb, var(--color-danger) 12%, transparent); color:var(--color-danger-text); }
@@ -41,7 +43,8 @@
     .notif-icon-success { background:color-mix(in srgb, var(--color-success) 12%, transparent); color:var(--color-success-text); }
     .notif-icon-info { background:color-mix(in srgb, var(--color-info) 12%, transparent); color:var(--color-info-text); }
 
-    .notif-body { flex:1; min-width:0; }
+    .notif-body { flex:1; min-width:0; align-self:center; }
+    .notif-side { align-self:center; flex-shrink:0; }
     .notif-title { font-family:'Plus Jakarta Sans', sans-serif; font-size:0.875rem; font-weight:700; color:var(--text); margin-bottom:0.2rem; }
     .notif-message { font-size:0.85rem; color:var(--text-muted); line-height:1.5; margin:0 0 0.3rem; }
     .notif-time { font-size:0.73rem; color:var(--text-muted); display:flex; align-items:center; gap:0.3rem; }
@@ -51,6 +54,18 @@
     .type-badge-warning { background:color-mix(in srgb, var(--color-warning) 15%, transparent); color:var(--color-warning-text); }
     .type-badge-success { background:color-mix(in srgb, var(--color-success) 15%, transparent); color:var(--color-success-text); }
     .type-badge-info { background:color-mix(in srgb, var(--color-info) 15%, transparent); color:var(--color-info-text); }
+
+    /* ── Mobile: patient-notification sizes and stacking ── */
+    @media (max-width: 600px) {
+        .notif-card { padding:0.8rem 0.9rem; gap:0.6rem; border-radius:14px; flex-wrap:wrap; align-items:flex-start; }
+        .notif-icon { width:32px; height:32px; font-size:0.85rem; border-radius:9px; }
+        .notif-title { font-size:0.75rem; }
+        .notif-message { font-size:0.7rem; }
+        .notif-time { font-size:0.62rem; flex-wrap:wrap; }
+        .notif-badge-new { font-size:0.58rem; }
+        .type-badge { font-size:0.56rem; }
+        .notif-side { flex-direction:row !important; align-items:center !important; width:100%; justify-content:flex-end; }
+    }
 </style>
 @endpush
 
@@ -89,7 +104,7 @@
                     @endif
                     <p class="notif-message">{{ $notification->message }}</p>
                     @include('includes.patient-alert-receipt')
-                    <div class="d-flex align-items-center gap-2 mt-1">
+                    <div class="d-flex align-items-center gap-2 mt-1 flex-wrap">
                         <span class="type-badge type-badge-{{ $type }}">{{ ucfirst($type) }}</span>
                         <span class="notif-time">
                             <i class="bi bi-clock"></i>
@@ -100,7 +115,7 @@
                         </span>
                     </div>
                 </div>
-                <div class="d-flex flex-column align-items-end gap-1">
+                <div class="notif-side d-flex flex-column align-items-end gap-1">
                     @if(!$notification->is_read)
                         <span class="notif-badge-new">New</span>
                     @endif
