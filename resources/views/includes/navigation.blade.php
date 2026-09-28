@@ -45,6 +45,15 @@
     @if($currentRole === 'user')
         @include('includes.women-navigation')
     @else
+<style>
+    /* Staff actions match the patient portal's circular bordered buttons. */
+    :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
+    [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
+    @media (max-width: 576px) {
+        .navbar .staff-action-btn { width:34px !important; height:34px !important; }
+        .navbar .staff-profile-pill { padding:2px 2px 2px 2px !important; }
+    }
+</style>
 <nav class="navbar navbar-expand-lg border-bottom" style="background:var(--color-surface); border-color:var(--color-border) !important; height:64px;">
     <div class="container-fluid px-3">
         {{-- Brand & Sidebar Toggle --}}
@@ -72,8 +81,8 @@
             <span id="pwa-sync-pill" style="display:none;align-items:center;gap:.4rem;background:var(--color-secondary-soft);border:1px solid var(--color-secondary-soft);color:var(--color-secondary-text);font-size:.74rem;font-weight:700;padding:.4rem .8rem;border-radius:999px;white-space:nowrap;"></span>
 
             {{-- Global Dark Mode Toggle (all portals) --}}
-            <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle"
-               style="width:36px; height:36px; border-radius:10px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+            <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle staff-action-btn"
+               style="width:36px; height:36px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="Toggle dark mode"
                onclick="setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
                 <i class="bi bi-moon-fill icon-moon fs-6"></i>
@@ -91,8 +100,8 @@
                     default => route('user.notifications'),
                 };
             @endphp
-            <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center"
-               style="width:36px; height:36px; border-radius:10px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+            <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center staff-action-btn"
+               style="width:36px; height:36px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="System Alerts & Notifications">
                 <i class="bi bi-bell fs-6"></i>
                 @if($unreadNotifications > 0)
@@ -104,8 +113,9 @@
 
             {{-- User Avatar Dropdown --}}
             <div class="dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none"
-                   href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none staff-profile-pill"
+                   href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                   style="border:1px solid var(--color-border); border-radius:9999px; padding:2px 10px 2px 2px !important;">
                     <img src="{{ $currentUser->profile_image_url }}"
                          alt="{{ $currentUser->name }}"
                          class="rounded-circle border"
