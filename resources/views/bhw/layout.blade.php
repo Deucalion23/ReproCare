@@ -8,7 +8,13 @@
 <style>
     /* ── BHW portal mobile foundation (women-portal-like compactness) ── */
     @media (max-width: 600px) {
-        .main-content { padding:0.85rem 0.85rem 3.5rem !important; }
+        .main-content { padding:0.85rem 0.85rem 3.5rem !important; overflow-x:clip; }
+        .main-content > .mw-container { min-width:0; max-width:100%; overflow-x:clip; }
+        /* No element may stretch the page wider than the screen. */
+        .main-content .row { margin-left:0; margin-right:0; }
+        .main-content .row > * { min-width:0; max-width:100%; padding-left:0; padding-right:0; overflow-wrap:anywhere; }
+        .main-content .table-responsive { max-width:100%; }
+        .main-content table { word-break:break-word; }
         .page-hero { padding:1.1rem 1rem !important; border-radius:18px !important; margin-bottom:1rem !important; }
         .page-hero-title, .page-title, h1.page-title { font-size:1.02rem !important; line-height:1.3 !important; }
         .page-hero-subtitle, .page-subtitle { font-size:0.74rem !important; line-height:1.5 !important; }
