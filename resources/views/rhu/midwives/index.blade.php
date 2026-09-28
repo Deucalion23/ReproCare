@@ -78,21 +78,21 @@
                                 </td>
                                 <td class="pe-4 text-end">
                                     <div class="d-flex justify-content-end gap-2">
-                                        <a href="{{ route('rhu.midwives.show', $m->id) }}" class="btn btn-xs btn-outline-primary" style="font-size:0.75rem;">
-                                            <i class="bi bi-eye"></i> Details
+                                        <a href="{{ route('rhu.midwives.show', $m->id) }}" class="btn btn-xs btn-outline-primary" style="font-size:0.75rem;" title="Details" aria-label="View details of {{ $m->name }}">
+                                            <i class="bi bi-eye"></i>
                                         </a>
-                                        <a href="{{ route('rhu.midwives.edit', $m->id) }}" class="btn btn-xs btn-outline-warning" style="font-size:0.75rem;">
-                                            <i class="bi bi-pencil"></i> Edit
+                                        <a href="{{ route('rhu.midwives.edit', $m->id) }}" class="btn btn-xs btn-outline-warning" style="font-size:0.75rem;" title="Edit" aria-label="Edit {{ $m->name }}">
+                                            <i class="bi bi-pencil"></i>
                                         </a>
                                         @if(($m->status ?? 'approved') !== 'approved')
                                             <form method="POST" action="{{ route('rhu.midwives.activate', $m->id) }}" class="d-inline" onsubmit="return confirm('Re-activate {{ $m->name }}? They will be able to log in again.');">
                                                 @csrf
-                                                <button type="submit" class="btn btn-xs btn-outline-success" style="font-size:0.75rem;">
-                                                    <i class="bi bi-arrow-counterclockwise"></i> Activate
+                                                <button type="submit" class="btn btn-xs btn-outline-success" style="font-size:0.75rem;" title="Activate" aria-label="Activate {{ $m->name }}">
+                                                    <i class="bi bi-arrow-counterclockwise"></i>
                                                 </button>
                                             </form>
                                         @endif
-                                        <x-archive-form :action="route('rhu.midwives.destroy', $m->id)" label="Archive" title="Archive midwife (retained for audit)" btnClass="btn btn-xs btn-outline-warning" icon="bi bi-archive" :confirmText="'Archive midwife ' . $m->name . '? Sessions are revoked and history is retained.'" />
+                                        <x-archive-form :action="route('rhu.midwives.destroy', $m->id)" label="" title="Archive midwife (retained for audit)" btnClass="btn btn-xs btn-outline-warning" icon="bi bi-archive" :confirmText="'Archive midwife ' . $m->name . '? Sessions are revoked and history is retained.'" />
                                     </div>
                                 </td>
                             </tr>
