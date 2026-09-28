@@ -183,22 +183,19 @@
     .quick-inline-form { padding-top:0; }
     .quick-inline-input {
         border-radius:999px !important;
-        height:46px;
-        min-height:46px;
+        height:auto;
+        min-height:0;
         resize:none;
         overflow:hidden;
         white-space:nowrap !important;
         text-overflow:ellipsis !important;
-        padding-top:0 !important;
-        padding-bottom:0 !important;
-        line-height:44px !important;
+        padding:0.72rem 1.25rem !important;
+        line-height:1.4 !important;
     }
     .quick-composer-card:focus-within .quick-inline-input {
         border-radius:14px !important;
         min-height:88px;
         white-space:normal !important;
-        padding-top:0.72rem !important;
-        padding-bottom:0.72rem !important;
         line-height:1.5 !important;
     }
     .quick-inline-bar { display:none; }

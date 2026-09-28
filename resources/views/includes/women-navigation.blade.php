@@ -1046,15 +1046,17 @@
         {{-- Emergency Support Button in Drawer --}}
         <div class="mt-auto pt-3 border-top">
             <button type="button"
-                    class="btn btn-outline-danger w-100 py-2.5 rounded-3 fw-700 d-flex align-items-center justify-content-center gap-2 mb-3"
+                    class="btn btn-outline-danger w-100 rounded-3 fw-700 d-flex align-items-center justify-content-center gap-2 mb-3"
+                    style="font-size:0.8rem; padding:0.55rem 0.75rem;"
                     data-bs-toggle="modal"
                     data-bs-target="#careEmergencyModal">
                 <i class="bi bi-telephone-plus-fill"></i> Health Center Emergency Contacts
             </button>
             <form method="POST" action="{{ route('logout') }}" class="js-logout-form" data-user-name="{{ $currentUser->first_name ?? $currentUser->name }}">
                 @csrf
-                <button type="submit" class="btn btn-light border text-danger w-100 py-2 rounded-3 fw-600">
-                    <i class="bi bi-box-arrow-right me-2"></i> Log Out
+                <button type="submit" class="btn w-100 rounded-3 fw-700 d-flex align-items-center justify-content-center"
+                    style="font-size:0.8rem; padding:0.6rem 0.75rem; background:#B91C1C; background-color:#B91C1C; border:1px solid #B91C1C; color:#FFFFFF;">
+                    <i class="bi bi-box-arrow-right me-2" style="color:#FFFFFF;"></i> Log Out
                 </button>
             </form>
         </div>
