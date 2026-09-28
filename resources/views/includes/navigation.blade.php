@@ -52,11 +52,25 @@
     .navbar .navbar-brand { white-space:nowrap !important; flex-shrink:1; min-width:0; font-size:clamp(1rem, 2.5vw + 0.6rem, 1.25rem); }
     .navbar .navbar-brand > span:last-child { overflow:hidden; text-overflow:ellipsis; }
     .navbar .d-flex.align-items-center.gap-2.ms-auto { flex-shrink:0; margin-left:auto; }
-    /* Circles stay circles: never let crowded bars squash buttons or icons. */
-    .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; }
-    .navbar .staff-action-btn i { flex-shrink:0; }
+    /* Circles stay circles: exact squares that clip any inner content. */
+    .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; align-self:center !important; }
+    .navbar .staff-action-btn {
+        width:30px !important; height:30px !important;
+        min-width:30px !important; max-width:30px !important;
+        min-height:30px !important; max-height:30px !important;
+        aspect-ratio:1 / 1 !important;
+        padding:0 !important; overflow:hidden !important;
+        border-radius:50% !important;
+        line-height:1 !important;
+        display:inline-flex !important; align-items:center !important; justify-content:center !important;
+    }
+    .navbar .staff-action-btn i { flex-shrink:0; font-size:13px !important; line-height:1 !important; }
+    /* Keep the unread dot visible: it sits half-outside the bell button. */
+    .navbar a.staff-action-btn.position-relative { overflow:visible !important; }
     /* Brand accent: lavender Care everywhere this navbar renders. */
     .navbar .navbar-brand .brand-care { color:#9B64B9 !important; }
+    /* Bootstrap adds its own caret to .dropdown-toggle — the pill has its own chevron. */
+    .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
     /* Staff actions match the patient portal's circular bordered buttons. */
     :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
     [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
@@ -68,10 +82,16 @@
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
         .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
         .navbar #sidebarToggleBtn { width:32px !important; height:32px !important; }
-        .navbar .staff-action-btn { width:34px !important; height:34px !important; min-width:34px !important; padding:0 !important; }
+        .navbar .staff-action-btn {
+            width:28px !important; height:28px !important;
+            min-width:28px !important; max-width:28px !important;
+            min-height:28px !important; max-height:28px !important;
+        }
+        .navbar .staff-action-btn i { font-size:12px !important; }
         .navbar .staff-profile-pill { padding:2px !important; gap:0 !important; }
         .navbar .staff-profile-pill img { width:30px !important; height:30px !important; }
         .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
+        .navbar .staff-profile-pill .dropdown-chevron { display:none !important; }
     }
 </style>
 <nav class="navbar navbar-expand-lg border-bottom" style="background:var(--color-surface); border-color:var(--color-border) !important; height:64px;">
@@ -85,11 +105,11 @@
                 <i class="bi bi-list fs-5"></i>
             </button>
             <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
-                <span aria-hidden="true" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 36px; transform:translateY(-1.5px);">
+                <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px;">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
-                         style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;">
+                         style="width:30px; height:30px; max-width:none; object-fit:contain; display:block;">
                 </span>
-                <span class="fw-800 d-inline-flex align-items-center" style="min-height:36px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
+                <span class="fw-800 d-inline-flex align-items-center" style="min-height:30px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:0.95rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
                     Repro<span class="brand-care">Care</span>
                 </span>
             </a>
@@ -102,7 +122,7 @@
 
             {{-- Global Dark Mode Toggle (all portals) --}}
             <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle staff-action-btn"
-               style="width:36px; height:36px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
+               style="width:30px; height:30px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="Toggle dark mode"
                onclick="setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
                 <i class="bi bi-moon-fill icon-moon fs-6"></i>
@@ -121,7 +141,7 @@
                 };
             @endphp
             <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center staff-action-btn"
-               style="width:36px; height:36px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
+               style="width:30px; height:30px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="System Alerts & Notifications">
                 <i class="bi bi-bell fs-6"></i>
                 @if($unreadNotifications > 0)
@@ -139,7 +159,7 @@
                     <img src="{{ $currentUser->profile_image_url }}"
                          alt="{{ $currentUser->name }}"
                          class="rounded-circle border"
-                         style="width:34px; height:34px; object-fit:cover; border-color:var(--color-border);"
+                         style="width:28px; height:28px; object-fit:cover; border-color:var(--color-border);"
                          onerror="this.onerror=null;this.src='{{ $currentUser->gender === 'male' ? '/images/avatars/avatar-male.svg' : '/images/avatars/avatar-female.svg' }}';">
                     <div class="d-none d-lg-block text-start lh-1">
                         <div class="fw-700 text-truncate" style="max-width:110px; font-size:0.84rem; color:var(--text);">
