@@ -54,6 +54,13 @@
     .navbar .d-flex.align-items-center.gap-2.ms-auto { flex-shrink:0; margin-left:auto; }
     /* Circles stay circles: exact squares that clip any inner content. */
     .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; align-self:center !important; }
+    .navbar #sidebarToggleBtn {
+        min-width:32px !important; max-width:32px !important;
+        min-height:32px !important; max-height:32px !important;
+        aspect-ratio:1 / 1 !important; padding:0 !important; overflow:hidden !important;
+        line-height:1 !important;
+    }
+    .navbar #sidebarToggleBtn i { flex-shrink:0; line-height:1 !important; }
     .navbar .staff-action-btn {
         width:32px !important; height:32px !important;
         min-width:32px !important; max-width:32px !important;
@@ -85,7 +92,12 @@
         .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
         .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
-        .navbar #sidebarToggleBtn { width:30px !important; height:30px !important; border-radius:50% !important; background:var(--color-surface) !important; }
+        .navbar #sidebarToggleBtn {
+        min-width:32px !important; max-width:32px !important;
+        min-height:32px !important; max-height:32px !important;
+        aspect-ratio:1 / 1 !important; padding:0 !important; overflow:hidden !important;
+        line-height:1 !important;
+    }
         .navbar .staff-action-btn {
             width:30px !important; height:30px !important;
             min-width:30px !important; max-width:30px !important;
