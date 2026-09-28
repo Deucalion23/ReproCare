@@ -78,16 +78,21 @@
     }
     .checkups-top-card { background:var(--color-surface); border:1px solid var(--color-border); border-radius:20px; padding:1.25rem 1.5rem; box-shadow:var(--wp-shadow-sm); margin-bottom:1.5rem; }
     @media (max-width:600px) {
-        .checkups-page { padding-top:0.5rem !important; }
-        .checkups-top-card { padding:1rem; border-radius:18px; margin-bottom:1.15rem; }
-        .checkups-top-card .page-title { font-size:1.05rem; }
-        .checkups-count { font-size:0.7rem; white-space:nowrap; }
-        .checkups-chip { font-size:0.68rem; padding:0.38rem 0.7rem; justify-content:center; }
-        .checkups-chips-row { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; }
-        .checkup-card-body { padding:1rem 1rem 0.85rem; }
-        .checkup-purpose { font-size:0.88rem; margin-bottom:0.75rem; }
-        .checkup-info-row { font-size:0.78rem; margin-bottom:0.6rem; }
-        .checkup-card-footer { padding:0.7rem 1rem 0.9rem; font-size:0.7rem; }
+        .checkups-page { padding-top:0 !important; }
+        .checkups-top-card { padding:1.4rem 1.1rem; border-radius:20px; margin-bottom:1.25rem; }
+        .checkups-top-card .page-title { font-size:0.95rem; line-height:1.3; }
+        .checkups-count { font-size:0.64rem; white-space:nowrap; }
+        .checkups-chip { font-size:0.62rem; padding:0.34rem 0.55rem; justify-content:center; gap:4px; }
+        .checkups-chips-row { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; }
+        .checkup-card { border-radius:18px; }
+        .checkup-card-header { padding:0.65rem 1rem; }
+        .checkup-status { font-size:0.64rem; padding:0.24rem 0.7rem; }
+        .checkup-card-body { padding:0.9rem 1rem 0.75rem; }
+        .checkup-purpose { font-size:0.8rem; margin-bottom:0.65rem; }
+        .checkup-info-row { font-size:0.72rem; margin-bottom:0.55rem; gap:0.55rem; }
+        .checkup-info-row strong { font-size:0.74rem; }
+        .checkup-info-icon { width:28px; height:28px; font-size:0.8rem; border-radius:9px; }
+        .checkup-card-footer { padding:0.65rem 1rem 0.85rem; font-size:0.64rem; }
     }
 </style>
 @endpush
