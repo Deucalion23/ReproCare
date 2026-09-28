@@ -390,40 +390,49 @@
     }
 
     @media (max-width: 575.98px) {
-        /* Phones: compact hero, no oversized banner. */
+        /* Phones: compact hero — title + subtitle only. */
         .forum-hero {
-            border-radius:16px !important;
-            padding:1.1rem 1rem !important;
-            margin-bottom:1rem !important;
-            gap:0.8rem !important;
+            border-radius:14px !important;
+            padding:0.95rem 0.9rem !important;
+            margin-bottom:0.9rem !important;
+            gap:0 !important;
             flex-direction:column !important;
             align-items:flex-start !important;
         }
-        .forum-hero-title { font-size:1.25rem !important; gap:0.45rem !important; }
-        .forum-hero-sub { font-size:0.82rem !important; }
-        .forum-role-badge { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
-        .forum-composer-btn { width:100% !important; justify-content:center !important; }
+        .forum-hero-title { font-size:1.1rem !important; gap:0.4rem !important; margin-bottom:0.2rem !important; }
+        .forum-hero-sub { font-size:0.78rem !important; line-height:1.45 !important; }
+        .forum-role-badge { display:none !important; }
+        .forum-composer-btn { display:none !important; }
 
-        /* Phones: tighter composer + post cards. */
-        .quick-composer-card { padding:0.9rem !important; border-radius:16px !important; margin-bottom:1rem !important; }
-        .composer-user-avatar { width:38px !important; height:38px !important; }
-        .quick-composer-btn { font-size:0.82rem !important; padding:0.65rem 1rem !important; }
-        .forum-post-card { padding:1rem !important; border-radius:16px !important; margin-bottom:1rem !important; }
-        .author-avatar { width:40px !important; height:40px !important; }
-        .author-name { font-size:0.88rem !important; }
-        .post-text-body { font-size:0.88rem !important; line-height:1.6 !important; }
-        .post-media-frame { max-height:220px !important; border-radius:12px !important; }
-        .post-media-frame img { max-height:220px !important; }
+        /* Phones: tighter composer + post cards, smaller text throughout. */
+        .forum-feed-title { font-size:0.95rem !important; }
+        .quick-composer-card { padding:0.8rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .composer-user-avatar { width:34px !important; height:34px !important; }
+        .quick-composer-btn { font-size:0.78rem !important; padding:0.6rem 0.9rem !important; }
+        .composer-textarea-full { font-size:0.82rem !important; padding:0.7rem 0.8rem !important; }
+        .forum-post-card { padding:0.9rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .author-avatar { width:36px !important; height:36px !important; }
+        .author-name { font-size:0.82rem !important; }
+        .author-time { font-size:0.68rem !important; }
+        .role-verified-badge { font-size:0.58rem !important; }
+        .post-text-body { font-size:0.82rem !important; line-height:1.55 !important; }
+        .post-media-frame { max-height:200px !important; border-radius:10px !important; }
+        .post-media-frame img { max-height:200px !important; }
 
         /* Phones: engagement buttons wrap small. */
-        .post-engagement-bar { flex-wrap:wrap !important; gap:0.5rem !important; }
-        .btn-engage { font-size:0.75rem !important; padding:0.4rem 0.75rem !important; }
-        .comments-tray { padding:0.85rem !important; }
-        .comment-bubble { padding:0.6rem 0.75rem !important; }
+        .post-engagement-bar { flex-wrap:wrap !important; gap:0.45rem !important; }
+        .btn-engage { font-size:0.7rem !important; padding:0.35rem 0.65rem !important; }
+        .comments-tray { padding:0.75rem !important; }
+        .comment-avatar { width:28px !important; height:28px !important; }
+        .comment-author { font-size:0.78rem !important; }
+        .comment-text { font-size:0.78rem !important; }
+        .comment-bubble { padding:0.55rem 0.7rem !important; }
+        .btn-attach-photo { font-size:0.76rem !important; padding:0.45rem 0.8rem !important; }
 
         /* Phones: sidebar cards go full-width below the feed, compact. */
-        .forum-side-card { padding:1rem !important; border-radius:16px !important; }
-        .side-card-title { font-size:0.95rem !important; }
+        .forum-side-card { padding:0.9rem !important; border-radius:14px !important; }
+        .side-card-title { font-size:0.88rem !important; }
+        .guide-item { font-size:0.76rem !important; }
     }
 </style>
 @endpush
@@ -504,7 +513,7 @@
 
             {{-- Feed Filters (All Posts vs My Posts) --}}
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h3 style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.15rem;font-weight:800;color:var(--color-text);margin:0;">
+                <h3 class="forum-feed-title" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.15rem;font-weight:800;color:var(--color-text);margin:0;">
                     Community Feed
                 </h3>
                 <div class="d-flex gap-1 p-1 rounded-pill" style="background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none;">
