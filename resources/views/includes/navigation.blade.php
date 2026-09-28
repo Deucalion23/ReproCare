@@ -121,12 +121,12 @@
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
+            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:2px; line-height:1;">
                 <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px; transform:translateY(-0.15em);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
                          style="width:30px; height:30px; max-width:none; object-fit:contain; display:block;">
                 </span>
-                <span class="fw-800 d-inline-flex align-items-center" style="min-height:30px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:0.95rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
+                <span class="fw-800 d-inline-flex align-items-center" style="min-height:30px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:0.95rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px; margin-left:-2px;">
                     Repro<span class="brand-care">Care</span>
                 </span>
             </a>
