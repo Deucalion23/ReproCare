@@ -98,11 +98,11 @@
 
     {{-- Header --}}
     @php $unreadCount = $notifications->where('is_read', false)->count(); @endphp
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="notif-page-title">Notifications
-            </h1>
-            <p class="notif-page-sub">Open an alert to acknowledge it and stop its reminders.</p>
+            <div class="page-hero-title">My Notifications</div>
+            <p class="page-hero-subtitle">Stay updated on checkups, referrals, and reminders.</p>
         </div>
         <div class="d-flex align-items-center gap-2">
             @if($unreadCount > 0)
@@ -117,6 +117,7 @@
             @endif
         </div>
     </div>
+</div>
 
     {{-- List --}}
     @if($notifications->count() > 0)

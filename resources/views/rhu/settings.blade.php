@@ -87,11 +87,11 @@
 
 @section('rhu-content')
 
-<div class="settings-page-header fade-in-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1>Settings — Facility &amp; Operational Level</h1>
-            <p>Facility profile, staff security, president lock, escalation alerts, and report templates for {{ \App\Models\Setting::get('rhu.station_name', 'your RHU station') }}</p>
+            <div class="page-hero-title">Settings</div>
+            <p class="page-hero-subtitle">Configure facility and operational preferences.</p>
         </div>
     </div>
 </div>

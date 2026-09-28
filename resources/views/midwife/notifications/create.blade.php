@@ -7,18 +7,19 @@
     <div class="row">
         <div class="col-12">
             <!-- Page Header -->
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h1 class="h2 mb-1">Create Notification
-                    </h1>
-                    <p class="text-muted mb-0">Send notifications to users and health workers</p>
-                </div>
-                <div>
-                    <a href="{{ route('midwife.notifications.index') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Back
-                    </a>
-                </div>
-            </div>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Create Notification</div>
+            <p class="page-hero-subtitle">Send an alert to BHWs or patients.</p>
+        </div>
+        <div>
+            <a href="{{ route('midwife.notifications.index') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+</div>
 
 <!-- Create Notification Form -->
 <div class="row">

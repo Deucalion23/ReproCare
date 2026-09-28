@@ -2,12 +2,17 @@
 
 @section('bhw-content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
-        <h2 class="page-title">Checkup Referrals</h2>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Checkup Referrals</div>
+            <p class="page-hero-subtitle">Track referrals sent to the midwife.</p>
+        </div>
         <a href="{{ route('bhw.referrals.create') }}" class="btn btn-primary">
             <i class="bi bi-plus-lg"></i> New Referral
         </a>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

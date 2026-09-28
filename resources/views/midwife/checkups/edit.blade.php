@@ -4,9 +4,13 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Edit Checkup</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
+            <div class="page-hero-title">Edit Checkup</div>
+            <p class="page-hero-subtitle">Correct schedule, findings, or remarks for this visit.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('midwife.checkups.show', $checkup->id) }}" class="btn btn-outline-info">
                 <i class="bi bi-eye"></i> View Details
             </a>
@@ -15,6 +19,7 @@
             </a>
         </div>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

@@ -11,7 +11,7 @@
     }
 
     .profile-view-header {
-        background:linear-gradient(135deg, var(--primary), var(--primary-light));
+        background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
     }
 
     .profile-view-avatar {
@@ -45,6 +45,14 @@
     }
 </style>
 <div class="py-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Staff Profile</div>
+            <p class="page-hero-subtitle">Read-only staff profile view.</p>
+        </div>
+    </div>
+</div>
     <div class="row justify-content-center">
         <div class="col-xl-9 col-lg-10">
             <div class="mb-3">

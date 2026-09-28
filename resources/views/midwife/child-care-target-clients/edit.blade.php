@@ -19,6 +19,14 @@
 
 @section('midwife-content')
 <div class="cctl-edit-shell">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Edit Child Care Record</div>
+            <p class="page-hero-subtitle">Update immunization and growth data.</p>
+        </div>
+    </div>
+</div>
     <div class="cctl-panel">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>

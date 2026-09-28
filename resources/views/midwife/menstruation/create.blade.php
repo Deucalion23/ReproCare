@@ -4,12 +4,17 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Add Menstruation Record</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Add Menstruation Record</div>
+            <p class="page-hero-subtitle">Log a cycle on behalf of a patient.</p>
+        </div>
         <a href="{{ route('midwife.menstruation.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back to Records
         </a>
     </div>
+</div>
 
     @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">

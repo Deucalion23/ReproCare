@@ -4,12 +4,13 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1>Woman Health Records</h1>
-            <p class="text-muted mb-0">{{ $woman->name }} ({{ $woman->email }})</p>
+            <div class="page-hero-title">Woman Health Records</div>
+            <p class="page-hero-subtitle">All records for this enrolled woman.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('midwife.patient-details', $woman->id) }}" class="btn btn-outline-info">
                 <i class="bi bi-person"></i> Woman Profile
             </a>
@@ -18,6 +19,7 @@
             </a>
         </div>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

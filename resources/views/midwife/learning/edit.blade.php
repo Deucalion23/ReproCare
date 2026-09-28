@@ -9,16 +9,17 @@
 
 @section($section)
 <div class="py-3" style="width:100%; max-width:100%;">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h2 class="fw-800 text-dark mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Edit Learning Material
-            </h2>
-            <p class="text-muted mb-0" style="font-size:0.9rem;">Update video links, uploaded files, or clinical counseling points.</p>
+            <div class="page-hero-title">Edit Learning Material</div>
+            <p class="page-hero-subtitle">Revise title, body, or attachment.</p>
         </div>
         <a href="{{ route('midwife.learning.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius:10px;">
                 <i class="bi bi-arrow-left"></i> Back to Learning Materials
         </a>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4 border-0 shadow-sm" style="border-radius:14px;">

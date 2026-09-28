@@ -21,6 +21,14 @@
 
 @section('midwife-content')
 <div class="mctl-create-shell">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Add Maternal Care Record</div>
+            <p class="page-hero-subtitle">Enroll a mother in the target-client list.</p>
+        </div>
+    </div>
+</div>
     <div class="mctl-create-header">
         <h1 class="mctl-create-title">Add New Maternal Care Record</h1>
         <p class="mctl-create-subtitle">Create a new maternal care target client record for patients not in the system.</p>

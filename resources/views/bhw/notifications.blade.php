@@ -56,11 +56,11 @@
 
 @section('bhw-content')
 <div class="notif-wrap fade-in-card">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">Notifications
-            </h1>
-            <p class="page-subtitle">Your alerts, reminders, and health updates</p>
+            <div class="page-hero-title">Notifications</div>
+            <p class="page-hero-subtitle">Check task assignments and referral updates.</p>
         </div>
         @if($notifications->count() > 0)
             <span style="background:var(--primary-subtle);border:1px solid var(--border-glass);color:var(--primary-light);font-size:0.8rem;font-weight:700;padding:0.35em 1em;border-radius:20px;">
@@ -68,6 +68,7 @@
             </span>
         @endif
     </div>
+</div>
 
     @if($notifications->count() > 0)
         @foreach($notifications as $notification)

@@ -4,12 +4,17 @@
 
 @section('rhu-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1 class="h3 mb-0">Register BHW</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Register BHW</div>
+            <p class="page-hero-subtitle">Create a new Barangay Health Worker account.</p>
+        </div>
         <a href="{{ route('rhu.bhws.index') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
+</div>
 
     <div class="card fade-in-card">
         <div class="card-body">

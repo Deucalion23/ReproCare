@@ -3,11 +3,11 @@
 @section('title', 'Assignment Details - BHW President Portal | ReproCare')
 
 @section('content')
-<div class="page-header">
-    <div class="page-header-content">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">Assignment Details</h1>
-            <p class="page-subtitle">{{ $assignment->bhw->name }} - {{ $assignment->purok->name }}</p>
+            <div class="page-hero-title">Assignment Details</div>
+            <p class="page-hero-subtitle">View coverage and the assigned BHW.</p>
         </div>
         <div class="btn-group">
             <a href="{{ route('bhw-president.assignments.edit', $assignment->id) }}" class="btn btn-warning">

@@ -4,23 +4,24 @@
 
 @section('bhw-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    @php
+        $backRoute = request('from') === 'pregnancies'
+            ? route('bhw.pregnancies.index')
+            : (request('from') === 'women'
+                ? route('bhw.patients')
+                : route('bhw.walk-in-patients.show', $patient->id));
+    @endphp
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">Edit Walk-in Patient
-            </h1>
-            <p class="page-subtitle">Update patient information</p>
+            <div class="page-hero-title">Edit Walk-in Patient</div>
+            <p class="page-hero-subtitle">Correct walk-in demographics or visit info.</p>
         </div>
-        @php
-            $backRoute = request('from') === 'pregnancies'
-                ? route('bhw.pregnancies.index')
-                : (request('from') === 'women'
-                    ? route('bhw.patients')
-                    : route('bhw.walk-in-patients.show', $patient->id));
-        @endphp
         <a href="{{ $backRoute }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back
         </a>
     </div>
+</div>
 
     <div class="card shadow fade-in-card">
         <div class="card-body">

@@ -4,16 +4,18 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="mb-0">{{ $woman->name }}</h1>
-            <p class="text-muted mb-0">{{ $woman->email }} · Menstrual cycle history ({{ $records->count() }} records)</p>
+            <div class="page-hero-title">Patient Cycle History</div>
+            <p class="page-hero-subtitle">Cycle history for this patient.</p>
         </div>
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('midwife.menstruation.create', $woman->id) }}" class="btn btn-primary"><i class="bi bi-calendar-plus"></i> Add Record</a>
             <a href="{{ route('midwife.menstruation.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> All Records</a>
         </div>
     </div>
+</div>
 
     <div class="card shadow">
         <div class="card-body">

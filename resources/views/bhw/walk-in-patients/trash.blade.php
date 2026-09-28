@@ -4,13 +4,15 @@
 
 @section('bhw-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h2 class="page-title">Trashed Walk-ins</h2>
-            <p class="page-subtitle">Soft-deleted records. Restore to bring them back — nothing is permanently erased here.</p>
+            <div class="page-hero-title">Trashed Walk-ins</div>
+            <p class="page-hero-subtitle">Restore or permanently clear trashed walk-ins.</p>
         </div>
         <a href="{{ route('bhw.patients', ['filter' => 'unregistered']) }}" class="btn btn-outline-light"><i class="bi bi-arrow-left me-1"></i> Back to Women</a>
     </div>
+</div>
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     <div class="card"><div class="card-body p-0">
         @forelse($patients as $p)

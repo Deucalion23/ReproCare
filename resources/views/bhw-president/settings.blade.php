@@ -58,11 +58,11 @@
 
 @section('bhw-president-content')
 
-<div class="settings-page-header fade-in-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1>Settings — Barangay &amp; Team Level</h1>
-            <p>Team coordination for {{ $barangay !== '' ? 'Barangay ' . $barangay : 'your barangay' }} · BHW reporting, alerts, and your profile</p>
+            <div class="page-hero-title">Settings</div>
+            <p class="page-hero-subtitle">Manage barangay-level and team preferences.</p>
         </div>
         <a href="{{ route('bhw-president.dashboard') }}" class="btn btn-outline-primary btn-sm">
             <i class="bi bi-house-door me-1"></i> Back to Dashboard

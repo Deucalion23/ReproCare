@@ -3,13 +3,20 @@
 @section('title', 'Add Health Record - ReproCare')
 
 @section('user-content')
-<div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Add Health Record</h1>
-        <a href="{{ route('user.health-records') }}" class="btn btn-outline-secondary">
-            <i class="bi bi-arrow-left"></i> Back to Records
-        </a>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Add Health Record</div>
+            <p class="page-hero-subtitle">Submit a new health record for midwife review.</p>
+        </div>
+        <div>
+            <a href="{{ route('user.health-records') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Records
+            </a>
+        </div>
     </div>
+</div>
+<div class="py-4">
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

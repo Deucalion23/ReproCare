@@ -2,12 +2,17 @@
 
 @section('bhw-content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="page-title">Record Walk-in Patient</h2>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Record Walk-in Patient</div>
+            <p class="page-hero-subtitle">Register an unlinked walk-in visit.</p>
+        </div>
         <a href="{{ route('bhw.patients', ['filter' => 'unregistered']) }}" class="btn btn-secondary">
             <i class="bi bi-arrow-left"></i> Back to Women
         </a>
     </div>
+</div>
 
     <div class="card">
         <div class="card-body">

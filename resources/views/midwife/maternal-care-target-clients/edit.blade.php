@@ -32,6 +32,14 @@
 @php
     $profile = $profile ?? null;
 @endphp
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Edit Maternal Record</div>
+            <p class="page-hero-subtitle">Update prenatal services and status.</p>
+        </div>
+    </div>
+</div>
 <div class="mctl-edit-shell">
     <div class="mctl-panel">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">

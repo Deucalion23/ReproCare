@@ -49,7 +49,7 @@
         display:flex; align-items:center; gap:0.4rem;
     }
     .edit-post-header {
-        background:linear-gradient(135deg, var(--color-primary), var(--primary), var(--accent-pink));
+        background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
         padding:1.25rem 1.5rem; border-radius:18px 18px 0 0; color:var(--color-on-solid);
     }
     .edit-post-header h5 {
@@ -59,7 +59,6 @@
 </style>
 @endpush
 
-@section('user-content')
 @php($forumUser = auth()->user())
 <div class="edit-post-wrap fade-in-card">
 
@@ -70,6 +69,15 @@
             <i class="bi bi-arrow-left"></i> Back to Post
         </a>
     </div>
+
+    <div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Edit Post</div>
+            <p class="page-hero-subtitle">Update your post before the community sees it.</p>
+        </div>
+    </div>
+</div>
 
     <div class="card" style="border-radius:20px;overflow:hidden;">
 

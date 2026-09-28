@@ -2,6 +2,14 @@
 @section('title', 'Choose Patient - ReproCare')
 @section('bhw-content')
 <div class="py-4" style="max-width:720px;margin:0 auto;">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Choose Patient</div>
+            <p class="page-hero-subtitle">Select enrolled vs walk-in to start a record.</p>
+        </div>
+    </div>
+</div>
     <h2 class="page-title">Add Health Record</h2>
     <p class="page-subtitle">Choose a patient first — records need an owner.</p>
     <div class="card"><div class="card-body">

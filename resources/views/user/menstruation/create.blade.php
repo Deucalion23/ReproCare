@@ -3,18 +3,20 @@
 @section('title', 'Log Period - ReproCare')
 
 @section('user-content')
-<div class="py-2">
-
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">Log Period</h1>
-            <p class="page-subtitle">Record your menstrual period dates</p>
+            <div class="page-hero-title">Log Period</div>
+            <p class="page-hero-subtitle">Record a new period to keep predictions accurate.</p>
         </div>
-        <a href="{{ route('user.menstruation.index') }}" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-arrow-left me-1"></i> Back
-        </a>
+        <div>
+            <a href="{{ route('user.menstruation.index') }}" class="btn btn-outline-secondary btn-sm">
+                <i class="bi bi-arrow-left me-1"></i> Back
+            </a>
+        </div>
     </div>
+</div>
+<div class="py-2">
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4">

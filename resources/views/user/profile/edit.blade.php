@@ -3,6 +3,14 @@
 @section('title', 'Edit Profile')
 
 @section('user-content')
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Edit Profile</div>
+            <p class="page-hero-subtitle">Update your name, contact, and address details.</p>
+        </div>
+    </div>
+</div>
 <style>
     .profile-edit-card {
         background:var(--bg-card);

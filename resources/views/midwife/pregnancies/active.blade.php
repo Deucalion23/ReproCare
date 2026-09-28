@@ -4,9 +4,13 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Active Pregnancies</h1>
-        <div class="d-flex gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Active Pregnancies</div>
+            <p class="page-hero-subtitle">Focus on currently ongoing pregnancies.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap align-items-center">
             <a href="{{ route('midwife.pregnancies.create') }}" class="btn btn-primary">
                 <i class="bi bi-heart-plus"></i> Add Pregnancy
             </a>
@@ -21,6 +25,7 @@
             </form>
         </div>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

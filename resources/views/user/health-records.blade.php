@@ -11,7 +11,8 @@
 
 /* ── Hero Banner ── */
 .care-hero {
-    background:var(--color-surface); background-color:var(--color-surface);
+    background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
+    background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
     border:none;
     border-radius:24px;
     padding:2.25rem 2.5rem;
@@ -26,26 +27,10 @@
     color:var(--color-text);
 }
 .care-hero::before {
-    content:'';
-    position:absolute;
-    width:340px;
-    height:340px;
-    border-radius:50%;
-    background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 90%, transparent) 0%, transparent 70%);
-    top:-120px;
-    right:-80px;
-    pointer-events:none;
+    display:none;
 }
 .care-hero::after {
-    content:'';
-    position:absolute;
-    width:260px;
-    height:260px;
-    border-radius:50%;
-    background:radial-gradient(circle, color-mix(in srgb, var(--color-peach-soft) 70%, transparent) 0%, transparent 70%);
-    bottom:-120px;
-    left:30%;
-    pointer-events:none;
+    display:none;
 }
 .care-hero-grid {
     display:flex;

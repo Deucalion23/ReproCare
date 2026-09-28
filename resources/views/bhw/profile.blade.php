@@ -79,11 +79,11 @@
     }
 </style>
 
-<div class="page-header mb-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">My Profile</h1>
-            <p class="page-subtitle mb-0">Manage your personal information and account settings</p>
+            <div class="page-hero-title">My Profile</div>
+            <p class="page-hero-subtitle">View your BHW profile.</p>
         </div>
         <a href="{{ route('bhw.settings') }}" class="btn btn-outline-primary">
             <i class="bi bi-gear"></i> Settings
