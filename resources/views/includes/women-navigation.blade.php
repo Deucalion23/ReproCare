@@ -527,7 +527,7 @@
         margin-left:auto !important;
     }
 
-    /* Care Support Button */
+    /* Care Support Button — same gray as the navigation buttons */
     .btn-care-support {
         display:inline-flex !important;
         align-items:center !important;
@@ -536,7 +536,7 @@
         padding:0 12px !important;
         background:#F1F5F9 !important;
         border:none !important;
-        color:#743AFF !important;
+        color:var(--nav-slate-600) !important;
         border-radius:var(--nav-btn-r) !important;
         font-size:var(--nav-font-sz) !important;
         font-weight:600 !important;
@@ -550,18 +550,18 @@
 
     .btn-care-support i {
         font-size:14px;
-        color:#743AFF;
+        color:var(--nav-slate-500);
     }
 
     .btn-care-support:hover {
         background:#E8EEF5 !important;
         border-color:transparent !important;
-        color:#6431DE !important;
+        color:var(--nav-slate-600) !important;
         box-shadow:0 8px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent);
     }
 
     .btn-care-support:hover i {
-        color:#6431DE !important;
+        color:var(--nav-slate-500) !important;
     }
 
     /* Bell Button */

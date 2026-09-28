@@ -71,7 +71,7 @@
 :root[data-theme][data-bs-theme] body .sidebar .nav-link.active.active:hover { background:#10131A !important; background-color:#10131A !important; color:#FFFFFF !important; }
 :root[data-theme][data-bs-theme] body .sidebar .nav-link.active.active:hover i { color:#FFFFFF !important; }
 :root[data-theme][data-bs-theme] body :is(.navbar-brand,.public-brand,.fb-hero-logo) { color:var(--color-text) !important; }
-:root[data-theme][data-bs-theme] body :is(.brand-accent,.navbar-brand .brand-care,.public-brand .brand-accent,.fb-hero-logo span span) { color:#F06292 !important; }
+    :root[data-theme][data-bs-theme] body :is(.brand-accent,.navbar-brand .brand-care,.public-brand .brand-accent,.fb-hero-logo span span) { color:#9B64B9 !important; }
 :root[data-theme][data-bs-theme] body :is(.form-control,.form-select,.input-group-text,.clinical-input) {
     color:var(--color-text) !important; background-color:var(--color-surface) !important; border-color:var(--color-input-border) !important;
 }
@@ -151,7 +151,7 @@
 :root[data-theme][data-bs-theme] body :is(.btn-outline-danger):hover {background:var(--color-danger-soft) !important;}
 :root[data-theme][data-bs-theme] body .bg-danger:not(.badge) {background-color:var(--color-danger) !important;}
 
-/* ReproCare wordmark: designed Baloo 2 letterforms, fixed black + pink brand.
+/* ReproCare wordmark: designed Baloo 2 letterforms, fixed black + purplish brand.
    Attribute-free fallback first (correct pre-JS/no-JS), themed gates above win after boot. */
 body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span,
 body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
@@ -161,14 +161,14 @@ body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance
     color:var(--color-ink);
 }
 body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
-    /* Keep the "Care" half of the wordmark a clear, recognizable pink. */
-    color:#F06292;
+    /* Keep the "Care" half of the wordmark a clear, recognizable purplish. */
+    color:#9B64B9;
 }
 [data-theme="dark"] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span {
     color:var(--color-white);
 }
 [data-theme="dark"] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
-    color:#F48FB1;
+    color:#C8ADFF;
 }
 :root[data-theme][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span,
 :root[data-theme][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
@@ -178,13 +178,13 @@ body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance
     color:var(--color-ink) !important;
 }
 :root[data-theme][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
-    color:#F06292 !important;
+    color:#9B64B9 !important;
 }
 :root[data-theme="dark"][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span {
     color:var(--color-white) !important;
 }
 :root[data-theme="dark"][data-bs-theme] body :is(.navbar-brand, .public-brand, .fb-hero-logo, .fb-reg-brand, .appearance-preview-brand) > span > span {
-    color:#F48FB1 !important;
+    color:#C8ADFF !important;
 }
 
 /* Fixed info meaning, independent of brand selection. */

@@ -23,13 +23,25 @@
 <script>
     // Shared archive guardrail: every archive carries who/when/why for the audit trail.
     function reproArchivePrompt(form, confirmText) {
+        if (form.dataset.archiveConfirmBypass === '1') {
+            form.dataset.archiveConfirmBypass = '0';
+            return true;
+        }
         var reason = prompt('Reason for archiving? (required for audit, e.g. duplicate entry, relocated, resigned)', '');
         if (reason === null) return false;
         if (reason.trim() === '') { alert('A reason for archiving is required.'); return false; }
         var hidden = document.createElement('input');
         hidden.type = 'hidden'; hidden.name = 'reason'; hidden.value = reason.trim();
         form.appendChild(hidden);
-        return confirm(confirmText || 'Archive this record? It will be retained for audit.');
+        var message = confirmText || 'Archive this record? It will be retained for audit.';
+        if (typeof showAppConfirm === 'function') {
+            showAppConfirm(message, function() {
+                form.dataset.archiveConfirmBypass = '1';
+                if (typeof form.requestSubmit === 'function') form.requestSubmit(); else form.submit();
+            });
+            return false;
+        }
+        return confirm(message);
     }
 </script>
 @endonce

@@ -217,15 +217,21 @@
             .catch(function () { connDot.className = 'badge bg-warning text-dark'; connDot.textContent = 'Reconnecting…'; });
     }, 3000);
     delBtn.addEventListener('click', function () {
-        if (!confirm('Move this conversation to Trash? You can restore it.')) return;
-        fetch(deleteUrl, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
-            .then(function (j) {
-                if (!j.success) throw new Error('delete');
-                clearInterval(pollTimer);
-                trashBanner.classList.remove('d-none');
-            })
-            .catch(function () { alert('Delete failed. Please retry.'); });
+        var archiveThread = function () {
+            fetch(deleteUrl, { method: 'DELETE', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' } })
+                .then(function (r) { return r.json(); })
+                .then(function (j) {
+                    if (!j.success) throw new Error('delete');
+                    clearInterval(pollTimer);
+                    trashBanner.classList.remove('d-none');
+                })
+                .catch(function () { alert('Delete failed. Please retry.'); });
+        };
+        if (typeof showAppConfirm === 'function') {
+            showAppConfirm('Move this conversation to Trash? You can restore it.', archiveThread);
+        } else if (confirm('Move this conversation to Trash? You can restore it.')) {
+            archiveThread();
+        }
     });
     undoBtn.addEventListener('click', function () {
         fetch(restoreUrl, { method: 'POST', headers: { 'X-CSRF-TOKEN': csrf, 'Accept': 'application/json' } })
