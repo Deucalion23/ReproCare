@@ -512,7 +512,7 @@
             </div>
 
             {{-- Feed Filters (All Posts vs My Posts) --}}
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 forum-feed-head">
                 <h3 class="forum-feed-title" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.15rem;font-weight:800;color:var(--color-text);margin:0;">
                     Community Feed
                 </h3>
@@ -562,9 +562,11 @@
                             <div>
                                 <h4 class="author-name">
                                     {{ optional($author)->name ?? 'Community Member' }}
+                                    @if($roleClass !== 'member')
                                     <span class="role-verified-badge {{ $roleClass }}">
                                         <i class="bi bi-patch-check-fill"></i> {{ $roleName }}
                                     </span>
+                                    @endif
                                 </h4>
                                 <div class="author-time">
                                     <i class="bi bi-clock"></i>
