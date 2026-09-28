@@ -530,3 +530,26 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    /* Keep the selected bottom-dock tab visible: page reloads reset the
+       horizontal scroll to the far left, so center the active tab instead. */
+    (function () {
+        function centerActiveDockTab() {
+            var bar = document.querySelector('.women-dock-items');
+            if (!bar) return;
+            var active = bar.querySelector('.women-dock-link.active');
+            if (!active) return;
+            var target = active.offsetLeft - (bar.clientWidth - active.offsetWidth) / 2;
+            bar.scrollLeft = Math.max(0, target);
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', centerActiveDockTab);
+        } else {
+            centerActiveDockTab();
+        }
+        window.addEventListener('load', centerActiveDockTab);
+    })();
+</script>
+@endpush
