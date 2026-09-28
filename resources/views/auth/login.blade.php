@@ -165,6 +165,23 @@
     </div>
     </section>
 </div>
+
+@if(session('account_locked'))
+<div class="modal fade" id="accountLockedModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="accountLockedTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none; border-radius:22px; box-shadow:0 24px 60px rgba(20, 10, 40, 0.28); overflow:hidden;">
+            <div class="modal-body text-center" style="padding:2rem 1.75rem 1.75rem;">
+                <div style="width:68px; height:68px; border-radius:50%; margin:0 auto 1rem; display:flex; align-items:center; justify-content:center; font-size:1.7rem; background:color-mix(in srgb, var(--color-secondary) 14%, var(--color-surface)); border:1px solid color-mix(in srgb, var(--color-secondary) 32%, transparent); color:var(--color-secondary-text);">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h5 id="accountLockedTitle" style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; color:var(--color-text); margin-bottom:0.6rem;">Account Deactivated</h5>
+                <p style="color:var(--color-text-muted); font-size:0.9rem; line-height:1.6; margin-bottom:1.4rem;">{{ session('account_locked') }}</p>
+                <button type="button" class="fb-btn-primary w-100" data-bs-dismiss="modal" style="border-radius:14px;">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @push('scripts')
@@ -193,6 +210,13 @@
         btn.classList.remove('is-loading');
         btn.disabled = false;
         btn.innerHTML = 'Log in';
+    });
+    // Auto-lockout notice: pop the deactivation message in a modal.
+    document.addEventListener('DOMContentLoaded', function () {
+        var lockModal = document.getElementById('accountLockedModal');
+        if (lockModal && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(lockModal).show();
+        }
     });
 </script>
 @endpush

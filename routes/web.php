@@ -742,6 +742,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/{id}', [RhuController::class, 'midwifeDetails'])->name('show');
         Route::get('/{id}/edit', [RhuController::class, 'editMidwife'])->name('edit');
         Route::put('/{id}', [RhuController::class, 'updateMidwife'])->name('update');
+        Route::post('/{id}/activate', [RhuController::class, 'activateMidwife'])->name('activate');
         Route::delete('/{id}', [RhuController::class, 'destroyMidwife'])->name('destroy');
     });
 
@@ -754,6 +755,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/{id}', [RhuController::class, 'showBhwPresident'])->name('show');
         Route::get('/{id}/edit', [RhuController::class, 'editBhwPresident'])->name('edit');
         Route::put('/{id}', [RhuController::class, 'updateBhwPresident'])->name('update');
+        Route::post('/{id}/activate', [RhuController::class, 'activateBhwPresident'])->name('activate');
         Route::delete('/{id}', [RhuController::class, 'destroyBhwPresident'])->name('destroy');
     });
 

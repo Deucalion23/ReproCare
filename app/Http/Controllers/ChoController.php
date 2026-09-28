@@ -373,7 +373,7 @@ class ChoController extends Controller
     public function activateUser($id)
     {
         $user = User::whereIn('role', ['rhu', 'midwife', 'bhw_president', 'bhw'])->findOrFail($id);
-        $user->update(['status' => 'approved']);
+        $user->update(['status' => 'approved', 'failed_login_attempts' => 0]);
         ActivityLog::log('update', "CHO reactivated staff account for {$user->name}", $user);
 
         return back()->with('success', 'Staff account activated.');

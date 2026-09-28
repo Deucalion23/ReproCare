@@ -83,6 +83,14 @@
                                         <a href="{{ route('rhu.bhw-presidents.edit', $p->id) }}" class="btn btn-xs btn-outline-warning" style="font-size:0.75rem;">
                                             <i class="bi bi-pencil"></i> Edit
                                         </a>
+                                        @if(($p->status ?? 'approved') !== 'approved')
+                                            <form method="POST" action="{{ route('rhu.bhw-presidents.activate', $p->id) }}" class="d-inline" onsubmit="return confirm('Re-activate {{ $p->name }}? They will be able to log in again.');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-xs btn-outline-success" style="font-size:0.75rem;">
+                                                    <i class="bi bi-arrow-counterclockwise"></i> Activate
+                                                </button>
+                                            </form>
+                                        @endif
                                         <x-archive-form :action="route('rhu.bhw-presidents.destroy', $p->id)" label="Archive" title="Archive president (retained for audit)" btnClass="btn btn-xs btn-outline-warning" icon="bi bi-archive" :confirmText="'Archive BHW President ' . $p->name . '? Sessions are revoked and history is retained.'" />
                                     </div>
                                 </td>

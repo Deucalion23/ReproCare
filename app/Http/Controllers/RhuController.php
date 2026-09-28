@@ -233,6 +233,20 @@ class RhuController extends Controller
             ->with('success', "Midwife {$name} archived successfully. Use Staff Transitions to reassign their cases.");
     }
 
+    /**
+     * Reactivate a midwife account auto-locked by failed logins
+     * (status inactive). Only RHU admins can perform this (route guard).
+     */
+    public function activateMidwife($id)
+    {
+        $midwife = User::where('role', 'midwife')->findOrFail($id);
+        $midwife->update(['status' => 'approved', 'failed_login_attempts' => 0]);
+        ActivityLog::log('update', "RHU re-activated midwife {$midwife->name}", $midwife);
+
+        return redirect()->route('rhu.midwives.index')
+            ->with('success', 'Midwife re-activated successfully.');
+    }
+
     // ─── BHW President Management (Copied from MidwifeController) ────
 
     public function bhwPresidents()
@@ -598,11 +612,25 @@ class RhuController extends Controller
     public function activateBhw($id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
-        $bhw->update(['status' => 'approved']);
+        $bhw->update(['status' => 'approved', 'failed_login_attempts' => 0]);
         ActivityLog::log('update', "RHU re-activated BHW {$bhw->name}", $bhw);
 
         return redirect()->route('rhu.bhws.index')
             ->with('success', 'BHW re-activated successfully.');
+    }
+
+    /**
+     * Reactivate a BHW President account auto-locked by failed logins
+     * (status inactive). Only RHU admins can perform this (route guard).
+     */
+    public function activateBhwPresident($id)
+    {
+        $president = User::where('role', 'bhw_president')->findOrFail($id);
+        $president->update(['status' => 'approved', 'failed_login_attempts' => 0]);
+        ActivityLog::log('update', "RHU re-activated BHW President {$president->name}", $president);
+
+        return redirect()->route('rhu.bhw-presidents.index')
+            ->with('success', 'BHW President re-activated successfully.');
     }
 
     // ─── RHU account settings ─────────────────────────────────────────
