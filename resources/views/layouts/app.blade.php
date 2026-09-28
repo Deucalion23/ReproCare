@@ -3146,54 +3146,6 @@
                 navigator.serviceWorker.register('/sw.js').catch(function () {});
             });
         }
-
-        /* Forum likes without a page refresh (keeps scroll position). Falls
-           back to a normal submit if the request fails. */
-        document.addEventListener('submit', function (event) {
-            var form = event.target && event.target.closest ? event.target.closest('form[data-like-form]') : null;
-            if (!form || form.dataset.busy === '1') return;
-            event.preventDefault();
-            form.dataset.busy = '1';
-            var btn = form.querySelector('button[type="submit"]');
-            if (btn) btn.disabled = true;
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
-                credentials: 'same-origin'
-            }).then(function (res) {
-                if (!res.ok) throw new Error('like failed');
-                return res.json();
-            }).then(function (data) {
-                document.querySelectorAll('form[data-like-form][data-post-id="' + data.post_id + '"]').forEach(function (f) {
-                    var b = f.querySelector('button[type="submit"]');
-                    if (!b) return;
-                    b.classList.toggle('liked', !!data.liked);
-                    var swap = function (el, likedCls, unlikedCls) {
-                        if (!el || !likedCls || !unlikedCls) return;
-                        likedCls.split(' ').forEach(function (c) { if (c) el.classList.remove(c); });
-                        unlikedCls.split(' ').forEach(function (c) { if (c) el.classList.remove(c); });
-                        (data.liked ? likedCls : unlikedCls).split(' ').forEach(function (c) { if (c) el.classList.add(c); });
-                    };
-                    swap(b, b.getAttribute('data-liked-class'), b.getAttribute('data-unliked-class'));
-                    var icon = b.querySelector('[data-like-icon]');
-                    if (icon) {
-                        icon.classList.remove('bi-heart', 'bi-heart-fill');
-                        icon.classList.add(data.liked ? 'bi-heart-fill' : 'bi-heart');
-                        swap(icon, icon.getAttribute('data-icon-liked'), icon.getAttribute('data-icon-unliked'));
-                    }
-                    var count = b.querySelector('[data-like-count]');
-                    if (count) count.textContent = data.likes_count;
-                    var label = b.querySelector('[data-like-label]');
-                    if (label) label.textContent = data.likes_count === 1 ? 'Like' : 'Likes';
-                });
-            }).catch(function () {
-                form.submit();
-            }).finally(function () {
-                form.dataset.busy = '0';
-                if (btn) btn.disabled = false;
-            });
-        });
     </script>
 </body>
 </html>

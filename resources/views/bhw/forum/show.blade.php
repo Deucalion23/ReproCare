@@ -89,11 +89,11 @@
                 @endif
 
                 <div class="d-flex align-items-center gap-3 pt-3" style="border-top:1px solid var(--border);">
-                    <form method="POST" action="{{ route('forum.like', $post->id) }}" data-like-form data-post-id="{{ $post->id }}">
+                    <form method="POST" action="{{ route('forum.like', $post->id) }}">
                         @csrf
-                        <button type="submit" class="btn btn-sm {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'btn-danger' : 'btn-outline-danger' }}" data-liked-class="btn-danger" data-unliked-class="btn-outline-danger">
-                            <i class="bi bi-heart{{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? '-fill' : '' }}" data-like-icon></i>
-                            <span data-like-count>{{ $post->likes_count }}</span>
+                        <button type="submit" class="btn btn-sm {{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? 'btn-danger' : 'btn-outline-danger' }}">
+                            <i class="bi bi-heart{{ $post->likes->where('user_id', auth()->id())->where('user_type', auth()->user()->role)->count() > 0 ? '-fill' : '' }}"></i>
+                            {{ $post->likes_count }}
                         </button>
                     </form>
                     <span class="text-muted">

@@ -304,27 +304,15 @@ class ForumController extends Controller
 
         if ($existingLike) {
             $existingLike->delete();
-            $liked = false;
         } else {
             try {
                 ForumLike::create([
                     'post_id' => $post->id,
                     'user_id' => $currentUser->id,
                 ]);
-                $liked = true;
             } catch (\Illuminate\Database\QueryException $e) {
                 // Already liked concurrently — treat as liked.
-                $liked = true;
             }
-        }
-
-        // AJAX likes (no page refresh, keeps scroll position).
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json([
-                'post_id' => $post->id,
-                'liked' => $liked,
-                'likes_count' => $post->likes()->count(),
-            ]);
         }
 
         return redirect()->back();
