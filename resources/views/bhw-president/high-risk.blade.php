@@ -4,7 +4,7 @@
 
 @section('bhw-president-content')
 
-<div class="page-hero fade-in-card" style="background:linear-gradient(135deg, var(--color-warning) 0%, var(--color-danger) 100%);">
+<div class="page-hero fade-in-card">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
             <div class="page-hero-title">High-Risk Pregnancies</div>
@@ -23,7 +23,7 @@
     <div class="card-body">
         @if($highRiskPregnancies->count() > 0)
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover table-cards-mobile">
                 <thead>
                     <tr>
                         <th>Patient</th>
@@ -37,7 +37,7 @@
                 <tbody>
                     @foreach($highRiskPregnancies as $pregnancy)
                     <tr>
-                        <td>
+                        <td class="no-card-label" data-label="Patient">
                             <div class="d-flex align-items-center gap-2">
                                 <x-patient-avatar :patient="$pregnancy->woman" :size="32" />
                                 <div>
@@ -46,16 +46,16 @@
                                 </div>
                             </div>
                         </td>
-                        <td>{{ optional($pregnancy->edd)?->format('M j, Y') ?? 'N/A' }}</td>
-                        <td>{{ $pregnancy->gestational_age ?? 'N/A' }} weeks</td>
-                        <td>
+                        <td data-label="EDD" style="white-space:nowrap;">{{ optional($pregnancy->edd)?->format('M j, Y') ?? 'N/A' }}</td>
+                        <td data-label="Gestational Age" style="white-space:nowrap;">{{ $pregnancy->gestational_age ?? 'N/A' }} weeks</td>
+                        <td data-label="Risk Factors">
                             <span class="badge bg-danger">High Risk</span>
                             @if($pregnancy->is_high_risk)
                             <span class="badge bg-warning ms-1">Flagged</span>
                             @endif
                         </td>
-                        <td>{{ optional($pregnancy->checkups->first())->scheduled_date?->format('M j, Y') ?? 'No checkups' }}</td>
-                        <td>
+                        <td data-label="Last Checkup" style="white-space:nowrap;">{{ optional($pregnancy->checkups->first())->scheduled_date?->format('M j, Y') ?? 'No checkups' }}</td>
+                        <td class="no-card-label" data-label="Actions">
                             @if($pregnancy->woman)
                             <a href="{{ route('profile.view', $pregnancy->woman->id) }}" class="btn btn-sm btn-primary">
                                 <i class="bi bi-eye"></i> View

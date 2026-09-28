@@ -135,15 +135,15 @@
                                 <tbody>
                                     @foreach($section['items'] as $report)
                                         <tr>
-                                            <td>
+                                            <td class="no-card-label" data-label="Report">
                                                 <div class="table-title">{{ $report->title }}</div>
                                                 <div class="table-subtitle">{{ \Illuminate\Support\Str::limit($report->description, 50) }}</div>
                                             </td>
-                                            <td>{{ optional($report->bhw)->name ?? 'Unknown' }}</td>
-                                            <td>{{ Carbon::create()->month($report->report_month)->format('F') }} {{ $report->report_year }}</td>
-                                            <td><span class="summary-chip {{ $report->status === 'completed' ? 'chip-success' : 'chip-warning' }}">{{ ucfirst($report->status) }}</span></td>
-                                            <td><span class="summary-chip chip-primary">{{ ucwords(str_replace('_', ' ', $report->submission_status)) }}</span></td>
-                                            <td class="text-end report-actions-col">
+                                            <td data-label="BHW">{{ optional($report->bhw)->name ?? 'Unknown' }}</td>
+                                            <td data-label="Period" style="white-space:nowrap;">{{ Carbon::create()->month($report->report_month)->format('F') }} {{ $report->report_year }}</td>
+                                            <td data-label="Status"><span class="summary-chip {{ $report->status === 'completed' ? 'chip-success' : 'chip-warning' }}">{{ ucfirst($report->status) }}</span></td>
+                                            <td data-label="Submission"><span class="summary-chip chip-primary">{{ ucwords(str_replace('_', ' ', $report->submission_status)) }}</span></td>
+                                            <td class="text-end report-actions-col no-card-label" data-label="Actions">
                                                 <div class="report-table-actions">
                                                     <a href="{{ route('bhw-president.reports.show', $report->id) }}" class="btn btn-sm btn-outline-primary report-action-btn" title="View report"><i class="bi bi-eye"></i></a>
                                                     @if($report->submission_status === 'submitted_to_president')
@@ -180,7 +180,7 @@
         <div class="workspace-panel-body pt-3">
             @if($reports->count() > 0)
                 <div class="modern-table-wrap">
-                    <table class="modern-table">
+                    <table class="modern-table table-cards-mobile">
                         <thead>
                             <tr>
                                 <th>Report Title</th>
@@ -195,18 +195,18 @@
                         <tbody>
                             @foreach($reports as $report)
                                 <tr>
-                                    <td>
+                                    <td class="no-card-label" data-label="Report Title">
                                         <div class="table-title">{{ $report->title }}</div>
                                         @if($report->description)
                                             <div class="table-subtitle">{{ \Illuminate\Support\Str::limit($report->description, 60) }}</div>
                                         @endif
                                     </td>
-                                    <td><span class="summary-chip {{ $report->report_type === 'pregnancies' ? 'chip-info' : 'chip-primary' }}">{{ $report->report_type === 'pregnancies' ? 'Pregnancies' : 'Health Records' }}</span></td>
-                                    <td>{{ optional($report->bhw)->name ?? 'Unknown' }}</td>
-                                    <td>{{ Carbon::create()->month($report->report_month)->format('F') }} {{ $report->report_year }}</td>
-                                    <td><span class="summary-chip {{ $report->status === 'completed' ? 'chip-success' : 'chip-warning' }}">{{ ucfirst($report->status) }}</span></td>
-                                    <td>{{ $report->created_at->format('M j, Y') }}</td>
-                                    <td class="text-end report-actions-col">
+                                    <td data-label="Type"><span class="summary-chip {{ $report->report_type === 'pregnancies' ? 'chip-info' : 'chip-primary' }}">{{ $report->report_type === 'pregnancies' ? 'Pregnancies' : 'Health Records' }}</span></td>
+                                    <td data-label="BHW">{{ optional($report->bhw)->name ?? 'Unknown' }}</td>
+                                    <td data-label="Period" style="white-space:nowrap;">{{ Carbon::create()->month($report->report_month)->format('F') }} {{ $report->report_year }}</td>
+                                    <td data-label="Status"><span class="summary-chip {{ $report->status === 'completed' ? 'chip-success' : 'chip-warning' }}">{{ ucfirst($report->status) }}</span></td>
+                                    <td data-label="Created" style="white-space:nowrap;">{{ $report->created_at->format('M j, Y') }}</td>
+                                    <td class="text-end report-actions-col no-card-label" data-label="Actions">
                                         <div class="report-table-actions">
                                             <a href="{{ route('bhw-president.reports.show', $report->id) }}" class="btn btn-sm btn-outline-primary report-action-btn" title="View report"><i class="bi bi-eye"></i></a>
                                             <form action="{{ route('bhw-president.reports.delete', $report->id) }}" method="POST" onsubmit="return confirm('Archive this report? It will be hidden but not permanently deleted.')">

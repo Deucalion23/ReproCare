@@ -68,7 +68,7 @@
         <div class="card-body p-0">
                             @if($pregnancies->count())
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0" id="bhw-preg-table">
+                    <table class="table table-hover mb-0 table-cards-mobile" id="bhw-preg-table">
                         <thead>
                             <tr>
                                 <th>Patient</th>
@@ -90,21 +90,21 @@
                                         : route('bhw.patient-details', $pregnancy->user_id);
                                 @endphp
                                 <tr>
-                                    <td>
+                                    <td class="no-card-label" data-label="Patient">
                                         <div class="fw-semibold">{{ $pregnancy->patient_name }}</div>
                                         <small class="text-muted">{{ $isWalkIn ? 'Unlinked patient' : (optional($pregnancy->woman)->email ?? 'Enrolled patient') }}</small>
                                     </td>
-                                    <td class="pg-nowrap">{{ $pregnancy->lmp?->format('M d, Y') ?? 'N/A' }}</td>
-                                    <td class="pg-nowrap">{{ $pregnancy->edd?->format('M d, Y') ?? 'N/A' }}</td>
-                                    <td><span class="badge bg-light text-dark border text-nowrap">{{ $pregnancy->formatted_aog ?? 'N/A' }}</span></td>
-                                    <td><span class="badge bg-info text-dark text-nowrap">{{ $pregnancy->trimester_name ?? 'N/A' }}</span></td>
-                                    <td>
+                                    <td data-label="LMP" class="pg-nowrap">{{ $pregnancy->lmp?->format('M d, Y') ?? 'N/A' }}</td>
+                                    <td data-label="EDD" class="pg-nowrap">{{ $pregnancy->edd?->format('M d, Y') ?? 'N/A' }}</td>
+                                    <td data-label="AOG"><span class="badge bg-light text-dark border text-nowrap">{{ $pregnancy->formatted_aog ?? 'N/A' }}</span></td>
+                                    <td data-label="Trimester"><span class="badge bg-info text-dark text-nowrap">{{ $pregnancy->trimester_name ?? 'N/A' }}</span></td>
+                                    <td data-label="Risk">
                                         <span class="badge text-nowrap {{ $pregnancy->is_high_risk ? 'bg-danger' : 'bg-success' }}">
                                             {{ $pregnancy->is_high_risk ? 'High Risk' : 'Normal' }}
                                         </span>
                                     </td>
-                                    <td class="pg-nowrap">{{ $pregnancy->created_by_name ?? 'Unknown' }}</td>
-                                    <td class="text-center">
+                                    <td data-label="Created By" class="pg-nowrap">{{ $pregnancy->created_by_name ?? 'Unknown' }}</td>
+                                    <td class="text-center no-card-label" data-label="Actions">
                                         <div class="d-inline-flex align-items-center gap-1 tbl-actions">
                                             <a href="{{ route('bhw.referrals.report-pregnancy', $pregnancy->id) }}" class="btn btn-sm btn-outline-success" title="Report this pregnancy to a midwife" aria-label="Report this pregnancy to a midwife">
                                                 <i class="bi bi-send-fill"></i>

@@ -104,7 +104,7 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-hover">
+            <table class="table table-hover table-cards-mobile">
                 <thead>
                     <tr>
                         <th>Patient</th>
@@ -129,7 +129,7 @@
                             $hasPregnancies = $patient->pregnancies && $patient->pregnancies->count() > 0;
                         @endphp
                         <tr>
-                            <td>
+                            <td class="no-card-label" data-label="Patient">
                                 <div class="d-flex align-items-center gap-2">
                                     <x-patient-avatar :patient="$patient" :name="$displayName" :size="32" />
                                     @if($isWalkIn)
@@ -139,15 +139,15 @@
                                     @endif
                                 </div>
                             </td>
-                            <td>
+                            <td data-label="Type">
                                 <span class="badge {{ $isWalkIn ? 'bg-info text-dark' : 'bg-primary' }}">
                                     {{ $isWalkIn ? 'Unlinked' : 'Enrolled' }}
                                 </span>
                             </td>
-                            <td>{{ $patient->purok?->name ?? 'N/A' }}</td>
-                            <td><span class="badge {{ $hasCheckups ? 'bg-success' : 'bg-secondary' }}"><i class="bi bi-{{ $hasCheckups ? 'check' : 'x' }}"></i></span></td>
-                            <td><span class="badge {{ $hasHealthRecords ? 'bg-success' : 'bg-secondary' }}"><i class="bi bi-{{ $hasHealthRecords ? 'check' : 'x' }}"></i></span></td>
-                            <td><span class="badge {{ $hasPregnancies ? 'bg-success' : 'bg-secondary' }}"><i class="bi bi-{{ $hasPregnancies ? 'check' : 'x' }}"></i></span></td>
+                            <td data-label="Purok">{{ $patient->purok?->name ?? 'N/A' }}</td>
+                            <td data-label="Has Checkups"><span class="badge {{ $hasCheckups ? 'bg-success' : 'bg-secondary' }}"><i class="bi bi-{{ $hasCheckups ? 'check' : 'x' }}"></i></span></td>
+                            <td data-label="Has Health Records"><span class="badge {{ $hasHealthRecords ? 'bg-success' : 'bg-secondary' }}"><i class="bi bi-{{ $hasHealthRecords ? 'check' : 'x' }}"></i></span></td>
+                            <td data-label="Has Pregnancies"><span class="badge {{ $hasPregnancies ? 'bg-success' : 'bg-secondary' }}"><i class="bi bi-{{ $hasPregnancies ? 'check' : 'x' }}"></i></span></td>
                         </tr>
                     @endforeach
                 </tbody>
