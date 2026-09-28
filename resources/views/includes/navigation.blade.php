@@ -48,12 +48,20 @@
 <style>
     /* Staff navbar stays a single fixed top row at any zoom or width. */
     .navbar { flex-wrap:nowrap !important; }
-    .navbar .container-fluid { flex-wrap:nowrap !important; gap:0.5rem; }
+    .navbar .container-fluid { flex-wrap:nowrap !important; gap:0.5rem; align-items:center !important; }
+    .navbar .container-fluid > div { align-self:center !important; }
     .navbar .navbar-brand { white-space:nowrap !important; flex-shrink:1; min-width:0; font-size:clamp(1rem, 2.5vw + 0.6rem, 1.25rem); }
     .navbar .navbar-brand > span:last-child { overflow:hidden; text-overflow:ellipsis; }
     .navbar .d-flex.align-items-center.gap-2.ms-auto { flex-shrink:0; margin-left:auto; }
     /* Circles stay circles: exact squares that clip any inner content. */
     .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; align-self:center !important; }
+    .navbar #sidebarToggleBtn {
+        min-width:32px !important; max-width:32px !important;
+        min-height:32px !important; max-height:32px !important;
+        aspect-ratio:1 / 1 !important; padding:0 !important; overflow:hidden !important;
+        line-height:1 !important;
+    }
+    .navbar #sidebarToggleBtn i { flex-shrink:0; line-height:1 !important; }
     .navbar .staff-action-btn {
         width:32px !important; height:32px !important;
         min-width:32px !important; max-width:32px !important;
@@ -80,12 +88,17 @@
     }
     @media (max-width: 576px) {
         .navbar { height:58px !important; }
-        .navbar .container-fluid { gap:0.375rem !important; padding-left:0.6rem !important; padding-right:0.6rem !important; }
+        .navbar .container-fluid { gap:0.25rem !important; padding-left:0.25rem !important; padding-right:0.6rem !important; }
         .navbar .navbar-brand { gap:2px !important; }
         .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
         .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
-        .navbar #sidebarToggleBtn { width:30px !important; height:30px !important; border-radius:50% !important; background:var(--color-surface) !important; }
+        .navbar #sidebarToggleBtn {
+        min-width:32px !important; max-width:32px !important;
+        min-height:32px !important; max-height:32px !important;
+        aspect-ratio:1 / 1 !important; padding:0 !important; overflow:hidden !important;
+        line-height:1 !important;
+    }
         .navbar .staff-action-btn {
             width:30px !important; height:30px !important;
             min-width:30px !important; max-width:30px !important;
@@ -108,12 +121,12 @@
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
+            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:2px; line-height:1;">
                 <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px; transform:translateY(-0.15em);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
                          style="width:30px; height:30px; max-width:none; object-fit:contain; display:block;">
                 </span>
-                <span class="fw-800 d-inline-flex align-items-center" style="min-height:30px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:0.95rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
+                <span class="fw-800 d-inline-flex align-items-center" style="min-height:30px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:0.95rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px; margin-left:-2px;">
                     Repro<span class="brand-care">Care</span>
                 </span>
             </a>
