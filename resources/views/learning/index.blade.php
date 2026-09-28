@@ -81,21 +81,21 @@
                 <label for="learnFormat" class="form-label learn-label">Format</label>
                 <select id="learnFormat" name="type" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Formats</option>
-                    <option value="video" {{ $activeFilter === 'video' ? 'selected' : '' }}>🎬 Playable Videos</option>
-                    <option value="article" {{ $activeFilter === 'article' ? 'selected' : '' }}>📄 Articles &amp; Guides</option>
-                    <option value="file" {{ $activeFilter === 'file' ? 'selected' : '' }}>📁 Downloadable Files</option>
-                    <option value="link" {{ $activeFilter === 'link' ? 'selected' : '' }}>🔗 External Links</option>
+                    <option value="video" {{ $activeFilter === 'video' ? 'selected' : '' }}>Playable Videos</option>
+                    <option value="article" {{ $activeFilter === 'article' ? 'selected' : '' }}>Articles &amp; Guides</option>
+                    <option value="file" {{ $activeFilter === 'file' ? 'selected' : '' }}>Downloadable Files</option>
+                    <option value="link" {{ $activeFilter === 'link' ? 'selected' : '' }}>External Links</option>
                 </select>
             </div>
             <div class="learn-field learn-field-category">
                 <label for="learnCategory" class="form-label learn-label">Category</label>
                 <select id="learnCategory" name="category" class="form-select learn-input" onchange="this.form.submit()">
                     <option value="">All Categories</option>
-                    <option value="prenatal-care" {{ $activeCategory === 'prenatal-care' ? 'selected' : '' }}>🤰 Prenatal Care</option>
-                    <option value="nutrition" {{ $activeCategory === 'nutrition' ? 'selected' : '' }}>🥗 Nutrition</option>
-                    <option value="warning-signs" {{ $activeCategory === 'warning-signs' ? 'selected' : '' }}>⚠️ Warning Signs</option>
-                    <option value="family-planning" {{ $activeCategory === 'family-planning' ? 'selected' : '' }}>👨‍👩‍👧 Family Planning</option>
-                    <option value="postpartum" {{ $activeCategory === 'postpartum' ? 'selected' : '' }}>👶 Postpartum &amp; Newborn</option>
+                    <option value="prenatal-care" {{ $activeCategory === 'prenatal-care' ? 'selected' : '' }}>Prenatal Care</option>
+                    <option value="nutrition" {{ $activeCategory === 'nutrition' ? 'selected' : '' }}>Nutrition</option>
+                    <option value="warning-signs" {{ $activeCategory === 'warning-signs' ? 'selected' : '' }}>Warning Signs</option>
+                    <option value="family-planning" {{ $activeCategory === 'family-planning' ? 'selected' : '' }}>Family Planning</option>
+                    <option value="postpartum" {{ $activeCategory === 'postpartum' ? 'selected' : '' }}>Postpartum &amp; Newborn</option>
                 </select>
             </div>
             <div class="learn-actions">
@@ -132,19 +132,20 @@
                         <img src="{{ $material->image_url }}" alt="{{ $material->title }}" class="w-100 h-100" style="object-fit:cover; opacity:0.9;">
                     @else
                         @php
-                            $cover = match($material->category) {
-                                'nutrition' => ['bi-apple', '#14744B', '#22A06B'],
-                                'family-planning' => ['bi-people-fill', '#964B2D', '#F59E7A'],
-                                'teen-pregnancy' => ['bi-mortarboard-fill', '#6D28D9', '#A78BFA'],
-                                'breastfeeding' => ['bi-heart-fill', '#AD2851', '#F472A0'],
-                                'prenatal-care' => ['bi-clipboard2-pulse-fill', '#176C63', '#2A9D8F'],
-                                'pregnancy-guide' => ['bi-journal-medical', '#1D4ED8', '#60A5FA'],
-                                default => ['bi-file-earmark-text', '#4C1D95', '#8B5CF6'],
+                            // Single default cover color (no thumbnail) on all screen sizes.
+                            $coverIcon = match($material->category) {
+                                'nutrition' => 'bi-apple',
+                                'family-planning' => 'bi-people-fill',
+                                'teen-pregnancy' => 'bi-mortarboard-fill',
+                                'breastfeeding' => 'bi-heart-fill',
+                                'prenatal-care' => 'bi-clipboard2-pulse-fill',
+                                'pregnancy-guide' => 'bi-journal-medical',
+                                default => 'bi-file-earmark-text',
                             };
                         @endphp
                         <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white text-center px-3"
-                             style="background:linear-gradient(135deg, {{ $cover[1] }}, {{ $cover[2] }});">
-                            <i class="bi {{ $cover[0] }}" style="font-size:2.4rem; opacity:0.85;"></i>
+                             style="background:linear-gradient(135deg, #4C1D95, #8B5CF6);">
+                            <i class="bi {{ $coverIcon }}" style="font-size:2.4rem; opacity:0.85;"></i>
                             <div class="fw-bold mt-2" style="font-size:0.85rem; line-height:1.35;">{{ \Illuminate\Support\Str::limit($material->title, 60) }}</div>
                         </div>
                     @endif
@@ -514,8 +515,17 @@
         }
     }
     @media (max-width: 575.98px) {
-        .learn-hero-icon { width:42px; height:42px; font-size:1.2rem; }
-        .learn-hero-count { width:100%; justify-content:center; }
+        /* Phones: stack the hero vertically so nothing squeezes or overflows. */
+        .learn-hero { border-radius:16px !important; }
+        .learn-hero-body {
+            flex-direction:column !important;
+            align-items:flex-start !important;
+            gap:0.7rem !important;
+        }
+        .learn-hero-icon { width:44px; height:44px; font-size:1.25rem; border-radius:13px; }
+        .learn-hero-body h2 { font-size:1.15rem !important; line-height:1.25 !important; overflow-wrap:anywhere; }
+        .learn-hero-body p { font-size:0.82rem !important; }
+        .learn-hero-count { width:auto; justify-content:flex-start; font-size:0.78rem; }
 
         /* Phones: drop the nested sheet (single flat card), stack selects
            full-width so option text never truncates side-by-side. */
@@ -526,28 +536,29 @@
                 "format"
                 "category"
                 "actions";
-            gap:0.55rem;
+            gap:0.45rem;
             padding:0;
             background:transparent;
             border:none;
         }
-        .learn-filter-card > .card-body { padding:0.85rem !important; }
-        .learn-mobile-head { padding:0 0.15rem 0.65rem; align-items:center; }
-        .learn-mobile-title { font-size:0.88rem !important; }
-        .learn-mobile-reset { font-size:0.74rem !important; min-height:0 !important; padding:0.25rem !important; }
-        .learn-mobile-count { font-size:0.62rem !important; }
-        .learn-label { margin-bottom:0.25rem !important; font-size:0.6rem !important; letter-spacing:0.3px; text-align:left; }
-        .learn-input, .learn-search-group .learn-search-icon { min-height:44px !important; }
+        .learn-filter-card > .card-body { padding:0.7rem !important; }
+        .learn-mobile-head { padding:0 0.1rem 0.5rem; align-items:center; gap:0.4rem; }
+        .learn-mobile-title { font-size:0.82rem !important; }
+        .learn-mobile-title i { font-size:0.9rem !important; }
+        .learn-mobile-reset { font-size:0.7rem !important; min-height:0 !important; padding:0.2rem !important; }
+        .learn-mobile-count { font-size:0.6rem !important; padding:0.15rem 0.5rem !important; }
+        .learn-label { margin-bottom:0.2rem !important; font-size:0.58rem !important; letter-spacing:0.3px; text-align:left; }
+        .learn-input, .learn-search-group .learn-search-icon { min-height:40px !important; }
         .learn-input {
-            font-size:0.78rem !important;
+            font-size:0.75rem !important;
             max-width:100%; width:100%; text-align:left;
         }
         .learn-field-format .learn-input, .learn-field-category .learn-input {
             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
         }
-        .learn-btn-apply { min-height:44px; font-size:0.8rem; justify-content:center; }
-        .learn-btn-clear { width:44px; height:44px; min-height:44px; }
-        .learn-actions { align-items:center; }
+        .learn-btn-apply { min-height:40px; font-size:0.78rem; justify-content:center; padding:0 0.9rem; }
+        .learn-btn-clear { width:40px; height:40px; min-height:40px; }
+        .learn-actions { align-items:center; gap:0.4rem; }
 
         /* Phones: YouTube-style 2-col video grid — compact cards fit side by side */
         .learn-media-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.65rem; }
@@ -557,9 +568,22 @@
         .learn-media-grid .video-media-card .card-body { padding:0.6rem 0.65rem !important; text-align:left; }
         .learn-media-grid .video-media-card h6 { font-size:0.7rem !important; line-height:1.35 !important; margin-bottom:0.25rem !important; text-align:left; }
         .learn-media-grid .video-media-card .card-body p { display:none !important; }
-        .learn-media-grid .video-media-card .pt-2\.5 { padding-top:0.3rem !important; justify-content:flex-start !important; }
+        .learn-media-grid .video-media-card .pt-2\.5 {
+            padding-top:0.35rem !important;
+            flex-direction:column !important;
+            align-items:stretch !important;
+            gap:0.35rem !important;
+        }
         .learn-media-grid .video-media-card small { font-size:0.6rem !important; text-align:left; }
-        .learn-media-grid .video-media-card .btn { display:none !important; }
+        /* Keep cards tappable on phones: compact full-width action instead of hidden. */
+        .learn-media-grid .video-media-card .btn {
+            display:inline-flex !important;
+            width:100% !important;
+            justify-content:center !important;
+            align-items:center !important;
+            font-size:0.66rem !important;
+            padding:0.42rem 0.5rem !important;
+        }
         .learn-media-grid .yt-watch-btn.rounded-circle { width:42px !important; height:42px !important; }
     }
 </style>

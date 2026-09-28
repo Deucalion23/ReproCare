@@ -170,6 +170,37 @@
     .guideline-item { display:flex; align-items:flex-start; gap:0.65rem; padding:0.55rem 1.2rem; font-size:0.875rem; color:var(--text-muted); border-bottom:1px solid var(--border); line-height:1.4; }
     .guideline-item:last-child { border-bottom:none; }
     .guideline-item i { color:var(--success); flex-shrink:0; margin-top:2px; }
+
+    @media (max-width: 575.98px) {
+        /* Phones: slim top hero. */
+        .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .page-hero .page-hero-title { font-size:1.05rem !important; }
+        .page-hero .page-hero-subtitle { font-size:0.76rem !important; }
+
+        /* Phones: compact post card + smaller post text. */
+        .post-detail-card { border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .post-detail-header { padding:0.85rem 0.9rem !important; gap:0.7rem !important; }
+        .forum-show-avatar, .forum-avatar-init-lg { width:38px !important; height:38px !important; font-size:1rem !important; }
+        .post-detail-body { padding:1rem 0.9rem !important; }
+        .post-content-text { font-size:0.85rem !important; line-height:1.6 !important; margin-bottom:1rem !important; }
+        .forum-show-image { max-height:220px !important; border-radius:10px !important; margin-bottom:1rem !important; }
+        .post-action-bar { gap:0.5rem !important; padding-top:0.8rem !important; }
+        .post-action-btn { font-size:0.75rem !important; padding:0.35rem 0.7rem !important; }
+
+        /* Phones: compact comments + sidebar. */
+        .comments-card { border-radius:14px !important; }
+        .comments-card-header { padding:0.8rem 0.9rem !important; font-size:0.85rem !important; }
+        .comment-form-area { padding:0.9rem !important; }
+        .comment-textarea { font-size:0.82rem !important; }
+        .comment-item-show { padding:0.8rem 0.9rem !important; gap:0.65rem !important; }
+        .comment-avatar-md { width:30px !important; height:30px !important; font-size:0.72rem !important; }
+        .comment-author { font-size:0.8rem !important; }
+        .comment-ts { font-size:0.68rem !important; }
+        .comment-body { font-size:0.8rem !important; }
+        .forum-sidebar-card { border-radius:14px !important; }
+        .forum-sidebar-card-header { font-size:0.82rem !important; padding:0.75rem 0.9rem !important; }
+        .guideline-item { font-size:0.78rem !important; padding:0.5rem 0.9rem !important; }
+    }
 </style>
 @endpush
 

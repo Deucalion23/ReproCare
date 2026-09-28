@@ -6,10 +6,13 @@
 <style>
     /* === Care Messaging — clean, borderless, dashboard-matched === */
     .rc-msg-app { --chat-primary:var(--color-secondary-text); --chat-primary-dk:var(--color-secondary-text); --chat-ink:var(--color-surface-strong); --chat-muted:var(--color-text-muted); --chat-faint:var(--color-text-muted); --chat-soft:var(--color-bg); max-width:1200px; margin:0 auto; padding-bottom:2rem; }
-    .rc-msg-hero { background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); border:none; border-radius:20px; padding:1.35rem 1.6rem; margin-bottom:1.25rem; box-shadow:var(--wp-shadow-sm); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
-    .rc-msg-hero h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.35rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.6rem; letter-spacing:-0.01em; }
+    .rc-msg-hero { position:relative; overflow:hidden; background:var(--color-surface); background-color:var(--color-surface); border:none; border-radius:24px; padding:1.5rem 1.75rem; margin-top:0; margin-bottom:1.5rem; box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .rc-msg-hero::before { content:''; position:absolute; top:-40px; right:-30px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%); pointer-events:none; }
+    .rc-msg-hero::after { content:''; position:absolute; bottom:-50px; left:20%; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%); pointer-events:none; }
+    .rc-msg-hero > * { position:relative; z-index:1; }
+    .rc-msg-hero h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.1rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.6rem; letter-spacing:-0.01em; }
     .rc-msg-hero h1 .rc-msg-ico { width:42px; height:42px; border-radius:12px; background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:1px solid var(--color-border); color:var(--color-text); display:inline-flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
-    .rc-msg-hero p { margin:.25rem 0 0; font-size:.85rem; color:var(--chat-muted); }
+    .rc-msg-hero p { margin:.25rem 0 0; font-size:.78rem; color:var(--chat-muted); }
     .rc-msg-hero-actions { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
     .rc-unread-pill { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; padding:.5rem .95rem; border-radius:999px; font-weight:800; font-size:.78rem; white-space:nowrap; }
     .rc-btn-pink { display:inline-flex; align-items:center; justify-content:center; gap:.45rem; background:var(--color-surface-strong); background-color:var(--color-surface-strong); border:none; color:var(--color-on-solid); font-weight:800; font-size:.86rem; padding:.62rem 1.3rem; border-radius:999px; text-decoration:none; box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); transition:all .2s; white-space:nowrap; }
@@ -64,6 +67,39 @@
     .rc-empty i { font-size:2.8rem; color:var(--color-border); margin-bottom:.8rem; }
     .rc-empty h6 { font-weight:800; color:var(--color-text); }
     .rc-empty p { font-size:.84rem; }
+
+    /* ── Mobile: smaller text, greeting-size top card, stacked chat layout ── */
+    @media (max-width:600px) {
+        .rc-msg-app { padding-bottom:1rem; }
+        .rc-msg-hero { padding:1.4rem 1.1rem; border-radius:20px; margin-bottom:1.25rem; flex-direction:column; align-items:stretch; }
+        .rc-msg-hero h1 { font-size:0.95rem; line-height:1.3; }
+        .rc-msg-hero h1 .rc-msg-ico { width:34px; height:34px; font-size:1rem; border-radius:10px; }
+        .rc-msg-hero p { font-size:0.7rem; line-height:1.5; }
+        .rc-msg-hero-actions { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; }
+        .rc-msg-hero-actions .rc-unread-pill { grid-column:1 / -1; justify-self:start; font-size:0.68rem; }
+        .rc-btn-pink, .rc-btn-ghost { font-size:0.76rem; padding:0.55rem 0.9rem; width:100%; }
+        .rc-msg-shell { grid-template-columns:1fr; gap:0.85rem; min-height:0; }
+        .rc-panel { min-height:0; border-radius:18px; }
+        .rc-panel-head { padding:0.9rem 1rem; }
+        .rc-panel-head-top h3 { font-size:0.88rem; }
+        .rc-panel-sub { font-size:0.7rem; }
+        .rc-count { font-size:0.64rem; }
+        .rc-search input { font-size:0.76rem; padding:0.55rem 1rem 0.55rem 2.3rem; }
+        .rc-chat-list { max-height:340px; padding:0.5rem; }
+        .rc-chat-item { padding:0.6rem; gap:0.6rem; }
+        .rc-avatar { width:40px; height:40px; }
+        .rc-chat-name { font-size:0.8rem; }
+        .rc-chat-time { font-size:0.64rem; }
+        .rc-chat-preview { font-size:0.72rem; }
+        .rc-role-tag { font-size:0.58rem; }
+        .rc-contacts-grid { grid-template-columns:1fr; gap:0.55rem; padding:0.85rem; }
+        .rc-contact { padding:0.7rem 0.8rem; gap:0.65rem; }
+        .rc-contact img { width:38px; height:38px; }
+        .rc-contact h6 { font-size:0.78rem; }
+        .rc-contact small { font-size:0.66rem; }
+        .rc-empty { padding:2rem 1rem; }
+        .rc-empty p { font-size:0.76rem; }
+    }
 </style>
 @endpush
 

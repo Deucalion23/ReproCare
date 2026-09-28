@@ -9,28 +9,45 @@
     padding:0;
 }
 
-/* ── Hero Banner ── */
+/* ── Hero Banner (dashboard greeting look) ── */
 .care-hero {
-    background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
-    background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
+    background:var(--color-surface);
+    background-color:var(--color-surface);
     border:none;
     border-radius:24px;
-    padding:2.25rem 2.5rem;
+    padding:2rem 2.25rem;
     position:relative;
     overflow:hidden;
+    margin-top:0;
     margin-bottom:1.5rem;
     color:var(--color-text);
-    box-shadow:var(--wp-shadow-sm);
+    box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent);
 }
 [data-theme="light"] .care-hero {
     background:var(--color-surface); background-color:var(--color-surface);
     color:var(--color-text);
 }
 .care-hero::before {
-    display:none;
+    content:'';
+    position:absolute;
+    top:-40px;
+    right:-30px;
+    width:260px;
+    height:260px;
+    border-radius:50%;
+    background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%);
+    pointer-events:none;
 }
 .care-hero::after {
-    display:none;
+    content:'';
+    position:absolute;
+    bottom:-50px;
+    left:20%;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%);
+    pointer-events:none;
 }
 .care-hero-grid {
     display:flex;
@@ -47,9 +64,9 @@
 }
 .care-hero-title {
     font-family:'Plus Jakarta Sans', sans-serif;
-    font-size:1.85rem;
+    font-size:1.4rem;
     font-weight:800;
-    line-height:1.2;
+    line-height:1.25;
     margin-bottom:0.5rem;
     color:var(--color-text);
     letter-spacing:-0.02em;
@@ -348,6 +365,33 @@
     .record-vitals-strip {
         grid-template-columns:repeat(4, 1fr);
     }
+}
+
+/* ── Mobile: smaller text, compact hero, stacked records ── */
+@media (max-width: 600px) {
+    .health-page { padding-top:0; }
+    .care-hero { padding:1.4rem 1.1rem; border-radius:20px; margin-bottom:1.25rem; }
+    .care-hero-grid { gap:1rem; }
+    .care-hero-left { min-width:0; width:100%; }
+    .care-hero-title { font-size:0.95rem; line-height:1.3; }
+    .care-hero-sub { font-size:0.7rem; margin-bottom:0.85rem; }
+    .care-pill-row { display:grid; grid-template-columns:1fr 1fr; gap:0.45rem; }
+    .care-pill { font-size:0.66rem; padding:0.36rem 0.65rem; justify-content:center; }
+    .care-hero-actions { width:100%; display:grid; grid-template-columns:1fr; gap:0.5rem; }
+    .btn-hero-action { width:100%; justify-content:center; font-size:0.76rem; padding:0.6rem 1rem; }
+    .vitals-summary-grid { grid-template-columns:repeat(2, 1fr); gap:0.65rem; margin-bottom:1.25rem; }
+    .vital-stat-card { padding:1rem 0.75rem; border-radius:16px; }
+    .vital-icon-box { width:34px; height:34px; font-size:0.95rem; margin-bottom:0.55rem; }
+    .record-vitals-strip { grid-template-columns:repeat(2, 1fr); gap:0.65rem; padding:0.85rem; }
+    .strip-val { font-size:0.95rem; }
+    .records-head-row { gap:0.6rem; margin-bottom:1rem; }
+    .records-title { font-size:0.95rem; }
+    .records-count { font-size:0.66rem; }
+    .record-card { padding:1rem; border-radius:18px; margin-bottom:1rem; }
+    .record-top { gap:0.6rem; margin-bottom:0.9rem; }
+    .record-title { font-size:0.9rem; }
+    .record-date-badge { font-size:0.7rem; flex-wrap:wrap; }
+    .risk-pill { font-size:0.6rem; padding:0.26rem 0.65rem; }
 }
 .strip-item {
     display:flex;
