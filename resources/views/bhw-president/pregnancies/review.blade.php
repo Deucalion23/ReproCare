@@ -2,15 +2,17 @@
 
 @section('bhw-president-content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="h3 mb-0">Review Pregnancy Record</h1>
-            <p class="text-muted mb-0">Review and approve/reject pregnancy record submitted for approval</p>
+            <div class="page-hero-title">Review Pregnancy Record</div>
+            <p class="page-hero-subtitle">Approve and forward the pregnancy submission.</p>
         </div>
         <a href="{{ route('bhw-president.pregnancies.index') }}" class="btn btn-outline-secondary">
             <i class="fas fa-arrow-left me-2"></i>Back to Pregnancies
         </a>
     </div>
+</div>
 
     <div class="row">
         <div class="col-lg-8">

@@ -83,13 +83,41 @@ class LearningController extends Controller
         return view('learning.show', compact('material', 'relatedMaterials'));
     }
 
-    // Admin functions for midwives & CHO
-    public function adminIndex(Request $request)
+    // Admin functions for RHU admins & CHO (upload / manage materials).
+    // Midwives can only view materials via the shared Learning page.
+    private function requireLearningAdmin(): \App\Models\User
     {
         $user = $this->getCurrentUser();
-        if (!$user || (!$user->isMidwife() && !$user->isCho())) {
+        if (!$user || (!$user->isRhu() && !$user->isCho())) {
             abort(403, 'Unauthorized access.');
         }
+
+        return $user;
+    }
+
+    /** Route prefix + layout + section for the current admin's portal. */
+    private function adminViewContext(): array
+    {
+        $user = $this->getCurrentUser();
+
+        if ($user && $user->isCho()) {
+            return [
+                'routeBase' => 'cho.learning',
+                'layout' => 'cho.layout',
+                'section' => 'cho-content',
+            ];
+        }
+
+        return [
+            'routeBase' => 'rhu.learning',
+            'layout' => 'rhu.layout',
+            'section' => 'rhu-content',
+        ];
+    }
+
+    public function adminIndex(Request $request)
+    {
+        $this->requireLearningAdmin();
 
         $query = LearningMaterial::query();
 
@@ -110,25 +138,19 @@ class LearningController extends Controller
         }
 
         $materials = $query->latest()->paginate(10)->withQueryString();
-        return view('midwife.learning.index', compact('materials'));
+        return view('midwife.learning.index', array_merge(compact('materials'), $this->adminViewContext()));
     }
 
     public function create()
     {
-        $user = $this->getCurrentUser();
-        if (!$user || (!$user->isMidwife() && !$user->isCho())) {
-            abort(403, 'Unauthorized access.');
-        }
+        $this->requireLearningAdmin();
 
-        return view('midwife.learning.create');
+        return view('midwife.learning.create', $this->adminViewContext());
     }
 
     public function store(Request $request)
     {
-        $user = $this->getCurrentUser();
-        if (!$user || (!$user->isMidwife() && !$user->isCho())) {
-            abort(403, 'Unauthorized access.');
-        }
+        $this->requireLearningAdmin();
 
         $request->validate([
             'title'         => 'required|string|max:255',
@@ -170,27 +192,21 @@ class LearningController extends Controller
         $material = LearningMaterial::create($data);
         ActivityLog::log('create', "Created learning material/video: {$material->title}");
 
-        return redirect()->route('midwife.learning.index')
+        return redirect()->route($this->adminViewContext()['routeBase'] . '.index')
             ->with('success', 'Learning material / playable video published successfully');
     }
 
     public function edit($id)
     {
-        $user = $this->getCurrentUser();
-        if (!$user || (!$user->isMidwife() && !$user->isCho())) {
-            abort(403, 'Unauthorized access.');
-        }
+        $this->requireLearningAdmin();
 
         $material = LearningMaterial::findOrFail($id);
-        return view('midwife.learning.edit', compact('material'));
+        return view('midwife.learning.edit', array_merge(compact('material'), $this->adminViewContext()));
     }
 
     public function update(Request $request, $id)
     {
-        $user = $this->getCurrentUser();
-        if (!$user || (!$user->isMidwife() && !$user->isCho())) {
-            abort(403, 'Unauthorized access.');
-        }
+        $this->requireLearningAdmin();
 
         $material = LearningMaterial::findOrFail($id);
 
@@ -236,17 +252,14 @@ class LearningController extends Controller
         $material->update($data);
         ActivityLog::log('update', "Updated learning material/video: {$material->title}");
 
-        return redirect()->route('midwife.learning.index')
+        return redirect()->route($this->adminViewContext()['routeBase'] . '.index')
             ->with('success', 'Learning material updated successfully');
     }
 
     // Soft delete (archive) - NO HARD DELETES
     public function destroy($id)
     {
-        $user = $this->getCurrentUser();
-        if (!$user || (!$user->isMidwife() && !$user->isCho())) {
-            abort(403, 'Unauthorized access.');
-        }
+        $user = $this->requireLearningAdmin();
 
         $material = LearningMaterial::findOrFail($id);
         $title = $material->title;
@@ -261,7 +274,7 @@ class LearningController extends Controller
             return back()->withErrors(['reason' => $e->getMessage()])->withInput();
         }
 
-        return redirect()->route('midwife.learning.index')
+        return redirect()->route($this->adminViewContext()['routeBase'] . '.index')
             ->with('success', "Learning material '{$title}' moved to archives.");
     }
 

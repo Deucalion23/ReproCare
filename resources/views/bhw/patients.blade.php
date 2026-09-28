@@ -57,14 +57,12 @@
 @endpush
 
 @section('bhw-content')
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 fade-in-card">
-    <div>
-        <h1 class="page-title">All Women
-        </h1>
-        <p class="page-subtitle">
-            Enrolled Accounts (Portal-Active · Authenticated Patients) and Unlinked Profiles (BHW-Managed · Field Records) under your care
-        </p>
-    </div>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">All Women</div>
+            <p class="page-hero-subtitle">Browse enrolled women in your purok.</p>
+        </div>
     <div class="d-flex gap-2 align-items-center flex-wrap">
         <form method="GET" action="{{ route('bhw.patients') }}" class="d-flex">
             <input type="hidden" name="filter" value="{{ request('filter', 'all') }}">
@@ -85,6 +83,7 @@
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $trashCount }}</span>
             @endif
         </a>
+    </div>
     </div>
 </div>
 

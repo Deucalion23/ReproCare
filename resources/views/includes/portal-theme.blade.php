@@ -30,9 +30,10 @@
         width:100%;
     }
 
-    /* ── Page hero: white card, soft shadow, aligned ── */
+    /* ── Page hero: flat light card, soft shadow, aligned ── */
     .page-hero {
-        background:var(--color-surface) !important;
+        background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important;
+        background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important;
         border:1px solid var(--mw-border) !important;
         border-radius:18px !important;
         padding:1.75rem 2rem !important;
@@ -512,7 +513,7 @@
     .navbar .navbar-brand div.rounded-3 {
         background:linear-gradient(135deg, var(--color-secondary-soft), var(--color-secondary)) !important;
     }
-    .navbar .navbar-brand span span { color:var(--color-secondary-text) !important; }
+    .navbar .navbar-brand span span { color:#9B64B9 !important; }
 
     /* ── Badges / pills: soft pink default ── */
     .main-content .badge.bg-primary { background:var(--color-secondary-soft) !important; color:var(--color-secondary-text) !important; border:1px solid var(--color-secondary-soft); }

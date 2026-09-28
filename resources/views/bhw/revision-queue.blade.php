@@ -4,8 +4,14 @@
 
 @section('bhw-content')
 <div class="container-fluid">
-    <h4 class="mb-1">Draft / Needs Revision</h4>
-    <p class="text-muted">Items sent back by your BHW President or Midwife. Reviewer notes are highlighted — fix and resubmit.</p>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Needs Revision</div>
+            <p class="page-hero-subtitle">Fix returned records and resubmit.</p>
+        </div>
+    </div>
+</div>
 
     @if (session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     @if (session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif

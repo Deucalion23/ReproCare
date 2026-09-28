@@ -4,16 +4,17 @@
 
 @section('bhw-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">Activate Portal Account
-            </h1>
-            <p class="page-subtitle">Upgrade an Unlinked Profile (BHW-Managed · Field Record Only) into an Enrolled Account (Portal-Active · Direct Access Patient)</p>
+            <div class="page-hero-title">Activate Portal Account</div>
+            <p class="page-hero-subtitle">Convert walk-in to an enrolled woman account.</p>
         </div>
         <a href="{{ route('bhw.walk-in-patients.show', $walkInPatient->id) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-1"></i> Back to Patient Details
         </a>
     </div>
+</div>
 
     <div class="row">
         <div class="col-md-8">

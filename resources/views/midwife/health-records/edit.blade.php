@@ -18,9 +18,13 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Edit Health Record</h1>
-        <div class="d-flex gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Edit Health Record</div>
+            <p class="page-hero-subtitle">Update diagnosis, treatment, or notes.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('midwife.health-records.show', $healthRecord->id) }}" class="btn btn-outline-info">
                 <i class="bi bi-eye"></i> View Record
             </a>
@@ -29,6 +33,7 @@
             </a>
         </div>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

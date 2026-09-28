@@ -4,10 +4,11 @@
 
 @section('rhu-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="h3 mb-1">Barangay Health Workers</h1>
-            <p class="text-muted mb-0">Register and manage rank-and-file BHW accounts. Day-to-day supervision stays with the BHW President.</p>
+            <div class="page-hero-title">Barangay Health Workers</div>
+            <p class="page-hero-subtitle">Manage all BHWs under RHU supervision.</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('rhu.staff-transitions.index', ['type' => 'bhw_transfer']) }}" class="btn btn-filter">
@@ -18,6 +19,7 @@
             </a>
         </div>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

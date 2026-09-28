@@ -1,8 +1,8 @@
-@extends('midwife.layout')
+@extends($layout ?? 'midwife.layout')
 
 @section('title', 'Manage Learning Materials - ReproCare')
 
-@section('midwife-content')
+@section($section ?? 'midwife-content')
 <div class="py-2">
     {{-- Page Hero --}}
     <div class="page-hero fade-in-card mb-4">
@@ -15,7 +15,7 @@
                     Educational resources, patient care guidelines, and training materials.
                 </p>
             </div>
-            <a href="{{ route('midwife.learning.create') }}" class="btn-hero-primary">
+            <a href="{{ route(($routeBase ?? 'midwife.learning').'create') }}" class="btn-hero-primary">
                 <i class="bi bi-plus-circle-fill me-1"></i> Add Material
             </a>
         </div>
@@ -96,7 +96,7 @@
     {{-- Filter Toolbar --}}
     <div class="card fade-in-card mb-4" style="background:var(--color-surface); border:1px solid var(--color-border); border-radius:18px;">
         <div class="card-body p-3">
-            <form action="{{ route('midwife.learning.index') }}" method="GET" class="row g-2 align-items-center">
+            <form action="{{ route(($routeBase ?? 'midwife.learning').'index') }}" method="GET" class="row g-2 align-items-center">
                 <div class="col-md-6 col-12">
                     <div class="position-relative">
                         <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
@@ -117,7 +117,7 @@
                         <i class="bi bi-funnel-fill me-1"></i> Filter
                     </button>
                     @if(request('search') || request('type'))
-                        <a href="{{ route('midwife.learning.index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="height:42px; width:42px; border-radius:12px; border:1px solid var(--color-border);" title="Clear">
+                        <a href="{{ route(($routeBase ?? 'midwife.learning').'index') }}" class="btn btn-outline-secondary d-flex align-items-center justify-content-center" style="height:42px; width:42px; border-radius:12px; border:1px solid var(--color-border);" title="Clear">
                             <i class="bi bi-x-lg"></i>
                         </a>
                     @endif
@@ -182,7 +182,7 @@
                                     <i class="bi bi-calendar3 me-1"></i>{{ $material->created_at->format('M d, Y') }}
                                 </small>
                                 <div class="d-inline-flex align-items-center gap-1.5">
-                                    <a href="{{ route('midwife.learning.show', $material->id) }}" 
+                                    <a href="{{ route('learning.show', $material->id) }}" 
                                        class="btn btn-sm btn-primary" 
                                        style="border-radius:10px; padding:0.4rem 0.85rem; font-size:0.82rem; font-weight:700;">
                                         <i class="bi bi-eye me-1"></i> View
@@ -194,12 +194,12 @@
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px; border:1px solid var(--color-border); font-size:0.85rem;">
                                             <li>
-                                                <a href="{{ route('midwife.learning.edit', $material->id) }}" class="dropdown-item">
+                                                <a href="{{ route(($routeBase ?? 'midwife.learning').'edit', $material->id) }}" class="dropdown-item">
                                                     <i class="bi bi-pencil me-2"></i> Edit Material
                                                 </a>
                                             </li>
                                             <li>
-                                                <x-archive-form :action="route('midwife.learning.destroy', $material->id)" label="Archive" btnClass="dropdown-item text-warning" icon="bi bi-archive" confirmText="Archive this material? It will be retained in the archives." />
+                                                <x-archive-form :action="route(($routeBase ?? 'midwife.learning').'destroy', $material->id)" label="Archive" btnClass="dropdown-item text-warning" icon="bi bi-archive" confirmText="Archive this material? It will be retained in the archives." />
                                             </li>
                                         </ul>
                                     </div>
@@ -216,7 +216,7 @@
                     <h4 class="mt-3 fw-bold" style="color:var(--color-text);">No learning materials found</h4>
                     <p class="text-muted">Start creating educational content for mothers and community health workers.</p>
                     <div class="mt-2">
-                        <a href="{{ route('midwife.learning.create') }}" class="btn btn-primary px-4 py-2" style="border-radius:12px; font-weight:700;">
+                        <a href="{{ route(($routeBase ?? 'midwife.learning').'create') }}" class="btn btn-primary px-4 py-2" style="border-radius:12px; font-weight:700;">
                             <i class="bi bi-plus-circle me-1"></i> Add First Material
                         </a>
                     </div>

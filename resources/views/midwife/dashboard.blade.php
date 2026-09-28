@@ -281,9 +281,9 @@
                         </a>
                     </div>
                     <div class="col-6 d-flex">
-                        <a href="{{ route('midwife.learning.create') }}" class="quick-action-tile qa-amber w-100">
+                        <a href="{{ route('learning.index') }}" class="quick-action-tile qa-amber w-100">
                             <i class="bi bi-book-half"></i>
-                            <span>Add Class / Learning</span>
+                            <span>Learning Materials</span>
                         </a>
                     </div>
                     <div class="col-6 d-flex">

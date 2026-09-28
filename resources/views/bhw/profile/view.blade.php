@@ -45,13 +45,19 @@
     }
 </style>
 <div class="py-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">BHW Profile</div>
+            <p class="page-hero-subtitle">Read-only BHW profile view.</p>
+        </div>
+        <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('bhw.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
+    </div>
+</div>
     <div class="row justify-content-center">
         <div class="col-xl-9 col-lg-10">
-            <div class="mb-3">
-                <a href="{{ url()->previous() !== url()->current() ? url()->previous() : route('bhw.dashboard') }}" class="btn btn-outline-secondary">
-                    <i class="bi bi-arrow-left"></i> Back
-                </a>
-            </div>
             <div class="card shadow-sm profile-view-card">
                 <div class="card-header text-white profile-view-header">
                     <h4 class="mb-0">{{ $user->name }}'s Profile</h4>

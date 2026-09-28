@@ -1,6 +1,7 @@
 @php
-    $layout = auth()->user()?->isCho() ? 'cho.layout' : 'midwife.layout';
-    $section = auth()->user()?->isCho() ? 'cho-content' : 'midwife-content';
+    $layout = $layout ?? (auth()->user()?->isCho() ? 'cho.layout' : 'rhu.layout');
+    $section = $section ?? (auth()->user()?->isCho() ? 'cho-content' : 'rhu-content');
+    $routeBase = $routeBase ?? (auth()->user()?->isCho() ? 'cho.learning' : 'rhu.learning');
 @endphp
 
 @extends($layout)
@@ -9,16 +10,17 @@
 
 @section($section)
 <div class="py-3" style="width:100%; max-width:100%;">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h2 class="fw-800 text-dark mb-1" style="font-family:'Plus Jakarta Sans',sans-serif;">Edit Learning Material
-            </h2>
-            <p class="text-muted mb-0" style="font-size:0.9rem;">Update video links, uploaded files, or clinical counseling points.</p>
+            <div class="page-hero-title">Edit Learning Material</div>
+            <p class="page-hero-subtitle">Revise title, body, or attachment.</p>
         </div>
-        <a href="{{ route('midwife.learning.index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius:10px;">
+        <a href="{{ route($routeBase.'index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" style="border-radius:10px;">
                 <i class="bi bi-arrow-left"></i> Back to Learning Materials
         </a>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-4 border-0 shadow-sm" style="border-radius:14px;">
@@ -40,7 +42,7 @@
         </div>
     @endif
 
-    <form method="POST" action="{{ route('midwife.learning.update', $material->id) }}" enctype="multipart/form-data">
+    <form method="POST" action="{{ route($routeBase.'update', $material->id) }}" enctype="multipart/form-data">
         @csrf
         @method('PUT')
         
@@ -157,7 +159,7 @@
                             <button type="submit" class="btn btn-primary fw-700 py-2.5" style="border-radius:10px;">
                                 <i class="bi bi-save me-1"></i> Update Media Material
                             </button>
-                            <a href="{{ route('midwife.learning.index') }}" class="btn btn-light border py-2" style="border-radius:10px;">Cancel</a>
+                            <a href="{{ route($routeBase.'index') }}" class="btn btn-light border py-2" style="border-radius:10px;">Cancel</a>
                         </div>
                     </div>
                 </div>

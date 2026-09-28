@@ -92,11 +92,11 @@
 
 @section('cho-content')
 
-<div class="settings-page-header pref-card fade-in-card p-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1>Settings — City-Wide System Level</h1>
-            <p style="font-size:0.9rem; color:var(--color-text); font-weight:600; margin:0;">Clinical thresholds, office profile, maintenance, audit retention, and SMS gateway for all of San Carlos City</p>
+            <div class="page-hero-title">Settings</div>
+            <p class="page-hero-subtitle">Manage city-wide system configuration.</p>
         </div>
     </div>
 </div>

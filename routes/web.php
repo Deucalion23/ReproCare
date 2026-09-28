@@ -203,17 +203,6 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
         Route::get('/patient/{userId}', [MenstruationController::class, 'patientRecords'])->name('patient');
     });
     
-    // Learning Materials
-    Route::prefix('learning')->name('learning.')->group(function () {
-        Route::get('/', [LearningController::class, 'adminIndex'])->name('index');
-        Route::get('/create', [LearningController::class, 'create'])->name('create');
-        Route::post('/', [LearningController::class, 'store'])->name('store');
-        Route::get('/{id}', [LearningController::class, 'show'])->name('show');
-        Route::get('/{id}/edit', [LearningController::class, 'edit'])->name('edit');
-        Route::put('/{id}', [LearningController::class, 'update'])->name('update');
-        Route::delete('/{id}', [LearningController::class, 'destroy'])->name('destroy');
-    });
-    
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [MidwifeController::class, 'reportsIndex'])->name('index');
@@ -223,6 +212,14 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
         Route::get('/{id}/details', [MidwifeController::class, 'reportsDetails'])->name('details');
         Route::get('/{id}', [MidwifeController::class, 'reportsDetails'])->name('show');
     });
+
+    // Midwife Monthly Reports Validation (BHW President -> Midwife -> RHU)
+    Route::prefix('monthly-reports')->name('monthly-reports.')->group(function () {
+        Route::get('/', [MidwifeController::class, 'monthlyReports'])->name('index');
+        Route::get('/{id}', [MidwifeController::class, 'monthlyReportShow'])->name('show');
+        Route::post('/{id}/approve', [MidwifeController::class, 'monthlyReportApprove'])->name('approve');
+        Route::post('/{id}/return', [MidwifeController::class, 'monthlyReportReturn'])->name('return');
+    });
     
     // Pregnant Patients
     Route::get('/pregnant-patients', [MidwifeController::class, 'pregnantPatients'])->name('pregnant-patients');
@@ -230,20 +227,7 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
 
     // Risk Alerts inbox (clinical review queue)
     Route::get('/risk-alerts', [MidwifeController::class, 'riskAlerts'])->name('risk-alerts');
-    
-    // Forum Administration
-    Route::prefix('forum-admin')->name('forum.admin.')->group(function () {
-        Route::get('/', [ForumController::class, 'adminIndex'])->name('index');
-        Route::get('/create', [ForumController::class, 'adminCreate'])->name('create');
-        Route::post('/', [ForumController::class, 'adminStore'])->name('store');
-        Route::delete('/bulk', [ForumController::class, 'bulkDelete'])->name('bulk-delete');
-        Route::get('/{id}', [ForumController::class, 'adminShow'])->name('show');
-        Route::get('/{id}/edit', [ForumController::class, 'adminEdit'])->name('edit');
-        Route::put('/{id}', [ForumController::class, 'adminUpdate'])->name('update');
-        Route::delete('/{id}', [ForumController::class, 'adminDestroy'])->name('destroy');
-        Route::post('/{id}/restore', [ForumController::class, 'restorePost'])->name('restore');
-    });
-    
+
     // Notifications
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/create', [NotificationController::class, 'create'])->name('create');
@@ -480,6 +464,8 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
         Route::delete('/{id}', [BhwPresidentController::class, 'reportDelete'])->name('delete');
         Route::post('/{id}/approve', [BhwPresidentController::class, 'reportApprove'])->name('approve');
         Route::post('/{id}/reject', [BhwPresidentController::class, 'reportReject'])->name('reject');
+        Route::post('/{id}/resubmit-to-midwife', [BhwPresidentController::class, 'reportResubmitToMidwife'])->name('resubmit-to-midwife');
+        Route::post('/{id}/send-back', [BhwPresidentController::class, 'reportSendBackToBhw'])->name('send-back');
     });
 
     Route::prefix('messages')->name('messages.')->group(function () {
@@ -673,6 +659,16 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/bhws', [ChoController::class, 'bhws'])->name('bhws');
     });
 
+    // Learning Materials Management (upload / edit / archive — CHO only here)
+    Route::prefix('learning')->name('learning.')->group(function () {
+        Route::get('/', [LearningController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [LearningController::class, 'create'])->name('create');
+        Route::post('/', [LearningController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [LearningController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [LearningController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LearningController::class, 'destroy'])->name('destroy');
+    });
+
     // Database Management
     Route::prefix('database')->name('database.')->group(function () {
         Route::get('/', [DatabaseBackupController::class, 'index'])->name('index');
@@ -732,6 +728,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/{id}', [RhuController::class, 'midwifeDetails'])->name('show');
         Route::get('/{id}/edit', [RhuController::class, 'editMidwife'])->name('edit');
         Route::put('/{id}', [RhuController::class, 'updateMidwife'])->name('update');
+        Route::post('/{id}/activate', [RhuController::class, 'activateMidwife'])->name('activate');
         Route::delete('/{id}', [RhuController::class, 'destroyMidwife'])->name('destroy');
     });
 
@@ -744,6 +741,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/{id}', [RhuController::class, 'showBhwPresident'])->name('show');
         Route::get('/{id}/edit', [RhuController::class, 'editBhwPresident'])->name('edit');
         Route::put('/{id}', [RhuController::class, 'updateBhwPresident'])->name('update');
+        Route::post('/{id}/activate', [RhuController::class, 'activateBhwPresident'])->name('activate');
         Route::delete('/{id}', [RhuController::class, 'destroyBhwPresident'])->name('destroy');
     });
 
@@ -808,13 +806,23 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/export/pdf', [RhuController::class, 'exportPdf'])->name('export.pdf');
     });
 
+    // Learning Materials Management (upload / edit / archive — RHU only here)
+    Route::prefix('learning')->name('learning.')->group(function () {
+        Route::get('/', [LearningController::class, 'adminIndex'])->name('index');
+        Route::get('/create', [LearningController::class, 'create'])->name('create');
+        Route::post('/', [LearningController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [LearningController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [LearningController::class, 'update'])->name('update');
+        Route::delete('/{id}', [LearningController::class, 'destroy'])->name('destroy');
+    });
+
     // GIS Maternal Risk Heat Map
     Route::prefix('gis')->name('gis.')->group(function () {
         Route::get('/', [GisController::class, 'index'])->name('index');
         Route::get('/data', [GisController::class, 'data'])->name('data');
     });
 
-    // BHW Monthly Reports Approval
+    // Midwife Monthly Reports Approval (President -> Midwife -> RHU)
     Route::prefix('bhw-reports')->name('bhw-reports.')->group(function () {
         Route::get('/', [RhuController::class, 'bhwReports'])->name('index');
         Route::get('/{id}', [RhuController::class, 'bhwReportShow'])->name('show');

@@ -6,7 +6,7 @@
 <style>
     /* === Care Messaging — clean, borderless, dashboard-matched === */
     .rc-msg-app { --chat-primary:var(--color-secondary-text); --chat-primary-dk:var(--color-secondary-text); --chat-ink:var(--color-surface-strong); --chat-muted:var(--color-text-muted); --chat-faint:var(--color-text-muted); --chat-soft:var(--color-bg); max-width:1200px; margin:0 auto; padding-bottom:2rem; }
-    .rc-msg-hero { background:var(--color-surface); background-color:var(--color-surface); border:none; border-radius:20px; padding:1.35rem 1.6rem; margin-bottom:1.25rem; box-shadow:var(--wp-shadow-sm); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .rc-msg-hero { background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); border:none; border-radius:20px; padding:1.35rem 1.6rem; margin-bottom:1.25rem; box-shadow:var(--wp-shadow-sm); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
     .rc-msg-hero h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.35rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.6rem; letter-spacing:-0.01em; }
     .rc-msg-hero h1 .rc-msg-ico { width:42px; height:42px; border-radius:12px; background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:1px solid var(--color-border); color:var(--color-text); display:inline-flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
     .rc-msg-hero p { margin:.25rem 0 0; font-size:.85rem; color:var(--chat-muted); }
@@ -149,13 +149,13 @@
                 <div class="rc-panel-head-top" style="margin-bottom:0;">
                     <h3>Available Contacts</h3>
                 </div>
-                <p class="rc-panel-sub">@if($currentUserRole === 'user') BHW staff assigned to your barangay. @else Staff &amp; patient directory. @endif</p>
+                <p class="rc-panel-sub">@if($currentUserRole === 'user') BHW staff assigned to your barangay. @elseif($currentUserRole === 'midwife') BHW Presidents in your designated barangays. @else Staff &amp; patient directory. @endif</p>
             </div>
             @if($contacts->isEmpty())
                 <div class="rc-empty">
                     <i class="bi bi-people"></i>
                     <h6>No contacts found</h6>
-                    <p>@if($currentUserRole === 'user') No BHW is assigned to your barangay right now. @else No available contacts under your health center right now. @endif</p>
+                    <p>@if($currentUserRole === 'user') No BHW is assigned to your barangay right now. @elseif($currentUserRole === 'midwife') No BHW President is assigned to your designated barangays yet. @else No available contacts under your health center right now. @endif</p>
                 </div>
             @else
                 <div class="rc-contacts-grid">

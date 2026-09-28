@@ -45,13 +45,13 @@ class WalkInSmsAndMessagingTest extends AutomationTestCase
     public function test_messaging_idempotency_trash_and_restore(): void
     {
         $a = $this->patient(['role' => 'midwife']);
-        $b = $this->patient();
+        $b = $this->patient(['role' => 'bhw_president']);
         $this->actingAs($a);
         $controller = new MessageController();
         $uuid = 'test-uuid-123';
         $req = function () use ($b, $uuid) {
             $r = \Illuminate\Http\Request::create('/midwife/messages/send', 'POST', [
-                'receiver_id' => $b->id, 'receiver_role' => 'woman',
+                'receiver_id' => $b->id, 'receiver_role' => 'bhw_president',
                 'body' => 'Hello', 'client_uuid' => $uuid,
             ]);
             $r->headers->set('Accept', 'application/json');

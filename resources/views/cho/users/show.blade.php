@@ -84,8 +84,8 @@
                                 <i class="bi bi-person-x me-1"></i> Suspend Account
                             </button>
                         </form>
-                    @elseif($user->status === 'suspended')
-                        <form method="POST" action="{{ route('cho.users.activate', $user->id) }}">
+                    @elseif(in_array($user->status, ['suspended', 'inactive']))
+                        <form method="POST" action="{{ route('cho.users.activate', $user->id) }}" onsubmit="return confirm('Re-activate this account? They will be able to log in again.');">
                             @csrf
                             <button type="submit" class="btn btn-success text-white w-100">
                                 <i class="bi bi-person-check me-1"></i> Activate Account

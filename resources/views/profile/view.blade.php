@@ -11,7 +11,7 @@
     }
 
     .profile-view-header {
-        background:linear-gradient(135deg, var(--color-info), var(--color-info));
+        background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
     }
 
     .profile-view-avatar {
@@ -52,6 +52,14 @@
                     <i class="bi bi-arrow-left"></i> Back
                 </a>
             </div>
+            <div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">User Profile</div>
+            <p class="page-hero-subtitle">Read-only profile view.</p>
+        </div>
+    </div>
+</div>
             <div class="card shadow-sm profile-view-card">
                 <div class="card-header text-white profile-view-header">
                     <h4 class="mb-0">{{ $user->name }}'s Profile</h4>

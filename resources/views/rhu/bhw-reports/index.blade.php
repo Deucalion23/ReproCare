@@ -1,14 +1,14 @@
 @extends('rhu.layout')
 
-@section('title', 'BHW Monthly Reports - RHU Portal | ReproCare')
+@section('title', 'Midwife Monthly Reports - RHU Portal | ReproCare')
 
 @section('rhu-content')
 <div class="workspace-stack">
     <div class="page-hero fade-in-card">
         <div class="workspace-toolbar" style="position:relative;z-index:1;">
             <div>
-                <div class="page-hero-title">BHW Monthly Reports</div>
-                <p class="page-hero-subtitle">Final review queue for reports approved by the BHW president and waiting for RHU Admin action.</p>
+                <div class="page-hero-title">Midwife Monthly Reports</div>
+                <p class="page-hero-subtitle">Final review queue for reports validated by the midwife and waiting for RHU Admin action.</p>
             </div>
         </div>
     </div>
@@ -16,6 +16,12 @@
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show mb-0">
             <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show mb-0">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
@@ -27,11 +33,11 @@
         </div>
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Pending Review</div>
-            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->where('submission_status', 'submitted_to_midwife')->count() }}</div>
+            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->where('submission_status', 'approved_by_midwife')->count() }}</div>
         </div>
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Approved</div>
-            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->where('submission_status', 'approved_by_midwife')->count() }}</div>
+            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->where('submission_status', 'approved_by_rhu')->count() }}</div>
         </div>
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Rejected</div>
@@ -79,6 +85,7 @@
                                 <th>Records</th>
                                 <th>Submission Status</th>
                                 <th>President Notes</th>
+                                <th>Midwife Notes</th>
                                 <th class="text-end px-4">Actions</th>
                             </tr>
                         </thead>
@@ -100,12 +107,16 @@
                                     <td>
                                         @php
                                             $statusChip = match($report->submission_status) {
-                                                'approved_by_midwife' => 'bg-success',
+                                                'approved_by_rhu' => 'bg-success',
+                                                'approved_by_midwife' => 'bg-primary',
+                                                'returned_to_president' => 'bg-info',
                                                 'rejected', 'needs_revision' => 'bg-danger',
                                                 default => 'bg-warning',
                                             };
                                             $statusLabel = match($report->submission_status) {
-                                                'approved_by_midwife' => 'Approved',
+                                                'approved_by_rhu' => 'Approved',
+                                                'approved_by_midwife' => 'Validated by Midwife',
+                                                'returned_to_president' => 'Returned to President',
                                                 'rejected', 'needs_revision' => 'Needs Revision',
                                                 default => 'Pending Review',
                                             };
@@ -113,10 +124,11 @@
                                         <span class="badge {{ $statusChip }} text-white text-xs">{{ $statusLabel }}</span>
                                     </td>
                                     <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $report->president_notes ?? 'No notes' }}</td>
+                                    <td style="max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ $report->midwife_notes ?? 'No notes' }}</td>
                                     <td class="text-end px-4">
                                         <div class="d-flex justify-content-end gap-2">
                                             <a href="{{ route('rhu.bhw-reports.show', $report->id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye"></i></a>
-                                            @if($report->submission_status === 'submitted_to_midwife')
+                                            @if($report->submission_status === 'approved_by_midwife')
                                                 <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#approveModal{{ $report->id }}"><i class="bi bi-check-lg"></i></button>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $report->id }}"><i class="bi bi-x-lg"></i></button>
                                             @endif
@@ -135,7 +147,7 @@
                 <div class="text-center py-5">
                     <i class="bi bi-file-earmark-x text-muted" style="font-size:3rem;"></i>
                     <h5 class="mt-3 mb-1 fw-700">No reports found</h5>
-                    <p class="text-muted text-xs">Reports approved by the BHW president will appear here when they reach the queue.</p>
+                    <p class="text-muted text-xs">Reports validated by the midwife will appear here when they reach the queue.</p>
                 </div>
             @endif
         </div>
@@ -143,7 +155,7 @@
 </div>
 
 @foreach($reports as $report)
-    @if($report->submission_status === 'submitted_to_midwife')
+    @if($report->submission_status === 'approved_by_midwife')
         <div class="modal fade report-action-modal" id="approveModal{{ $report->id }}" tabindex="-1">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -177,7 +189,7 @@
                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                         </div>
                         <div class="modal-body">
-                            <p class="text-muted text-xs mb-3">Reject this report and return it to the BHW president with comments.</p>
+                            <p class="text-muted text-xs mb-3">Reject this report and return it to the BHW with comments.</p>
                             <label class="form-label text-xs fw-600 required-label">Reason for rejection</label>
                             <textarea name="notes" class="form-control" rows="3" required></textarea>
                         </div>

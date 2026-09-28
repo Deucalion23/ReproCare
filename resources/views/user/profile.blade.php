@@ -3,6 +3,14 @@
 @section('title', 'My Profile - ReproCare')
 
 @section('user-content')
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">My Profile</div>
+            <p class="page-hero-subtitle">View and manage your personal information.</p>
+        </div>
+    </div>
+</div>
 <style>
     .user-profile-card {
         background:color-mix(in srgb, var(--color-surface-soft) 96%, transparent);

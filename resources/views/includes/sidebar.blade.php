@@ -73,8 +73,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('learning.*') ? 'active' : '' }}"
-                   href="{{ route('learning.index') }}">
+                <a class="nav-link {{ request()->routeIs('cho.learning*') ? 'active' : '' }}"
+                   href="{{ route('cho.learning.index') }}">
                     <i class="bi bi-camera-video-fill"></i>
                     <span>Learning Materials</span>
                 </a>
@@ -245,6 +245,17 @@
             </li>
         </ul>
 
+        <div class="sidebar-section-label">Content</div>
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('rhu.learning*') ? 'active' : '' }}"
+                   href="{{ route('rhu.learning.index') }}">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    <span>Learning Materials</span>
+                </a>
+            </li>
+        </ul>
+
         <div class="sidebar-section-label">Maternal Health</div>
         <ul class="nav flex-column">
             <li class="nav-item">
@@ -269,7 +280,7 @@
                 <a class="nav-link {{ request()->routeIs('rhu.bhw-reports*') ? 'active' : '' }}"
                    href="{{ route('rhu.bhw-reports.index') }}">
                     <i class="bi bi-file-earmark-text-fill"></i>
-                    <span>BHW Monthly Reports</span>
+                    <span>Midwife Monthly Reports</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -515,22 +526,15 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('forum.*') && !request()->routeIs('midwife.forum.admin.*') ? 'active' : '' }}"
+                <a class="nav-link {{ request()->routeIs('forum.*') ? 'active' : '' }}"
                    href="{{ route('forum.index') }}">
                     <i class="bi bi-chat-dots-fill"></i>
                     <span>Community Forum</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('midwife.forum.admin.*') ? 'active' : '' }}"
-                   href="{{ route('midwife.forum.admin.index') }}">
-                    <i class="bi bi-shield-check"></i>
-                    <span>Forum Admin</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('midwife.learning*') || request()->routeIs('learning.*') ? 'active' : '' }}"
-                   href="{{ route('midwife.learning.index') }}">
+                <a class="nav-link {{ request()->routeIs('learning.*') ? 'active' : '' }}"
+                   href="{{ route('learning.index') }}">
                     <i class="bi bi-mortarboard-fill"></i>
                     <span>Learning Materials</span>
                 </a>
@@ -544,6 +548,13 @@
                    href="{{ route('midwife.reports.index') }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
                     <span>Reports</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('midwife.monthly-reports*') ? 'active' : '' }}"
+                   href="{{ route('midwife.monthly-reports.index') }}">
+                    <i class="bi bi-file-earmark-text-fill"></i>
+                    <span>BHW President Monthly Reports</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -654,7 +665,7 @@
                 <a class="nav-link {{ request()->routeIs('bhw-president.reports*') ? 'active' : '' }}"
                    href="{{ route('bhw-president.reports.index') }}">
                     <i class="bi bi-file-earmark-bar-graph-fill"></i>
-                    <span>Monthly Reports</span>
+                    <span>BHW Reports</span>
                 </a>
             </li>
         </ul>

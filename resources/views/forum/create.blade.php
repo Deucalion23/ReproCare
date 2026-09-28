@@ -123,7 +123,6 @@
 </style>
 @endpush
 
-@section('user-content')
 @php($forumUser = auth()->user())
 
 <div class="create-post-wrap fade-in-card">
@@ -134,6 +133,15 @@
             <i class="bi bi-arrow-left"></i> Back to Forum
         </a>
     </div>
+
+    <div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Create Post</div>
+            <p class="page-hero-subtitle">Share an announcement or start a discussion.</p>
+        </div>
+    </div>
+</div>
 
     <div class="card create-post-card">
 

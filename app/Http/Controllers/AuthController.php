@@ -16,10 +16,18 @@ use Illuminate\Validation\Rule;
 class AuthController extends Controller
 {
     /**
-     * Wrong-password attempts after which an approved patient account
-     * auto-locks (status inactive) until an RHU admin reactivates it.
+     * Wrong-password attempts after which an approved account auto-locks
+     * (status inactive) until an admin reactivates it. Applies to women,
+     * BHWs, BHW Presidents, midwives, and RHU admins — CHO accounts are
+     * exempt so the office always retains access.
      */
     private const MAX_LOGIN_ATTEMPTS = 3;
+
+    /** Roles subject to the 3-strike auto-lockout. CHO is exempt. */
+    private const LOCKOUT_ROLES = ['user', 'bhw', 'bhw_president', 'midwife', 'rhu'];
+
+    /** Shown (in a modal) whenever an account locks or a locked owner retries. */
+    public const LOCKOUT_MESSAGE = 'Too many incorrect password attempts. Your account has been deactivated for security. Please contact your BHW or the BHW President of your barangay to inform the RHU 1 administrator to reactivate it.';
 
     /**
      * Legacy city-wide 86-barangay list. Kept for reference only —
@@ -249,6 +257,14 @@ class AuthController extends Controller
                 ])->onlyInput('email');
             }
 
+            // Auto-locked accounts (3 wrong passwords): the owner sees the
+            // lockout modal again on every retry until reactivated — even
+            // with the right password.
+            if (($user->status ?? 'approved') === 'inactive' && in_array($user->role, self::LOCKOUT_ROLES, true)) {
+                Auth::logout();
+                return $this->lockedResponse();
+            }
+
             // Block deactivated / archived accounts (e.g. former admins after a role handover).
             // Only approved accounts may hold an active session.
             if (($user->status ?? 'approved') !== 'approved') {
@@ -272,11 +288,17 @@ class AuthController extends Controller
             };
         }
 
+        // Wrong password. An already-locked owner gets the lockout modal
+        // again instead of a generic mismatch message.
+        $existing = \App\Models\User::where('email', $credentials['email'])->first();
+        if ($existing && ($existing->status ?? 'approved') === 'inactive'
+            && in_array($existing->role, self::LOCKOUT_ROLES, true)) {
+            return $this->lockedResponse();
+        }
+
         // Locked on this very attempt: tell the owner why, and who to see.
         if ($this->registerFailedLoginAttempt($credentials['email'])) {
-            return back()->withErrors([
-                'email' => 'Too many incorrect password attempts. Your account has been deactivated for security. Please contact your RHU 1 administrator to reactivate it.',
-            ])->onlyInput('email');
+            return $this->lockedResponse();
         }
 
         return back()->withErrors([
@@ -285,17 +307,27 @@ class AuthController extends Controller
     }
 
     /**
-     * Count a failed login against a patient account. Approved patient
-     * accounts lock (status inactive) after MAX_LOGIN_ATTEMPTS wrong
-     * passwords; only an RHU admin can reactivate them. Other roles and
-     * non-approved statuses are never touched. Returns true when this
-     * attempt triggered the lock.
+     * Redirect back with the lockout message plus a flash flag so the
+     * login page pops it in a modal.
+     */
+    private function lockedResponse()
+    {
+        return back()->withErrors([
+            'email' => self::LOCKOUT_MESSAGE,
+        ])->with('account_locked', self::LOCKOUT_MESSAGE)->onlyInput('email');
+    }
+
+    /**
+     * Count a failed login against an account. Approved accounts in
+     * LOCKOUT_ROLES lock (status inactive) after MAX_LOGIN_ATTEMPTS wrong
+     * passwords; CHO accounts and non-approved statuses are never touched.
+     * Returns true when this attempt triggered the lock.
      */
     private function registerFailedLoginAttempt(string $email): bool
     {
         $user = \App\Models\User::where('email', $email)->first();
 
-        if (!$user || $user->role !== 'user' || $user->status !== 'approved') {
+        if (!$user || !in_array($user->role, self::LOCKOUT_ROLES, true) || $user->status !== 'approved') {
             return false;
         }
 
@@ -303,7 +335,7 @@ class AuthController extends Controller
 
         if ($attempts >= self::MAX_LOGIN_ATTEMPTS) {
             $user->update(['status' => 'inactive', 'failed_login_attempts' => 0]);
-            \App\Models\ActivityLog::log('update', "Patient account auto-locked after {$attempts} failed login attempts: {$user->name}", $user);
+            \App\Models\ActivityLog::log('update', "Account auto-locked after {$attempts} failed login attempts: {$user->name} ({$user->role})", $user);
             return true;
         }
 

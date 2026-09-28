@@ -800,34 +800,28 @@
 
         /* ── 8. PAGE HERO ── */
         .page-hero {
-            background:linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-text) 50%, var(--color-primary) 100%);
-            border-radius:24px;
+            background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
+            border-radius:20px;
             padding:1.85rem 2.25rem;
             margin-bottom:1.75rem;
             position:relative;
             overflow:hidden;
-            box-shadow:0 12px 36px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent);
+            box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);
         }
         .page-hero::before {
-            content:'';
-            position:absolute;
-            width:320px; height:320px;
-            border-radius:50%;
-            background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 18%, transparent) 0%, transparent 70%);
-            top:-100px; right:-80px;
-            pointer-events:none;
+            display:none;
         }
         .page-hero-title {
             font-family:'Plus Jakarta Sans', sans-serif;
             font-size:1.6rem;
             font-weight:800;
-            color:var(--color-on-solid);
+            color:var(--color-text);
             margin-bottom:0.3rem;
             position:relative;
         }
         .page-hero-subtitle {
             font-size:0.9rem;
-            color:color-mix(in srgb, var(--color-on-solid) 85%, transparent);
+            color:var(--color-text-muted);
             margin:0;
             position:relative;
         }
@@ -1148,21 +1142,54 @@
             border-radius:22px;
             background:var(--bg-card);
             box-shadow:var(--shadow-md);
+            overflow:hidden;
         }
-        .app-confirm-modal .modal-header,
+        .app-confirm-modal .modal-header {
+            background:transparent;
+            border-bottom:1px solid var(--border);
+            border-radius:22px 22px 0 0;
+            padding:1.1rem 1.4rem 0.75rem;
+            color:var(--color-text);
+        }
+        .app-confirm-modal .modal-header .modal-title {
+            font-family:'Plus Jakarta Sans', sans-serif;
+            font-weight:800;
+            font-size:1.05rem;
+            color:var(--color-text);
+        }
+        .app-confirm-modal .modal-header .btn-close { filter:none; opacity:0.55; }
+        .app-confirm-modal .modal-body {
+            text-align:center;
+            padding:1.4rem 1.75rem 1.25rem;
+        }
         .app-confirm-modal .modal-footer {
             border-color:var(--border);
+            background:transparent;
+            justify-content:center;
+            gap:0.6rem;
+            padding:0.9rem 1.4rem 1.3rem;
+        }
+        .app-confirm-modal .modal-footer .btn {
+            border-radius:999px;
+            padding:0.55rem 1.6rem;
+            font-weight:700;
         }
         .app-confirm-icon {
-            width:54px;
-            height:54px;
-            border-radius:16px;
+            width:64px;
+            height:64px;
+            border-radius:50%;
             display:grid;
             place-items:center;
-            margin-bottom:1rem;
-            background:linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 16%, transparent), color-mix(in srgb, var(--color-secondary) 16%, transparent));
-            color:var(--primary);
-            font-size:1.35rem;
+            margin:0 auto 1rem;
+            background:color-mix(in srgb, var(--color-secondary) 14%, var(--color-surface));
+            border:1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent);
+            color:var(--color-secondary-text);
+            font-size:1.6rem;
+        }
+        .app-confirm-modal #appConfirmMessage {
+            color:var(--color-text);
+            font-size:0.95rem;
+            line-height:1.55;
         }
 
         /* ── Dedicated LOGOUT dialog (all roles) ── */
@@ -1954,41 +1981,28 @@
             border-radius:20px;
             padding:1.75rem 2rem;
             margin-bottom:1.75rem;
-            background:linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 55%, var(--accent-pink) 100%);
-            box-shadow:0 8px 40px var(--primary-glow), 0 2px 0 color-mix(in srgb, rgb(var(--color-shadow-rgb)) 7%, transparent) inset;
+            background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
+            box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);
             transition:box-shadow 0.3s ease;
         }
         /* Orb decorations */
         .page-hero::before {
-            content:'';
-            position:absolute;
-            top:-60px; right:-60px;
-            width:220px; height:220px;
-            background:color-mix(in srgb, var(--color-surface) 6%, transparent);
-            border-radius:50%;
-            pointer-events:none;
+            display:none;
         }
         .page-hero::after {
-            content:'';
-            position:absolute;
-            bottom:-50px; left:35%;
-            width:160px; height:160px;
-            background:color-mix(in srgb, var(--color-surface) 4%, transparent);
-            border-radius:50%;
-            pointer-events:none;
+            display:none;
         }
         .page-hero-title {
             font-family:'Plus Jakarta Sans', sans-serif;
             font-size:1.4rem;
             font-weight:800;
-            color:var(--color-on-solid);
+            color:var(--color-text);
             letter-spacing:-0.5px;
-            text-shadow:0 1px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent);
             margin:0;
         }
         .page-hero-subtitle {
             font-size:0.875rem;
-            color:color-mix(in srgb, var(--color-on-solid) 75%, transparent);
+            color:var(--color-text-muted);
             margin:0.3rem 0 0;
         }
 
@@ -2485,7 +2499,7 @@
 
         /* ── Layout surfaces (all role portals) ── */
         [data-theme="dark"] .main-content { background-color:var(--color-bg) !important; color:var(--color-text) !important; }
-        [data-theme="dark"] .page-hero { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-border) !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 45%, transparent) !important; color:var(--color-text) !important; }
+        [data-theme="dark"] .page-hero { background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important; background-color:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)) !important; border:1px solid var(--color-border) !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 45%, transparent) !important; color:var(--color-text) !important; }
         [data-theme="dark"] .page-hero-title, [data-theme="dark"] .page-title { color:var(--color-text) !important; }
         [data-theme="dark"] .page-hero-subtitle, [data-theme="dark"] .page-subtitle { color:var(--color-text-muted) !important; }
         [data-theme="dark"] .card, [data-theme="dark"] .glass-card, [data-theme="dark"] .table-card { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border-color:var(--color-border) !important; color:var(--color-text) !important; }

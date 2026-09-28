@@ -4,6 +4,14 @@
 
 @section('bhw-content')
 <div class="py-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Pregnancy Report Details</div>
+            <p class="page-hero-subtitle">Review the pregnancy-type report content.</p>
+        </div>
+    </div>
+</div>
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>

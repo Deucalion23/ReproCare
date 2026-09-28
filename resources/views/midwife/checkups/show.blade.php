@@ -4,9 +4,13 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Checkup Details</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
+            <div class="page-hero-title">Checkup Details</div>
+            <p class="page-hero-subtitle">Review findings and follow-up for this visit.</p>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('midwife.checkups.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Checkups
             </a>
@@ -15,6 +19,7 @@
             </a>
         </div>
     </div>
+</div>
 
     <div class="row">
         <div class="col-md-8">

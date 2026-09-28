@@ -165,7 +165,7 @@
     }
 
     .women-brand-title span {
-        color:#B7A8D3;
+        color:#9B64B9;
     }
 
     /* ── 3. SECTION 2: Center Primary Links ── */
@@ -793,7 +793,7 @@
         <div class="women-nav-left flex items-center gap-2.5 flex-shrink-0">
             <a href="{{ route('user.dashboard') }}" class="women-brand-link flex items-center" title="ReproCare Home">
                 <span class="women-brand-mark" aria-hidden="true"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""></span>
-                <span class="women-brand-title font-extrabold text-slate-800">Repro<span>Care</span></span>
+                <span class="women-brand-title font-extrabold text-slate-800">Repro<span style="color:#9B64B9;">Care</span></span>
             </a>
         </div>
 
@@ -985,7 +985,7 @@
         <div class="d-flex align-items-center" style="gap:0.125rem;">
             <span aria-hidden="true" style="width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 2rem; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
             <div style="margin-left:-0.2rem; min-width:0;">
-                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem;" id="womenMobileDrawerLabel">Repro<span style="color:#B7A8D3;">Care</span></h6>
+                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem;" id="womenMobileDrawerLabel">Repro<span style="color:#9B64B9;">Care</span></h6>
                 <small class="text-muted" style="font-size:0.72rem;">Mother &amp; Patient Portal</small>
             </div>
         </div>

@@ -43,11 +43,6 @@
     .fb-remember { display:flex; align-items:center; gap:9px; font-size:.82rem; color:var(--color-text-muted); margin:2px 0 18px; cursor:pointer; }
     .fb-remember input { accent-color:var(--color-secondary-text); width:16px; height:16px; }
     .fb-input-wrap .password-toggle { top:50%; transform:translateY(-50%); right:8px; }
-    .fb-demo { margin-top:22px; border:1px dashed var(--color-border); border-radius:18px; padding:14px 16px; background:var(--color-bg); }
-    .fb-demo summary { cursor:pointer; font-size:.8rem; font-weight:700; color:var(--color-text-muted); }
-    .fb-demo .demo-options { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-    .fb-demo .demo-options button { background:var(--color-surface); border:1px solid var(--color-border); border-radius:999px; padding:7px 14px; font-size:.76rem; font-weight:600; color:var(--color-text-muted); cursor:pointer; transition:all .18s; }
-    .fb-demo .demo-options button:hover { border-color:var(--color-secondary-text); color:var(--color-secondary-text); }
     @media (max-width:900px) {
         .fb-auth { grid-template-columns:1fr; }
         .fb-hero { padding:44px 28px 56px; }
@@ -76,7 +71,6 @@
     .fb-btn-outline:hover { background:var(--color-primary-soft); }
     .fb-forgot { color:var(--color-primary-text); }
     .fb-forgot:hover { color:var(--color-primary-hover); }
-    .fb-demo { border-radius:16px; }
     .login-page .public-header { border-bottom:1px solid var(--color-border); }
     .login-page .header-inner { width:100%; min-height:84px; padding-inline:clamp(28px,5vw,72px); }
     .login-page .public-brand, .login-page .public-brand-name { transform:none; }
@@ -168,21 +162,26 @@
         <div class="fb-center"><a class="fb-forgot" href="{{ route('password.request') }}">Forgot password?</a></div>
         <div class="fb-divider">new to ReproCare?</div>
         <a class="fb-btn-outline" href="{{ route('register') }}">Create new account</a>
-        <details class="fb-demo">
-            <summary>Demo access</summary>
-            <div class="demo-options">
-                <button type="button" data-demo-email="mariasanta@gmail.com">Patient</button>
-                <button type="button" data-demo-email="midwife@reprocare.com">Midwife</button>
-                <button type="button" data-demo-email="ana@gmail.com">BHW</button>
-                <button type="button" data-demo-email="rhu@reprocare.com">RHU 1</button>
-                <button type="button" data-demo-email="cho@reprocare.com">CHO</button>
-                <button type="button" data-demo-email="pres@gmail.com">BHW President</button>
-            </div>
-            <p id="demoFeedback" role="status"></p>
-        </details>
     </div>
     </section>
 </div>
+
+@if(session('account_locked'))
+<div class="modal fade" id="accountLockedModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="accountLockedTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border:none; border-radius:22px; box-shadow:0 24px 60px rgba(20, 10, 40, 0.28); overflow:hidden;">
+            <div class="modal-body text-center" style="padding:2rem 1.75rem 1.75rem;">
+                <div style="width:68px; height:68px; border-radius:50%; margin:0 auto 1rem; display:flex; align-items:center; justify-content:center; font-size:1.7rem; background:color-mix(in srgb, var(--color-secondary) 14%, var(--color-surface)); border:1px solid color-mix(in srgb, var(--color-secondary) 32%, transparent); color:var(--color-secondary-text);">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h5 id="accountLockedTitle" style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; color:var(--color-text); margin-bottom:0.6rem;">Account Deactivated</h5>
+                <p style="color:var(--color-text-muted); font-size:0.9rem; line-height:1.6; margin-bottom:1.4rem;">{{ session('account_locked') }}</p>
+                <button type="button" class="fb-btn-primary w-100" data-bs-dismiss="modal" style="border-radius:14px;">I Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @push('scripts')
@@ -194,14 +193,6 @@
         this.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
         this.setAttribute('aria-pressed', String(showing));
         document.getElementById('passwordToggleIcon').className = showing ? 'bi bi-eye-slash' : 'bi bi-eye';
-    });
-    document.querySelectorAll('[data-demo-email]').forEach(button => {
-        button.addEventListener('click', () => {
-            document.getElementById('email').value = button.dataset.demoEmail;
-            document.getElementById('password').value = 'password123';
-            document.getElementById('demoFeedback').textContent = button.textContent + ' demo selected. Log in to continue.';
-            document.getElementById('email').focus();
-        });
     });
     // Modern loading feedback: disable + spinner while signing in (stops double-submit)
     document.getElementById('loginForm').addEventListener('submit', function () {
@@ -219,6 +210,13 @@
         btn.classList.remove('is-loading');
         btn.disabled = false;
         btn.innerHTML = 'Log in';
+    });
+    // Auto-lockout notice: pop the deactivation message in a modal.
+    document.addEventListener('DOMContentLoaded', function () {
+        var lockModal = document.getElementById('accountLockedModal');
+        if (lockModal && typeof bootstrap !== 'undefined') {
+            bootstrap.Modal.getOrCreateInstance(lockModal).show();
+        }
     });
 </script>
 @endpush

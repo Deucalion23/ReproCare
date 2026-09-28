@@ -5,10 +5,11 @@
 @section('bhw-content')
 <div class="container-fluid py-4">
     <!-- Page Header -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="h2 mb-1">Learning Materials</h1>
-            <p class="text-muted mb-0">Educational resources for your health journey</p>
+            <div class="page-hero-title">Learning Materials</div>
+            <p class="page-hero-subtitle">Study guides published by the midwife.</p>
         </div>
         <div class="d-flex gap-2">
             <!-- Search -->
@@ -40,6 +41,7 @@
                 </ul>
             </div>
         </div>
+    </div>
     </div>
     
     @if(session('success'))

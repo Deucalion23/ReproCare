@@ -44,7 +44,7 @@ class RhuController extends Controller
             'activePregnancies' => Pregnancy::active()->count(),
             'highRiskPatients' => Pregnancy::active()->highRisk()->count(),
             'pendingSupplyRequests' => SupplyRequest::where('status', 'submitted')->count(),
-            'pendingBhwReports' => BhwMonthlyReport::where('submission_status', 'submitted_to_midwife')->count(),
+            'pendingBhwReports' => BhwMonthlyReport::where('submission_status', 'approved_by_midwife')->count(),
             'maternalDeathsCount' => MaternalDeath::count(),
             'nearMissCount' => MaternalMorbidity::count(),
         ];
@@ -233,6 +233,20 @@ class RhuController extends Controller
             ->with('success', "Midwife {$name} archived successfully. Use Staff Transitions to reassign their cases.");
     }
 
+    /**
+     * Reactivate a midwife account auto-locked by failed logins
+     * (status inactive). Only RHU admins can perform this (route guard).
+     */
+    public function activateMidwife($id)
+    {
+        $midwife = User::where('role', 'midwife')->findOrFail($id);
+        $midwife->update(['status' => 'approved', 'failed_login_attempts' => 0]);
+        ActivityLog::log('update', "RHU re-activated midwife {$midwife->name}", $midwife);
+
+        return redirect()->route('rhu.midwives.index')
+            ->with('success', 'Midwife re-activated successfully.');
+    }
+
     // ─── BHW President Management (Copied from MidwifeController) ────
 
     public function bhwPresidents()
@@ -341,14 +355,14 @@ class RhuController extends Controller
             'active_pregnancies_count' => Pregnancy::active()->count(),
         ];
 
-        return view('rhu.bhw-presidents.show', compact('bhwPresident', 'stats'));
+        return view('rhu.bhw-presidents.show', ['president' => $bhwPresident, 'stats' => $stats]);
     }
 
     public function editBhwPresident($id)
     {
         $bhwPresident = User::where('role', 'bhw_president')->findOrFail($id);
         $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
-        return view('rhu.bhw-presidents.edit', compact('bhwPresident', 'barangays'));
+        return view('rhu.bhw-presidents.edit', ['president' => $bhwPresident, 'barangays' => $barangays]);
     }
 
     public function updateBhwPresident(Request $request, $id)
@@ -598,11 +612,25 @@ class RhuController extends Controller
     public function activateBhw($id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
-        $bhw->update(['status' => 'approved']);
+        $bhw->update(['status' => 'approved', 'failed_login_attempts' => 0]);
         ActivityLog::log('update', "RHU re-activated BHW {$bhw->name}", $bhw);
 
         return redirect()->route('rhu.bhws.index')
             ->with('success', 'BHW re-activated successfully.');
+    }
+
+    /**
+     * Reactivate a BHW President account auto-locked by failed logins
+     * (status inactive). Only RHU admins can perform this (route guard).
+     */
+    public function activateBhwPresident($id)
+    {
+        $president = User::where('role', 'bhw_president')->findOrFail($id);
+        $president->update(['status' => 'approved', 'failed_login_attempts' => 0]);
+        ActivityLog::log('update', "RHU re-activated BHW President {$president->name}", $president);
+
+        return redirect()->route('rhu.bhw-presidents.index')
+            ->with('success', 'BHW President re-activated successfully.');
     }
 
     // ─── RHU account settings ─────────────────────────────────────────
@@ -1569,7 +1597,7 @@ class RhuController extends Controller
             ->with('success', $womanName . ' has been rejected, notified with the reason, and archived.');
     }
 
-    // ─── BHW Monthly Reports Approval (Copied from MidwifeController) ──
+    // ─── Midwife Monthly Reports Approval ──
 
     public function bhwReports()
     {
@@ -1632,14 +1660,21 @@ class RhuController extends Controller
     public function bhwReportApprove(Request $request, $id)
     {
         $report = BhwMonthlyReport::findOrFail($id);
-        $report->approveByMidwife(auth()->id(), $request->input('notes'));
 
-        // 5. Transparency: BHW + President learn the outcome.
+        if ($report->submission_status !== 'approved_by_midwife') {
+            return redirect()->route('rhu.bhw-reports.index')
+                ->with('error', 'Only reports validated by the midwife can be approved here.');
+        }
+
+        $report->approveByRhu(auth()->id(), $request->input('notes'));
+
+        // 5. Transparency: BHW + President learn the outcome. The report is
+        // now validated by the RHU and ready for the CHO.
         $workflows = app(\App\Services\WorkflowService::class);
         $workflows->notifyAction(
             (int) $report->bhw_id,
-            '✅ Monthly Report Finally Approved',
-            'Your report "' . ($report->title ?? "#{$report->id}") . '" was approved by the RHU Admin.',
+            '✅ Monthly Report Approved by RHU',
+            'Your report "' . ($report->title ?? "#{$report->id}") . '" was approved by the RHU Admin and is now ready for the CHO.',
             'success',
             route('bhw.reports.index')
         );
@@ -1647,16 +1682,16 @@ class RhuController extends Controller
             $workflows->notifyAction(
                 (int) $report->approved_by_president,
                 '✅ Report Approved by RHU',
-                'Report "' . ($report->title ?? "#{$report->id}") . '" was approved by the RHU Admin.',
+                'Report "' . ($report->title ?? "#{$report->id}") . '" was approved by the RHU Admin and is now ready for the CHO.',
                 'success',
                 route('bhw-president.reports.index')
             );
         }
 
-        ActivityLog::log('approve', "Approved BHW monthly report ID: {$report->id} submitted by BHW: {$report->bhw->name}", $report);
+        ActivityLog::log('approve', "Approved midwife monthly report ID: {$report->id} submitted by BHW: {$report->bhw->name}", $report);
 
         return redirect()->route('rhu.bhw-reports.index')
-            ->with('success', 'BHW Monthly Report approved successfully.');
+            ->with('success', 'Midwife Monthly Report approved successfully. It is now ready for the CHO.');
     }
 
     public function bhwReportReject(Request $request, $id)
@@ -1665,6 +1700,12 @@ class RhuController extends Controller
         $request->validate(['notes' => 'required|string|max:1000']);
 
         $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'approved_by_midwife') {
+            return redirect()->route('rhu.bhw-reports.index')
+                ->with('error', 'Only reports validated by the midwife can be sent back here.');
+        }
+
         app(\App\Services\WorkflowService::class)->sendBackForRevision(
             'bhw_report',
             $report,
@@ -1672,7 +1713,7 @@ class RhuController extends Controller
             $request->input('notes')
         );
 
-        ActivityLog::log('reject', "Rejected BHW monthly report ID: {$report->id} submitted by BHW: {$report->bhw->name}", $report);
+        ActivityLog::log('reject', "Rejected midwife monthly report ID: {$report->id} submitted by BHW: {$report->bhw->name}", $report);
 
         return redirect()->route('rhu.bhw-reports.index')
             ->with('success', 'Report sent back to the Needs Revision queue. The BHW was notified with your reason.');
@@ -1685,7 +1726,7 @@ class RhuController extends Controller
         try {
             app(\App\Services\ArchiveService::class)->archiveRecord(
                 $report,
-                $request->input('reason', 'BHW monthly report removed by RHU'),
+                $request->input('reason', 'Midwife monthly report removed by RHU'),
                 auth()->user()
             );
         } catch (\InvalidArgumentException $e) {

@@ -25,7 +25,7 @@
 @section($learningSection)
 
 {{-- Header Banner (compact — no dead space when no staff actions) --}}
-<div class="card mb-4 learn-hero" style="border:none; border-radius:18px; background:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
+<div class="card mb-4 learn-hero" style="border:none; border-radius:18px; background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); box-shadow:var(--wp-shadow-sm);">
     <div class="card-body learn-hero-body d-flex align-items-center gap-3 p-3 p-md-4">
         <div class="learn-hero-icon" aria-hidden="true">
             <i class="bi bi-mortarboard-fill"></i>
@@ -41,16 +41,15 @@
         <span class="learn-hero-count flex-shrink-0" title="Total materials">
             <i class="bi bi-collection-play-fill"></i> {{ $materials->total() }}
         </span>
-    @if($learningUser?->isMidwife() || $learningUser?->isCho())
+    @if($learningUser?->isRhu() || $learningUser?->isCho())
+        @php $manageBase = $learningUser->isCho() ? 'cho.learning' : 'rhu.learning'; @endphp
         <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
-            <a href="{{ route('midwife.learning.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
+            <a href="{{ route($manageBase . '.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
                 <i class="bi bi-plus-lg"></i> Add New Video / Material
             </a>
-            @if($learningUser?->isMidwife())
-                <a href="{{ route('midwife.learning.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius:10px;">
-                    <i class="bi bi-gear"></i> Manage Materials
-                </a>
-            @endif
+            <a href="{{ route($manageBase . '.index') }}" class="btn btn-outline-secondary d-inline-flex align-items-center gap-1.5" style="border-radius:10px;">
+                <i class="bi bi-gear"></i> Manage Materials
+            </a>
         </div>
     @endif
     </div>

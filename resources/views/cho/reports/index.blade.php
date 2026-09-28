@@ -6,7 +6,7 @@
 <div class="page-hero fade-in-card mb-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <div class="page-hero-title">City-Wide BHW Reports</div>
+                <div class="page-hero-title">City-Wide Midwife Reports</div>
             <p class="page-hero-subtitle" style="font-weight:600;">Monthly submissions across all barangays for {{ date('F Y', strtotime($month . '-01')) }}.</p>
         </div>
         <div class="d-flex gap-2">
@@ -28,7 +28,9 @@
                     <option value="draft" {{ ($status ?? '') === 'draft' ? 'selected' : '' }}>Draft</option>
                     <option value="submitted_to_president" {{ ($status ?? '') === 'submitted_to_president' ? 'selected' : '' }}>At President</option>
                     <option value="submitted_to_midwife" {{ ($status ?? '') === 'submitted_to_midwife' ? 'selected' : '' }}>At Midwife</option>
-                    <option value="approved_by_midwife" {{ ($status ?? '') === 'approved_by_midwife' ? 'selected' : '' }}>Approved</option>
+                    <option value="approved_by_midwife" {{ ($status ?? '') === 'approved_by_midwife' ? 'selected' : '' }}>Validated by Midwife</option>
+                    <option value="approved_by_rhu" {{ ($status ?? '') === 'approved_by_rhu' ? 'selected' : '' }}>Approved by RHU (Ready for CHO)</option>
+                    <option value="returned_to_president" {{ ($status ?? '') === 'returned_to_president' ? 'selected' : '' }}>Returned to President</option>
                     <option value="needs_revision" {{ ($status ?? '') === 'needs_revision' ? 'selected' : '' }}>Needs Revision</option>
                 </select>
             </div>

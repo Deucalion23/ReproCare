@@ -133,6 +133,14 @@
 
 @section('midwife-content')
 <div class="cctl-shell">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Child Care Target Clients</div>
+            <p class="page-hero-subtitle">Track 0-12 mo services and coverage.</p>
+        </div>
+    </div>
+</div>
     <div class="cctl-header">
         <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
             <div>

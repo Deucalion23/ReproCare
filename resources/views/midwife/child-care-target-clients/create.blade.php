@@ -21,6 +21,14 @@
 
 @section('midwife-content')
 <div class="cctl-create-shell">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Add Child Care Record</div>
+            <p class="page-hero-subtitle">Enroll a 0-12 mo child in the target-client list.</p>
+        </div>
+    </div>
+</div>
     <div class="cctl-create-header">
         <h1 class="cctl-create-title">Add New Child Care Record (0-12 Mos)</h1>
         <p class="cctl-create-subtitle">Create a new child care target client record for children not in the system.</p>

@@ -53,16 +53,17 @@
 @section('midwife-content')
 
 {{-- ── Header ── --}}
-<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 fade-in-card">
-    <div>
-        <h1 class="page-title">Checkups
-        </h1>
-        <p class="page-subtitle">Manage all scheduled and completed prenatal checkups</p>
-    </div>
-    <div class="d-flex gap-2 align-items-center">
-        <a href="{{ route('midwife.checkups.create') }}" class="btn-hero-primary">
-            <i class="bi bi-calendar-plus-fill"></i> + Schedule Checkup
-        </a>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Checkups</div>
+            <p class="page-hero-subtitle">Manage prenatal and postnatal visits across patients.</p>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{{ route('midwife.checkups.create') }}" class="btn-hero-primary">
+                <i class="bi bi-calendar-plus-fill"></i> + Schedule Checkup
+            </a>
+        </div>
     </div>
 </div>
 

@@ -2,7 +2,7 @@
 
 @use('Carbon\Carbon')
 
-@section('title', 'Pregnancy Report Details - BHW President Portal | ReproCare')
+@section('title', 'BHW Pregnancy Report Details - BHW President Portal | ReproCare')
 
 @section('bhw-president-content')
 

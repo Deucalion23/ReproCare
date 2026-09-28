@@ -5,7 +5,7 @@
 @push('styles')
 <style>
     .rc-compose { max-width:1100px; margin:0 auto; padding-bottom:2rem; }
-    .rc-compose-hero { background:var(--color-surface); border:1px solid var(--color-border); border-radius:18px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 5%, transparent); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
+    .rc-compose-hero { background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); border:1px solid var(--color-border); border-radius:18px; padding:1.25rem 1.5rem; margin-bottom:1.25rem; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 5%, transparent); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
     .rc-compose-hero h2 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.25rem; font-weight:800; color:var(--color-text); margin:0; display:flex; align-items:center; gap:.6rem; }
     .rc-compose-hero h2 .rc-ico { width:40px; height:40px; border-radius:12px; background:var(--color-secondary-soft); border:1px solid var(--color-secondary-soft); color:var(--color-secondary-text); display:inline-flex; align-items:center; justify-content:center; }
     .rc-compose-hero p { margin:.2rem 0 0; font-size:.85rem; color:var(--color-text-muted); }
@@ -56,7 +56,7 @@
             <div class="rc-ico" style="display:inline-flex;"><i class="bi bi-pencil-square"></i></div>
             <div>
                 <h2>New Chat</h2>
-                <p>@if(request()->routeIs('user.messages.*')) Choose from the BHW staff in your barangay. @else Choose a contact, then send a message like a modern chat app. @endif</p>
+                <p>@if(request()->routeIs('user.messages.*')) Choose from the BHW staff in your barangay. @elseif(request()->routeIs('midwife.messages.*')) Choose from the BHW Presidents in your designated barangays. @else Choose a contact, then send a message like a modern chat app. @endif</p>
             </div>
         </div>
         <a href="{{ route($messagesRouteBase . '.index') }}" class="rc-btn-ghost"><i class="bi bi-arrow-left"></i> Back to Messages</a>

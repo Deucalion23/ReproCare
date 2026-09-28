@@ -1,6 +1,6 @@
 @extends('rhu.layout')
 
-@section('title', 'View BHW Monthly Report - RHU Portal | ReproCare')
+@section('title', 'View Midwife Monthly Report - RHU Portal | ReproCare')
 
 @section('rhu-content')
 

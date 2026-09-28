@@ -5,6 +5,17 @@
 @section('bhw-content')
 <div class="container-fluid py-4">
 <div class="container-fluid py-4">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Learning Material</div>
+            <p class="page-hero-subtitle">Read the full study guide.</p>
+        </div>
+        <a href="{{ route('bhw.learning.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Materials
+        </a>
+    </div>
+</div>
     <div class="row">
         <div class="col-lg-8 mx-auto">
             <div class="card shadow">

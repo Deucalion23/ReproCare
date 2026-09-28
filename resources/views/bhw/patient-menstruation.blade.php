@@ -4,12 +4,17 @@
 
 @section('bhw-content')
 <div class="py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Patient Menstrual Cycle</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Patient Menstrual Cycle</div>
+            <p class="page-hero-subtitle">View cycles for assigned women.</p>
+        </div>
         <a href="{{ route('bhw.patient-details', $woman->id) }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
+</div>
 
     <div class="card mb-4">
         <div class="card-header">

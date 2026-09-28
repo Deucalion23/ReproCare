@@ -4,12 +4,17 @@
 
 @section('bhw-content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Schedule Checkup</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Schedule Checkup</div>
+            <p class="page-hero-subtitle">Book a visit for a patient with the midwife.</p>
+        </div>
         <a href="{{ route('bhw.patients') }}" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Back
         </a>
     </div>
+</div>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

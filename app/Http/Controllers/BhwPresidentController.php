@@ -770,6 +770,57 @@ class BhwPresidentController extends Controller
             ->with('success', 'Report sent back to the BHW Needs Revision queue with your note.');
     }
 
+    // Forward a midwife-returned report back to the midwife queue
+    public function reportResubmitToMidwife(Request $request, $id)
+    {
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'returned_to_president') {
+            return redirect()->route('bhw-president.reports.index')
+                ->with('error', 'Only reports returned by the midwife can be forwarded again.');
+        }
+
+        $report->resubmitToMidwife(auth()->id());
+
+        app(\App\Services\WorkflowService::class)->notifyAction(
+            (int) $report->bhw_id,
+            '✅ Monthly Report Re-checked',
+            'Your report "' . ($report->title ?? "#{$report->id}") . '" was re-checked and forwarded to the midwife again.',
+            'success',
+            route('bhw.reports.index')
+        );
+
+        \App\Models\ActivityLog::log('approve', "BHW President re-forwarded midwife-returned monthly report ID: {$report->id} to the midwife", $report);
+
+        return redirect()->route('bhw-president.reports.index')
+            ->with('success', 'Report re-checked and forwarded to the midwife.');
+    }
+
+    // Send a midwife-returned report down to the BHW for correction
+    public function reportSendBackToBhw(Request $request, $id)
+    {
+        $request->validate([
+            'notes' => 'required|string',
+        ]);
+
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'returned_to_president') {
+            return redirect()->route('bhw-president.reports.index')
+                ->with('error', 'Only reports returned by the midwife can be sent back to the BHW.');
+        }
+
+        app(\App\Services\WorkflowService::class)->sendBackForRevision(
+            'bhw_report',
+            $report,
+            auth()->id(),
+            $request->input('notes')
+        );
+
+        return redirect()->route('bhw-president.reports.index')
+            ->with('success', 'Report sent back to the BHW Needs Revision queue with your note.');
+    }
+
     // Settings — Barangay & team level
     public function settings()
     {

@@ -47,7 +47,7 @@
     <div class="page-hero fade-in-card">
         <div class="workspace-toolbar" style="position:relative;z-index:1;">
             <div>
-                <div class="page-hero-title">Monthly Reports</div>
+                <div class="page-hero-title">BHW Reports</div>
                 <p class="page-hero-subtitle">Review submissions from BHWs, add notes, and forward approved reports to the midwife.</p>
             </div>
         </div>
@@ -77,6 +77,12 @@
             <div class="metric-card-label">Need Review</div>
             <div class="metric-card-value">{{ $reports->getCollection()->where('submission_status', 'submitted_to_president')->count() }}</div>
             <div class="metric-card-note">Reports waiting for your approval or rejection.</div>
+        </div>
+        <div class="metric-card metric-card-cyan fade-in-card">
+            <i class="bi bi-reply-fill metric-card-icon"></i>
+            <div class="metric-card-label">Returned by Midwife</div>
+            <div class="metric-card-value">{{ $reports->getCollection()->where('submission_status', 'returned_to_president')->count() }}</div>
+            <div class="metric-card-note">Re-check, then forward to the midwife again or send back to the BHW.</div>
         </div>
     </div>
 
@@ -143,6 +149,9 @@
                                                     @if($report->submission_status === 'submitted_to_president')
                                                         <button type="button" class="btn btn-sm btn-outline-success report-action-btn" data-bs-toggle="modal" data-bs-target="#approveModal{{ $report->id }}" title="Approve report"><i class="bi bi-check-lg"></i></button>
                                                         <button type="button" class="btn btn-sm btn-outline-danger report-action-btn" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $report->id }}" title="Reject report"><i class="bi bi-x-lg"></i></button>
+                                                    @elseif($report->submission_status === 'returned_to_president')
+                                                        <button type="button" class="btn btn-sm btn-outline-success report-action-btn" data-bs-toggle="modal" data-bs-target="#forwardModal{{ $report->id }}" title="Re-check done — forward to midwife"><i class="bi bi-send-check"></i></button>
+                                                        <button type="button" class="btn btn-sm btn-outline-warning report-action-btn" data-bs-toggle="modal" data-bs-target="#sendBackModal{{ $report->id }}" title="Send back to BHW"><i class="bi bi-reply"></i></button>
                                                     @endif
                                                 </div>
                                             </td>
@@ -269,6 +278,57 @@
                         <div class="modal-footer">
                             <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                             <button type="submit" class="btn btn-danger">Reject Report</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+@endforeach
+
+@foreach($reports as $report)
+    @if($report->submission_status === 'returned_to_president')
+        <div class="modal fade report-action-modal" id="forwardModal{{ $report->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('bhw-president.reports.resubmit-to-midwife', $report->id) }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Forward to Midwife</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Re-check done? Forward this report to the midwife again.</p>
+                            @if($report->rejection_reason)
+                                <p class="text-muted small mb-0">Midwife note: {{ $report->rejection_reason }}</p>
+                            @endif
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success">Forward to Midwife</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade report-action-modal" id="sendBackModal{{ $report->id }}" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <form method="POST" action="{{ route('bhw-president.reports.send-back', $report->id) }}">
+                        @csrf
+                        <div class="modal-header">
+                            <h5 class="modal-title">Send Back to BHW</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <p>Send this report back to the BHW for correction.</p>
+                            <label class="form-label">Reason</label>
+                            <textarea name="notes" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-warning">Send to BHW</button>
                         </div>
                     </form>
                 </div>

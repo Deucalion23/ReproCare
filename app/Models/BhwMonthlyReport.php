@@ -34,6 +34,8 @@ class BhwMonthlyReport extends Model
         'approved_by_midwife',
         'approved_by_midwife_at',
         'midwife_notes',
+        'approved_by_rhu_by',
+        'approved_by_rhu_at',
         // 1. Rejection Feedback Loop — correction & resubmission state
         'revision_count',
         'rejected_by_id',
@@ -49,6 +51,7 @@ class BhwMonthlyReport extends Model
         'approved_by_president_at' => 'datetime',
         'submitted_to_midwife_at' => 'datetime',
         'approved_by_midwife_at' => 'datetime',
+        'approved_by_rhu_at' => 'datetime',
         'rejected_at' => 'datetime',
         'resubmitted_at' => 'datetime',
     ];
@@ -108,6 +111,11 @@ class BhwMonthlyReport extends Model
     public function approvedByMidwife()
     {
         return $this->belongsTo(User::class, 'approved_by_midwife');
+    }
+
+    public function approvedByRhu()
+    {
+        return $this->belongsTo(User::class, 'approved_by_rhu_by');
     }
 
     public function submitToPresident($userId)
@@ -173,6 +181,47 @@ class BhwMonthlyReport extends Model
             'rejected_at' => now(),
             'rejection_reason' => $notes,
             'revision_count' => ((int) ($this->revision_count ?? 0)) + 1,
+        ]);
+    }
+
+    /**
+     * Midwife sends the report back to the BHW President for re-check
+     * (instead of bouncing it all the way to the BHW). The president can
+     * then forward it to the midwife again or send it back to the BHW.
+     */
+    public function returnToPresident($midwifeId, $notes)
+    {
+        $this->update([
+            'submission_status' => 'returned_to_president',
+            'rejected_by_id' => $midwifeId,
+            'rejected_at' => now(),
+            'rejection_reason' => $notes,
+            'midwife_notes' => $notes,
+        ]);
+    }
+
+    /** President re-forwards a returned report to the midwife queue. */
+    public function resubmitToMidwife($presidentId)
+    {
+        $this->update([
+            'submission_status' => 'submitted_to_midwife',
+            'approved_by_president' => $presidentId,
+            'approved_by_president_at' => now(),
+            'submitted_to_midwife_by' => $presidentId,
+            'submitted_to_midwife_at' => now(),
+        ]);
+    }
+
+    /**
+     * RHU final validation. Terminal state — the report is now ready
+     * for the CHO.
+     */
+    public function approveByRhu($userId, $notes = null)
+    {
+        $this->update([
+            'submission_status' => 'approved_by_rhu',
+            'approved_by_rhu_by' => $userId,
+            'approved_by_rhu_at' => now(),
         ]);
     }
 

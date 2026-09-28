@@ -82,7 +82,7 @@
 
     /* ── Edit card header ── */
     .edit-profile-header {
-        background:linear-gradient(135deg, var(--primary-dark), var(--primary), var(--accent-violet));
+        background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface));
         padding:1.25rem 1.75rem;
         border-radius:20px 20px 0 0;
         color:var(--color-on-solid);
@@ -106,6 +106,15 @@
                 <i class="bi bi-arrow-left"></i> Back
             </a>
         </div>
+
+        <div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Edit Profile</div>
+            <p class="page-hero-subtitle">Update your shared-portal account details.</p>
+        </div>
+    </div>
+</div>
 
         <div class="card" style="border-radius:20px;overflow:hidden;">
 

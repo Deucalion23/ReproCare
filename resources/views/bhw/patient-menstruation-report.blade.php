@@ -4,8 +4,12 @@
 
 @section('bhw-content')
 <div class="container-fluid py-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1>Patient Menstrual Cycle Report</h1>
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div>
+            <div class="page-hero-title">Patient Menstrual Report</div>
+            <p class="page-hero-subtitle">Printable cycle summary for referral.</p>
+        </div>
         <div>
             <a href="{{ route('bhw.patient-menstruation', $woman->id) }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back
@@ -15,6 +19,7 @@
             </button>
         </div>
     </div>
+</div>
 
     <div class="card mb-4">
         <div class="card-header">

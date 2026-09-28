@@ -9,13 +9,15 @@
 
 @section($contentSection)
 <div style="max-width:900px;margin:0 auto;padding-bottom:2rem;">
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 style="font-size:1.3rem;font-weight:800;margin:0;">Trash</h1>
-            <p class="text-muted mb-0" style="font-size:.85rem;">Deleted conversations stay here and can be restored. Nothing is permanently erased from this screen.</p>
+            <div class="page-hero-title">Trash</div>
+            <p class="page-hero-subtitle">Review deleted conversations; restore or clear.</p>
         </div>
         <a href="{{ route($messagesRouteBase.'.index') }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to chats</a>
     </div>
+</div>
     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
     <div class="card"><div class="card-body p-0">
         @forelse($messages as $msg)

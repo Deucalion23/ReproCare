@@ -4,13 +4,13 @@
 
 @section('midwife-content')
 <div class="py-4">
-    <!-- Page Header -->
-    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="h2">Pregnancy History</h1>
-            <p class="text-muted mb-0">{{ $woman->name }}</p>
+            <div class="page-hero-title">Pregnancy History</div>
+            <p class="page-hero-subtitle">Browse completed and archived pregnancy cases.</p>
         </div>
-        <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="d-flex gap-2 flex-wrap">
             <a href="{{ route('midwife.pregnant-patients') }}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left me-2"></i>Back to List
             </a>
@@ -19,6 +19,7 @@
             </a>
         </div>
     </div>
+</div>
 
     <!-- Current Pregnancy Details -->
     <div class="row mb-4">

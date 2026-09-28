@@ -64,10 +64,10 @@
     <div class="col-xl-3 col-md-6">
         <div class="stat-card stat-cyan fade-in-card">
             <div class="stat-icon"><i class="bi bi-file-earmark-text-fill"></i></div>
-            <div class="stat-label">BHW Monthly Reports</div>
+            <div class="stat-label">Midwife Monthly Reports</div>
             <div class="stat-number" data-count="{{ $pendingBhwReports }}">0</div>
             <div class="stat-trend up">
-                <i class="bi bi-hourglass-split"></i> Pending midwife review
+                <i class="bi bi-hourglass-split"></i> Pending RHU review
             </div>
         </div>
     </div>

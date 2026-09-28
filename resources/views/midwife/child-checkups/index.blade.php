@@ -3,11 +3,11 @@
 @section('title', 'Child Checkups - Midwife Portal | ReproCare')
 
 @section('content')
-<div class="page-header">
-    <div class="page-header-content">
+<div class="page-hero fade-in-card">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
-            <h1 class="page-title">Child Checkups</h1>
-            <p class="page-subtitle">{{ $child->full_name }} - Checkup History</p>
+            <div class="page-hero-title">Child Checkups</div>
+            <p class="page-hero-subtitle">Monitor growth and visit history for children.</p>
         </div>
         <a href="{{ route('midwife.child-checkups.create', $child->id) }}" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Add Checkup

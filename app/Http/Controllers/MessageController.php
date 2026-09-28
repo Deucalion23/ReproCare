@@ -403,12 +403,16 @@ class MessageController extends Controller
         }
 
         $isPatient = $currentUser->role === 'user';
+        $isMidwife = $currentUser->role === 'midwife';
 
         $contacts = User::query()
-            ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status', 'barangay', 'assigned_barangay'])
+            ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status', 'barangay', 'assigned_barangay', 'catchment_barangays'])
             ->where('id', '!=', $currentUser->id)
-            // Patients only see BHW / BHW President staff; staff keep the full directory.
-            ->whereIn('role', $isPatient ? ['bhw', 'bhw_president'] : ['user', 'midwife', 'bhw', 'bhw_president'])
+            // Patients only see BHW / BHW President staff; midwives only see
+            // BHW Presidents; staff keep the full directory.
+            ->whereIn('role', $isPatient
+                ? ['bhw', 'bhw_president']
+                : ($isMidwife ? ['bhw_president'] : ['user', 'midwife', 'bhw', 'bhw_president']))
             ->where(function ($query) {
                 $query->where('role', '!=', 'user')
                     ->orWhere(function ($userQuery) {
@@ -484,6 +488,17 @@ class MessageController extends Controller
             return false;
         }
 
+        if ($sender->role === 'midwife') {
+            // Midwives message only the BHW President(s) of their designated
+            // barangay(s) — concerns and check-up announcements flow through
+            // the president to their BHWs and kabarangays.
+            if ($receiver->role !== 'bhw_president') {
+                return false;
+            }
+
+            return $this->midwifeCanMessagePresident($sender, $receiver);
+        }
+
         if ($sender->role === 'user') {
             // Patients may only message the BHW / BHW President of their own
             // barangay (same jurisdiction as the rest of the BHW workflows).
@@ -511,13 +526,83 @@ class MessageController extends Controller
      */
     private function sharesJurisdiction(?string $patientBarangay, ?string $staffBarangay): bool
     {
-        $a = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($patientBarangay);
-        $b = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($staffBarangay);
-        if ($a === '' || $b === '') {
-            return false;
+        return $this->sharesCatchment([$patientBarangay], [$staffBarangay]);
+    }
+
+    /**
+     * All designated barangays of a staff member: home barangay, assigned
+     * barangay, plus every catchment barangay (midwives cover several).
+     */
+    private function staffBarangays(User $staff): array
+    {
+        $areas = [$staff->barangay ?? null, $staff->assigned_barangay ?? null];
+        foreach ((array) ($staff->catchment_barangays ?? []) as $area) {
+            $areas[] = $area;
         }
 
-        return $a === $b || str_contains($a, $b) || str_contains($b, $a);
+        return $areas;
+    }
+
+    /**
+     * True when any raw barangay name on one side overlaps any on the
+     * other (normalized: equal or one contains the other). An empty
+     * jurisdiction on the SENDER side fails open so legacy accounts
+     * without designations never lose messaging entirely.
+     */
+    private function sharesCatchment(array $oneSide, array $otherSide): bool
+    {
+        $keys = [];
+        foreach ($oneSide as $raw) {
+            $key = \App\Services\BhwPresidentAssignmentService::normalizeBarangay(is_string($raw) ? $raw : null);
+            if ($key !== '') {
+                $keys[] = $key;
+            }
+        }
+        if (empty($keys)) {
+            return true;
+        }
+
+        foreach ($otherSide as $raw) {
+            $key = \App\Services\BhwPresidentAssignmentService::normalizeBarangay(is_string($raw) ? $raw : null);
+            if ($key === '') {
+                continue;
+            }
+            foreach ($keys as $mine) {
+                if ($mine === $key || str_contains($mine, $key) || str_contains($key, $mine)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Midwife → president routing: strict designation match wins; when the
+     * midwife's designations match NO president at all (spelling drift,
+     * missing president barangay), fall back to any president rather than
+     * a dead inbox. Result is cached per request.
+     */
+    private array $midwifeFallbackCache = [];
+
+    private function midwifeCanMessagePresident(User $midwife, User $president): bool
+    {
+        $mine = $this->staffBarangays($midwife);
+        $theirs = [$president->barangay ?? null, $president->assigned_barangay ?? null];
+
+        if ($this->sharesCatchment($mine, $theirs)) {
+            return true;
+        }
+
+        $key = (int) $midwife->id;
+        if (!array_key_exists($key, $this->midwifeFallbackCache)) {
+            $anyDesignated = User::where('role', 'bhw_president')
+                ->get(['barangay', 'assigned_barangay'])
+                ->contains(fn (User $p) => $this->sharesCatchment($mine, [$p->barangay, $p->assigned_barangay]));
+            $this->midwifeFallbackCache[$key] = !$anyDesignated;
+        }
+
+        return $this->midwifeFallbackCache[$key];
     }
 
     private function formatRoleLabel(User $user): string
