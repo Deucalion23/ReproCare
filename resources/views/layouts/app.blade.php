@@ -1149,59 +1149,74 @@
         [data-theme="dark"] .alert-warning { color:var(--color-warning-text); }
         [data-theme="dark"] .alert-primary { color:var(--color-secondary-text); }
         .alert .btn-close { filter:invert(0.45); }
+        .app-confirm-modal .modal-dialog { max-width:400px; }
         .app-confirm-modal .modal-content {
             border:1px solid var(--border);
-            border-radius:22px;
+            border-radius:26px;
             background:var(--bg-card);
             box-shadow:var(--shadow-md);
             overflow:hidden;
         }
-        .app-confirm-modal .modal-header {
-            background:transparent;
-            border-bottom:1px solid var(--border);
-            border-radius:22px 22px 0 0;
-            padding:1.1rem 1.4rem 0.75rem;
-            color:var(--color-text);
+        .app-confirm-modal .modal-body {
+            padding:2rem 1.75rem 1.6rem;
+            text-align:center;
         }
-        .app-confirm-modal .modal-header .modal-title {
+        .app-confirm-title {
             font-family:'Plus Jakarta Sans', sans-serif;
             font-weight:800;
-            font-size:1.05rem;
-            color:var(--color-text);
-        }
-        .app-confirm-modal .modal-header .btn-close { filter:none; opacity:0.55; }
-        .app-confirm-modal .modal-body {
-            text-align:center;
-            padding:1.4rem 1.75rem 1.25rem;
+            font-size:1.3rem;
+            letter-spacing:-0.02em;
+            color:var(--text);
+            margin-bottom:0.4rem;
         }
         .app-confirm-modal .modal-footer {
-            border-color:var(--border);
+            border:0;
             background:transparent;
-            justify-content:center;
+            justify-content:stretch;
             gap:0.6rem;
-            padding:0.9rem 1.4rem 1.3rem;
+            margin-top:1.5rem;
+            padding:0;
         }
         .app-confirm-modal .modal-footer .btn {
+            flex:1;
+            min-height:46px;
             border-radius:999px;
-            padding:0.55rem 1.6rem;
             font-weight:700;
+            font-size:0.88rem;
         }
         .app-confirm-icon {
-            width:64px;
-            height:64px;
+            width:68px;
+            height:68px;
             border-radius:50%;
-            display:grid;
-            place-items:center;
-            margin:0 auto 1rem;
-            background:color-mix(in srgb, var(--color-secondary) 14%, var(--color-surface));
-            border:1px solid color-mix(in srgb, var(--color-secondary) 30%, transparent);
-            color:var(--color-secondary-text);
-            font-size:1.6rem;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin:0 auto 1.1rem;
+            background:linear-gradient(135deg, #DC2626, #991B1B);
+            color:#FFFFFF;
+            font-size:1.7rem;
+            box-shadow:0 10px 26px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 40%, transparent);
         }
         .app-confirm-modal #appConfirmMessage {
-            color:var(--color-text);
-            font-size:0.95rem;
-            line-height:1.55;
+            color:var(--text-muted);
+            font-size:0.9rem;
+            line-height:1.6;
+        }
+        .app-confirm-modal .btn-app-cancel {
+            background:var(--bg-card2);
+            border:1.5px solid var(--border);
+            color:var(--text);
+        }
+        .app-confirm-modal .btn-app-confirm {
+            background:linear-gradient(135deg, #DC2626, #991B1B);
+            border:0;
+            color:#FFFFFF;
+            box-shadow:0 6px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent);
+        }
+        .app-confirm-modal .btn-app-confirm:hover { color:#FFFFFF; transform:translateY(-1px); }
+        @media (max-width:480px) {
+            .app-confirm-modal .modal-dialog { max-width:calc(100vw - 2rem); margin-left:auto; margin-right:auto; }
+            .app-confirm-modal .modal-footer { flex-direction:column-reverse; }
         }
 
         /* ── Dedicated LOGOUT dialog (all roles) ── */
@@ -2764,19 +2779,16 @@
     <div class="modal fade app-confirm-modal" id="appConfirmModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Confirm Action</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
                 <div class="modal-body">
                     <div class="app-confirm-icon">
-                        <i class="bi bi-exclamation-circle"></i>
+                        <i class="bi bi-exclamation-triangle-fill"></i>
                     </div>
+                    <h5 class="app-confirm-title" id="appConfirmTitle">Confirm this action?</h5>
                     <p class="mb-0" id="appConfirmMessage">Are you sure you want to continue?</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="appConfirmAccept">Continue</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-app-cancel" data-bs-dismiss="modal"><i class="bi bi-arrow-left"></i> Cancel</button>
+                        <button type="button" class="btn btn-app-confirm" id="appConfirmAccept"><i class="bi bi-check2"></i> Yes, continue</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2879,27 +2891,38 @@
             return match ? match[2] : null;
         }
 
+        let pendingAppConfirmation = null;
+
         function showAppConfirm(message, onConfirm) {
             const modalEl = document.getElementById('appConfirmModal');
             const messageEl = document.getElementById('appConfirmMessage');
             const acceptButton = document.getElementById('appConfirmAccept');
 
             if (!modalEl || !messageEl || !acceptButton || typeof bootstrap === 'undefined') {
-                return window.confirm(message);
+                if (window.confirm(message)) onConfirm();
+                return false;
             }
 
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             messageEl.textContent = message || 'Are you sure you want to continue?';
-
-            const handleConfirm = function() {
-                acceptButton.removeEventListener('click', handleConfirm);
-                modal.hide();
-                onConfirm();
-            };
-
-            acceptButton.addEventListener('click', handleConfirm, { once: true });
+            pendingAppConfirmation = onConfirm;
             modal.show();
             return false;
+        }
+
+        function wireAppConfirmationModal() {
+            const modalEl = document.getElementById('appConfirmModal');
+            const acceptButton = document.getElementById('appConfirmAccept');
+            if (!modalEl || !acceptButton || acceptButton.dataset.wired === '1') return;
+
+            acceptButton.dataset.wired = '1';
+            acceptButton.addEventListener('click', function() {
+                const action = pendingAppConfirmation;
+                pendingAppConfirmation = null;
+                if (typeof bootstrap !== 'undefined') bootstrap.Modal.getOrCreateInstance(modalEl).hide();
+                if (typeof action === 'function') action();
+            });
+            modalEl.addEventListener('hidden.bs.modal', function() { pendingAppConfirmation = null; });
         }
 
         function enhanceLegacyConfirms() {
@@ -3123,6 +3146,7 @@
             if (collapseBtn) collapseBtn.addEventListener('click', function() { toggleSidebar(); syncCollapseArrow(); });
 
             enhanceLegacyConfirms();
+            wireAppConfirmationModal();
             wireLogoutForms();
             initBackButtonGuard();
 
