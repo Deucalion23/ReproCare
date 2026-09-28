@@ -122,7 +122,7 @@
 
             {{-- Global Dark Mode Toggle (all portals) --}}
             <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle staff-action-btn"
-               style="width:30px; height:30px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
+               style="width:30px;height:30px;min-width:30px;max-width:30px;min-height:30px;max-height:30px;aspect-ratio:1/1;padding:0;overflow:hidden;line-height:1;border-radius:50%;color:var(--color-text-muted);background:var(--color-surface);border:1px solid var(--color-border) !important;"
                title="Toggle dark mode"
                onclick="setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
                 <i class="bi bi-moon-fill icon-moon fs-6"></i>
@@ -141,7 +141,7 @@
                 };
             @endphp
             <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center staff-action-btn"
-               style="width:30px; height:30px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
+               style="width:30px;height:30px;min-width:30px;max-width:30px;min-height:30px;max-height:30px;aspect-ratio:1/1;padding:0;overflow:hidden;line-height:1;border-radius:50%;color:var(--color-text-muted);background:var(--color-surface);border:1px solid var(--color-border) !important;"
                title="System Alerts & Notifications">
                 <i class="bi bi-bell fs-6"></i>
                 @if($unreadNotifications > 0)
