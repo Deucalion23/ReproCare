@@ -38,31 +38,23 @@
 {{-- QUICK ACTIONS: compact strip at the top --}}
 <div class="card fade-in-card mb-4 bhw-quick-card">
     <div class="card-body">
-        <div class="row g-2">
-            <div class="col-6 col-md-3">
-                <a href="{{ route('bhw.patients') }}" class="quick-action-tile qa-blue">
-                    <i class="bi bi-people-fill"></i>
-                    <span>Patients</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="{{ route('bhw.schedules') }}" class="quick-action-tile qa-teal">
-                    <i class="bi bi-calendar-check-fill"></i>
-                    <span>Schedules</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="{{ route('bhw.health-records.index') }}" class="quick-action-tile qa-green">
-                    <i class="bi bi-clipboard-pulse-fill"></i>
-                    <span>My Records</span>
-                </a>
-            </div>
-            <div class="col-6 col-md-3">
-                <a href="{{ route('forum.index') }}" class="quick-action-tile qa-violet">
-                    <i class="bi bi-chat-dots-fill"></i>
-                    <span>Forum</span>
-                </a>
-            </div>
+        <div class="bhw-quick-grid">
+            <a href="{{ route('bhw.patients') }}" class="quick-action-tile qa-blue">
+                <i class="bi bi-people-fill"></i>
+                <span>Patients</span>
+            </a>
+            <a href="{{ route('bhw.schedules') }}" class="quick-action-tile qa-teal">
+                <i class="bi bi-calendar-check-fill"></i>
+                <span>Schedules</span>
+            </a>
+            <a href="{{ route('bhw.health-records.index') }}" class="quick-action-tile qa-green">
+                <i class="bi bi-clipboard-pulse-fill"></i>
+                <span>My Records</span>
+            </a>
+            <a href="{{ route('forum.index') }}" class="quick-action-tile qa-violet">
+                <i class="bi bi-chat-dots-fill"></i>
+                <span>Forum</span>
+            </a>
         </div>
     </div>
 </div>
@@ -218,8 +210,8 @@
             </div>
         </div>
 
-        {{-- BHW Role Info - Redesigned --}}
-        <div class="card fade-in-card">
+        {{-- BHW Role Info - Redesigned (desktop/tablet only) --}}
+        <div class="card fade-in-card d-none d-md-block">
             <div class="card-header">
                 <h5 class="mb-0" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Your BHW Capabilities
                 </h5>
