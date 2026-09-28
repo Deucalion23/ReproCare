@@ -341,14 +341,14 @@ class RhuController extends Controller
             'active_pregnancies_count' => Pregnancy::active()->count(),
         ];
 
-        return view('rhu.bhw-presidents.show', compact('bhwPresident', 'stats'));
+        return view('rhu.bhw-presidents.show', ['president' => $bhwPresident, 'stats' => $stats]);
     }
 
     public function editBhwPresident($id)
     {
         $bhwPresident = User::where('role', 'bhw_president')->findOrFail($id);
         $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
-        return view('rhu.bhw-presidents.edit', compact('bhwPresident', 'barangays'));
+        return view('rhu.bhw-presidents.edit', ['president' => $bhwPresident, 'barangays' => $barangays]);
     }
 
     public function updateBhwPresident(Request $request, $id)
