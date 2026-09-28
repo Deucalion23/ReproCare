@@ -405,16 +405,18 @@ class MessageController extends Controller
         $isPatient = $currentUser->role === 'user';
         $isMidwife = $currentUser->role === 'midwife';
         $isBhw = $currentUser->role === 'bhw';
+        $isPresident = $currentUser->role === 'bhw_president';
 
         $contacts = User::query()
             ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status', 'barangay', 'assigned_barangay', 'catchment_barangays'])
             ->where('id', '!=', $currentUser->id)
             // Patients only see BHW / BHW President staff; midwives only see
-            // BHW Presidents; BHWs only see patients + BHW Presidents; other
-            // staff keep the full directory.
+            // BHW Presidents; BHWs only see patients + BHW Presidents;
+            // BHW Presidents only see registered patients; other staff keep
+            // the full directory.
             ->whereIn('role', $isPatient
                 ? ['bhw', 'bhw_president']
-                : ($isMidwife ? ['bhw_president'] : ($isBhw ? ['user', 'bhw_president'] : ['user', 'midwife', 'bhw', 'bhw_president'])))
+                : ($isMidwife ? ['bhw_president'] : ($isBhw ? ['user', 'bhw_president'] : ($isPresident ? ['user'] : ['user', 'midwife', 'bhw', 'bhw_president']))))
             ->where(function ($query) {
                 $query->where('role', '!=', 'user')
                     ->orWhere(function ($userQuery) {
@@ -518,6 +520,16 @@ class MessageController extends Controller
 
             return $this->sharesJurisdiction($sender->barangay ?? null, $receiver->barangay ?? null)
                 || $this->sharesJurisdiction($sender->barangay ?? null, $receiver->assigned_barangay ?? null);
+        }
+
+        if ($sender->role === 'bhw_president') {
+            // BHW Presidents message only registered women living in their
+            // own designated barangay.
+            if ($receiver->role !== 'user' || ($receiver->status ?? 'approved') !== 'approved') {
+                return false;
+            }
+
+            return $this->sharesJurisdiction($sender->barangay ?? null, $receiver->barangay ?? null);
         }
 
         if ($sender->role === 'user') {
