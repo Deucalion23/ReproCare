@@ -35,6 +35,38 @@
     </div>
 </div>
 
+{{-- QUICK ACTIONS: compact strip at the top --}}
+<div class="card fade-in-card mb-4 bhw-quick-card">
+    <div class="card-body">
+        <div class="row g-2">
+            <div class="col-6 col-md-3">
+                <a href="{{ route('bhw.patients') }}" class="quick-action-tile qa-blue">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Patients</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{{ route('bhw.schedules') }}" class="quick-action-tile qa-teal">
+                    <i class="bi bi-calendar-check-fill"></i>
+                    <span>Schedules</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{{ route('bhw.health-records.index') }}" class="quick-action-tile qa-green">
+                    <i class="bi bi-clipboard-pulse-fill"></i>
+                    <span>My Records</span>
+                </a>
+            </div>
+            <div class="col-6 col-md-3">
+                <a href="{{ route('forum.index') }}" class="quick-action-tile qa-violet">
+                    <i class="bi bi-chat-dots-fill"></i>
+                    <span>Forum</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- STAT CARDS: equal height, aligned --}}
 <div class="row g-3 mb-4 bhw-stat-row">
 
@@ -183,42 +215,6 @@
                         <p class="mb-0">No checkups scheduled for today.</p>
                     </div>
                 @endif
-            </div>
-        </div>
-
-        {{-- Quick Actions --}}
-        <div class="card fade-in-card mb-4">
-            <div class="card-header">
-                <h5 class="mb-0" style="font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;">Quick Actions
-                </h5>
-            </div>
-            <div class="card-body">
-                <div class="row g-2">
-                    <div class="col-6">
-                        <a href="{{ route('bhw.patients') }}" class="quick-action-tile qa-blue">
-                            <i class="bi bi-people-fill"></i>
-                            <span>Patients</span>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('bhw.schedules') }}" class="quick-action-tile qa-teal">
-                            <i class="bi bi-calendar-check-fill"></i>
-                            <span>Schedules</span>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('bhw.health-records.index') }}" class="quick-action-tile qa-green">
-                            <i class="bi bi-clipboard-pulse-fill"></i>
-                            <span>My Records</span>
-                        </a>
-                    </div>
-                    <div class="col-6">
-                        <a href="{{ route('forum.index') }}" class="quick-action-tile qa-violet">
-                            <i class="bi bi-chat-dots-fill"></i>
-                            <span>Forum</span>
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
 
