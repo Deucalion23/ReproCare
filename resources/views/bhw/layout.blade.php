@@ -25,6 +25,12 @@
         .main-content .empty-state h6 { font-size:0.8rem !important; }
         .main-content .empty-state p { font-size:0.7rem !important; }
         .main-content .modal-title { font-size:0.9rem !important; }
+        /* Header buttons centered. */
+        .main-content .card-header a.btn { display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important; }
+        /* Stacked checkup cards: tighter and smaller. */
+        .main-content table.table-cards-mobile tbody tr { margin-bottom:0.6rem; border-radius:14px; padding:0.15rem 0; }
+        .main-content table.table-cards-mobile td { padding:0.4rem 0.85rem !important; font-size:0.72rem !important; }
+        .main-content table.table-cards-mobile td::before { font-size:0.58rem; margin-bottom:0.15rem; }
     }
 </style>
 @endpush
