@@ -384,6 +384,14 @@
     .vital-icon-box { width:34px; height:34px; font-size:0.95rem; margin-bottom:0.55rem; }
     .record-vitals-strip { grid-template-columns:repeat(2, 1fr); gap:0.65rem; padding:0.85rem; }
     .strip-val { font-size:0.95rem; }
+    .records-head-row { gap:0.6rem; margin-bottom:1rem; }
+    .records-title { font-size:0.95rem; }
+    .records-count { font-size:0.66rem; }
+    .record-card { padding:1rem; border-radius:18px; margin-bottom:1rem; }
+    .record-top { gap:0.6rem; margin-bottom:0.9rem; }
+    .record-title { font-size:0.9rem; }
+    .record-date-badge { font-size:0.7rem; flex-wrap:wrap; }
+    .risk-pill { font-size:0.6rem; padding:0.26rem 0.65rem; }
 }
 .strip-item {
     display:flex;
