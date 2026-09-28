@@ -513,7 +513,9 @@
     .navbar .navbar-brand div.rounded-3 {
         background:linear-gradient(135deg, var(--color-secondary-soft), var(--color-secondary)) !important;
     }
-    .navbar .navbar-brand span span { color:#9B64B9 !important; }
+    /* Keep the Care word in the wordmark on the brand lavender, independent
+       of a portal's accent/pink colour. */
+    body .navbar .navbar-brand .brand-care { color:#9B64B9 !important; }
 
     /* ── Badges / pills: soft pink default ── */
     .main-content .badge.bg-primary { background:var(--color-secondary-soft) !important; color:var(--color-secondary-text) !important; border:1px solid var(--color-secondary-soft); }
@@ -560,4 +562,3 @@
     }
 </style>
 @endpush
-

@@ -1812,7 +1812,8 @@
         /* ── Phones (≤576px): stack everything, keep items visible ── */
         @media (max-width: 576px) {
             body { font-size:14px; }
-            .navbar { padding:0.5rem 0.75rem; }
+            .navbar { padding:0.5rem 0.75rem 0.5rem 0.4rem; }
+            .navbar .container-fluid { padding-left:0.4rem !important; }
             .navbar-brand { font-size:1.05rem; }
             .main-content { padding:0.9rem 0.75rem 5rem; }
             .page-hero { padding:1.1rem 1rem; border-radius:18px; }

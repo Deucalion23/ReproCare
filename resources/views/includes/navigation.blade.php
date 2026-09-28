@@ -45,23 +45,41 @@
     @if($currentRole === 'user')
         @include('includes.women-navigation')
     @else
+<style>
+    /* Staff navbar stays a single fixed top row at any zoom or width. */
+    .navbar { flex-wrap:nowrap !important; }
+    .navbar .container-fluid { flex-wrap:nowrap !important; gap:0.5rem; }
+    .navbar .navbar-brand { white-space:nowrap !important; flex-shrink:1; min-width:0; font-size:clamp(1rem, 2.5vw + 0.6rem, 1.25rem); }
+    .navbar .navbar-brand > span:last-child { overflow:hidden; text-overflow:ellipsis; }
+    .navbar .d-flex.align-items-center.gap-2.ms-auto { flex-shrink:0; margin-left:auto; }
+    /* Circles stay circles: never let crowded bars squash buttons or icons. */
+    .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; }
+    .navbar .staff-action-btn i { flex-shrink:0; }
+    /* Staff actions match the patient portal's circular bordered buttons. */
+    :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
+    [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
+    @media (max-width: 576px) {
+        .navbar .staff-action-btn { width:34px !important; height:34px !important; }
+        .navbar .staff-profile-pill { padding:2px 2px 2px 2px !important; }
+    }
+</style>
 <nav class="navbar navbar-expand-lg border-bottom" style="background:var(--color-surface); border-color:var(--color-border) !important; height:64px;">
     <div class="container-fluid px-3">
         {{-- Brand & Sidebar Toggle --}}
         <div class="d-flex align-items-center gap-2">
             <button id="sidebarToggleBtn"
                     class="btn btn-sm btn-light border d-flex d-lg-none align-items-center justify-content-center"
-                    style="width:36px; height:36px; border-radius:10px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+                    style="width:32px; height:32px; border-radius:9px; color:var(--color-text-muted); background:var(--color-surface-soft);"
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:9px; line-height:1;">
+            <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
                 <span aria-hidden="true" style="width:36px; height:36px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 36px; transform:translateY(-1.5px);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
                          style="width:36px; height:36px; max-width:none; object-fit:contain; display:block;">
                 </span>
                 <span class="fw-800 d-inline-flex align-items-center" style="min-height:36px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1.15rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
-                    Repro<span style="color:#9B64B9;">Care</span>
+                    Repro<span class="brand-care">Care</span>
                 </span>
             </a>
         </div>
@@ -72,8 +90,8 @@
             <span id="pwa-sync-pill" style="display:none;align-items:center;gap:.4rem;background:var(--color-secondary-soft);border:1px solid var(--color-secondary-soft);color:var(--color-secondary-text);font-size:.74rem;font-weight:700;padding:.4rem .8rem;border-radius:999px;white-space:nowrap;"></span>
 
             {{-- Global Dark Mode Toggle (all portals) --}}
-            <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle"
-               style="width:36px; height:36px; border-radius:10px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+            <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle staff-action-btn"
+               style="width:36px; height:36px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="Toggle dark mode"
                onclick="setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
                 <i class="bi bi-moon-fill icon-moon fs-6"></i>
@@ -91,8 +109,8 @@
                     default => route('user.notifications'),
                 };
             @endphp
-            <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center"
-               style="width:36px; height:36px; border-radius:10px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+            <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center staff-action-btn"
+               style="width:36px; height:36px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="System Alerts & Notifications">
                 <i class="bi bi-bell fs-6"></i>
                 @if($unreadNotifications > 0)
@@ -104,8 +122,9 @@
 
             {{-- User Avatar Dropdown --}}
             <div class="dropdown">
-                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none"
-                   href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none staff-profile-pill"
+                   href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
+                   style="border:1px solid var(--color-border); border-radius:9999px; padding:2px 10px 2px 2px !important;">
                     <img src="{{ $currentUser->profile_image_url }}"
                          alt="{{ $currentUser->name }}"
                          class="rounded-circle border"
