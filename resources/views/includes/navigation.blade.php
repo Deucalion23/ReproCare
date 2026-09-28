@@ -85,7 +85,7 @@
         .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
         .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
-        .navbar #sidebarToggleBtn { width:30px !important; height:30px !important; }
+        .navbar #sidebarToggleBtn { width:30px !important; height:30px !important; border-radius:50% !important; background:var(--color-surface) !important; }
         .navbar .staff-action-btn {
             width:30px !important; height:30px !important;
             min-width:30px !important; max-width:30px !important;
@@ -104,12 +104,12 @@
         <div class="d-flex align-items-center gap-2">
             <button id="sidebarToggleBtn"
                     class="btn btn-sm btn-light border d-flex d-lg-none align-items-center justify-content-center"
-                    style="width:32px; height:32px; border-radius:9px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+                    style="width:32px; height:32px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
             <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
-                <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px;">
+                <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px; transform:translateY(-0.07em);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
                          style="width:30px; height:30px; max-width:none; object-fit:contain; display:block;">
                 </span>
