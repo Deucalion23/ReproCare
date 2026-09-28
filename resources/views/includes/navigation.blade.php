@@ -53,14 +53,18 @@
     .navbar .navbar-brand > span:last-child { overflow:hidden; text-overflow:ellipsis; }
     .navbar .d-flex.align-items-center.gap-2.ms-auto { flex-shrink:0; margin-left:auto; }
     /* Circles stay circles: exact squares that clip any inner content. */
-    .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; }
+    .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; align-self:center !important; }
     .navbar .staff-action-btn {
-        width:32px !important; height:32px !important;
-        min-width:32px !important; max-width:32px !important;
+        width:30px !important; height:30px !important;
+        min-width:30px !important; max-width:30px !important;
+        min-height:30px !important; max-height:30px !important;
+        aspect-ratio:1 / 1 !important;
         padding:0 !important; overflow:hidden !important;
         border-radius:50% !important;
+        line-height:1 !important;
+        display:inline-flex !important; align-items:center !important; justify-content:center !important;
     }
-    .navbar .staff-action-btn i { flex-shrink:0; }
+    .navbar .staff-action-btn i { flex-shrink:0; font-size:13px !important; line-height:1 !important; }
     /* Bootstrap adds its own caret to .dropdown-toggle — the pill has its own chevron. */
     .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
     /* Staff actions match the patient portal's circular bordered buttons. */
@@ -68,10 +72,13 @@
     [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
     @media (max-width: 576px) {
         .navbar .staff-action-btn {
-            width:30px !important; height:30px !important;
-            min-width:30px !important; max-width:30px !important;
+            width:28px !important; height:28px !important;
+            min-width:28px !important; max-width:28px !important;
+            min-height:28px !important; max-height:28px !important;
         }
+        .navbar .staff-action-btn i { font-size:12px !important; }
         .navbar .staff-profile-pill { padding:2px 2px 2px 2px !important; }
+        .navbar .staff-profile-pill .dropdown-chevron { display:none !important; }
     }
 </style>
 <nav class="navbar navbar-expand-lg border-bottom" style="background:var(--color-surface); border-color:var(--color-border) !important; height:64px;">
@@ -85,11 +92,11 @@
                 <i class="bi bi-list fs-5"></i>
             </button>
             <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
-                <span aria-hidden="true" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 32px;">
+                <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px;">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
-                         style="width:32px; height:32px; max-width:none; object-fit:contain; display:block;">
+                         style="width:30px; height:30px; max-width:none; object-fit:contain; display:block;">
                 </span>
-                <span class="fw-800 d-inline-flex align-items-center" style="min-height:32px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:1rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
+                <span class="fw-800 d-inline-flex align-items-center" style="min-height:30px; font-family:'Plus Jakarta Sans',sans-serif; color:var(--text); font-size:0.95rem; letter-spacing:-0.4px; line-height:1; padding-bottom:1px;">
                     Repro<span class="brand-care">Care</span>
                 </span>
             </a>
@@ -102,7 +109,7 @@
 
             {{-- Global Dark Mode Toggle (all portals) --}}
             <button type="button" class="btn btn-sm btn-light border d-flex align-items-center justify-content-center rc-theme-toggle staff-action-btn"
-               style="width:32px; height:32px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
+               style="width:30px; height:30px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="Toggle dark mode"
                onclick="setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark')">
                 <i class="bi bi-moon-fill icon-moon fs-6"></i>
@@ -121,7 +128,7 @@
                 };
             @endphp
             <a href="{{ $notifRoute }}" class="btn btn-sm btn-light border position-relative d-flex align-items-center justify-content-center staff-action-btn"
-               style="width:32px; height:32px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
+               style="width:30px; height:30px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                title="System Alerts & Notifications">
                 <i class="bi bi-bell fs-6"></i>
                 @if($unreadNotifications > 0)
@@ -139,7 +146,7 @@
                     <img src="{{ $currentUser->profile_image_url }}"
                          alt="{{ $currentUser->name }}"
                          class="rounded-circle border"
-                         style="width:30px; height:30px; object-fit:cover; border-color:var(--color-border);"
+                         style="width:28px; height:28px; object-fit:cover; border-color:var(--color-border);"
                          onerror="this.onerror=null;this.src='{{ $currentUser->gender === 'male' ? '/images/avatars/avatar-male.svg' : '/images/avatars/avatar-female.svg' }}';">
                     <div class="d-none d-lg-block text-start lh-1">
                         <div class="fw-700 text-truncate" style="max-width:110px; font-size:0.84rem; color:var(--text);">
