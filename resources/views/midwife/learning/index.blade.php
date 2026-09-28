@@ -131,65 +131,39 @@
         @if($materials->count() > 0)
             @foreach($materials as $material)
                 <div class="col-lg-4 col-md-6">
-                    <div class="card h-100 fade-in-card" style="background:var(--color-surface); border:1px solid var(--color-border)!important; border-radius:20px; overflow:hidden; box-shadow:0 4px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent);">
-                        @php $adminYtId = $material->youtube_id; @endphp
-                        <div class="position-relative" style="height:190px; background:var(--color-bg);">
-                            @if($adminYtId)
-                                <img src="{{ $material->youtube_thumbnail_url }}"
-                                     alt="{{ $material->title }}"
-                                     class="w-100 h-100"
-                                     style="object-fit:cover;"
-                                     loading="lazy"
-                                     onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
-                                <div class="d-none align-items-center justify-content-center w-100 h-100 text-muted">
-                                    <i class="bi bi-youtube" style="font-size:3rem; color:var(--color-danger-text);"></i>
-                                </div>
-                                <span class="position-absolute top-50 start-50 translate-middle rounded-circle d-flex align-items-center justify-content-center text-white shadow"
-                                      style="width:52px; height:52px; background:color-mix(in srgb, var(--color-danger) 92%, transparent);">
-                                    <i class="bi bi-play-fill fs-4 ms-0.5"></i>
-                                </span>
-                                <span class="position-absolute bottom-0 start-0 m-2 badge bg-dark bg-opacity-75 text-white" style="border-radius:8px; font-size:0.7rem;">
-                                    <i class="bi bi-youtube text-danger me-1"></i>YouTube
-                                </span>
-                            @else
-                            @if($material->image_url)
-                                <img src="{{ $material->image_url }}"
-                                     alt="{{ $material->title }}"
-                                     class="w-100 h-100"
-                                     style="object-fit:cover;"
-                                     onerror="this.style.display='none'; this.nextElementSibling.classList.remove('d-none');">
-                            @endif
-                            <div class="d-{{ $material->image_url ? 'none' : 'flex' }} align-items-center justify-content-center w-100 h-100 text-muted">
-                                <i class="bi bi-journal-richtext" style="font-size:3rem; color:var(--color-primary-text);"></i>
-                            </div>
-                            @endif
-                            <span class="position-absolute top-0 end-0 m-3 badge rounded-pill" 
-                                  style="background:color-mix(in srgb, var(--color-surface) 92%, transparent); color:var(--color-text); backdrop-filter:blur(4px); font-weight:700; border:1px solid var(--color-border); box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);">
-                                {{ ucfirst($material->material_type) }}
+                    <div class="card h-100 fade-in-card" style="background:var(--color-surface); border:none; border-radius:20px; overflow:hidden; box-shadow:0 4px 18px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);">
+                        <div class="position-relative d-flex flex-column align-items-center justify-content-center text-center px-4" style="height:155px; background:linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-text) 100%);">
+                            <span class="position-absolute top-0 end-0 m-3 badge rounded-pill"
+                                  style="background:var(--color-surface); color:var(--color-text); font-weight:700; font-size:0.72rem; padding:0.35em 0.9em; box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent);">
+                                {{ ucfirst($material->category ?? $material->material_type) }}
                             </span>
+                            <i class="bi bi-file-earmark-text" style="font-size:2.4rem; color:var(--color-on-solid);"></i>
+                            <div class="fw-bold mt-2" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-on-solid); font-size:1rem; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
+                                {{ $material->title }}
+                            </div>
                         </div>
 
                         <div class="card-body d-flex flex-column p-4">
                             <h5 class="card-title fw-bold mb-2" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text); font-size:1.1rem; line-height:1.4;">
                                 {{ $material->title }}
                             </h5>
-                            <p class="card-text text-muted small mb-3" style="line-height:1.6;">
+                            <p class="card-text text-muted small mb-3" style="line-height:1.6; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;">
                                 {{ \Illuminate\Support\Str::limit(strip_tags($material->content), 120) }}
                             </p>
 
                             <div class="mt-auto pt-3 d-flex justify-content-between align-items-center" style="border-top:1px solid var(--color-border);">
-                                <small class="text-muted" style="font-size:0.78rem;">
+                                <small class="text-muted" style="font-size:0.78rem; white-space:nowrap;">
                                     <i class="bi bi-calendar3 me-1"></i>{{ $material->created_at->format('M d, Y') }}
                                 </small>
                                 <div class="d-inline-flex align-items-center gap-1.5">
-                                    <a href="{{ route('learning.show', $material->id) }}" 
-                                       class="btn btn-sm btn-primary" 
-                                       style="border-radius:10px; padding:0.4rem 0.85rem; font-size:0.82rem; font-weight:700;">
-                                        <i class="bi bi-eye me-1"></i> View
+                                    <a href="{{ route('learning.show', $material->id) }}"
+                                       class="btn btn-sm"
+                                       style="border-radius:999px; padding:0.45rem 1.1rem; font-size:0.82rem; font-weight:700; background:var(--color-surface-strong); color:var(--color-on-solid); border:1px solid var(--color-surface-strong); white-space:nowrap;">
+                                        <i class="bi bi-eye me-1"></i> View Guide
                                     </a>
                                     <div class="dropdown">
-                                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false" 
-                                                style="border-radius:10px; border:1px solid var(--color-border); width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center;">
+                                        <button class="btn btn-sm btn-light" type="button" data-bs-toggle="dropdown" aria-expanded="false"
+                                                style="border-radius:50%; border:1px solid var(--color-border); width:34px; height:34px; padding:0; display:flex; align-items:center; justify-content:center;">
                                             <i class="bi bi-three-dots-vertical" style="color:var(--color-text-muted);"></i>
                                         </button>
                                         <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px; border:1px solid var(--color-border); font-size:0.85rem;">
