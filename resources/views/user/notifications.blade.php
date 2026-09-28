@@ -74,9 +74,9 @@
     .notif-view-pill { font-size:0.72rem; font-weight:800; padding:0.35rem 0.85rem; border:none; border-radius:999px; color:var(--color-text); background:var(--color-surface-soft); background-color:var(--color-surface-soft); white-space:nowrap; }
 
     .mark-all-btn {
-        background:#F1F5F9; background-color:#F1F5F9;
+        background:var(--color-surface-soft); background-color:var(--color-surface-soft);
         border:none;
-        color:#743AFF;
+        color:var(--color-primary-text);
         font-size:0.78rem;
         font-weight:800;
         padding:0.45em 1.1em;
@@ -87,8 +87,63 @@
         align-items:center;
         gap:0.4rem;
     }
-    .mark-all-btn:hover { background:#E8EEF5; background-color:#E8EEF5; color:#6431DE; }
+    .mark-all-btn:hover { background:var(--color-primary-soft); background-color:var(--color-primary-soft); color:var(--color-primary-text); }
     .mark-all-btn:disabled { opacity:0.4; cursor:not-allowed; }
+
+    /* ── Header top card (dashboard greeting look, compact text) ── */
+    .page-hero {
+        position:relative;
+        overflow:hidden;
+        border:none;
+        border-radius:24px;
+        padding:1.5rem 1.75rem;
+        margin-top:0;
+        margin-bottom:1.5rem;
+        background:var(--color-surface);
+        background-color:var(--color-surface);
+        box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent);
+    }
+    .page-hero::before {
+        content:'';
+        position:absolute;
+        top:-40px;
+        right:-30px;
+        width:260px;
+        height:260px;
+        border-radius:50%;
+        background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%);
+        pointer-events:none;
+    }
+    .page-hero::after {
+        content:'';
+        position:absolute;
+        bottom:-50px;
+        left:20%;
+        width:180px;
+        height:180px;
+        border-radius:50%;
+        background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%);
+        pointer-events:none;
+    }
+    .page-hero-title { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.1rem; font-weight:800; color:var(--color-text); letter-spacing:-0.01em; line-height:1.3; }
+    .page-hero-subtitle { font-size:0.78rem; color:var(--color-text-muted); margin:0.2rem 0 0; line-height:1.5; }
+
+    /* ── Mobile: smaller text, stacked cards ── */
+    @media (max-width:600px) {
+        .notif-wrap { max-width:100%; }
+        .page-hero { padding:1.4rem 1.1rem; border-radius:20px; margin-bottom:1.25rem; }
+        .page-hero-title { font-size:0.95rem; }
+        .page-hero-subtitle { font-size:0.7rem; }
+        .notif-count-pill { font-size:0.68rem; }
+        .mark-all-btn { font-size:0.7rem; width:100%; justify-content:center; }
+        .notif-card { padding:0.9rem 1rem; gap:0.7rem; border-radius:16px; flex-wrap:wrap; }
+        .notif-icon { width:36px; height:36px; font-size:0.95rem; border-radius:10px; }
+        .notif-title { font-size:0.8rem; }
+        .notif-message { font-size:0.76rem; }
+        .notif-time { font-size:0.66rem; flex-wrap:wrap; }
+        .notif-view-pill { font-size:0.66rem; }
+        .type-badge { font-size:0.58rem; }
+    }
 </style>
 @endpush
 
