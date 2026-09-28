@@ -55,9 +55,9 @@
     /* Circles stay circles: exact squares that clip any inner content. */
     .navbar .staff-action-btn, .navbar #sidebarToggleBtn, .navbar .staff-profile-pill { flex-shrink:0 !important; align-self:center !important; }
     .navbar .staff-action-btn {
-        width:30px !important; height:30px !important;
-        min-width:30px !important; max-width:30px !important;
-        min-height:30px !important; max-height:30px !important;
+        width:32px !important; height:32px !important;
+        min-width:32px !important; max-width:32px !important;
+        min-height:32px !important; max-height:32px !important;
         aspect-ratio:1 / 1 !important;
         padding:0 !important; overflow:hidden !important;
         border-radius:50% !important;
@@ -74,6 +74,10 @@
     /* Staff actions match the patient portal's circular bordered buttons. */
     :root:not([data-theme="dark"]) .navbar .rc-theme-toggle .icon-sun { display:none !important; }
     [data-theme="dark"] .navbar .rc-theme-toggle .icon-moon { display:none !important; }
+    /* Roomier profile pill only where the name text actually shows (desktop). */
+    @media (min-width: 992px) {
+        .navbar .staff-profile-pill { padding:2px 10px 2px 2px !important; }
+    }
     @media (max-width: 576px) {
         .navbar { height:58px !important; }
         .navbar .container-fluid { gap:0.375rem !important; padding-left:0.6rem !important; padding-right:0.6rem !important; }
@@ -81,11 +85,11 @@
         .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
         .navbar .navbar-brand > span:last-child { font-size:0.95rem !important; letter-spacing:-0.2px !important; }
-        .navbar #sidebarToggleBtn { width:32px !important; height:32px !important; }
+        .navbar #sidebarToggleBtn { width:30px !important; height:30px !important; border-radius:50% !important; background:var(--color-surface) !important; }
         .navbar .staff-action-btn {
-            width:28px !important; height:28px !important;
-            min-width:28px !important; max-width:28px !important;
-            min-height:28px !important; max-height:28px !important;
+            width:30px !important; height:30px !important;
+            min-width:30px !important; max-width:30px !important;
+            min-height:30px !important; max-height:30px !important;
         }
         .navbar .staff-action-btn i { font-size:12px !important; }
         .navbar .staff-profile-pill { padding:2px !important; gap:0 !important; }
@@ -100,12 +104,12 @@
         <div class="d-flex align-items-center gap-2">
             <button id="sidebarToggleBtn"
                     class="btn btn-sm btn-light border d-flex d-lg-none align-items-center justify-content-center"
-                    style="width:32px; height:32px; border-radius:9px; color:var(--color-text-muted); background:var(--color-surface-soft);"
+                    style="width:32px; height:32px; border-radius:50%; color:var(--color-text-muted); background:var(--color-surface); border:1px solid var(--color-border) !important;"
                     aria-label="Toggle sidebar">
                 <i class="bi bi-list fs-5"></i>
             </button>
             <a class="navbar-brand d-flex align-items-center m-0 p-0 text-decoration-none" href="{{ $dashboardRoute }}" style="gap:4px; line-height:1;">
-                <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px;">
+                <span aria-hidden="true" style="width:30px; height:30px; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 30px; transform:translateY(-0.15em);">
                     <img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt=""
                          style="width:30px; height:30px; max-width:none; object-fit:contain; display:block;">
                 </span>
@@ -155,7 +159,7 @@
             <div class="dropdown">
                 <a class="nav-link dropdown-toggle d-flex align-items-center gap-2 p-1 text-decoration-none staff-profile-pill"
                    href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"
-                   style="border:1px solid var(--color-border); border-radius:9999px; padding:2px 10px 2px 2px !important;">
+                   style="border:1px solid var(--color-border); border-radius:9999px; padding:2px;">
                     <img src="{{ $currentUser->profile_image_url }}"
                          alt="{{ $currentUser->name }}"
                          class="rounded-circle border"
