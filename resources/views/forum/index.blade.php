@@ -393,14 +393,14 @@
         /* Phones: compact hero — title + subtitle only. */
         .forum-hero {
             border-radius:14px !important;
-            padding:0.95rem 0.9rem !important;
-            margin-bottom:0.9rem !important;
+            padding:0.8rem 0.85rem !important;
+            margin-bottom:0.8rem !important;
             gap:0 !important;
             flex-direction:column !important;
             align-items:flex-start !important;
         }
-        .forum-hero-title { font-size:1.1rem !important; gap:0.4rem !important; margin-bottom:0.2rem !important; }
-        .forum-hero-sub { font-size:0.78rem !important; line-height:1.45 !important; }
+        .forum-hero-title { font-size:1rem !important; gap:0.4rem !important; margin-bottom:0.15rem !important; }
+        .forum-hero-sub { font-size:0.74rem !important; line-height:1.4 !important; }
         .forum-role-badge { display:none !important; }
         .forum-composer-btn { display:none !important; }
 
