@@ -535,28 +535,29 @@
                 "format"
                 "category"
                 "actions";
-            gap:0.55rem;
+            gap:0.45rem;
             padding:0;
             background:transparent;
             border:none;
         }
-        .learn-filter-card > .card-body { padding:0.85rem !important; }
-        .learn-mobile-head { padding:0 0.15rem 0.65rem; align-items:center; }
-        .learn-mobile-title { font-size:0.88rem !important; }
-        .learn-mobile-reset { font-size:0.74rem !important; min-height:0 !important; padding:0.25rem !important; }
-        .learn-mobile-count { font-size:0.62rem !important; }
-        .learn-label { margin-bottom:0.25rem !important; font-size:0.6rem !important; letter-spacing:0.3px; text-align:left; }
-        .learn-input, .learn-search-group .learn-search-icon { min-height:44px !important; }
+        .learn-filter-card > .card-body { padding:0.7rem !important; }
+        .learn-mobile-head { padding:0 0.1rem 0.5rem; align-items:center; gap:0.4rem; }
+        .learn-mobile-title { font-size:0.82rem !important; }
+        .learn-mobile-title i { font-size:0.9rem !important; }
+        .learn-mobile-reset { font-size:0.7rem !important; min-height:0 !important; padding:0.2rem !important; }
+        .learn-mobile-count { font-size:0.6rem !important; padding:0.15rem 0.5rem !important; }
+        .learn-label { margin-bottom:0.2rem !important; font-size:0.58rem !important; letter-spacing:0.3px; text-align:left; }
+        .learn-input, .learn-search-group .learn-search-icon { min-height:40px !important; }
         .learn-input {
-            font-size:0.78rem !important;
+            font-size:0.75rem !important;
             max-width:100%; width:100%; text-align:left;
         }
         .learn-field-format .learn-input, .learn-field-category .learn-input {
             white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
         }
-        .learn-btn-apply { min-height:44px; font-size:0.8rem; justify-content:center; }
-        .learn-btn-clear { width:44px; height:44px; min-height:44px; }
-        .learn-actions { align-items:center; }
+        .learn-btn-apply { min-height:40px; font-size:0.78rem; justify-content:center; padding:0 0.9rem; }
+        .learn-btn-clear { width:40px; height:40px; min-height:40px; }
+        .learn-actions { align-items:center; gap:0.4rem; }
 
         /* Phones: YouTube-style 2-col video grid — compact cards fit side by side */
         .learn-media-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.65rem; }
