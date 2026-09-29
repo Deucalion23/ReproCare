@@ -7,7 +7,7 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
             <div class="page-hero-title">Health Record Review</div>
-            <p class="page-hero-subtitle">Review BHW-submitted records, update details, message the assigned BHW, and pass records to the midwife.</p>
+            <p class="page-hero-subtitle">Review BHW-submitted records, update details, and pass records to the midwife.</p>
         </div>
     </div>
 </div>

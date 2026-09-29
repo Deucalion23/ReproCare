@@ -223,8 +223,16 @@
         .bhw-search-actions .btn { font-size:0.72rem; display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important; }
         .bhw-avatar { width:36px; height:36px; font-size:0.78rem; border-radius:12px; }
         .main-content table.table-cards-mobile td { font-size:0.72rem !important; }
+        .main-content table.table-cards-mobile tbody tr { margin-bottom:0.6rem; border-radius:14px; padding:0.15rem 0; }
+        .main-content table.table-cards-mobile td > div[style*="font-weight:800"] { font-size:0.8rem !important; }
+        .main-content table.table-cards-mobile td > div[style*="font-size:0.8rem"] { font-size:0.7rem !important; }
+        .main-content table.table-cards-mobile td > div[style*="font-weight:700"] { font-size:0.76rem !important; }
+        .main-content table.table-cards-mobile td > div[style*="font-size:0.76rem"] { font-size:0.66rem !important; }
         .main-content .badge { font-size:0.62rem !important; }
-        .bhw-actions .btn, .bhw-actions-col .btn { font-size:0.68rem !important; padding:0.35rem 0.6rem !important; }
+        .main-content .status-badge-custom { font-size:0.64rem !important; }
+        .main-content .metric-chip { font-size:0.66rem !important; }
+        .bhw-actions .btn, .bhw-actions-col .btn, .bhw-action-btn { font-size:0.68rem !important; }
+        .bhw-action-btn { width:30px !important; height:30px !important; }
     }
 </style>
 @endpush
