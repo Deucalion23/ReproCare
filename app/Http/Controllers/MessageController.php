@@ -88,7 +88,54 @@ class MessageController extends Controller
             // aggregate instead; identifiers stay unquoted/lowercase so the
             // same SQL parses on pgsql, mysql and sqlite.
             ->orderByRaw('COALESCE((select max(replies.created_at) from messages as replies where replies.reply_to_id = messages.id and replies.deleted_at is null), messages.created_at) DESC')
-            ->paginate(15);
+            // Fetch-then-group: the inbox shows ONE row per person (latest
+            // activity first), never one row per thread. 200 most recent
+            // threads is plenty for a chat list; deep history stays in search.
+            ->limit(200)
+            ->get();
+
+        // Collapse threads with the same counterpart, keeping the latest.
+        $seenCounterparts = [];
+        $grouped = collect();
+        foreach ($messages as $thread) {
+            $otherId = (int) ($thread->sender_id === $userId ? $thread->receiver_id : $thread->sender_id);
+            if (isset($seenCounterparts[$otherId])) {
+                continue;
+            }
+            $seenCounterparts[$otherId] = true;
+            $grouped->push($thread);
+        }
+
+        // Unread totals per person (roots + replies), in a single query.
+        $unreadByPerson = $grouped->isEmpty() ? collect() : Message::where('receiver_id', $userId)
+            ->where('is_read', false)
+            ->whereIn('sender_id', array_keys($seenCounterparts))
+            ->selectRaw('sender_id, count(*) as aggregate')
+            ->groupBy('sender_id')
+            ->pluck('aggregate', 'sender_id');
+
+        // Per-row display data: preview = newest text in that conversation.
+        foreach ($grouped as $thread) {
+            $otherId = (int) ($thread->sender_id === $userId ? $thread->receiver_id : $thread->sender_id);
+            $latestReply = $thread->replies->sortByDesc('created_at')->first();
+            if ($latestReply && $latestReply->created_at > $thread->created_at) {
+                $thread->conversation_preview_prefix = $latestReply->sender_id === $userId ? 'You: ' : '';
+                $thread->conversation_preview = $latestReply->body;
+            } else {
+                $thread->conversation_preview_prefix = $thread->sender_id === $userId ? 'You: ' : '';
+                $thread->conversation_preview = $thread->body;
+            }
+            $thread->conversation_unread_count = (int) ($unreadByPerson[$otherId] ?? 0);
+        }
+
+        $page = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $messages = new \Illuminate\Pagination\LengthAwarePaginator(
+            $grouped->forPage($page, 15)->values(),
+            $grouped->count(),
+            15,
+            $page,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
 
         $unreadCount = Message::where('receiver_id', $userId)
             ->where('is_read', false)

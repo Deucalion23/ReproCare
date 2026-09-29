@@ -145,10 +145,10 @@
                 @forelse($messages as $msg)
                     @php
                         $sentByCurrentUser = $msg->sender_id === $currentUserId;
-                        $unreadForCurrentUser = !$msg->is_read && $msg->receiver_id === $currentUserId;
+                        $unreadForCurrentUser = ($msg->conversation_unread_count ?? 0) > 0 || (!$msg->is_read && $msg->receiver_id === $currentUserId);
                         $otherParty = $sentByCurrentUser ? $msg->receiver : $msg->sender;
                         $lastActivity = $msg->replies_max_created_at ? \Carbon\Carbon::parse($msg->replies_max_created_at) : $msg->created_at;
-                        $previewPrefix = $sentByCurrentUser ? 'You: ' : '';
+                        $previewPrefix = $msg->conversation_preview_prefix ?? ($sentByCurrentUser ? 'You: ' : '');
                         $otherPhoto = $otherParty ? $otherParty->profile_image_url : '/images/avatars/avatar-female.svg';
                         $otherRole = $otherParty?->staff_title ?? 'Member';
                         $roleCls = match ($otherParty?->role) { 'midwife' => 'rc-role-midwife', 'bhw' => 'rc-role-bhw', 'bhw_president' => 'rc-role-president', 'user' => 'rc-role-patient', default => 'rc-role-member', };
@@ -164,7 +164,7 @@
                                 <span class="rc-chat-time">{{ $lastActivity->diffForHumans(null, true, true) }}</span>
                             </div>
                             <div class="rc-chat-bottom">
-                                <p class="rc-chat-preview">{{ $previewPrefix }}{{ \Illuminate\Support\Str::limit($msg->body, 55) }}</p>
+                                <p class="rc-chat-preview">{{ $previewPrefix }}{{ \Illuminate\Support\Str::limit($msg->conversation_preview ?? $msg->body, 55) }}</p>
                                 @if($unreadForCurrentUser)<span class="rc-new-badge">NEW</span>@endif
                             </div>
                             <span class="rc-role-tag {{ $roleCls }}">{{ $otherRole }}</span>
