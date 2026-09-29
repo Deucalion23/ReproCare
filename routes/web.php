@@ -882,6 +882,13 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::post('/walk-in', [SmsController::class, 'sendWalkIn'])->name('walk-in');
         Route::post('/broadcast', [SmsController::class, 'broadcast'])->name('broadcast');
     });
+
+    // Archived Records Hub (same hub as CHO; administrator accounts stay
+    // CHO-only inside the controller).
+    Route::prefix('archived')->name('archived.')->group(function () {
+        Route::get('/', [ArchivedRecordController::class, 'index'])->name('index');
+        Route::post('/{type}/{id}/restore', [ArchivedRecordController::class, 'restore'])->name('restore');
+    });
 });
 
 // ─── Cross-cutting workflows: correction loop, transfers, emergency,

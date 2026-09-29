@@ -31,6 +31,8 @@ abstract class AutomationTestCase extends TestCase
             $t->timestamp('email_verified_at')->nullable();
             $t->string('google_id')->nullable(); $t->boolean('is_profile_complete')->default(false);
             $t->string('barangay')->nullable();
+            $t->timestamp('archived_at')->nullable(); $t->string('archived_reason')->nullable();
+            $t->unsignedBigInteger('archived_by')->nullable(); $t->string('rejection_reason')->nullable();
             $t->string('role')->default('user'); $t->string('status')->default('approved');
             $t->string('contact_number')->nullable(); $t->boolean('sms_opt_out')->default(false);
             $t->rememberToken();

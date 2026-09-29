@@ -309,6 +309,13 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('rhu.archived*') ? 'active' : '' }}"
+                   href="{{ route('rhu.archived.index') }}">
+                    <i class="bi bi-archive-fill"></i>
+                    <span>Archived Records</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('rhu.logs*') ? 'active' : '' }}"
                    href="{{ route('rhu.logs.index') }}">
                     <i class="bi bi-activity"></i>
