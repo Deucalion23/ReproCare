@@ -173,14 +173,24 @@
                     </div>
                 </div>
                 <div class="pref-card-body">
-                    {{-- Full profile show card, displayed inside settings --}}
-                    @include('bhw.profile.partials.profile-card', ['user' => $bhwUser, 'actions' => ['edit']])
+                    {{-- Full profile show card, displayed inside settings (no buttons — the form below edits directly) --}}
+                    @include('bhw.profile.partials.profile-card', ['user' => $bhwUser, 'actions' => []])
 
-                    <form method="POST" action="{{ route('bhw.settings.update') }}" class="mt-4">
+                    <form method="POST" action="{{ route('bhw.settings.update') }}" class="mt-4" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="section" value="profile">
                         <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-bold" style="font-size:0.8rem;">Profile Photo</label>
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <img id="bhwPhotoPreview" src="{{ $bhwUser->profile_image_url }}" alt="Profile photo"
+                                         style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--color-border);flex-shrink:0;"
+                                         onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
+                                    <input type="file" name="profile_image" class="form-control" accept="image/jpeg,image/png,image/jpg" style="max-width:300px;"
+                                           onchange="if(this.files[0])document.getElementById('bhwPhotoPreview').src=window.URL.createObjectURL(this.files[0])">
+                                </div>
+                            </div>
                             <div class="col-md-8">
                                 <label class="form-label fw-bold" style="font-size:0.8rem;">Full Name</label>
                                 <input type="text" class="form-control" value="{{ $bhwUser->name }}" readonly style="background:var(--color-bg);font-weight:600;">

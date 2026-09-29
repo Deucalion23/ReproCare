@@ -107,10 +107,20 @@
             </div>
         </div>
 
+        @php
+            $cardSettingsRoute = match(auth()->user()?->role) {
+                'midwife' => 'midwife.settings',
+                'bhw' => 'bhw.settings',
+                'bhw_president' => 'bhw-president.settings',
+                'cho' => 'cho.settings',
+                'rhu' => 'rhu.settings',
+                default => 'user.settings',
+            };
+        @endphp
         @if(!empty($actions))
         <div class="mt-4 d-flex flex-wrap gap-2">
             @if(in_array('edit', $actions))
-            <a href="{{ route('profile.edit') }}" class="btn btn-primary">
+            <a href="{{ route($cardSettingsRoute) }}" class="btn btn-primary">
                 <i class="bi bi-pencil-fill me-1"></i> Edit Profile
             </a>
             @endif

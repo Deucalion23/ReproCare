@@ -150,7 +150,7 @@
         <div class="mw-profile-card h-100 fade-in-card">
             <div class="mw-profile-header d-flex justify-content-between align-items-center">
                 <h5 class="mw-profile-title">Personal Information</h5>
-                <a href="{{ url('/profile/edit') }}" class="btn btn-sm btn-primary" style="border-radius:10px; font-weight:700;">
+                <a href="{{ route('midwife.settings') }}" class="btn btn-sm btn-primary" style="border-radius:10px; font-weight:700;">
                     <i class="bi bi-pencil-square me-1"></i> Edit Profile
                 </a>
             </div>

@@ -196,11 +196,23 @@
                     </div>
                 </div>
                 <div class="pref-card-body">
-                    <form method="POST" action="{{ route('midwife.settings.update') }}">
+                    <form method="POST" action="{{ route('midwife.settings.update') }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="section" value="profile">
                         <div class="row g-3">
+                            <div class="col-12">
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <img id="mwPhotoPreview" src="{{ $mwUser->profile_image_url }}" alt="Profile photo"
+                                         style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--color-border);flex-shrink:0;"
+                                         onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
+                                    <div>
+                                        <label class="form-label fw-bold" style="font-size:0.8rem;">Profile Photo</label>
+                                        <input type="file" name="profile_image" class="form-control" accept="image/jpeg,image/png,image/jpg" style="max-width:300px;"
+                                               onchange="if(this.files[0])document.getElementById('mwPhotoPreview').src=window.URL.createObjectURL(this.files[0])">
+                                    </div>
+                                </div>
+                            </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-bold" style="font-size:0.8rem;">PRC License Number</label>
                                 <div class="input-group">

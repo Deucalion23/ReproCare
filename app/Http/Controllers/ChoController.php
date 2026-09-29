@@ -207,8 +207,19 @@ class ChoController extends Controller
                 'secondary_email' => 'nullable|email|max:255',
                 'office_extension' => 'nullable|string|max:20',
                 'emergency_mobile' => 'nullable|string|max:30',
+                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             ]);
             $user = auth()->user();
+            if ($request->hasFile('profile_image')) {
+                if ($user->profile_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_image)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_image);
+                }
+                $data['profile_image'] = $request->file('profile_image')->store('uploads/profile', 'public');
+                $inline = \App\Models\User::makeAvatarDataUrl($request->file('profile_image'));
+                if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                    $data['profile_image_data'] = $inline;
+                }
+            }
             $user->update($data);
             \App\Models\ActivityLog::log('update', 'CHO updated My Profile identity and contact details');
             return back()->with('success', 'My Profile updated.');

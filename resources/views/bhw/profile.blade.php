@@ -146,11 +146,8 @@
                     </div>
 
                     <div class="d-flex flex-wrap gap-2 mt-4">
-                        <a href="{{ url('/profile/edit') }}" class="btn btn-primary">
+                        <a href="{{ route('bhw.settings') }}" class="btn btn-primary">
                             <i class="bi bi-pencil"></i> Edit Profile
-                        </a>
-                        <a href="{{ route('bhw.settings') }}" class="btn btn-outline-secondary">
-                            <i class="bi bi-gear"></i> Account Settings
                         </a>
                     </div>
                 </div>

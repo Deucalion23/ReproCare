@@ -386,7 +386,19 @@ class MidwifeController extends Controller
             $request->validate([
                 'contact_number' => 'nullable|string|max:20',
                 'specialization' => 'nullable|string|max:255',
+                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             ]);
+
+            if ($request->hasFile('profile_image')) {
+                if ($user->profile_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_image)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_image);
+                }
+                $user->profile_image = $request->file('profile_image')->store('uploads/profile', 'public');
+                $inline = \App\Models\User::makeAvatarDataUrl($request->file('profile_image'));
+                if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                    $user->profile_image_data = $inline;
+                }
+            }
 
             $user->contact_number = $request->input('contact_number', $user->contact_number);
             // PRC license fields are editable only until the RHU Admin verifies the account.

@@ -49,9 +49,35 @@
     .settings-page-header h1 { font-family:'Plus Jakarta Sans', sans-serif; font-size:1.5rem; font-weight:800; color:var(--text); margin-bottom:0.2rem; }
     .settings-page-header p  { font-size:0.875rem; color:var(--text-muted); margin:0; }
     @media (max-width: 768px) {
-        .settings-wrap { flex-direction:column; }
-        .settings-sidebar { width:100%; position:static; }
+        .settings-wrap { flex-direction:column; gap:0.85rem; }
+        .settings-sidebar { width:100%; max-width:none; position:static; }
+        .settings-nav { display:flex; gap:0.4rem; overflow-x:auto; padding:0.4rem; border-radius:14px; scrollbar-width:none; }
+        .settings-nav::-webkit-scrollbar { display:none; }
+        .settings-nav-item { font-size:0.7rem; padding:0.5rem 0.7rem; gap:0.4rem; white-space:nowrap; flex-shrink:0; margin-bottom:0; }
+        .settings-nav-item i { font-size:0.85rem; width:1rem; }
+        .settings-content { width:100%; }
+        .settings-section { scroll-margin-top:76px; }
+        .settings-page-header { margin-bottom:1rem; }
+        .settings-page-header h1 { font-size:1.05rem; }
+        .settings-page-header p { font-size:0.72rem; }
         .theme-option-grid { grid-template-columns:1fr 1fr; }
+        .pref-card { border-radius:14px; margin-bottom:1rem; }
+        .pref-card-header { padding:0.75rem 0.85rem; gap:0.55rem; flex-wrap:wrap; }
+        .pref-card-header-icon { width:30px; height:30px; font-size:0.85rem; border-radius:9px; }
+        .pref-card-header h6 { font-size:0.76rem; }
+        .pref-card-header p { font-size:0.64rem; }
+        .pref-card-body { padding:0.85rem; font-size:0.78rem; }
+        .pref-card-body h5 { font-size:0.88rem !important; }
+        .pref-card-body .small, .pref-card-body small { font-size:0.68rem; }
+        .pref-row { padding:0.7rem 0; }
+        .pref-row-label h6 { font-size:0.78rem; }
+        .pref-row-label p { font-size:0.68rem; }
+        .pref-card-body .btn { font-size:0.72rem; }
+        .form-label { font-size:0.72rem; }
+        .form-control, .form-select { font-size:0.8rem; }
+        .danger-zone { padding:0.85rem; border-radius:14px; }
+        .danger-zone h6 { font-size:0.78rem; }
+        .session-badge { font-size:0.68rem; }
     }
 </style>
 @endpush

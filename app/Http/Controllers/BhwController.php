@@ -1524,7 +1524,19 @@ class BhwController extends Controller
                 'secondary_contact' => 'nullable|string|max:20',
                 'secondary_email' => 'nullable|email|max:255',
                 'address' => 'nullable|string|max:500',
+                'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             ]);
+
+            if ($request->hasFile('profile_image')) {
+                if ($user->profile_image && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->profile_image)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($user->profile_image);
+                }
+                $user->profile_image = $request->file('profile_image')->store('uploads/profile', 'public');
+                $inline = \App\Models\User::makeAvatarDataUrl($request->file('profile_image'));
+                if ($inline !== null && \Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_image_data')) {
+                    $user->profile_image_data = $inline;
+                }
+            }
 
             $user->contact_number = $request->input('contact_number', $user->contact_number);
             $user->secondary_contact = $request->input('secondary_contact', $user->secondary_contact);

@@ -179,10 +179,22 @@
                     </div>
                 </div>
                 <div class="pref-card-body">
-                    <form method="POST" action="{{ route('cho.settings.update') }}" class="row g-3">
+                    <form method="POST" action="{{ route('cho.settings.update') }}" class="row g-3" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="section" value="myprofile">
+                        <div class="col-12">
+                            <div class="d-flex align-items-center gap-3 flex-wrap">
+                                <img id="choPhotoPreview" src="{{ $me->profile_image_url }}" alt="Profile photo"
+                                     style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--color-border);flex-shrink:0;"
+                                     onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
+                                <div>
+                                    <label class="form-label">Profile Photo</label>
+                                    <input type="file" name="profile_image" class="form-control" accept="image/jpeg,image/png,image/jpg" style="max-width:300px;"
+                                           onchange="if(this.files[0])document.getElementById('choPhotoPreview').src=window.URL.createObjectURL(this.files[0])">
+                                </div>
+                            </div>
+                        </div>
                         <div class="col-md-4">
                             <label class="form-label">First Name</label>
                             <input type="text" class="form-control" name="first_name" value="{{ old('first_name', $me->first_name) }}" required>
