@@ -979,9 +979,19 @@ class BhwController extends Controller
             
             $totalRecords = $baseQuery->count();
         } else {
+            // Pregnancy reports: only pregnancies of women (or walk-in
+            // patients) living in the BHW's designated barangay.
+            $reportBarangay = $this->ownBarangay();
             $baseQuery = Pregnancy::whereNull('ended_at')
                 ->whereMonth('created_at', $validated['report_month'])
                 ->whereYear('created_at', $validated['report_year'])
+                ->where(function ($query) use ($reportBarangay) {
+                    $query->whereHas('woman', function ($w) use ($reportBarangay) {
+                        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $reportBarangay);
+                    })->orWhereHas('walkInPatient', function ($w) use ($reportBarangay) {
+                        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $reportBarangay);
+                    });
+                })
                 ->when($validated['patient_filter'] === 'selected', function ($query) use ($patientIds) {
                     $query->whereIn('user_id', $patientIds);
                 });
@@ -1034,9 +1044,17 @@ class BhwController extends Controller
             return view('bhw.reports.show', compact('report', 'healthRecords', 'uniquePatients', 'riskDistribution'));
         } else {
             // Pregnancy reports
+            $reportBarangay = $this->ownBarangay();
             $baseQuery = Pregnancy::whereNull('ended_at')
                 ->whereMonth('created_at', $report->report_month)
                 ->whereYear('created_at', $report->report_year)
+                ->where(function ($query) use ($reportBarangay) {
+                    $query->whereHas('woman', function ($w) use ($reportBarangay) {
+                        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $reportBarangay);
+                    })->orWhereHas('walkInPatient', function ($w) use ($reportBarangay) {
+                        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $reportBarangay);
+                    });
+                })
                 ->with('woman')
                 ->when(($report->filters['patient_filter'] ?? 'all') === 'selected', function ($query) use ($report) {
                     $query->whereIn('user_id', $report->filters['user_ids'] ?? []);

@@ -36,9 +36,9 @@
     }
     /* ── Phones: compact metrics, stacked filter, compressed tables ── */
     @media (max-width: 600px) {
-        .metric-grid { display:flex !important; flex-wrap:nowrap !important; overflow-x:auto !important; gap:0.45rem; padding-bottom:0.25rem; scrollbar-width:none; }
+        .metric-grid { display:flex !important; flex-wrap:nowrap !important; overflow-x:auto !important; gap:0.45rem; padding-bottom:0.25rem; scrollbar-width:none; scroll-snap-type:x mandatory; -webkit-mask-image:linear-gradient(90deg, #000 88%, transparent 100%); mask-image:linear-gradient(90deg, #000 88%, transparent 100%); }
         .metric-grid::-webkit-scrollbar { display:none; }
-        .metric-grid > .metric-card { flex:0 0 148px !important; max-width:148px !important; }
+        .metric-grid > .metric-card { flex:0 0 148px !important; max-width:148px !important; scroll-snap-align:start; }
         .metric-card { padding:0.55rem 0.6rem !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; min-height:0; }
         .metric-card-icon { font-size:0.8rem !important; margin-bottom:0.25rem !important; }
         .metric-card-label { font-size:0.52rem !important; }
