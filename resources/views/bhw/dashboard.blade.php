@@ -89,7 +89,7 @@
     <div class="col-xl-3 col-md-6 d-flex">
         <div class="stat-card w-100">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div class="stat-icon mb-0" style="background:var(--color-success-soft) !important;color:var(--color-success-text) !important;"><i class="bi bi-calendar-today-fill"></i></div>
+                <div class="stat-icon mb-0" style="background:var(--color-success-soft) !important;color:var(--color-success-text) !important;"><i class="bi bi-calendar-day-fill"></i></div>
                 <span class="summary-chip chip-success" style="font-size:0.72rem;">Today</span>
             </div>
             <div class="stat-label">Today's Checkups</div>
@@ -101,7 +101,7 @@
     <div class="col-xl-3 col-md-6 d-flex">
         <div class="stat-card w-100">
             <div class="d-flex justify-content-between align-items-start mb-3">
-                <div class="stat-icon mb-0"><i class="bi bi-clipboard-pulse-fill"></i></div>
+                <div class="stat-icon mb-0"><i class="bi bi-clipboard-data-fill"></i></div>
                 <span class="summary-chip chip-primary" style="font-size:0.72rem;">Records</span>
             </div>
             <div class="stat-label">My Records</div>
