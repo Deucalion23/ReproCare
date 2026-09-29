@@ -53,6 +53,22 @@
     .btn-action-view:hover { background:var(--primary-subtle); border-color:var(--primary); color:var(--primary-light); }
     .btn-action-add { color:var(--success); }
     .btn-action-add:hover { background:color-mix(in srgb, var(--color-success) 12%, transparent); border-color:var(--success); color:var(--success); }
+
+    /* ── Mobile: stacked hero, scrollable pills, compact record cards ── */
+    @media (max-width: 600px) {
+        .page-hero .d-flex.justify-content-between { flex-direction:column; align-items:stretch !important; }
+        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; }
+        .page-hero form.d-flex { grid-column:1 / -1; }
+        .search-bar { max-width:none; width:100%; }
+        .search-bar input { font-size:0.78rem; }
+        .filter-pills { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; width:100%; }
+        .filter-pill { font-size:0.66rem; padding:0.5rem 0.55rem; justify-content:center; white-space:nowrap; }
+        .patient-name-cell .name { font-size:0.8rem; }
+        .patient-name-cell .sub { font-size:0.68rem; }
+        .patient-avatar { width:32px; height:32px; font-size:0.74rem; }
+        .btn-action { width:30px; height:30px; font-size:0.74rem; }
+        .table-card { border-radius:18px; }
+    }
 </style>
 @endpush
 
@@ -77,8 +93,8 @@
         <a href="{{ route('bhw.walk-in-patients.create') }}" class="btn btn-outline-primary">
             <i class="bi bi-person-add me-1"></i> Record Walk-in
         </a>
-        <a href="{{ route('bhw.walk-in-patients.trash') }}" class="btn btn-outline-secondary position-relative" title="Deleted walk-in profiles">
-            <i class="bi bi-trash3 me-1"></i> Trash
+        <a href="{{ route('bhw.walk-in-patients.trash') }}" class="btn btn-outline-secondary position-relative" title="Archived walk-in profiles">
+            <i class="bi bi-archive me-1"></i> Archive
             @if(($trashCount ?? 0) > 0)
                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">{{ $trashCount }}</span>
             @endif
