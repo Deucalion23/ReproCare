@@ -36,13 +36,14 @@
     }
     /* ── Phones: compact metrics, stacked filter, compressed tables ── */
     @media (max-width: 600px) {
-        .metric-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.5rem; align-items:stretch; }
-        .metric-grid > .metric-card:last-child { grid-column:1 / -1; }
-        .metric-card { padding:0.65rem 0.7rem !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; min-height:0; }
-        .metric-card-icon { font-size:0.9rem !important; margin-bottom:0.3rem !important; }
-        .metric-card-label { font-size:0.56rem !important; }
-        .metric-card-value { font-size:1.05rem !important; line-height:1.1 !important; }
-        .metric-card-note { font-size:0.6rem !important; line-height:1.4 !important; }
+        .metric-grid { display:flex !important; flex-wrap:nowrap !important; overflow-x:auto !important; gap:0.45rem; padding-bottom:0.25rem; scrollbar-width:none; }
+        .metric-grid::-webkit-scrollbar { display:none; }
+        .metric-grid > .metric-card { flex:0 0 148px !important; max-width:148px !important; }
+        .metric-card { padding:0.55rem 0.6rem !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; min-height:0; }
+        .metric-card-icon { font-size:0.8rem !important; margin-bottom:0.25rem !important; }
+        .metric-card-label { font-size:0.52rem !important; }
+        .metric-card-value { font-size:0.95rem !important; line-height:1.1 !important; }
+        .metric-card-note { font-size:0.56rem !important; line-height:1.35 !important; }
         .workspace-panel-header { padding:0.85rem 1rem !important; }
         .workspace-panel-title { font-size:0.82rem !important; }
         .workspace-panel-subtitle { font-size:0.66rem !important; }

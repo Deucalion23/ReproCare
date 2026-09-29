@@ -107,7 +107,7 @@ class BhwController extends Controller
         // Patient counts are scoped to the BHW's own barangay via the shared
         // jurisdiction rule (legacy spellings resolve to the same area);
         // myHealthRecords is personal and needs no scoping.
-        $bhwBarangay = auth()->user()->barangay;
+        $bhwBarangay = $this->ownBarangay();
         $inArea = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $bhwBarangay, $column);
         $stats = [
             'totalPatients' => tap(User::where('role', 'user'), $inArea)->count(),
@@ -332,7 +332,7 @@ class BhwController extends Controller
         // BHWs see only women from their own barangay (shared jurisdiction
         // rule: legacy spellings like 'Burgos' and 'Barangay Burgos Padlan,
         // San Carlos City, Pangasinan' resolve to the same area).
-        $bhwBarangay = auth()->user()->barangay;
+        $bhwBarangay = $this->ownBarangay();
         $inArea = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $bhwBarangay, $column);
 
         // Get registered patients
@@ -409,7 +409,7 @@ class BhwController extends Controller
         $registeredCount = tap(User::where('role', 'user'), $inArea)->count();
         $unregisteredCount = tap(WalkInPatient::whereNull('converted_to_user_id')->whereNull('user_id'), $inArea)->count();
 
-        $trashCount = WalkInPatient::onlyTrashed()->count();
+        $trashCount = tap(WalkInPatient::onlyTrashed(), $inArea)->count();
 
         return view('bhw.patients', compact(
             'patients',
@@ -533,8 +533,18 @@ class BhwController extends Controller
     // View Schedules - BHW can only view scheduled checkups
     public function schedules()
     {
+        // Same barangay scope as everywhere else: only checkups for women
+        // (registered or walk-in) living in the BHW's designated barangay.
+        $bhwBarangay = $this->ownBarangay();
         $checkups = Checkup::with(['woman', 'walkInPatient', 'midwife', 'scheduledBy'])
             ->scheduled()
+            ->where(function ($query) use ($bhwBarangay) {
+                $query->whereHas('woman', function ($w) use ($bhwBarangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $bhwBarangay);
+                })->orWhereHas('walkInPatient', function ($w) use ($bhwBarangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $bhwBarangay);
+                });
+            })
             ->orderBy('scheduled_date', 'asc')
             ->paginate(10);
 
@@ -800,7 +810,7 @@ class BhwController extends Controller
     {
         // BHWs see only checkups from their own barangay (shared jurisdiction
         // rule so legacy spellings resolve to the same area).
-        $bhwBarangay = auth()->user()->barangay;
+        $bhwBarangay = $this->ownBarangay();
         $inArea = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $bhwBarangay, $column);
         $areaScope = function ($query) use ($inArea) {
             $query->where(function ($q) use ($inArea) {
@@ -871,7 +881,7 @@ class BhwController extends Controller
     // automatically once the midwife marks it completed.
     public function archivedCheckups()
     {
-        $bhwBarangay = auth()->user()->barangay;
+        $bhwBarangay = $this->ownBarangay();
         $checkups = Checkup::with(['woman', 'walkInPatient', 'midwife', 'scheduledBy'])
             ->where('status', 'Completed')
             ->where(function ($query) use ($bhwBarangay) {
