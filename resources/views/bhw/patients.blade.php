@@ -57,7 +57,7 @@
     /* ── Mobile: stacked hero, scrollable pills, compact record cards ── */
     @media (max-width: 600px) {
         .page-hero .d-flex.justify-content-between { flex-direction:column; align-items:stretch !important; }
-        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.25rem; width:100%; align-items:stretch; }
+        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.4rem; width:100%; align-items:stretch; }
         .page-hero form.d-flex { grid-column:1 / -1; }
         .page-hero .d-flex.gap-2 .btn {
             min-width:0; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
@@ -98,9 +98,6 @@
         </form>
         <a href="{{ route('bhw.patients.create') }}" class="btn btn-primary">
             <i class="bi bi-person-plus-fill me-1"></i> Add Woman
-        </a>
-        <a href="{{ route('bhw.walk-in-patients.create') }}" class="btn btn-outline-primary">
-            <i class="bi bi-person-add me-1"></i> Record Walk-in
         </a>
         <a href="{{ route('bhw.walk-in-patients.trash') }}" class="btn btn-outline-secondary position-relative" title="Archived walk-in profiles">
             <i class="bi bi-archive me-1"></i> Archive
