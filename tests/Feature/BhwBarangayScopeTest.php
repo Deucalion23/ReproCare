@@ -14,7 +14,7 @@ class BhwBarangayScopeTest extends AutomationTestCase
         parent::setUp();
 
         Schema::table('users', function (Blueprint $t) {
-            $t->string('barangay')->nullable();
+            if (!Schema::hasColumn('users', 'barangay')) $t->string('barangay')->nullable();
         });
 
         Schema::table('pregnancies', function (Blueprint $t) {

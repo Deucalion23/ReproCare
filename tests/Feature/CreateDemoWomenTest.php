@@ -12,8 +12,8 @@ class CreateDemoWomenTest extends AutomationTestCase
     public function test_demo_command_validates_creates_ten_per_active_area_and_is_repeatable(): void
     {
         Schema::table('users', function (Blueprint $t) {
-            foreach (['email', 'password', 'middle_initial', 'gender', 'address', 'barangay'] as $column) $t->string($column)->nullable();
-            $t->unsignedBigInteger('purok_id')->nullable();
+            foreach (['email', 'password', 'middle_initial', 'gender', 'address', 'barangay'] as $column) if (!Schema::hasColumn('users', $column)) $t->string($column)->nullable();
+            if (!Schema::hasColumn('users', 'purok_id')) $t->unsignedBigInteger('purok_id')->nullable();
         });
         Schema::create('barangays', function (Blueprint $t) {
             $t->id(); $t->string('name'); $t->boolean('is_active'); $t->timestamps();

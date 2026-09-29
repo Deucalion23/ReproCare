@@ -14,16 +14,30 @@ use Illuminate\Http\Request;
 
 class ArchivedRecordController extends Controller
 {
+    /**
+     * Staff roles an RHU administrator may review and restore. Administrator
+     * accounts (cho / fellow rhu) belong to the City Health Office alone —
+     * letting RHU restore those would be a privilege escalation.
+     */
+    public const RHU_MANAGED_STAFF_ROLES = ['midwife', 'bhw_president', 'bhw'];
+
     public function __construct()
     {
-        $this->middleware(['auth', 'role:cho']);
+        $this->middleware(['auth', 'account.active', 'role:cho,rhu']);
     }
 
     /**
-     * Display all archived records across entities for the CHO Admin.
+     * Display archived records. CHO sees the city-wide hub; RHU sees the same
+     * hub (this deployment serves RHU 1 alone) except administrator accounts,
+     * which stay CHO-only.
      */
     public function index(Request $request)
     {
+        $isRhu = ($request->user()->role ?? null) === 'rhu';
+        $staffRoles = $isRhu
+            ? self::RHU_MANAGED_STAFF_ROLES
+            : ['rhu', 'midwife', 'bhw_president', 'bhw'];
+
         $activeTab = $request->input('tab', 'patients');
         $search = $request->input('search');
 
@@ -43,9 +57,10 @@ class ArchivedRecordController extends Controller
             ->paginate(15, ['*'], 'patients_page')
             ->withQueryString();
 
-        // Archived Staff Accounts
+        // Archived Staff Accounts (RHU: only the roles it manages — never
+        // fellow administrators, which stay CHO-only).
         $staff = User::onlyTrashed()
-            ->whereIn('role', ['rhu', 'midwife', 'bhw_president', 'bhw'])
+            ->whereIn('role', $staffRoles)
             ->when($search, function ($q) use ($search) {
                 $q->where(function ($inner) use ($search) {
                     $inner->where('first_name', 'like', "%{$search}%")
@@ -107,12 +122,21 @@ class ArchivedRecordController extends Controller
 
         $stats = [
             'patients' => User::onlyTrashed()->where('role', 'user')->count(),
-            'staff' => User::onlyTrashed()->whereIn('role', ['rhu', 'midwife', 'bhw_president', 'bhw'])->count(),
+            'staff' => User::onlyTrashed()->whereIn('role', $staffRoles)->count(),
             'health_records' => HealthRecord::onlyTrashed()->count(),
             'learning_materials' => LearningMaterial::onlyTrashed()->count(),
             'pregnancies' => Pregnancy::onlyTrashed()->count(),
             'supply_requests' => SupplyRequest::onlyTrashed()->count(),
         ];
+
+        // One shared hub view; layout/section/restore-route switch by role so
+        // RHU renders inside its own portal while CHO output stays identical.
+        $archiveLayout = $isRhu ? 'rhu.layout' : 'cho.layout';
+        $archiveSection = $isRhu ? 'rhu-content' : 'cho-content';
+        $archiveRestoreRoute = $isRhu ? 'rhu.archived.restore' : 'cho.archived.restore';
+        $archiveTitle = $isRhu
+            ? 'Archived Records - RHU Portal | ReproCare'
+            : 'Archived Records Hub - CHO Admin | ReproCare';
 
         return view('cho.archived.index', compact(
             'activeTab',
@@ -123,7 +147,11 @@ class ArchivedRecordController extends Controller
             'learningMaterials',
             'pregnancies',
             'supplyRequests',
-            'stats'
+            'stats',
+            'archiveLayout',
+            'archiveSection',
+            'archiveRestoreRoute',
+            'archiveTitle'
         ));
     }
 
@@ -135,6 +163,16 @@ class ArchivedRecordController extends Controller
     public function restore(string $type, int $id)
     {
         $service = app(\App\Services\ArchiveService::class);
+
+        // RHU administrators may never restore administrator accounts
+        // (cho / fellow rhu) — those belong to the City Health Office.
+        if (in_array($type, ['patient', 'staff', 'user'], true)
+            && (auth()->user()->role ?? null) === 'rhu') {
+            $target = User::withTrashed()->find($id);
+            if ($target && in_array($target->role ?? null, ['cho', 'rhu'], true)) {
+                return back()->with('error', 'Only the City Health Office can restore administrator accounts.');
+            }
+        }
 
         try {
             $name = match ($type) {

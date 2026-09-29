@@ -1,6 +1,6 @@
-@extends('cho.layout')
+@extends($archiveLayout ?? 'cho.layout')
 
-@section('title', 'Archived Records Hub - CHO Admin | ReproCare')
+@section('title', $archiveTitle ?? 'Archived Records Hub - CHO Admin | ReproCare')
 
 @push('styles')
 <style>
@@ -23,7 +23,7 @@
 </style>
 @endpush
 
-@section('cho-content')
+@section($archiveSection ?? 'cho-content')
 
 <div class="page-hero fade-in-card mb-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -194,7 +194,7 @@
                                     <span class="text-muted">{{ $patient->deleted_at ? $patient->deleted_at->format('M d, Y h:i A') : 'N/A' }}</span>
                                 </td>
                                 <td class="text-end px-3">
-                                    <form action="{{ route('cho.archived.restore', ['type' => 'patient', 'id' => $patient->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Restore patient record for {{ $patient->name }}?');">
+                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'patient', 'id' => $patient->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Restore patient record for {{ $patient->name }}?');">
                                         @csrf
                                         <button type="submit" class="btn btn-sm arch-restore-btn">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
@@ -251,7 +251,7 @@
                                     <span class="text-muted">{{ $member->deleted_at ? $member->deleted_at->format('M d, Y h:i A') : 'N/A' }}</span>
                                 </td>
                                 <td class="text-end px-3">
-                                    <form action="{{ route('cho.archived.restore', ['type' => 'staff', 'id' => $member->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Restore staff account for {{ $member->name }}?');">
+                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'staff', 'id' => $member->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Restore staff account for {{ $member->name }}?');">
                                         @csrf
                                         <button type="submit" class="btn btn-sm arch-restore-btn">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
@@ -313,7 +313,7 @@
                                     <span class="text-muted">{{ $record->deleted_at ? $record->deleted_at->format('M d, Y') : 'N/A' }}</span>
                                 </td>
                                 <td class="text-end px-3">
-                                    <form action="{{ route('cho.archived.restore', ['type' => 'health-record', 'id' => $record->id]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'health-record', 'id' => $record->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm arch-restore-btn">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
@@ -374,7 +374,7 @@
                                     <span class="text-muted">{{ $mat->deleted_at ? $mat->deleted_at->format('M d, Y') : 'N/A' }}</span>
                                 </td>
                                 <td class="text-end px-3">
-                                    <form action="{{ route('cho.archived.restore', ['type' => 'learning-material', 'id' => $mat->id]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'learning-material', 'id' => $mat->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm arch-restore-btn">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
@@ -429,7 +429,7 @@
                                     <span class="text-muted">{{ $preg->deleted_at ? $preg->deleted_at->format('M d, Y') : 'N/A' }}</span>
                                 </td>
                                 <td class="text-end px-3">
-                                    <form action="{{ route('cho.archived.restore', ['type' => 'pregnancy', 'id' => $preg->id]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'pregnancy', 'id' => $preg->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm arch-restore-btn">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
@@ -479,7 +479,7 @@
                                     <span class="text-muted">{{ $sup->deleted_at ? $sup->deleted_at->format('M d, Y') : 'N/A' }}</span>
                                 </td>
                                 <td class="text-end px-3">
-                                    <form action="{{ route('cho.archived.restore', ['type' => 'supply-request', 'id' => $sup->id]) }}" method="POST" class="d-inline">
+                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'supply-request', 'id' => $sup->id]) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm arch-restore-btn">
                                             <i class="bi bi-arrow-counterclockwise me-1"></i> Restore

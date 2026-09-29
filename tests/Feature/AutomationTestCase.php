@@ -27,8 +27,15 @@ abstract class AutomationTestCase extends TestCase
 
         Schema::create('users', function (Blueprint $t) {
             $t->id(); $t->string('first_name'); $t->string('last_name');
+            $t->string('email')->nullable(); $t->string('password')->nullable();
+            $t->timestamp('email_verified_at')->nullable();
+            $t->string('google_id')->nullable(); $t->boolean('is_profile_complete')->default(false);
+            $t->string('barangay')->nullable();
+            $t->timestamp('archived_at')->nullable(); $t->string('archived_reason')->nullable();
+            $t->unsignedBigInteger('archived_by')->nullable(); $t->string('rejection_reason')->nullable();
             $t->string('role')->default('user'); $t->string('status')->default('approved');
             $t->string('contact_number')->nullable(); $t->boolean('sms_opt_out')->default(false);
+            $t->rememberToken();
             $t->date('date_of_birth')->nullable(); $t->timestamps(); $t->softDeletes();
         });
         Schema::create('notifications', function (Blueprint $t) {
@@ -101,7 +108,25 @@ abstract class AutomationTestCase extends TestCase
 
     protected function patient(array $attributes = []): User
     {
-        return User::create(array_merge(['first_name' => 'Test', 'last_name' => 'Patient',
-            'role' => 'user', 'status' => 'approved', 'contact_number' => '09171234567'], $attributes));
+        // Portal-ready by default: verified email + completed onboarding so
+        // actingAs($this->patient()) keeps passing the verified /
+        // complete.profile gates. Override per-test to exercise the gates.
+        // NOTE: email_verified_at is intentionally NOT mass-assignable on the
+        // model, so it is applied via forceFill after creation.
+        $merged = array_merge(['first_name' => 'Test', 'last_name' => 'Patient',
+            'email' => 'test-patient-' . uniqid() . '@example.com',
+            'password' => bcrypt('password'),
+            'email_verified_at' => now(), 'is_profile_complete' => true,
+            'role' => 'user', 'status' => 'approved', 'contact_number' => '09171234567'], $attributes);
+        $verifiedAt = $merged['email_verified_at'];
+        unset($merged['email_verified_at']);
+
+        $user = User::create($merged);
+
+        if ($verifiedAt !== null) {
+            $user->forceFill(['email_verified_at' => $verifiedAt])->save();
+        }
+
+        return $user->fresh();
     }
 }

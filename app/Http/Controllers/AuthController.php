@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Barangay;
 use App\Models\Purok;
 use App\Models\User;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -157,6 +158,11 @@ class AuthController extends Controller
             'partner_contact'=> $validated['partner_contact'] ?? null,
         ]);
 
+        // Fire Laravel's email verification notification for the new account.
+        // (Google OAuth accounts skip this — Google already proved ownership
+        // and GoogleController marks them verified directly.)
+        event(new Registered($user));
+
         // Save Primary Emergency Contact
         $user->emergencyContacts()->create([
             'name' => $validated['emergency_name_1'],
@@ -241,6 +247,18 @@ class AuthController extends Controller
                 $user->update(['failed_login_attempts' => 0]);
             }
 
+            // Rejected accounts never enter any portal: re-queue as pending so
+            // the RHU 1 administrator can reassess / re-verify, and show the
+            // rejection message on the login page.
+            if (($user->status ?? null) === 'rejected') {
+                $user->update(['status' => 'pending']);
+                \App\Models\ActivityLog::log('update', "Rejected account re-queued for RHU re-verification on sign-in attempt: {$user->name} ({$user->email})", $user);
+                Auth::logout();
+                return redirect()->route('login')->withErrors([
+                    'email' => User::REJECTED_LOGIN_MESSAGE,
+                ])->onlyInput('email');
+            }
+
             // Block pending users from logging in
             if ($user->status === 'pending') {
                 Auth::logout();
@@ -275,6 +293,18 @@ class AuthController extends Controller
             }
 
             $request->session()->regenerate();
+
+            // Patient onboarding gates: unverified emails verify first,
+            // then incomplete Google profiles complete onboarding.
+            if ($user->role === 'user') {
+                if (! $user->hasVerifiedEmail()) {
+                    return redirect()->route('verification.notice');
+                }
+
+                if ($user->needsProfileCompletion()) {
+                    return redirect()->route('profile.complete');
+                }
+            }
 
             // Redirect based on role
             return match($user->role) {
@@ -374,6 +404,56 @@ class AuthController extends Controller
         return $status === Password::PASSWORD_RESET
             ? redirect()->route('login')->with('status', 'Password reset. Please log in.')
             : back()->withErrors(['email' => 'This reset link is invalid or expired.'])->onlyInput('email');
+    }
+
+    // ── Email verification (regular email/password sign-ups) ──────────────
+
+    /**
+     * Verification notice: tells the user to check their inbox.
+     * Google OAuth users never land here (already verified).
+     */
+    public function showVerifyNotice(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('dashboard');
+        }
+
+        return view('auth.verify-email');
+    }
+
+    /**
+     * Handle the signed verification link from the email.
+     */
+    public function verifyEmail(Request $request, string $id, string $hash)
+    {
+        $user = $request->user();
+
+        if (! hash_equals((string) $user->getKey(), (string) $id)
+            || ! hash_equals(sha1($user->getEmailForVerification()), (string) $hash)) {
+            abort(403, 'This verification link is invalid.');
+        }
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('dashboard')->with('status', 'Email already verified.');
+        }
+
+        $user->markEmailAsVerified();
+
+        return redirect()->route('dashboard')->with('status', 'Email verified. Welcome to ReproCare!');
+    }
+
+    /**
+     * Resend the verification email.
+     */
+    public function resendVerification(Request $request)
+    {
+        if ($request->user()->hasVerifiedEmail()) {
+            return redirect()->route('dashboard');
+        }
+
+        $request->user()->sendEmailVerificationNotification();
+
+        return back()->with('status', 'A fresh verification link was sent to your email.');
     }
 
     // Handle logout

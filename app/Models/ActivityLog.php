@@ -36,22 +36,30 @@ class ActivityLog extends Model
         return $this->morphTo('model');
     }
 
-    // Helper method to log an action easily
+    // Helper method to log an action easily.
+    // Best-effort: a logging failure (missing table, locked DB) must never
+    // crash the caller — especially authentication flows.
     public static function log($action, $description, $model = null)
     {
-        $user = auth()->user();
-        
-        self::create([
-            'user_id' => $user ? $user->id : null,
-            'user_role' => $user ? $user->role : null,
-            'user_name' => $user ? $user->name : 'System/Guest',
-            'action' => $action,
-            'model_type' => $model ? get_class($model) : null,
-            'model_id' => $model ? $model->id : null,
-            'description' => $description,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+        try {
+            $user = auth()->user();
+
+            return self::create([
+                'user_id' => $user ? $user->id : null,
+                'user_role' => $user ? $user->role : null,
+                'user_name' => $user ? $user->name : 'System/Guest',
+                'action' => $action,
+                'model_type' => $model ? get_class($model) : null,
+                'model_id' => $model ? $model->id : null,
+                'description' => $description,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
     }
 
     /**
@@ -60,19 +68,25 @@ class ActivityLog extends Model
      */
     public static function logProtected($action, $description, $model = null)
     {
-        $user = auth()->user();
+        try {
+            $user = auth()->user();
 
-        return self::create([
-            'user_id' => $user ? $user->id : null,
-            'user_role' => $user ? $user->role : null,
-            'user_name' => $user ? $user->name : 'System/Guest',
-            'action' => $action,
-            'model_type' => $model ? get_class($model) : null,
-            'model_id' => $model ? $model->id : null,
-            'description' => $description,
-            'is_protected' => true,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+            return self::create([
+                'user_id' => $user ? $user->id : null,
+                'user_role' => $user ? $user->role : null,
+                'user_name' => $user ? $user->name : 'System/Guest',
+                'action' => $action,
+                'model_type' => $model ? get_class($model) : null,
+                'model_id' => $model ? $model->id : null,
+                'description' => $description,
+                'is_protected' => true,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Throwable $e) {
+            report($e);
+
+            return null;
+        }
     }
 }
