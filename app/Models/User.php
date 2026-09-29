@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable, SoftDeletes;
@@ -27,6 +27,8 @@ class User extends Authenticatable
         'last_name',
         'email',
         'password',
+        'google_id',
+        'is_profile_complete',
         'date_of_birth',
         'gender',
         'contact_number',
@@ -137,7 +139,25 @@ class User extends Authenticatable
             'pref_registration_sms'       => 'boolean',
             'pref_registration_dashboard' => 'boolean',
             'pref_checkup_reminders'      => 'boolean',
+            'is_profile_complete'         => 'boolean',
         ];
+    }
+
+    /**
+     * Google OAuth may only ever provision patient accounts ('user').
+     * Staff / clinical roles must be created by admins, never via Socialite.
+     */
+    public const OAUTH_ALLOWED_ROLES = ['user'];
+
+    public const STAFF_ROLES = ['cho', 'rhu', 'midwife', 'bhw', 'bhw_president'];
+
+    /**
+     * Whether this account is still forced through profile completion
+     * (missing phone/barangay after Google sign-up).
+     */
+    public function needsProfileCompletion(): bool
+    {
+        return $this->role === 'user' && ! (bool) ($this->is_profile_complete ?? false);
     }
 
     // ── Domain Relationships ─────────────────────────────────────────────────

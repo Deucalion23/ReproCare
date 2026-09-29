@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\Auth\GoogleController;
 use App\Http\Controllers\MidwifeController;
 use App\Http\Controllers\BhwController;
 use App\Http\Controllers\BhwPresidentController;
@@ -49,6 +50,18 @@ Route::get('/dashboard', function () {
     }
 
     $user = auth()->user();
+
+    // Patient onboarding gates (staff roles are never gated here).
+    if ($user->role === 'user') {
+        if (! $user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
+        if ($user->needsProfileCompletion()) {
+            return redirect()->route('profile.complete');
+        }
+    }
+
     return match($user->role) {
         'cho' => redirect()->route('cho.dashboard'),
         'rhu' => redirect()->route('rhu.dashboard'),
@@ -74,10 +87,31 @@ Route::prefix('auth')->group(function () {
     Route::post('/forgot-password', [AuthController::class, 'sendResetLink'])->name('password.email')->middleware('throttle:3,1');
     Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])->name('password.reset')->middleware('guest');
     Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.update')->middleware('throttle:5,1');
+
+    // "Continue with Google" (Laravel Socialite — patient accounts only;
+    // GoogleController rejects staff emails, see security note there).
+    Route::get('/google/redirect', [GoogleController::class, 'redirectToGoogle'])->name('google.redirect');
+    Route::get('/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
+
+    // Email verification (regular email/password sign-ups; Google users
+    // are auto-verified in the callback and never need these routes).
+    Route::middleware('auth')->group(function () {
+        Route::get('/email/verify', [AuthController::class, 'showVerifyNotice'])->name('verification.notice');
+        Route::get('/email/verify/{id}/{hash}', [AuthController::class, 'verifyEmail'])->name('verification.verify')->middleware('signed');
+        Route::post('/email/verification-notification', [AuthController::class, 'resendVerification'])->name('verification.send')->middleware('throttle:3,1');
+    });
 });
 
 // Logout (Authenticated)
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
+
+// Mandatory profile completion for new Google users (phone + barangay).
+// Exempt from the complete.profile middleware itself to avoid redirect loops
+// (the middleware allow-lists these route names explicitly).
+Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'prevent-back'])->group(function () {
+    Route::get('/complete', [GoogleController::class, 'showCompleteProfile'])->name('complete');
+    Route::post('/complete', [GoogleController::class, 'updateCompleteProfile'])->name('complete.store');
+});
 
 // Midwife Routes
 Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout', 'auth', 'role:midwife', 'prevent-back'])->group(function () {
@@ -481,8 +515,8 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
     });
 });
 
-// User (Patient) Routes
-Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'role:user', 'prevent-back'])->group(function () {
+// User (Patient) Routes — verified email + completed profile required.
+Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'verified', 'complete.profile', 'role:user', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     
     // Profile - Use unified profile system at /profile
@@ -535,8 +569,8 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
     });
 });
 
-// Forum Routes (All authenticated users)
-Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'auth', 'prevent-back'])->group(function () {
+// Forum Routes (All authenticated users; incomplete patient profiles are gated)
+Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [ForumController::class, 'index'])->name('index');
     Route::get('/create', [ForumController::class, 'create'])->name('create');
     Route::post('/', [ForumController::class, 'store'])->name('store');
@@ -548,8 +582,8 @@ Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'a
     Route::post('/{id}/like', [ForumController::class, 'like'])->name('like');
 });
 
-// Profile Routes (Unified for all roles)
-Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'prevent-back'])->group(function () {
+// Profile Routes (Unified for all roles; incomplete patient profiles are gated)
+Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
     Route::put('/', [ProfileController::class, 'update'])->name('update');
@@ -560,8 +594,8 @@ Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout'
     Route::get('/{id}', [ProfileController::class, 'viewProfile'])->name('view');
 });
 
-// Learning Materials (Public for authenticated users)
-Route::prefix('learning')->name('learning.')->middleware(['web', 'absolute.logout', 'auth', 'prevent-back'])->group(function () {
+// Learning Materials (Public for authenticated users; incomplete patient profiles are gated)
+Route::prefix('learning')->name('learning.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [LearningController::class, 'index'])->name('index');
     Route::get('/articles', [LearningController::class, 'articles'])->name('articles');
     Route::get('/videos', [LearningController::class, 'videos'])->name('videos');
@@ -852,7 +886,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
 
 // ─── Cross-cutting workflows: correction loop, transfers, emergency,
 //     delivery auto-transition (BHW creates; President/RHU/Midwife review) ───
-Route::prefix('workflow')->name('workflow.')->middleware(['web', 'absolute.logout', 'auth', 'prevent-back'])->group(function () {
+Route::prefix('workflow')->name('workflow.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
     // 1. Correction & Resubmission (BHW)
     Route::get('/revision-queue', [WorkflowController::class, 'revisionQueue'])->name('revision-queue')->middleware('role:bhw');
     Route::post('/health-records/{id}/resubmit', [WorkflowController::class, 'resubmitHealthRecord'])->name('health-records.resubmit')->middleware('role:bhw');

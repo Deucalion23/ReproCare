@@ -20,7 +20,7 @@ class MaternalAnalyticsTest extends AutomationTestCase
         Http::swap(new Factory);
         Http::preventStrayRequests();
         config(['services.analytics_ai.provider' => 'rules']);
-        Schema::table('users', function (Blueprint $t) { $t->string('barangay')->nullable(); $t->string('rhu_assignment')->nullable(); });
+        Schema::table('users', function (Blueprint $t) { if (!Schema::hasColumn('users', 'barangay')) $t->string('barangay')->nullable(); if (!Schema::hasColumn('users', 'rhu_assignment')) $t->string('rhu_assignment')->nullable(); });
         Schema::create('barangays', function (Blueprint $t) {
             $t->id(); $t->string('name'); $t->string('rhu_assignment'); $t->boolean('is_active')->default(true); $t->timestamps();
         });

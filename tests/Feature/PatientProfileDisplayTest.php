@@ -34,9 +34,9 @@ class PatientProfileDisplayTest extends AutomationTestCase
         });
         Schema::table('users', function (Blueprint $table) {
             foreach (['email', 'middle_initial', 'profile_image', 'gender', 'address', 'barangay', 'partner_name', 'partner_contact'] as $column) {
-                $table->string($column)->nullable();
+                if (!Schema::hasColumn('users', $column)) $table->string($column)->nullable();
             }
-            $table->unsignedBigInteger('purok_id')->nullable();
+            if (!Schema::hasColumn('users', 'purok_id')) $table->unsignedBigInteger('purok_id')->nullable();
         });
         Schema::create('puroks', function (Blueprint $table) {
             $table->id();

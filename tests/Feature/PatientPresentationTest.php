@@ -25,7 +25,7 @@ class PatientPresentationTest extends AutomationTestCase
     public function test_barangay_bhw_fallback_does_not_claim_record_authorship(): void
     {
         Schema::table('users', function (Blueprint $t) {
-            $t->string('barangay')->nullable(); $t->string('assigned_barangay')->nullable(); $t->json('catchment_barangays')->nullable();
+            if (!Schema::hasColumn('users', 'barangay')) $t->string('barangay')->nullable(); if (!Schema::hasColumn('users', 'assigned_barangay')) $t->string('assigned_barangay')->nullable(); if (!Schema::hasColumn('users', 'catchment_barangays')) $t->json('catchment_barangays')->nullable();
         });
         $bhw = $this->patient(['role' => 'bhw', 'first_name' => 'BurgosWorker', 'barangay' => 'Barangay Burgos']);
         $this->patient(['role' => 'bhw', 'first_name' => 'DifferentWorker', 'barangay' => 'Other area']);

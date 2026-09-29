@@ -17,9 +17,9 @@ class AccountLockoutTest extends AutomationTestCase
         $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class);
 
         Schema::table('users', function (Blueprint $t) {
-            $t->string('email')->nullable()->unique();
-            $t->string('password')->nullable();
-            $t->integer('failed_login_attempts')->default(0);
+            if (!Schema::hasColumn('users', 'email')) $t->string('email')->nullable()->unique();
+            if (!Schema::hasColumn('users', 'password')) $t->string('password')->nullable();
+            if (!Schema::hasColumn('users', 'failed_login_attempts')) $t->integer('failed_login_attempts')->default(0);
         });
 
         Schema::create('activity_logs', function (Blueprint $t) {

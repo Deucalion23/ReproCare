@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'absolute.logout' => \App\Http\Middleware\AbsoluteLogoutProtection::class,
             'midwife.readonly' => \App\Http\Middleware\MidwifeReadOnly::class,
             'sync' => \App\Http\Middleware\HandleSyncRequests::class,
+            'complete.profile' => \App\Http\Middleware\EnsureProfileComplete::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
