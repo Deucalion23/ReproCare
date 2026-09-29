@@ -62,7 +62,7 @@
         .page-hero .d-flex.gap-2 .btn {
             min-width:0; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
             text-align:center; align-items:center; justify-content:center;
-            font-size:clamp(0.5rem, 2.5vw, 0.62rem);
+            font-size:clamp(0.46rem, 2.2vw, 0.56rem);
             padding:0.5rem 0.3rem;
         }
         .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; font-size:0.8em; }
