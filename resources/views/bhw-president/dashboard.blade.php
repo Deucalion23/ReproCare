@@ -51,8 +51,8 @@
 
 {{-- ═══════════════════════════════
      STAT CARDS
-═══════════════════════════════ --}}
-<div class="row g-3 mb-4">
+   ═══════════════════════════════ --}}
+<div class="row g-3 mb-4 pres-stat-row">
     <div class="col-xl-3 col-md-6">
         <div class="stat-card stat-purple fade-in-card">
             <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
@@ -90,7 +90,7 @@
     </div>
 </div>
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 pres-stat-row">
     <div class="col-xl-3 col-md-6">
         <div class="stat-card stat-green fade-in-card">
             <div class="stat-icon"><i class="bi bi-calendar-check-fill"></i></div>
