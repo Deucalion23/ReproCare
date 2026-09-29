@@ -256,7 +256,7 @@
         <div class="card fade-in-card h-100 pres-recent-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Recent Health Records</h5>
-                <a href="{{ route('bhw-president.health-records.index') }}" class="btn btn-sm btn-outline-primary pres-view-all">View All</a>
+                <a href="{{ route('bhw-president.health-records.index') }}" class="btn btn-sm btn-outline-success pres-view-all">View All</a>
             </div>
             <div class="card-body p-0">
                 @if($recentHealthRecords->count() > 0)
