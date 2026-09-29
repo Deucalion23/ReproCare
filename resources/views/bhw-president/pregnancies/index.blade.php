@@ -52,7 +52,7 @@
                 High-Risk
             </a>
         </div>
-        <form method="GET" action="{{ route('bhw-president.pregnancies.index') }}" class="d-flex gap-2">
+        <form method="GET" action="{{ route('bhw-president.pregnancies.index') }}" class="d-flex gap-2 preg-queue-search">
             <input type="hidden" name="filter" value="{{ $filter }}">
             <input type="search" name="search" class="form-control form-control-sm" placeholder="Search patient..."
                    value="{{ $search }}" style="border-radius:10px;">
@@ -81,14 +81,14 @@
                         <td>
                             <div class="d-flex align-items-center gap-2">
                                 <x-patient-avatar :patient="$pregnancy->woman" :size="32" />
-                                <div>
-                                    <div style="font-weight:500;">{{ $pregnancy->patient_name ?? optional($pregnancy->woman)->name ?? 'Unknown' }}</div>
-                                    <small class="text-muted">{{ optional($pregnancy->woman)->barangay ?? $pregnancy->walkInPatient?->barangay ?? 'N/A' }}</small>
+                                <div style="min-width:0;">
+                                    <div class="preg-patient-name" style="font-weight:500;">{{ $pregnancy->patient_name ?? optional($pregnancy->woman)->name ?? 'Unknown' }}</div>
+                                    <small class="text-muted preg-patient-brgy d-block">{{ optional($pregnancy->woman)->barangay ?? $pregnancy->walkInPatient?->barangay ?? 'N/A' }}</small>
                                 </div>
                             </div>
                         </td>
-                        <td>{{ optional($pregnancy->edd)?->format('M j, Y') ?? 'N/A' }}</td>
-                        <td>{{ $pregnancy->aog_weeks ?? $pregnancy->gestational_age ?? 'N/A' }} wks</td>
+                        <td class="preg-nowrap">{{ optional($pregnancy->edd)?->format('M j, Y') ?? 'N/A' }}</td>
+                        <td class="preg-nowrap">{{ $pregnancy->aog_weeks ?? $pregnancy->gestational_age ?? 'N/A' }} wks</td>
                         <td>
                             <span class="badge bg-{{ ($pregnancy->risk_level ?? 'Low') === 'High' ? 'danger' : (($pregnancy->risk_level ?? 'Low') === 'Medium' ? 'warning' : 'success') }}">
                                 {{ $pregnancy->risk_level ?? 'Low' }}
