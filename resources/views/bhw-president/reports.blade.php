@@ -36,12 +36,13 @@
     }
     /* ── Phones: compact metrics, stacked filter, compressed tables ── */
     @media (max-width: 600px) {
-        .metric-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.55rem; }
-        .metric-card { padding:0.8rem !important; border-radius:14px !important; }
-        .metric-card-icon { font-size:1rem !important; }
-        .metric-card-label { font-size:0.6rem !important; }
-        .metric-card-value { font-size:1.2rem !important; }
-        .metric-card-note { font-size:0.64rem !important; }
+        .metric-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.5rem; align-items:stretch; }
+        .metric-grid > .metric-card:last-child { grid-column:1 / -1; }
+        .metric-card { padding:0.65rem 0.7rem !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; min-height:0; }
+        .metric-card-icon { font-size:0.9rem !important; margin-bottom:0.3rem !important; }
+        .metric-card-label { font-size:0.56rem !important; }
+        .metric-card-value { font-size:1.05rem !important; line-height:1.1 !important; }
+        .metric-card-note { font-size:0.6rem !important; line-height:1.4 !important; }
         .workspace-panel-header { padding:0.85rem 1rem !important; }
         .workspace-panel-title { font-size:0.82rem !important; }
         .workspace-panel-subtitle { font-size:0.66rem !important; }

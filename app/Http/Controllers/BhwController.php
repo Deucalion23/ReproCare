@@ -29,10 +29,14 @@ class BhwController extends Controller
      * BHW data jurisdiction: a BHW only sees women whose home barangay
      * matches their own designated barangay (shared normalize-and-overlap
      * rule so legacy spellings resolve to the same area).
+     * The designated barangay is `assigned_barangay` when set, falling
+     * back to `barangay` for legacy accounts.
      */
     private function ownBarangay(): ?string
     {
-        return auth()->user()->barangay ?? null;
+        $user = auth()->user();
+
+        return $user->assigned_barangay ?: $user->barangay;
     }
 
     /** Query-scope helper: constrain a barangay column to the BHW's area. */
