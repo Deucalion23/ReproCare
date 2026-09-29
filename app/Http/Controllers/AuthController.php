@@ -247,6 +247,18 @@ class AuthController extends Controller
                 $user->update(['failed_login_attempts' => 0]);
             }
 
+            // Rejected accounts never enter any portal: re-queue as pending so
+            // the RHU 1 administrator can reassess / re-verify, and show the
+            // rejection message on the login page.
+            if (($user->status ?? null) === 'rejected') {
+                $user->update(['status' => 'pending']);
+                \App\Models\ActivityLog::log('update', "Rejected account re-queued for RHU re-verification on sign-in attempt: {$user->name} ({$user->email})", $user);
+                Auth::logout();
+                return redirect()->route('login')->withErrors([
+                    'email' => User::REJECTED_LOGIN_MESSAGE,
+                ])->onlyInput('email');
+            }
+
             // Block pending users from logging in
             if ($user->status === 'pending') {
                 Auth::logout();

@@ -148,6 +148,18 @@ class GoogleController extends Controller
     {
         $user = $user->fresh() ?? $user;
 
+        // Rejected accounts never enter any portal and never hold a session:
+        // re-queue as pending for RHU 1 re-verification and show the
+        // rejection message on the login page.
+        if (($user->status ?? null) === 'rejected') {
+            $user->update(['status' => 'pending']);
+            \App\Models\ActivityLog::log('update', "Rejected account re-queued for RHU re-verification on Google sign-in: {$user->name} ({$user->email})", $user);
+
+            return redirect()->route('login')->withErrors([
+                'email' => \App\Models\User::REJECTED_LOGIN_MESSAGE,
+            ])->onlyInput('email');
+        }
+
         // Suspended / deactivated accounts can never hold a session.
         if (in_array($user->status ?? 'approved', ['suspended', 'inactive'], true)) {
             return redirect()->route('login')->withErrors([
@@ -214,6 +226,16 @@ class GoogleController extends Controller
             'barangay' => $validated['barangay'],
             'is_profile_complete' => true,
         ])->save();
+
+        // Rejected accounts are re-queued (never onboarded into a portal).
+        if (($user->status ?? null) === 'rejected') {
+            $user->update(['status' => 'pending']);
+            Auth::logout();
+
+            return redirect()->route('login')->withErrors([
+                'email' => \App\Models\User::REJECTED_LOGIN_MESSAGE,
+            ])->onlyInput('email');
+        }
 
         // Still awaiting RHU approval → back to login with the pending notice.
         if (($user->status ?? 'approved') === 'pending') {

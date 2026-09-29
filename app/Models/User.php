@@ -152,6 +152,13 @@ class User extends Authenticatable implements MustVerifyEmail
     public const STAFF_ROLES = ['cho', 'rhu', 'midwife', 'bhw', 'bhw_president'];
 
     /**
+     * Shown on the login page when a rejected account tries to enter. The
+     * account is simultaneously re-queued as pending so the RHU 1
+     * administrator can reassess / re-verify it.
+     */
+    public const REJECTED_LOGIN_MESSAGE = 'Your account has been rejected, please fill up the correct information needed. It will be reassessed by the RHU 1 administrator for re-verification.';
+
+    /**
      * Whether this account is still forced through profile completion
      * (missing phone/barangay after Google sign-up).
      */

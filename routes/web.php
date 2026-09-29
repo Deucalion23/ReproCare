@@ -71,7 +71,7 @@ Route::get('/dashboard', function () {
         'user' => redirect()->route('user.dashboard'),
         default => redirect()->route('login'),
     };
-})->name('dashboard')->middleware('absolute.logout');
+})->name('dashboard')->middleware(['absolute.logout', 'account.active']);
 
 // Legacy short URLs (old bookmarks): redirect to the real auth pages.
 Route::redirect('/login', '/auth/login', 301);
@@ -114,7 +114,7 @@ Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout'
 });
 
 // Midwife Routes
-Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout', 'auth', 'role:midwife', 'prevent-back'])->group(function () {
+Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:midwife', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [MidwifeController::class, 'dashboard'])->name('dashboard');
     Route::get('/settings', [MidwifeController::class, 'settings'])->name('settings');
     Route::put('/settings', [MidwifeController::class, 'updateSettings'])->name('settings.update');
@@ -315,7 +315,7 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
 });
 
 // BHW Routes
-Route::prefix('bhw')->name('bhw.')->middleware(['web', 'absolute.logout', 'auth', 'role:bhw', 'prevent-back'])->group(function () {
+Route::prefix('bhw')->name('bhw.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:bhw', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [BhwController::class, 'dashboard'])->name('dashboard');
     Route::get('/settings', [BhwController::class, 'settings'])->name('settings');
     Route::put('/settings', [BhwController::class, 'updateSettings'])->name('settings.update');
@@ -429,7 +429,7 @@ Route::prefix('bhw')->name('bhw.')->middleware(['web', 'absolute.logout', 'auth'
 });
 
 // BHW President Routes
-Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'absolute.logout', 'auth', 'role:bhw_president', 'prevent-back'])->group(function () {
+Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:bhw_president', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [BhwPresidentController::class, 'dashboard'])->name('dashboard');
 
     // Patient account verification belongs to RHU Admin (rhu.pending-patients).
@@ -516,7 +516,7 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
 });
 
 // User (Patient) Routes — verified email + completed profile required.
-Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'verified', 'complete.profile', 'role:user', 'prevent-back'])->group(function () {
+Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'verified', 'complete.profile', 'role:user', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
     
     // Profile - Use unified profile system at /profile
@@ -570,7 +570,7 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
 });
 
 // Forum Routes (All authenticated users; incomplete patient profiles are gated)
-Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
+Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [ForumController::class, 'index'])->name('index');
     Route::get('/create', [ForumController::class, 'create'])->name('create');
     Route::post('/', [ForumController::class, 'store'])->name('store');
@@ -583,7 +583,7 @@ Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'a
 });
 
 // Profile Routes (Unified for all roles; incomplete patient profiles are gated)
-Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
+Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
     Route::put('/', [ProfileController::class, 'update'])->name('update');
@@ -595,7 +595,7 @@ Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout'
 });
 
 // Learning Materials (Public for authenticated users; incomplete patient profiles are gated)
-Route::prefix('learning')->name('learning.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
+Route::prefix('learning')->name('learning.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [LearningController::class, 'index'])->name('index');
     Route::get('/articles', [LearningController::class, 'articles'])->name('articles');
     Route::get('/videos', [LearningController::class, 'videos'])->name('videos');
@@ -622,7 +622,7 @@ Route::prefix('api/notifications')->name('api.notifications.')->middleware(['web
 });
 
 // CHO Routes
-Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth', 'role:cho', 'prevent-back'])->group(function () {
+Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:cho', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [ChoController::class, 'dashboard'])->name('dashboard');
     Route::get('/settings', [ChoController::class, 'settings'])->name('settings');
     Route::put('/settings', [ChoController::class, 'updateSettings'])->name('settings.update');
@@ -731,7 +731,7 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
 });
 
 // RHU Routes
-Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth', 'role:rhu', 'prevent-back'])->group(function () {
+Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:rhu', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [RhuController::class, 'dashboard'])->name('dashboard');
     Route::get('/analytics', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/analytics/pregnancies/{id}', [\App\Http\Controllers\AnalyticsController::class, 'pregnancy'])->name('analytics.pregnancies.show');
@@ -886,7 +886,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
 
 // ─── Cross-cutting workflows: correction loop, transfers, emergency,
 //     delivery auto-transition (BHW creates; President/RHU/Midwife review) ───
-Route::prefix('workflow')->name('workflow.')->middleware(['web', 'absolute.logout', 'auth', 'complete.profile', 'prevent-back'])->group(function () {
+Route::prefix('workflow')->name('workflow.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
     // 1. Correction & Resubmission (BHW)
     Route::get('/revision-queue', [WorkflowController::class, 'revisionQueue'])->name('revision-queue')->middleware('role:bhw');
     Route::post('/health-records/{id}/resubmit', [WorkflowController::class, 'resubmitHealthRecord'])->name('health-records.resubmit')->middleware('role:bhw');

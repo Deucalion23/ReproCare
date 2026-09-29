@@ -117,6 +117,80 @@ class GoogleOAuthTest extends AutomationTestCase
         $this->assertSoftDeleted('users', ['id' => $staff->id]);
     }
 
+    public function test_rejected_patient_is_bounced_to_login_and_requeued(): void
+    {
+        $rejected = $this->patient(['email' => 'rejected-patient@example.com', 'status' => 'rejected']);
+        $this->mockGoogleUser('google-rej-1', 'rejected-patient@example.com', 'Rejected Patient');
+
+        $response = $this->get(route('google.callback'));
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertSame('pending', $rejected->fresh()->status);
+        $this->assertStringContainsString(
+            'Your account has been rejected, please fill up the correct information needed.',
+            session('errors')->get('email')[0]
+        );
+    }
+
+    public function test_rejected_trashed_patient_is_restored_and_requeued(): void
+    {
+        $trashed = $this->patient(['email' => 'rejected-trashed@example.com', 'status' => 'rejected']);
+        $trashed->delete();
+        $this->mockGoogleUser('google-rej-2', 'rejected-trashed@example.com', 'Rejected Trashed');
+
+        $response = $this->get(route('google.callback'));
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $restored = User::where('email', 'rejected-trashed@example.com')->first();
+        $this->assertNotNull($restored);
+        $this->assertNull($restored->deleted_at);
+        $this->assertSame('pending', $restored->status);
+    }
+
+    public function test_live_rejected_session_cannot_reach_dashboard(): void
+    {
+        // Reproduces the production reload loop: a rejected account holding a
+        // live session must be logged out with the rejection message instead
+        // of bouncing between the dashboard and the login page forever.
+        $rejected = $this->patient(['status' => 'rejected']);
+
+        $response = $this->actingAs($rejected)->get(route('user.dashboard'));
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertSame('pending', $rejected->fresh()->status);
+    }
+
+    public function test_pending_incomplete_session_keeps_onboarding(): void
+    {
+        $patient = $this->patient(['status' => 'pending', 'is_profile_complete' => false]);
+
+        $response = $this->actingAs($patient)->get(route('forum.index'));
+
+        $response->assertRedirect(route('profile.complete'));
+        $this->assertAuthenticatedAs($patient->fresh());
+    }
+
+    public function test_password_login_rejected_shows_message_and_requeues(): void
+    {
+        $rejected = $this->patient(['status' => 'rejected']);
+
+        $response = $this->post(route('login.post'), [
+            'email' => $rejected->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertSame('pending', $rejected->fresh()->status);
+    }
+
     public function test_callback_rejects_staff_emails(): void
     {
         $this->patient(['role' => 'midwife', 'email' => 'midwife-staff@example.com']);
