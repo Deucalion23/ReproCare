@@ -877,6 +877,7 @@ class BhwPresidentController extends Controller
     public function reportDelete($id)
     {
         $report = BhwMonthlyReport::findOrFail($id);
+        $this->abortUnlessReportInArea($report);
         $report->delete();
 
         return redirect()->route('bhw-president.reports.index')
@@ -887,6 +888,7 @@ class BhwPresidentController extends Controller
     public function reportApprove(Request $request, $id)
     {
         $report = BhwMonthlyReport::findOrFail($id);
+        $this->abortUnlessReportInArea($report);
         
         if ($report->submission_status !== 'submitted_to_president') {
             return redirect()->route('bhw-president.reports.index')
@@ -923,6 +925,7 @@ class BhwPresidentController extends Controller
         ]);
 
         $report = BhwMonthlyReport::findOrFail($id);
+        $this->abortUnlessReportInArea($report);
         
         if ($report->submission_status !== 'submitted_to_president') {
             return redirect()->route('bhw-president.reports.index')

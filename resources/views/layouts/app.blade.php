@@ -430,6 +430,21 @@
         .sidebar .nav-link.active i {
             color:var(--color-on-solid) !important;
         }
+        /* BHW + BHW President portals: smaller side-nav text. */
+        body.role-bhw .sidebar .nav-link,
+        body.role-bhw_president .sidebar .nav-link {
+            font-size:0.78rem;
+            padding:0.55rem 1.1rem;
+            gap:0.6rem;
+        }
+        body.role-bhw .sidebar .nav-link i,
+        body.role-bhw_president .sidebar .nav-link i {
+            font-size:0.95rem;
+        }
+        body.role-bhw .sidebar-section-label,
+        body.role-bhw_president .sidebar-section-label {
+            font-size:0.6rem;
+        }
         /* Selected page darkens a touch on hover instead of flashing lighter. */
         .sidebar .nav-link.active:hover {
             background:#10131A !important;
@@ -2770,7 +2785,7 @@
     @vite('resources/css/theme.css')
     <script src="{{ asset('js/chart-palette.js') }}?v={{ filemtime(public_path('js/chart-palette.js')) }}"></script>
 </head>
-    <body class="{{ auth()->check() && auth()->user()->role !== 'user' ? 'has-sidebar' : 'patient-portal-body' }}" @yield('body_extra_attrs', '')>
+    <body class="{{ auth()->check() && auth()->user()->role !== 'user' ? 'has-sidebar' : 'patient-portal-body' }} role-{{ auth()->check() ? auth()->user()->role : 'guest' }}" @yield('body_extra_attrs', '')>
     @include('includes.navigation')
 
     @yield('content')
