@@ -34,6 +34,27 @@
             min-width:146px;
         }
     }
+    /* ── Phones: compact metrics, stacked filter, compressed tables ── */
+    @media (max-width: 600px) {
+        .metric-grid { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.55rem; }
+        .metric-card { padding:0.8rem !important; border-radius:14px !important; }
+        .metric-card-icon { font-size:1rem !important; }
+        .metric-card-label { font-size:0.6rem !important; }
+        .metric-card-value { font-size:1.2rem !important; }
+        .metric-card-note { font-size:0.64rem !important; }
+        .workspace-panel-header { padding:0.85rem 1rem !important; }
+        .workspace-panel-title { font-size:0.82rem !important; }
+        .workspace-panel-subtitle { font-size:0.66rem !important; }
+        .workspace-panel-body { padding:0.85rem 1rem !important; }
+        .workspace-filter-grid { display:grid !important; grid-template-columns:1fr; gap:0.5rem; }
+        .workspace-filter-actions { display:grid !important; grid-template-columns:1fr 1fr; gap:0.5rem; }
+        .workspace-filter-actions .btn { font-size:0.7rem; display:flex; align-items:center; justify-content:center; }
+        .form-label { font-size:0.64rem; }
+        .form-select { font-size:0.72rem; }
+        .split-panels { display:grid !important; grid-template-columns:1fr; gap:0.85rem; }
+        .report-action-btn { width:32px !important; height:32px !important; }
+        .modern-table-wrap { overflow-x:auto; }
+    }
 </style>
 @endpush
 
