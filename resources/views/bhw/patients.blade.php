@@ -57,8 +57,14 @@
     /* ── Mobile: stacked hero, scrollable pills, compact record cards ── */
     @media (max-width: 600px) {
         .page-hero .d-flex.justify-content-between { flex-direction:column; align-items:stretch !important; }
-        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; }
+        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; width:100%; }
         .page-hero form.d-flex { grid-column:1 / -1; }
+        .page-hero .d-flex.gap-2 .btn {
+            min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            justify-content:center; font-size:clamp(0.6rem, 3.2vw, 0.72rem);
+            padding:0.55rem 0.4rem;
+        }
+        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; }
         .search-bar { max-width:none; width:100%; }
         .search-bar input { font-size:0.78rem; }
         .filter-pills { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; width:100%; }
