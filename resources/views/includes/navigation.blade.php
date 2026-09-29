@@ -80,6 +80,15 @@
     .navbar .staff-action-btn { touch-action:manipulation; }
     /* Brand accent: lavender Care everywhere this navbar renders. */
     .navbar .navbar-brand .brand-care { color:#9B64B9 !important; }
+    /* Count badge on the bell, same as the patient portal. */
+    .navbar .women-bell-dot {
+        position:absolute; top:-4px; right:-4px;
+        min-width:16px; height:16px; padding:0 4px;
+        border-radius:9999px; background:var(--color-danger-text); color:var(--color-on-solid);
+        font-size:0.6rem; font-weight:800; line-height:1.4;
+        display:flex; align-items:center; justify-content:center;
+        border:2px solid var(--color-surface);
+    }
     /* Bootstrap adds its own caret to .dropdown-toggle — the pill has its own chevron. */
     .navbar .staff-profile-pill.dropdown-toggle::after { display:none !important; }
     /* Staff actions match the patient portal's circular bordered buttons. */
@@ -167,9 +176,7 @@
                title="System Alerts & Notifications">
                 <i class="bi bi-bell fs-6"></i>
                 @if($unreadNotifications > 0)
-                    <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle">
-                        <span class="visually-hidden">New alerts</span>
-                    </span>
+                    <span class="women-bell-dot">{{ $unreadNotifications > 9 ? '9+' : $unreadNotifications }}</span>
                 @endif
             </a>
 
