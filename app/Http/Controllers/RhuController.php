@@ -978,8 +978,9 @@ class RhuController extends Controller
         $pregnancies = Pregnancy::orderBy('lmp', 'desc')->get();
         $puroks = Purok::orderBy('name')->get();
         $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $patients = $users;
 
-        return view('rhu.maternal-deaths.create', compact('users', 'walkIns', 'pregnancies', 'puroks', 'barangays'));
+        return view('rhu.maternal-deaths.create', compact('users', 'patients', 'walkIns', 'pregnancies', 'puroks', 'barangays'));
     }
 
     public function storeMaternalDeath(Request $request)
@@ -1049,7 +1050,8 @@ class RhuController extends Controller
         $death = MaternalDeath::findOrFail($id);
         $puroks = Purok::orderBy('name')->get();
         $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
-        return view('rhu.maternal-deaths.edit', compact('death', 'puroks', 'barangays'));
+        $patients = User::where('role', 'user')->where('status', 'approved')->orderBy('first_name')->get();
+        return view('rhu.maternal-deaths.edit', compact('death', 'patients', 'puroks', 'barangays'));
     }
 
     public function updateMaternalDeath(Request $request, $id)
