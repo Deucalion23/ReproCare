@@ -51,8 +51,27 @@
     .theme-toggle-row { display:flex; align-items:center; gap:0.9rem; margin-top:1.25rem; padding:0.85rem 1rem; background:var(--color-bg); border:1px solid var(--color-border); border-radius:12px; }
     .theme-toggle-row span { font-size:0.875rem; color:var(--color-text-muted); font-weight:500; display:flex; align-items:center; gap:0.4rem; }
     @media (max-width: 768px) {
-        .settings-wrap { flex-direction:column; }
-        .settings-sidebar { width:100%; position:static; }
+        /* Women-portal pattern: top scroll-tab row, full-width content below. */
+        .settings-wrap { flex-direction:column; gap:0.85rem; }
+        .settings-sidebar { width:100%; max-width:none; position:static; }
+        .settings-nav { display:flex; gap:0.4rem; overflow-x:auto; padding:0.4rem; border-radius:14px; scrollbar-width:none; }
+        .settings-nav::-webkit-scrollbar { display:none; }
+        .settings-nav-item { font-size:0.7rem; padding:0.5rem 0.7rem; gap:0.4rem; white-space:nowrap; flex-shrink:0; margin-bottom:0; }
+        .settings-nav-item i { font-size:0.85rem; width:1rem; }
+        .settings-section { scroll-margin-top:76px; }
+        .pref-card { border-radius:14px; margin-bottom:1rem; }
+        .pref-card-header { padding:0.75rem 0.85rem; gap:0.55rem; flex-wrap:wrap; }
+        .pref-card-header-icon { width:30px; height:30px; font-size:0.85rem; border-radius:9px; }
+        .pref-card-header h6 { font-size:0.76rem; }
+        .pref-card-header p { font-size:0.64rem; }
+        .pref-card-body { padding:0.85rem; font-size:0.78rem; }
+        .pref-row-label h6 { font-size:0.78rem; }
+        .pref-row-label p { font-size:0.68rem; }
+        .pref-card-body .btn { font-size:0.72rem; }
+        .form-label { font-size:0.72rem; }
+        .form-control, .form-select { font-size:0.8rem; }
+        .locked-note { font-size:0.7rem; }
+        .stat-chip .n { font-size:1.2rem; }
     }
 </style>
 @endpush
@@ -451,8 +470,13 @@ function showSection(id, el, ev) {
     if (ev) ev.preventDefault();
     document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('section-' + id).classList.add('active');
+    const target = document.getElementById('section-' + id);
+    if (target) target.classList.add('active');
     el.classList.add('active');
+    // Bring the selected content into view (it sits below the nav on phones).
+    if (target) {
+        try { target.scrollIntoView({ behavior:'smooth', block:'start' }); } catch (e) { target.scrollIntoView(); }
+    }
 }
         @include('includes.theme-toggle')
 document.addEventListener('DOMContentLoaded', function () {

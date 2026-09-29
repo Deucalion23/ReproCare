@@ -55,7 +55,14 @@
         body .main-content .split-panels { gap:0.75rem !important; }
         body .main-content .workspace-filter-grid .form-label { font-size:0.7rem !important; margin-bottom:0.25rem !important; }
         body .main-content .workspace-filter-grid .form-select { font-size:0.8rem !important; min-height:2.5rem; }
-        body .main-content .workspace-filter-actions .btn { font-size:0.78rem !important; }
+        body .main-content .workspace-filter-actions { justify-content:center !important; }
+        body .main-content .workspace-filter-actions .btn {
+            font-size:0.78rem !important;
+            text-align:center !important;
+            display:inline-flex !important;
+            align-items:center !important;
+            justify-content:center !important;
+        }
         body .main-content .modern-table { font-size:0.7rem; }
         body .main-content .modern-table thead th { font-size:0.6rem !important; padding:0.4rem 0.5rem !important; }
         body .main-content .modern-table tbody td { padding:0.4rem 0.5rem !important; }
