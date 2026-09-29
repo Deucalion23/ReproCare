@@ -80,10 +80,22 @@ if [ "${SKIP_MIGRATIONS}" != "true" ]; then
     php artisan migrate --force || echo "Warning: Migration failed. Check DB connection settings."
 fi
 
-# Seed accounts and default data (CHO, Midwife, BHW, Patients)
+# Seed accounts and default data (CHO, Midwife, BHW, Patients).
+# Guarded: a full seed on EVERY boot is what makes free-tier sleep/wake and
+# redeploys take minutes (during boot, requests fail with ERR_CONNECTION_CLOSED).
+# Seeders are idempotent, so only seed a fresh database (no users yet) and
+# skip otherwise for a fast boot. Override with SKIP_SEED=true/false.
 if [ "${SKIP_SEED}" != "true" ]; then
-    echo "Seeding database accounts and data..."
-    php artisan db:seed --force || echo "Warning: Seeding encountered a warning or was already seeded."
+    USER_COUNT=$(php artisan tinker --execute="echo DB::table('users')->count();" 2>/dev/null | tr -cd '0-9')
+    if [ -z "${USER_COUNT}" ]; then
+        USER_COUNT="0"
+    fi
+    if [ "${SKIP_SEED}" = "false" ] || [ "${USER_COUNT}" = "0" ]; then
+        echo "Seeding database accounts and data (users: ${USER_COUNT})..."
+        php artisan db:seed --force || echo "Warning: Seeding encountered a warning or was already seeded."
+    else
+        echo "Database already seeded (${USER_COUNT} users), skipping seed for fast boot."
+    fi
 fi
 
 # Clear any cached config so runtime environment variables are active
