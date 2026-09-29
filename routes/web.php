@@ -478,6 +478,9 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
     // High-Risk
     Route::get('/high-risk', [BhwPresidentController::class, 'highRisk'])->name('high-risk');
     
+    // All Women in the president's assigned barangay
+    Route::get('/women', [BhwPresidentController::class, 'women'])->name('women.index');
+
     // Pregnancies
     Route::prefix('pregnancies')->name('pregnancies.')->group(function () {
         Route::get('/', [BhwPresidentController::class, 'pregnancies'])->name('index');

@@ -596,6 +596,63 @@ class BhwPresidentController extends Controller
         return view('bhw-president.high-risk', compact('highRiskPregnancies'));
     }
 
+    // All Women living in the president's assigned barangay.
+    public function women(Request $request)
+    {
+        $me = auth()->user();
+        $search = trim((string) $request->input('search', ''));
+
+        $mine = array_values(array_filter([
+            \App\Services\BhwPresidentAssignmentService::normalizeBarangay($me->barangay ?? null),
+            \App\Services\BhwPresidentAssignmentService::normalizeBarangay($me->assigned_barangay ?? null),
+        ]));
+
+        $women = User::where('role', 'user')
+            ->where(function ($query) {
+                $query->whereNull('status')->orWhere('status', 'approved');
+            })
+            ->with(['purok'])
+            ->orderBy('first_name')
+            ->orderBy('last_name')
+            ->get()
+            ->filter(function (User $woman) use ($mine) {
+                // Fail open when the president has no designation, like messaging.
+                if (empty($mine)) {
+                    return true;
+                }
+                $hers = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($woman->barangay ?? null);
+                if ($hers === '') {
+                    return false;
+                }
+                foreach ($mine as $area) {
+                    if ($area === $hers || str_contains($area, $hers) || str_contains($hers, $area)) {
+                        return true;
+                    }
+                }
+                return false;
+            });
+
+        if ($search !== '') {
+            $needle = mb_strtolower($search);
+            $women = $women->filter(fn (User $woman) => str_contains(mb_strtolower($woman->name ?? ''), $needle)
+                || str_contains(mb_strtolower($woman->email ?? ''), $needle)
+                || str_contains(mb_strtolower($woman->barangay ?? ''), $needle));
+        }
+        $women = $women->values();
+
+        $page = (int) $request->input('page', 1);
+        $perPage = 15;
+        $paged = new \Illuminate\Pagination\LengthAwarePaginator(
+            $women->forPage($page, $perPage)->values(),
+            $women->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        return view('bhw-president.women.index', ['women' => $paged, 'search' => $search]);
+    }
+
     // Pregnancies Review Queue (missing method referenced by bhw-president.pregnancies.index)
     public function pregnancies(Request $request)
     {

@@ -639,6 +639,13 @@
                     <span>Pregnancy Review</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('bhw-president.women*') ? 'active' : '' }}"
+                   href="{{ route('bhw-president.women.index') }}">
+                    <i class="bi bi-person-heart"></i>
+                    <span>All Women</span>
+                </a>
+            </li>
         </ul>
 
         <div class="sidebar-section-label">Reports</div>
