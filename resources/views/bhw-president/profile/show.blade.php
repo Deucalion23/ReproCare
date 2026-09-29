@@ -111,11 +111,8 @@
                     </div>
 
                     <div class="mt-4 d-flex flex-wrap gap-2">
-                        <a href="{{ route('profile.edit') }}" class="btn btn-primary">
+                        <a href="{{ route('bhw-president.settings') }}" class="btn btn-primary">
                             <i class="bi bi-pencil-fill me-1"></i> Edit Profile
-                        </a>
-                        <a href="{{ route('bhw-president.dashboard') }}" class="btn btn-secondary">
-                            <i class="bi bi-arrow-left me-1"></i> Back to Dashboard
                         </a>
                     </div>
                 </div>

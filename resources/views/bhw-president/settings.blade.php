@@ -283,7 +283,13 @@
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Profile photo</label>
-                                <input type="file" name="profile_image" class="form-control" accept="image/*">
+                                <div class="d-flex align-items-center gap-3 flex-wrap">
+                                    <img id="presPhotoPreview" src="{{ auth()->user()->profile_image_url }}" alt="Profile photo"
+                                         style="width:56px;height:56px;border-radius:50%;object-fit:cover;border:2px solid var(--color-border);flex-shrink:0;"
+                                         onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
+                                    <input type="file" name="profile_image" class="form-control" accept="image/jpeg,image/png,image/jpg" style="max-width:220px;"
+                                           onchange="if(this.files[0])document.getElementById('presPhotoPreview').src=window.URL.createObjectURL(this.files[0])">
+                                </div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Date of Birth</label>
