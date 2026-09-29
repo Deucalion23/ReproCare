@@ -27,10 +27,62 @@ class BhwPresidentController extends Controller
         });
     }
 
+    /**
+     * President data jurisdiction: only women (registered or walk-in),
+     * BHWs, checkups, pregnancies and reports inside the president's
+     * designated barangay (`assigned_barangay` when set, falling back
+     * to `barangay` for legacy accounts).
+     */
+    private function designatedBarangay(): ?string
+    {
+        $user = auth()->user();
+
+        return $user->assigned_barangay ?: $user->barangay;
+    }
+
+    /** True when the given barangay belongs to the president's area. */
+    private function inOwnBarangay(?string $barangay): bool
+    {
+        $mine = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($this->designatedBarangay());
+        if ($mine === '') {
+            return true;
+        }
+        $theirs = \App\Services\BhwPresidentAssignmentService::normalizeBarangay($barangay);
+        if ($theirs === '') {
+            return false;
+        }
+
+        return $mine === $theirs || str_contains($mine, $theirs) || str_contains($theirs, $mine);
+    }
+
+    /** 404 unless the barangay belongs to the president's area. */
+    private function abortUnlessOwnBarangay(?string $barangay): void
+    {
+        if (!$this->inOwnBarangay($barangay)) {
+            abort(404);
+        }
+    }
+
+    /** 404 unless the BHW belongs to the president's area. */
+    private function abortUnlessBhwInArea(User $bhw): void
+    {
+        $this->abortUnlessOwnBarangay($bhw->assigned_barangay ?? $bhw->barangay);
+    }
+
+    /** 404 unless the report's BHW belongs to the president's area. */
+    private function abortUnlessReportInArea(BhwMonthlyReport $report): void
+    {
+        $bhw = $report->relationLoaded('bhw') ? $report->bhw : $report->bhw()->first(['id', 'barangay', 'assigned_barangay']);
+        if (!$bhw) {
+            abort(404);
+        }
+        $this->abortUnlessBhwInArea($bhw);
+    }
+
     // Dashboard
     public function dashboard()
     {
-        $barangay = auth()->user()->barangay;
+        $barangay = $this->designatedBarangay();
         // Live counts on every load (previously cached for 5 minutes, which
         // left dashboard cards stale right after new records appeared).
         // Jurisdiction matching uses the shared normalize-and-overlap rule so
@@ -91,7 +143,7 @@ class BhwPresidentController extends Controller
         $status = request('status');
 
         $query = User::where('role', 'bhw')->with(['purok', 'activeBhwAssignment.purok']);
-        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, auth()->user()->barangay);
+        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $this->designatedBarangay());
 
         if ($search) {
             $query->where(function ($q) use ($search) {

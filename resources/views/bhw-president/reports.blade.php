@@ -34,6 +34,10 @@
             min-width:146px;
         }
     }
+    /* ── Wide screens: all five metrics share one row ── */
+    @media (min-width: 1024px) {
+        .metric-grid { display:grid !important; grid-template-columns:repeat(5, minmax(0, 1fr)) !important; }
+    }
     /* ── Phones: compact metrics, stacked filter, compressed tables ── */
     @media (max-width: 600px) {
         .metric-grid { display:flex !important; flex-wrap:nowrap !important; overflow-x:auto !important; gap:0.45rem; padding-bottom:0.25rem; scrollbar-width:none; scroll-snap-type:x mandatory; -webkit-mask-image:linear-gradient(90deg, #000 88%, transparent 100%); mask-image:linear-gradient(90deg, #000 88%, transparent 100%); }
