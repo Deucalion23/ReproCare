@@ -65,6 +65,15 @@
         .modern-table td { font-size:0.7rem !important; padding:0.5rem 0.6rem !important; }
         .modern-table .badge { font-size:0.6rem !important; }
         .modern-table .btn { font-size:0.66rem !important; }
+        /* All Reports stacked cards: fit the screen, no dead space. */
+        table.table-cards-mobile tbody tr { margin-bottom:0.55rem; border-radius:12px; padding:0.1rem 0; }
+        table.table-cards-mobile td { padding:0.35rem 0.75rem !important; font-size:0.68rem !important; }
+        table.table-cards-mobile td::before { font-size:0.56rem; margin-bottom:0.1rem; }
+        table.table-cards-mobile .table-title { font-size:0.74rem !important; }
+        table.table-cards-mobile .table-subtitle { font-size:0.64rem !important; }
+        table.table-cards-mobile .summary-chip { font-size:0.6rem !important; padding:0.2rem 0.6rem !important; }
+        table.table-cards-mobile .report-table-actions { gap:0.4rem; }
+        table.table-cards-mobile .report-action-btn { width:30px !important; height:30px !important; }
     }
 </style>
 @endpush
