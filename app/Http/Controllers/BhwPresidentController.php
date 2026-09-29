@@ -451,24 +451,35 @@ class BhwPresidentController extends Controller
     // Analytics Dashboard
     public function analytics()
     {
+        // All indicators are scoped to the president's designated barangay:
+        // women (registered) and walk-in patients outside the area never
+        // reach these counts.
+        $barangay = $this->designatedBarangay();
+        $area = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $barangay, $column);
+        $womanInArea = function ($query) use ($area) {
+            $query->where(function ($q) use ($area) {
+                $q->whereHas('woman', function ($w) use ($area) { $area($w); })
+                  ->orWhereHas('walkInPatient', function ($w) use ($area) { $area($w); });
+            });
+        };
         // Maternal health indicators
         $maternalStats = [
-            'totalPregnancies' => Pregnancy::count(),
-            'activePregnancies' => Pregnancy::active()->count(),
-            'completedPregnancies' => Pregnancy::completed()->count(),
-            'highRiskCount' => Pregnancy::active()->highRisk()->count(),
-            'highRiskPercentage' => Pregnancy::active()->count() > 0 
-                ? round((Pregnancy::active()->highRisk()->count() / Pregnancy::active()->count()) * 100, 2)
+            'totalPregnancies' => Pregnancy::where(fn ($q) => $womanInArea($q))->count(),
+            'activePregnancies' => Pregnancy::active()->where(fn ($q) => $womanInArea($q))->count(),
+            'completedPregnancies' => Pregnancy::completed()->where(fn ($q) => $womanInArea($q))->count(),
+            'highRiskCount' => Pregnancy::active()->highRisk()->where(fn ($q) => $womanInArea($q))->count(),
+            'highRiskPercentage' => Pregnancy::active()->where(fn ($q) => $womanInArea($q))->count() > 0
+                ? round((Pregnancy::active()->highRisk()->where(fn ($q) => $womanInArea($q))->count() / Pregnancy::active()->where(fn ($q) => $womanInArea($q))->count()) * 100, 2)
                 : 0,
         ];
 
         // Service utilization
         $serviceStats = [
-            'checkupsCompleted' => Checkup::where('status', 'Completed')->count(),
-            'checkupsMissed' => Checkup::missed()->count(),
-            'healthRecordsTotal' => HealthRecord::count(),
-            'averageCheckupsPerPatient' => User::where('role', 'user')->count() > 0
-                ? round(Checkup::where('status', 'Completed')->count() / User::where('role', 'user')->count(), 2)
+            'checkupsCompleted' => Checkup::where('status', 'Completed')->where(fn ($q) => $womanInArea($q))->count(),
+            'checkupsMissed' => Checkup::missed()->where(fn ($q) => $womanInArea($q))->count(),
+            'healthRecordsTotal' => HealthRecord::where(fn ($q) => $womanInArea($q))->count(),
+            'averageCheckupsPerPatient' => tap(User::where('role', 'user'), $area)->count() > 0
+                ? round(Checkup::where('status', 'Completed')->where(fn ($q) => $womanInArea($q))->count() / tap(User::where('role', 'user'), $area)->count(), 2)
                 : 0,
         ];
 
@@ -480,12 +491,15 @@ class BhwPresidentController extends Controller
                 'month' => $date->format('M Y'),
                 'pregnancies' => Pregnancy::whereMonth('created_at', $date->month)
                     ->whereYear('created_at', $date->year)
+                    ->where(fn ($q) => $womanInArea($q))
                     ->count(),
                 'checkups' => Checkup::whereMonth('scheduled_date', $date->month)
                     ->whereYear('scheduled_date', $date->year)
+                    ->where(fn ($q) => $womanInArea($q))
                     ->count(),
                 'healthRecords' => HealthRecord::whereMonth('created_at', $date->month)
                     ->whereYear('created_at', $date->year)
+                    ->where(fn ($q) => $womanInArea($q))
                     ->count(),
             ];
         }
@@ -493,6 +507,7 @@ class BhwPresidentController extends Controller
         // Risk distribution across active pregnancies (for the risk chart).
         // Keys are matched case-insensitively for the same reason as above.
         $riskCounts = Pregnancy::active()
+            ->where(fn ($q) => $womanInArea($q))
             ->selectRaw('LOWER(COALESCE(risk_level, ?)) as level, COUNT(*) as total', ['Low'])
             ->groupBy('level')
             ->pluck('total', 'level')

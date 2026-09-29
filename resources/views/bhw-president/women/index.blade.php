@@ -21,10 +21,10 @@
         .card-body .form-label { font-size:0.66rem !important; margin-bottom:0.2rem !important; }
         .card-body .form-control { font-size:0.74rem !important; min-height:2.375rem; }
         .card-body .btn { font-size:0.7rem !important; }
-        .table { font-size:0.72rem !important; }
-        .table th, .table td { padding:0.45rem 0.55rem !important; }
-        .table .pw-patient-name { white-space:nowrap !important; font-size:0.74rem !important; }
-        .table .pw-patient-sub { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:7rem; font-size:0.62rem !important; }
+        .table { font-size:0.7rem !important; }
+        .table th, .table td { padding:0.4rem 0.5rem !important; }
+        .table .pw-patient-name { white-space:nowrap !important; font-size:0.7rem !important; }
+        .table .pw-patient-sub { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:6.5rem; font-size:0.6rem !important; }
         .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
         .table .btn {
             font-size:0.66rem !important; padding:0.32rem 0.6rem !important; white-space:nowrap !important;
