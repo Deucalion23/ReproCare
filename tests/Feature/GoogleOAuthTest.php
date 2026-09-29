@@ -72,6 +72,20 @@ class GoogleOAuthTest extends AutomationTestCase
         $this->assertSame('google-456', $existing->fresh()->google_id);
     }
 
+    public function test_callback_matches_existing_email_case_insensitively(): void
+    {
+        $existing = $this->patient();
+        // Simulate an account originally registered with different casing.
+        $existing->forceFill(['email' => 'MixedCase-Patient@example.com'])->save();
+        $this->mockGoogleUser('google-999', 'mixedcase-patient@example.com', 'Mixed Case');
+
+        $response = $this->get(route('google.callback'));
+
+        $response->assertRedirect(route('user.dashboard'));
+        $this->assertAuthenticatedAs($existing->fresh());
+        $this->assertSame(1, User::whereRaw('LOWER(email) = ?', ['mixedcase-patient@example.com'])->count());
+    }
+
     public function test_callback_rejects_staff_emails(): void
     {
         $this->patient(['role' => 'midwife', 'email' => 'midwife-staff@example.com']);

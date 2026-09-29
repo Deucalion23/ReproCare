@@ -144,7 +144,7 @@
         @if(session('status'))
             <div class="public-alert public-alert-success" role="status">{{ session('status') }}</div>
         @endif
-        <a class="fb-btn-google" href="{{ route('google.redirect') }}" aria-label="Continue with Google">
+        <a class="fb-btn-google" href="{{ route('google.redirect') }}" id="btnGoogleLogin" aria-label="Continue with Google">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.5 12.3c0-.9-.1-1.5-.3-2.3H12v4.3h6.5c-.1 1.1-.8 2.7-2.4 3.8l-.1.1 3.5 2.7.2.1c2.2-2 3.8-5 3.8-8.7z"/><path fill="#34A853" d="M12 24c3.2 0 6-1.1 7.9-2.9l-3.8-2.9c-1 .7-2.4 1.2-4.1 1.2-3.2 0-5.9-2.1-6.8-5l-.1.1-3.6 2.8v.1C3.5 21.3 7.5 24 12 24z"/><path fill="#FBBC05" d="M5.2 14.4c-.2-.7-.4-1.5-.4-2.4s.1-1.7.4-2.4l-.1-.1-3.5-2.7-.1.1C.6 8.7 0 10.3 0 12s.6 3.3 1.6 4.8l3.6-2.4z"/><path fill="#EA4335" d="M12 4.6c1.8 0 3 .8 3.7 1.4l3.3-3.2C17.9 1.1 15.2 0 12 0 7.5 0 3.5 2.7 1.6 6.8l3.6 2.8c1-2.9 3.7-5 6.8-5z"/></svg>
             Continue with Google
         </a>
@@ -219,6 +219,23 @@
         btn.disabled = false;
         btn.innerHTML = 'Log in';
     });
+    // "Continue with Google" is a plain link: block double-clicks so the
+    // OAuth callback can't fire twice and race the user insert.
+    (function () {
+        var g = document.getElementById('btnGoogleLogin');
+        if (!g) return;
+        g.addEventListener('click', function (e) {
+            if (g.dataset.clicked === '1') { e.preventDefault(); return; }
+            g.dataset.clicked = '1';
+            g.style.opacity = '.6';
+            g.style.pointerEvents = 'none';
+        });
+        window.addEventListener('pageshow', function () {
+            g.dataset.clicked = '0';
+            g.style.opacity = '';
+            g.style.pointerEvents = '';
+        });
+    })();
     // Auto-lockout notice: pop the deactivation message in a modal.
     document.addEventListener('DOMContentLoaded', function () {
         var lockModal = document.getElementById('accountLockedModal');

@@ -58,46 +58,68 @@ class GoogleController extends Controller
             ]);
         }
 
-        $user = User::where('email', $email)->first();
+        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
         if ($user) {
-            // ── Staff accounts must never enter through public social login.
-            if (($user->role ?? null) !== 'user') {
-                return redirect()->route('login')->withErrors([
-                    'email' => 'This email belongs to a staff account. Please sign in with your email and password.',
-                ])->onlyInput('email');
-            }
-
-            if (empty($user->google_id)) {
-                $user->forceFill(['google_id' => $googleUser->getId()])->save();
-            }
-
-            // Google already verified ownership of this email address.
-            if (! $user->hasVerifiedEmail()) {
-                $user->markEmailAsVerified();
-            }
-
-            return $this->logGoogleUserIn($user);
+            return $this->handleExistingGoogleUser($user, (string) $googleUser->getId());
         }
 
         // ── New patient via Google. RHU approval still applies (status
         // pending); onboarding (phone + barangay) comes first.
         [$firstName, $lastName] = $this->splitName((string) $googleUser->getName());
 
-        $user = User::create([
-            'first_name' => $firstName,
-            'last_name' => $lastName,
-            'email' => $email,
-            'google_id' => $googleUser->getId(),
-            // users.password is NOT NULL → random unusable password; this
-            // account authenticates via Google, never via password.
-            'password' => Str::random(40),
-            'role' => 'user',
-            'status' => 'pending',
-            'is_profile_complete' => false,
-        ]);
+        try {
+            $user = User::create([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'google_id' => $googleUser->getId(),
+                // users.password is NOT NULL → random unusable password; this
+                // account authenticates via Google, never via password.
+                'password' => Str::random(40),
+                'role' => 'user',
+                'status' => 'pending',
+                'is_profile_complete' => false,
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            // Race guard: the callback was hit twice at once (double-click on
+            // Google's consent screen). The other request already inserted
+            // this email → fall through to the normal existing-user flow.
+            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+
+            if (! $user) {
+                throw $e;
+            }
+
+            return $this->handleExistingGoogleUser($user, (string) $googleUser->getId());
+        }
 
         $user->markEmailAsVerified();
+
+        return $this->logGoogleUserIn($user);
+    }
+
+    /**
+     * Existing email: link google_id if missing, trust Google's email
+     * verification, then run the shared login routing. Staff accounts are
+     * always rejected — public social login is patients-only.
+     */
+    protected function handleExistingGoogleUser(User $user, string $googleId): RedirectResponse
+    {
+        if (($user->role ?? null) !== 'user') {
+            return redirect()->route('login')->withErrors([
+                'email' => 'This email belongs to a staff account. Please sign in with your email and password.',
+            ])->onlyInput('email');
+        }
+
+        if (empty($user->google_id)) {
+            $user->forceFill(['google_id' => $googleId])->save();
+        }
+
+        // Google already verified ownership of this email address.
+        if (! $user->hasVerifiedEmail()) {
+            $user->markEmailAsVerified();
+        }
 
         return $this->logGoogleUserIn($user);
     }
