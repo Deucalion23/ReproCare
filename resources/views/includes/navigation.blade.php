@@ -75,6 +75,9 @@
     .navbar .staff-action-btn i { flex-shrink:0; font-size:13px !important; line-height:1 !important; }
     /* Keep the unread dot visible: it sits half-outside the bell button. */
     .navbar a.staff-action-btn.position-relative { overflow:visible !important; }
+    /* The toggle must always win its own taps (never the neighbor bell). */
+    .navbar .rc-theme-toggle { position:relative; z-index:2; touch-action:manipulation; }
+    .navbar .staff-action-btn { touch-action:manipulation; }
     /* Brand accent: lavender Care everywhere this navbar renders. */
     .navbar .navbar-brand .brand-care { color:#9B64B9 !important; }
     /* Bootstrap adds its own caret to .dropdown-toggle — the pill has its own chevron. */
@@ -89,6 +92,8 @@
     @media (max-width: 576px) {
         .navbar { height:58px !important; }
         .navbar .container-fluid { gap:0.25rem !important; padding-left:0.25rem !important; padding-right:0.6rem !important; }
+        /* Wider tap spacing on the right cluster so the moon never misfires the bell. */
+        .navbar .container-fluid > .d-flex.ms-auto { gap:0.7rem !important; }
         .navbar .navbar-brand { gap:2px !important; }
         .navbar .navbar-brand > span:first-child { width:30px !important; height:30px !important; flex-basis:30px !important; }
         .navbar .navbar-brand > span:first-child img { width:30px !important; height:30px !important; }
