@@ -120,7 +120,7 @@
                         <span class="notif-badge-new">New</span>
                     @endif
                     @if($hasAction)
-                        <a href="{{ $notification->action_url }}" class="btn btn-sm" style="font-size:0.72rem;padding:0.2rem 0.6rem;border:1px solid var(--border);border-radius:8px;color:var(--primary-light);background:var(--primary-subtle);">
+                        <a href="{{ $notification->action_url }}" class="btn btn-sm" style="display:inline-flex;align-items:center;justify-content:center;text-align:center;font-size:0.72rem;padding:0.25rem 0.7rem;border:1px solid var(--border);border-radius:8px;color:var(--primary-light);background:var(--primary-subtle);">
                             View <i class="bi bi-arrow-right ms-1"></i>
                         </a>
                     @endif
