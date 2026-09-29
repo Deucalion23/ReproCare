@@ -8,8 +8,14 @@
         .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
         .page-hero .page-hero-title { font-size:1.02rem !important; }
         .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
-        .preg-queue-tabs { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)) !important; gap:0 !important; width:100% !important; }
-        .preg-queue-tabs .btn { font-size:0.72rem !important; padding:0.45rem 0.4rem !important; width:100% !important; text-align:center !important; justify-content:center !important; border-radius:0 !important; margin-left:-1px !important; }
+        .preg-queue-tabs { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)) !important; gap:0 !important; width:100% !important; align-items:stretch !important; }
+        .preg-queue-tabs .btn {
+            font-size:0.72rem !important; font-weight:800 !important; line-height:1.2 !important;
+            padding:0.55rem 0.4rem !important; min-height:2.5rem !important;
+            width:100% !important; text-align:center !important;
+            display:inline-flex !important; align-items:center !important; justify-content:center !important;
+            border-radius:0 !important; margin-left:-1px !important; white-space:nowrap !important;
+        }
         .preg-queue-tabs .btn:first-child { border-radius:10px 0 0 10px !important; margin-left:0 !important; }
         .preg-queue-tabs .btn:last-child { border-radius:0 10px 10px 0 !important; }
         .preg-queue-search { width:100% !important; }
