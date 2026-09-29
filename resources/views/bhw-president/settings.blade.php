@@ -90,9 +90,6 @@
             <div class="page-hero-title">Settings</div>
             <p class="page-hero-subtitle">Manage barangay-level and team preferences.</p>
         </div>
-        <a href="{{ route('bhw-president.dashboard') }}" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-house-door me-1"></i> Back to Dashboard
-        </a>
     </div>
 </div>
 
