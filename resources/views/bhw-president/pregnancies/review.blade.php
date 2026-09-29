@@ -37,9 +37,6 @@
             <div class="page-hero-title">Review Pregnancy Record</div>
             <p class="page-hero-subtitle">Approve and forward the pregnancy submission.</p>
         </div>
-        <a href="{{ route('bhw-president.pregnancies.index') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Pregnancies
-        </a>
     </div>
 </div>
 
