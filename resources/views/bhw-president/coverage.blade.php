@@ -43,15 +43,6 @@
 <div class="card fade-in-card mb-4">
     <div class="card-body">
         <form method="GET" class="row g-3">
-            <div class="col-md-3">
-                <label class="form-label">Purok</label>
-                <select name="purok" class="form-select">
-                    <option value="">All Puroks</option>
-                    @foreach($puroks as $p)
-                        <option value="{{ $p->id }}" {{ $purokId == $p->id ? 'selected' : '' }}>{{ $p->name }}</option>
-                    @endforeach
-                </select>
-            </div>
             <div class="col-md-2">
                 <label class="form-label">Month</label>
                 <select name="month" class="form-select">
