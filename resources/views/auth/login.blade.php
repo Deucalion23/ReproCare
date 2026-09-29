@@ -43,11 +43,6 @@
     .fb-remember { display:flex; align-items:center; gap:9px; font-size:.82rem; color:var(--color-text-muted); margin:2px 0 18px; cursor:pointer; }
     .fb-remember input { accent-color:var(--color-secondary-text); width:16px; height:16px; }
     .fb-input-wrap .password-toggle { top:50%; transform:translateY(-50%); right:8px; }
-    .fb-demo { margin-top:22px; border:1px dashed var(--color-border); border-radius:18px; padding:14px 16px; background:var(--color-bg); }
-    .fb-demo summary { cursor:pointer; font-size:.8rem; font-weight:700; color:var(--color-text-muted); }
-    .fb-demo .demo-options { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
-    .fb-demo .demo-options button { background:var(--color-surface); border:1px solid var(--color-border); border-radius:999px; padding:7px 14px; font-size:.76rem; font-weight:600; color:var(--color-text-muted); cursor:pointer; transition:all .18s; }
-    .fb-demo .demo-options button:hover { border-color:var(--color-secondary-text); color:var(--color-secondary-text); }
     @media (max-width:900px) {
         .fb-auth { grid-template-columns:1fr; }
         .fb-hero { padding:44px 28px 56px; }
@@ -167,18 +162,6 @@
         <div class="fb-center"><a class="fb-forgot" href="{{ route('password.request') }}">Forgot password?</a></div>
         <div class="fb-divider">new to ReproCare?</div>
         <a class="fb-btn-outline" href="{{ route('register') }}">Create new account</a>
-        <details class="fb-demo">
-            <summary>Demo access</summary>
-            <div class="demo-options">
-                <button type="button" data-demo-email="mariasanta@gmail.com">Patient</button>
-                <button type="button" data-demo-email="midwife@reprocare.com">Midwife</button>
-                <button type="button" data-demo-email="ana@gmail.com">BHW</button>
-                <button type="button" data-demo-email="rhu@reprocare.com">RHU 1</button>
-                <button type="button" data-demo-email="cho@reprocare.com">CHO</button>
-                <button type="button" data-demo-email="pres@gmail.com">BHW President</button>
-            </div>
-            <p id="demoFeedback" role="status"></p>
-        </details>
     </div>
     </section>
 </div>
@@ -210,14 +193,6 @@
         this.setAttribute('aria-label', showing ? 'Hide password' : 'Show password');
         this.setAttribute('aria-pressed', String(showing));
         document.getElementById('passwordToggleIcon').className = showing ? 'bi bi-eye-slash' : 'bi bi-eye';
-    });
-    document.querySelectorAll('[data-demo-email]').forEach(button => {
-        button.addEventListener('click', () => {
-            document.getElementById('email').value = button.dataset.demoEmail;
-            document.getElementById('password').value = 'password123';
-            document.getElementById('demoFeedback').textContent = button.textContent + ' demo selected. Log in to continue.';
-            document.getElementById('email').focus();
-        });
     });
     // Modern loading feedback: disable + spinner while signing in (stops double-submit)
     document.getElementById('loginForm').addEventListener('submit', function () {
