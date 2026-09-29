@@ -32,6 +32,36 @@
             min-width:154px;
         }
     }
+
+    /* ── Small screens: slim hero, 4-across compressed metric cards, compact tables ── */
+    @media (max-width: 767.98px) {
+        body .main-content .page-hero { border-radius:1rem !important; }
+        body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
+        body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        body .main-content .workspace-toolbar .btn-hero-primary { font-size:0.76rem !important; padding:0.55rem 1rem !important; }
+        body .main-content .metric-grid { grid-template-columns:repeat(4, minmax(0, 1fr)) !important; gap:0.5rem !important; }
+        body .main-content .metric-card { min-height:0 !important; border-radius:0.9rem !important; padding:0.65rem 0.55rem !important; }
+        body .main-content .metric-card::before { width:64px; height:64px; top:-26px; right:-14px; }
+        body .main-content .metric-card::after { display:none; }
+        body .main-content .metric-card-icon { font-size:1rem !important; top:0.55rem; right:0.55rem; }
+        body .main-content .metric-card-label { font-size:0.56rem !important; letter-spacing:0.05em; overflow-wrap:anywhere; }
+        body .main-content .metric-card-value { font-size:1.2rem !important; margin-top:0.5rem; }
+        body .main-content .metric-card-note { display:none; }
+        body .main-content .workspace-panel-title { font-size:0.95rem !important; }
+        body .main-content .workspace-panel-subtitle { font-size:0.74rem !important; }
+        body .main-content .workspace-filter-grid .form-label { font-size:0.7rem !important; margin-bottom:0.25rem !important; }
+        body .main-content .workspace-filter-grid .form-select { font-size:0.8rem !important; min-height:2.5rem; }
+        body .main-content .workspace-filter-actions .btn { font-size:0.78rem !important; }
+        body .main-content .modern-table { font-size:0.76rem; }
+        body .main-content .modern-table thead th { font-size:0.66rem !important; }
+        body .main-content .modern-table tbody td { padding:0.55rem 0.6rem !important; }
+        body .main-content .table-title { font-size:0.78rem !important; }
+        body .main-content .table-subtitle { font-size:0.68rem !important; }
+        body .main-content .summary-chip { font-size:0.64rem !important; }
+        body .main-content .report-action-btn { width:2.125rem; height:2.125rem; border-radius:0.65rem; }
+        body .main-content .empty-state-panel h5, body .main-content .empty-state-panel h3 { font-size:0.95rem !important; }
+        body .main-content .empty-state-panel p { font-size:0.78rem !important; }
+    }
 </style>
 @endpush
 
