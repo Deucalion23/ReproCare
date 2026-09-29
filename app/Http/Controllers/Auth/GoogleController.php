@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Barangay;
+use App\Models\Purok;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -189,7 +190,10 @@ class GoogleController extends Controller
     }
 
     /**
-     * Show the mandatory profile completion form (phone + barangay).
+     * Show the mandatory profile completion form. This mirrors the regular
+     * self-registration form field-for-field — the ONLY things a Google user
+     * never fills in are email and password (Google supplies the identity).
+     * Name fields arrive pre-filled from Google and stay editable.
      */
     public function showCompleteProfile(Request $request): View|RedirectResponse
     {
@@ -205,7 +209,9 @@ class GoogleController extends Controller
     }
 
     /**
-     * Store the onboarding fields and lift the profile gate.
+     * Store the onboarding fields and lift the profile gate. Validation
+     * mirrors AuthController::register minus email/password (plus file-upload
+     * ID scans instead of base64 data URIs).
      */
     public function updateCompleteProfile(Request $request): RedirectResponse
     {
@@ -216,16 +222,116 @@ class GoogleController extends Controller
         }
 
         $validated = $request->validate([
-            'contact_number' => ['required', 'string', 'max:20'],
+            'first_name' => 'required|string|max:255',
+            'middle_initial' => 'nullable|string|max:10',
+            'last_name' => 'required|string|max:255',
+            'date_of_birth' => 'nullable|date',
+            'gender' => 'nullable|in:male,female',
+            'contact_number' => 'required|string|max:20',
+            'address' => 'nullable|string|max:500',
+            'house_number' => 'nullable|string|max:100',
+            'purok' => 'nullable|string|max:100',
+            'sitio' => 'nullable|string|max:200',
             'barangay' => ['required', 'string', 'max:255', Rule::in(Barangay::allNames())],
+            'purok_id' => 'nullable|exists:puroks,id',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'address_label' => 'nullable|string|max:500',
+            'id_image_front' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            'id_image_back' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+
+            // Partner / Additional Contact
+            'partner_name' => 'nullable|string|max:255',
+            'partner_contact' => 'nullable|string|max:20',
+
+            // Primary emergency contact
+            'emergency_name_1' => 'required|string|max:255',
+            'emergency_relationship_1' => 'required|string|max:255',
+            'emergency_contact_number_1' => 'required|string|max:255',
+            'emergency_address_1' => 'nullable|string|max:500',
+
+            // Secondary emergency contact
+            'emergency_name_2' => 'nullable|string|max:255',
+            'emergency_relationship_2' => 'nullable|required_with:emergency_name_2|string|max:255',
+            'emergency_contact_number_2' => 'nullable|required_with:emergency_name_2|string|max:255',
+            'emergency_address_2' => 'nullable|string|max:500',
+
+            // Tertiary emergency contact
+            'emergency_name_3' => 'nullable|string|max:255',
+            'emergency_relationship_3' => 'nullable|required_with:emergency_name_3|string|max:255',
+            'emergency_contact_number_3' => 'nullable|required_with:emergency_name_3|string|max:255',
+            'emergency_address_3' => 'nullable|string|max:500',
         ]);
 
+        $barangay = $validated['barangay'];
+
+        // Compose full address from components if address field is empty.
+        $addressParts = array_filter([
+            $request->filled('house_number') ? 'House/Unit ' . $request->house_number : null,
+            $request->filled('purok') ? (str_starts_with(strtolower($request->purok), 'purok') ? $request->purok : 'Purok ' . $request->purok) : null,
+            $request->filled('sitio') ? $request->sitio : null,
+            $barangay,
+            'San Carlos City, Pangasinan'
+        ]);
+        $resolvedAddress = !empty($validated['address']) ? $validated['address'] : (!empty($addressParts) ? implode(', ', $addressParts) : null);
+
+        $resolvedPurokId = $validated['purok_id']
+            ?? Purok::resolveIdFromText($request->input('purok'), $barangay);
+
         $user->forceFill([
+            'first_name' => $validated['first_name'],
+            'middle_initial' => $validated['middle_initial'] ?? null,
+            'last_name' => $validated['last_name'],
+            'date_of_birth' => $validated['date_of_birth'] ?? null,
+            'gender' => $validated['gender'] ?? null,
             // phone_number (spec) maps to the existing contact_number column.
             'contact_number' => $validated['contact_number'],
-            'barangay' => $validated['barangay'],
+            'address' => trim(($resolvedAddress ?? '').($request->filled('address_label') ? ' ('.$request->address_label.')' : '')) ?: null,
+            'barangay' => $barangay,
+            'purok_id' => $resolvedPurokId,
+            'latitude' => $validated['latitude'] ?? null,
+            'longitude' => $validated['longitude'] ?? null,
+            'address_label' => $validated['address_label'] ?? null,
+            'id_image_front' => $request->file('id_image_front')->store('uploads/ids', 'public'),
+            'id_image_back' => $request->file('id_image_back')->store('uploads/ids', 'public'),
+            'partner_name' => $validated['partner_name'] ?? null,
+            'partner_contact' => $validated['partner_contact'] ?? null,
             'is_profile_complete' => true,
         ])->save();
+
+        // Primary emergency contact.
+        $user->emergencyContacts()->create([
+            'name' => $validated['emergency_name_1'],
+            'relationship' => $validated['emergency_relationship_1'],
+            'contact_number' => $validated['emergency_contact_number_1'],
+            'address' => $validated['emergency_address_1'] ?? null,
+            'contact_order' => 1,
+            'is_primary' => true,
+        ]);
+
+        // Secondary emergency contact (if provided).
+        if (!empty($validated['emergency_name_2'])) {
+            $user->emergencyContacts()->create([
+                'name' => $validated['emergency_name_2'],
+                'relationship' => $validated['emergency_relationship_2'],
+                'contact_number' => $validated['emergency_contact_number_2'],
+                'address' => $validated['emergency_address_2'] ?? null,
+                'contact_order' => 2,
+                'is_primary' => false,
+            ]);
+        }
+
+        // Tertiary emergency contact (if provided).
+        if (!empty($validated['emergency_name_3'])) {
+            $user->emergencyContacts()->create([
+                'name' => $validated['emergency_name_3'],
+                'relationship' => $validated['emergency_relationship_3'],
+                'contact_number' => $validated['emergency_contact_number_3'],
+                'address' => $validated['emergency_address_3'] ?? null,
+                'contact_order' => 3,
+                'is_primary' => false,
+            ]);
+        }
 
         // Rejected accounts are re-queued (never onboarded into a portal).
         if (($user->status ?? null) === 'rejected') {

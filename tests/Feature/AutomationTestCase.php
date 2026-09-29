@@ -26,17 +26,23 @@ abstract class AutomationTestCase extends TestCase
         Http::fake(['*' => Http::response(['data' => ['success' => true, 'smsBatchId' => 'test-batch']], 200)]);
 
         Schema::create('users', function (Blueprint $t) {
-            $t->id(); $t->string('first_name'); $t->string('last_name');
+            $t->id(); $t->string('first_name'); $t->string('middle_initial')->nullable(); $t->string('last_name');
             $t->string('email')->nullable(); $t->string('password')->nullable();
             $t->timestamp('email_verified_at')->nullable();
             $t->string('google_id')->nullable(); $t->boolean('is_profile_complete')->default(false);
-            $t->string('barangay')->nullable();
+            $t->string('barangay')->nullable(); $t->string('gender')->nullable();
+            $t->date('date_of_birth')->nullable(); $t->text('address')->nullable();
+            $t->unsignedBigInteger('purok_id')->nullable();
+            $t->decimal('latitude', 10, 7)->nullable(); $t->decimal('longitude', 10, 7)->nullable();
+            $t->string('address_label')->nullable();
+            $t->string('partner_name')->nullable(); $t->string('partner_contact')->nullable();
+            $t->string('id_image_front')->nullable(); $t->string('id_image_back')->nullable();
             $t->timestamp('archived_at')->nullable(); $t->string('archived_reason')->nullable();
             $t->unsignedBigInteger('archived_by')->nullable(); $t->string('rejection_reason')->nullable();
             $t->string('role')->default('user'); $t->string('status')->default('approved');
             $t->string('contact_number')->nullable(); $t->boolean('sms_opt_out')->default(false);
             $t->rememberToken();
-            $t->date('date_of_birth')->nullable(); $t->timestamps(); $t->softDeletes();
+            $t->timestamps(); $t->softDeletes();
         });
         Schema::create('notifications', function (Blueprint $t) {
             $t->id(); $t->unsignedBigInteger('user_id'); $t->string('title');
