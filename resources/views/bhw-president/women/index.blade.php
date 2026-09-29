@@ -14,9 +14,10 @@
         .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
         .card-body { padding:0.7rem 0.8rem !important; }
         /* Search bar + button stay side by side on one row. */
-        .pw-search-form { display:flex !important; gap:0.5rem !important; align-items:flex-end !important; flex-wrap:nowrap !important; }
+        .pw-search-form { display:flex !important; gap:0.4rem !important; align-items:flex-end !important; flex-wrap:nowrap !important; }
         .pw-search-form .pw-search-field { flex:1 1 auto !important; min-width:0 !important; width:auto !important; }
         .pw-search-form .pw-search-btns { flex:0 0 auto !important; width:auto !important; }
+        .pw-search-form .pw-search-btns .btn { padding-left:0.6rem !important; padding-right:0.6rem !important; }
         .card-body .form-label { font-size:0.66rem !important; margin-bottom:0.2rem !important; }
         .card-body .form-control { font-size:0.74rem !important; min-height:2.375rem; }
         .card-body .btn { font-size:0.7rem !important; }
@@ -25,7 +26,11 @@
         .table .pw-patient-name { white-space:nowrap !important; font-size:0.74rem !important; }
         .table .pw-patient-sub { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:7rem; font-size:0.62rem !important; }
         .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
-        .table .btn { font-size:0.66rem !important; padding:0.32rem 0.6rem !important; white-space:nowrap !important; }
+        .table .btn {
+            font-size:0.66rem !important; padding:0.32rem 0.6rem !important; white-space:nowrap !important;
+            text-align:center !important; display:inline-flex !important;
+            align-items:center !important; justify-content:center !important;
+        }
         .card-footer { font-size:0.7rem !important; padding:0.6rem !important; }
         .text-center.py-5 { padding-top:1.25rem !important; padding-bottom:1.25rem !important; }
         .text-center h6 { font-size:0.85rem !important; }
@@ -84,7 +89,7 @@
                             <tr>
                                 <td class="no-card-label" data-label="Patient">
                                     <div class="d-flex align-items-center gap-2">
-                                        <x-patient-avatar :patient="$woman" :size="32" />
+                                        <x-patient-avatar :patient="$woman" :size="26" />
                                         <div style="min-width:0;">
                                             <div class="pw-patient-name" style="font-weight:500;">{{ $woman->name ?? 'Unknown' }}</div>
                                             <small class="text-muted pw-patient-sub d-block">{{ $woman->email ?? 'No email' }}</small>

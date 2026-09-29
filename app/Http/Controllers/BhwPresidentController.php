@@ -267,14 +267,15 @@ class BhwPresidentController extends Controller
     public function healthRecords()
     {
         $president = auth()->user();
+        $presidentBarangay = $this->designatedBarangay();
 
         $healthRecords = HealthRecord::with(['woman', 'walkInPatient', 'recordedBy'])
             ->whereNotNull('recorded_by_id')
-            ->where(function ($query) use ($president) {
-                $query->whereHas('woman', function ($q) use ($president) {
-                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $president->barangay);
-                })->orWhereHas('walkInPatient', function ($q) use ($president) {
-                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $president->barangay);
+            ->where(function ($query) use ($presidentBarangay) {
+                $query->whereHas('woman', function ($q) use ($presidentBarangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $presidentBarangay);
+                })->orWhereHas('walkInPatient', function ($q) use ($presidentBarangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $presidentBarangay);
                 });
             })
             ->latest()
@@ -314,6 +315,7 @@ class BhwPresidentController extends Controller
     public function assignPurok(Request $request, $id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
+        $this->abortUnlessBhwInArea($bhw);
 
         $validated = $request->validate([
             'purok_id' => 'required|exists:puroks,id',
@@ -362,6 +364,7 @@ class BhwPresidentController extends Controller
     public function archiveBhw(\Illuminate\Http\Request $request, $id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
+        $this->abortUnlessBhwInArea($bhw);
         $reason = trim((string) $request->input('reason', ''));
         if ($reason === '') {
             $reason = 'BHW archived by BHW President via console';
@@ -383,6 +386,7 @@ class BhwPresidentController extends Controller
     public function markInactive($id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
+        $this->abortUnlessBhwInArea($bhw);
 
         if ($block = app(\App\Services\WorkflowService::class)->guardOffboarding($bhw)) {
             return $block;
@@ -399,6 +403,7 @@ class BhwPresidentController extends Controller
     public function activateBhw($id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
+        $this->abortUnlessBhwInArea($bhw);
         $bhw->update(['status' => 'approved']);
 
         Cache::forget('bhw_president_dashboard_stats');
@@ -411,6 +416,7 @@ class BhwPresidentController extends Controller
     public function deleteBhw(\Illuminate\Http\Request $request, $id)
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
+        $this->abortUnlessBhwInArea($bhw);
 
         if (($bhw->status ?? 'approved') === 'approved') {
             return redirect()->route('bhw-president.bhws.details', $bhw->id)

@@ -60,6 +60,11 @@
         .split-panels { display:grid !important; grid-template-columns:1fr; gap:0.85rem; }
         .report-action-btn { width:32px !important; height:32px !important; }
         .modern-table-wrap { overflow-x:auto; }
+        .modern-table { font-size:0.7rem !important; }
+        .modern-table th { font-size:0.6rem !important; padding:0.5rem 0.6rem !important; }
+        .modern-table td { font-size:0.7rem !important; padding:0.5rem 0.6rem !important; }
+        .modern-table .badge { font-size:0.6rem !important; }
+        .modern-table .btn { font-size:0.66rem !important; }
     }
 </style>
 @endpush
