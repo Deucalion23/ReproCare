@@ -211,6 +211,21 @@
             min-width:140px;
         }
     }
+    /* ── Phones: compact directory ── */
+    @media (max-width: 600px) {
+        .table-card .table-toolbar h2 { font-size:0.9rem !important; }
+        .table-card .table-toolbar p { font-size:0.7rem !important; }
+        .bhw-search-bar { gap:0.5rem; }
+        .bhw-search-field, .bhw-filter-field { min-height:44px; padding:0.6rem 0.75rem; border-radius:12px; }
+        .bhw-search-field { flex:1 1 100%; min-width:0; }
+        .bhw-search-field input, .bhw-filter-field select { font-size:0.76rem; }
+        .bhw-search-actions { display:grid !important; grid-template-columns:1fr 1fr; gap:0.5rem; }
+        .bhw-search-actions .btn { font-size:0.72rem; justify-content:center; }
+        .bhw-avatar { width:36px; height:36px; font-size:0.78rem; border-radius:12px; }
+        .main-content table.table-cards-mobile td { font-size:0.72rem !important; }
+        .main-content .badge { font-size:0.62rem !important; }
+        .bhw-actions .btn, .bhw-actions-col .btn { font-size:0.68rem !important; padding:0.35rem 0.6rem !important; }
+    }
 </style>
 @endpush
 
