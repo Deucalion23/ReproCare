@@ -2,6 +2,28 @@
 
 @section('title', 'High-Risk Pregnancies - BHW President Portal | ReproCare')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .page-hero .page-hero-title { font-size:1.02rem !important; }
+        .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        .card-header { padding:0.7rem 0.85rem !important; }
+        .card-header h5 { font-size:0.85rem !important; }
+        .card-body { padding:0.75rem 0.85rem !important; }
+        .table { font-size:0.76rem !important; }
+        .table th, .table td { padding:0.5rem 0.6rem !important; }
+        .table .hr-patient-name { white-space:nowrap !important; font-size:0.78rem !important; }
+        .table .hr-patient-brgy { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:7rem; font-size:0.66rem !important; }
+        .table .badge { font-size:0.62rem !important; white-space:nowrap !important; }
+        .table .btn { font-size:0.7rem !important; padding:0.35rem 0.65rem !important; white-space:nowrap !important; }
+        .text-center.py-5 { padding-top:1.5rem !important; padding-bottom:1.5rem !important; }
+        .text-center h4 { font-size:1rem !important; }
+        .text-center p { font-size:0.76rem !important; }
+    }
+</style>
+@endpush
+
 @section('bhw-president-content')
 
 <div class="page-hero fade-in-card">
@@ -10,9 +32,6 @@
             <div class="page-hero-title">High-Risk Pregnancies</div>
             <p class="page-hero-subtitle">Monitor pregnancies requiring special attention</p>
         </div>
-        <a href="{{ route('bhw-president.dashboard') }}" class="btn btn-sm btn-light">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
     </div>
 </div>
 
@@ -40,9 +59,9 @@
                         <td class="no-card-label" data-label="Patient">
                             <div class="d-flex align-items-center gap-2">
                                 <x-patient-avatar :patient="$pregnancy->woman" :size="32" />
-                                <div>
-                                    <div style="font-weight:500;">{{ optional($pregnancy->woman)->name ?? 'Unknown' }}</div>
-                                    <small class="text-muted">{{ optional($pregnancy->woman)->barangay ?? 'N/A' }}</small>
+                                <div style="min-width:0;">
+                                    <div class="hr-patient-name" style="font-weight:500;">{{ optional($pregnancy->woman)->name ?? 'Unknown' }}</div>
+                                    <small class="text-muted hr-patient-brgy d-block">{{ optional($pregnancy->woman)->barangay ?? 'N/A' }}</small>
                                 </div>
                             </div>
                         </td>
