@@ -2,6 +2,23 @@
 
 @section('title', 'Health Record Review - BHW President Portal | ReproCare')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .page-hero .page-hero-title { font-size:1.02rem !important; }
+        .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        .table { font-size:0.76rem !important; }
+        .table th, .table td { padding:0.5rem 0.6rem !important; }
+        .table .fw-semibold { font-size:0.78rem !important; }
+        .table .small, .table small { font-size:0.66rem !important; }
+        .table .badge { font-size:0.62rem !important; }
+        .table .btn { font-size:0.7rem !important; padding:0.35rem 0.65rem !important; }
+        .card-footer { font-size:0.74rem !important; }
+    }
+</style>
+@endpush
+
 @section('bhw-president-content')
 <div class="page-hero fade-in-card mb-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
@@ -54,11 +71,6 @@
                             </td>
                             <td class="px-4 py-3 text-end no-card-label" data-label="Actions">
                                 <div class="d-flex justify-content-end gap-2 flex-wrap">
-                                    @if($record->recordedBy)
-                                        <a href="{{ route('bhw-president.messages.create', ['to' => $record->recordedBy->id, 'role' => 'bhw']) }}" class="btn btn-sm btn-outline-secondary">
-                                            <i class="bi bi-chat-text me-1"></i>Message Recorder
-                                        </a>
-                                    @endif
                                     @if($record->workflow_status !== 'submitted_to_midwife' && $record->workflow_status !== 'accepted_by_midwife')
                                         <form action="{{ route('bhw-president.health-records.pass', $record->id) }}" method="POST">
                                             @csrf

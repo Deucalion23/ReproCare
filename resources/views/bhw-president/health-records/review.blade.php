@@ -1,5 +1,32 @@
 @extends('bhw-president.layout')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .page-hero .page-hero-title { font-size:1.02rem !important; }
+        .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        .page-hero .btn { font-size:0.74rem !important; padding:0.45rem 0.8rem !important; }
+        .card { border-radius:14px !important; }
+        .card-header { padding:0.7rem 0.9rem !important; }
+        .card-header h5 { font-size:0.85rem !important; }
+        .card-body { padding:0.9rem !important; font-size:0.78rem !important; }
+        .card-body h6 { font-size:0.8rem !important; margin-bottom:0.5rem !important; }
+        .card-body .row > [class*="col-"] { font-size:0.78rem !important; }
+        .card-body strong { font-size:0.76rem !important; }
+        .card-body .text-muted, .card-body small { font-size:0.7rem !important; }
+        .card-body .badge { font-size:0.64rem !important; }
+        .card-body .alert { font-size:0.76rem !important; padding:0.65rem 0.8rem !important; margin-bottom:0.75rem !important; }
+        .card-body .mb-4 { margin-bottom:1rem !important; }
+        .card-body .mb-3 { margin-bottom:0.65rem !important; }
+        .card-body .form-label { font-size:0.72rem !important; }
+        .card-body .form-control { font-size:0.78rem !important; }
+        .card-body .btn { font-size:0.76rem !important; }
+        .card-body p.text-muted { font-size:0.76rem !important; }
+    }
+</style>
+@endpush
+
 @section('bhw-president-content')
 <div class="container-fluid py-4">
 <div class="page-hero fade-in-card">
