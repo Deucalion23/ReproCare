@@ -74,6 +74,11 @@
         table.table-cards-mobile .summary-chip { font-size:0.6rem !important; padding:0.2rem 0.6rem !important; }
         table.table-cards-mobile .report-table-actions { gap:0.4rem; }
         table.table-cards-mobile .report-action-btn { width:30px !important; height:30px !important; }
+        /* Actions ride at the top of each stacked card — no scrolling past the info. */
+        table.report-list-table tbody tr { display:flex !important; flex-direction:column !important; }
+        table.report-list-table td[data-label="Actions"] { order:-1 !important; align-self:stretch !important; }
+        table.report-list-table td[data-label="Actions"]::before { display:none !important; }
+        table.report-list-table .report-table-actions { justify-content:flex-end !important; }
     }
 </style>
 @endpush
@@ -221,7 +226,7 @@
         <div class="workspace-panel-body pt-3">
             @if($reports->count() > 0)
                 <div class="modern-table-wrap">
-                    <table class="modern-table table-cards-mobile">
+                    <table class="modern-table table-cards-mobile report-list-table">
                         <thead>
                             <tr>
                                 <th>Report Title</th>
