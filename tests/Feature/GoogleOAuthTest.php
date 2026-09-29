@@ -6,8 +6,12 @@ use App\Http\Middleware\EnsureProfileComplete;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Laravel\Socialite\Contracts\Provider;
 use Laravel\Socialite\Contracts\User as SocialiteUser;
@@ -15,6 +19,63 @@ use Laravel\Socialite\Facades\Socialite;
 
 class GoogleOAuthTest extends AutomationTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        Schema::create('emergency_contacts', function (Blueprint $t) {
+            $t->id();
+            $t->unsignedBigInteger('user_id')->nullable();
+            $t->string('name')->nullable();
+            $t->string('relationship')->nullable();
+            $t->string('contact_number')->nullable();
+            $t->string('address')->nullable();
+            $t->integer('contact_order')->default(1);
+            $t->boolean('is_primary')->default(false);
+            $t->timestamps();
+            $t->softDeletes();
+        });
+    }
+
+    /**
+     * Minimal 1px PNG payload. UploadedFile::fake()->image() needs the GD
+     * extension (absent here), so real image bytes are used instead — they
+     * also pass the controller's `image` MIME validation via fileinfo.
+     */
+    protected function fakeIdImage(string $name): UploadedFile
+    {
+        $path = tempnam(sys_get_temp_dir(), 'idimg') . '.png';
+        file_put_contents($path, base64_decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='
+        ));
+
+        return new UploadedFile($path, $name, 'image/png', null, true);
+    }
+
+    protected function completionPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'first_name' => 'Maria',
+            'middle_initial' => 'S',
+            'last_name' => 'Santos',
+            'date_of_birth' => '2000-05-10',
+            'gender' => 'female',
+            'contact_number' => '09179998888',
+            'house_number' => '123',
+            'sitio' => 'Centro',
+            'barangay' => 'Burgos St',
+            'address_label' => 'Near the chapel',
+            'id_image_front' => $this->fakeIdImage('id-front.png'),
+            'id_image_back' => $this->fakeIdImage('id-back.png'),
+            'partner_name' => 'Jose Santos',
+            'partner_contact' => '09171112222',
+            'emergency_name_1' => 'Ana Reyes',
+            'emergency_relationship_1' => 'Mother',
+            'emergency_contact_number_1' => '09173334444',
+            'emergency_address_1' => 'Burgos St',
+        ], $overrides);
+    }
+
     protected function mockGoogleUser(string $id, string $email, string $name): void
     {
         $socialiteUser = \Mockery::mock(SocialiteUser::class);
@@ -222,24 +283,61 @@ class GoogleOAuthTest extends AutomationTestCase
         $response->assertRedirect(route('user.dashboard'));
     }
 
-    public function test_profile_completion_stores_phone_and_barangay(): void
+    public function test_profile_completion_stores_full_registration_details(): void
     {
+        Storage::fake('public');
         $patient = $this->patient([
             'is_profile_complete' => false,
             'contact_number' => null,
             'barangay' => null,
         ]);
 
-        $response = $this->actingAs($patient)->post(route('profile.complete.store'), [
-            'contact_number' => '09179998888',
-            'barangay' => 'Burgos St',
-        ]);
+        $response = $this->actingAs($patient)->post(
+            route('profile.complete.store'),
+            $this->completionPayload()
+        );
 
         $response->assertRedirect(route('user.dashboard'));
         $fresh = $patient->fresh();
         $this->assertTrue((bool) $fresh->is_profile_complete);
+        // Mirrors regular registration: names, contact, address, barangay.
+        $this->assertSame('Maria', $fresh->first_name);
+        $this->assertSame('S', $fresh->middle_initial);
+        $this->assertSame('Santos', $fresh->last_name);
+        $this->assertSame('female', $fresh->gender);
         $this->assertSame('09179998888', $fresh->contact_number);
         $this->assertSame('Burgos St', $fresh->barangay);
+        $this->assertStringContainsString('Burgos St', (string) $fresh->address);
+        $this->assertStringContainsString('San Carlos City', (string) $fresh->address);
+        $this->assertSame('Jose Santos', $fresh->partner_name);
+        // Valid ID scans stored for RHU verification.
+        Storage::disk('public')->assertExists($fresh->id_image_front);
+        Storage::disk('public')->assertExists($fresh->id_image_back);
+        // Primary emergency contact recorded.
+        $this->assertDatabaseHas('emergency_contacts', [
+            'user_id' => $patient->id,
+            'name' => 'Ana Reyes',
+            'contact_order' => 1,
+            'is_primary' => true,
+        ]);
+    }
+
+    public function test_profile_completion_rejects_incomplete_payload(): void
+    {
+        $patient = $this->patient(['is_profile_complete' => false]);
+
+        $response = $this->actingAs($patient)->post(route('profile.complete.store'), [
+            'first_name' => 'Maria',
+            'last_name' => 'Santos',
+        ]);
+
+        $response->assertSessionHasErrors([
+            'contact_number', 'barangay',
+            'id_image_front', 'id_image_back',
+            'emergency_name_1', 'emergency_relationship_1', 'emergency_contact_number_1',
+        ]);
+        $this->assertFalse((bool) $patient->fresh()->is_profile_complete);
+        $this->assertDatabaseCount('emergency_contacts', 0);
     }
 
     public function test_middleware_passes_staff_through(): void
