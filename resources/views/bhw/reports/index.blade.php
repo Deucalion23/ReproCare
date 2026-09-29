@@ -47,20 +47,26 @@
         body .main-content .metric-card-label { font-size:0.56rem !important; letter-spacing:0.05em; overflow-wrap:anywhere; }
         body .main-content .metric-card-value { font-size:1.2rem !important; margin-top:0.5rem; }
         body .main-content .metric-card-note { display:none; }
-        body .main-content .workspace-panel-title { font-size:0.95rem !important; }
-        body .main-content .workspace-panel-subtitle { font-size:0.74rem !important; }
+        body .main-content .workspace-panel { margin-bottom:0.75rem !important; }
+        body .main-content .workspace-panel-header { padding:0.7rem 0.85rem !important; }
+        body .main-content .workspace-panel-title { font-size:0.85rem !important; }
+        body .main-content .workspace-panel-subtitle { font-size:0.68rem !important; margin-top:0.1rem !important; }
+        body .main-content .workspace-panel-body { padding:0.7rem 0.85rem !important; }
+        body .main-content .split-panels { gap:0.75rem !important; }
         body .main-content .workspace-filter-grid .form-label { font-size:0.7rem !important; margin-bottom:0.25rem !important; }
         body .main-content .workspace-filter-grid .form-select { font-size:0.8rem !important; min-height:2.5rem; }
         body .main-content .workspace-filter-actions .btn { font-size:0.78rem !important; }
-        body .main-content .modern-table { font-size:0.76rem; }
-        body .main-content .modern-table thead th { font-size:0.66rem !important; }
-        body .main-content .modern-table tbody td { padding:0.55rem 0.6rem !important; }
-        body .main-content .table-title { font-size:0.78rem !important; }
-        body .main-content .table-subtitle { font-size:0.68rem !important; }
-        body .main-content .summary-chip { font-size:0.64rem !important; }
-        body .main-content .report-action-btn { width:2.125rem; height:2.125rem; border-radius:0.65rem; }
-        body .main-content .empty-state-panel h5, body .main-content .empty-state-panel h3 { font-size:0.95rem !important; }
-        body .main-content .empty-state-panel p { font-size:0.78rem !important; }
+        body .main-content .modern-table { font-size:0.7rem; }
+        body .main-content .modern-table thead th { font-size:0.6rem !important; padding:0.4rem 0.5rem !important; }
+        body .main-content .modern-table tbody td { padding:0.4rem 0.5rem !important; }
+        body .main-content .table-title { font-size:0.72rem !important; }
+        body .main-content .table-subtitle { font-size:0.62rem !important; margin-top:0 !important; }
+        body .main-content .summary-chip { font-size:0.6rem !important; padding:0.15rem 0.5rem !important; }
+        body .main-content .report-action-btn { width:2rem; height:2rem; border-radius:0.6rem; font-size:0.72rem; }
+        body .main-content .empty-state-panel { padding:1.25rem 1rem !important; }
+        body .main-content .empty-state-panel i { font-size:1.6rem !important; }
+        body .main-content .empty-state-panel h5, body .main-content .empty-state-panel h3 { font-size:0.85rem !important; margin-bottom:0.25rem !important; }
+        body .main-content .empty-state-panel p { font-size:0.7rem !important; margin-bottom:0 !important; }
     }
 </style>
 @endpush
