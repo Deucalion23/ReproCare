@@ -5,22 +5,31 @@
 @push('styles')
 <style>
     @media (max-width: 767.98px) {
-        .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
-        .page-hero .page-hero-title { font-size:1.02rem !important; }
-        .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
-        .card-header { padding:0.7rem 0.85rem !important; gap:0.5rem !important; flex-wrap:wrap !important; }
+        .page-hero { padding:0.8rem 0.9rem !important; border-radius:14px !important; margin-bottom:0.8rem !important; }
+        .page-hero .page-hero-title { font-size:0.95rem !important; }
+        .page-hero .page-hero-subtitle { font-size:0.7rem !important; }
+        .card { border-radius:14px !important; margin-bottom:0.8rem !important; }
+        .card-header { padding:0.65rem 0.8rem !important; gap:0.5rem !important; flex-wrap:wrap !important; }
+        .card-header h5 { font-size:0.82rem !important; }
         .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
-        .card-body .form-label { font-size:0.7rem !important; margin-bottom:0.25rem !important; }
-        .card-body .form-control { font-size:0.78rem !important; min-height:2.5rem; }
-        .card-body .btn { font-size:0.72rem !important; }
-        .table { font-size:0.76rem !important; }
-        .table th, .table td { padding:0.5rem 0.6rem !important; }
-        .table .pw-patient-name { white-space:nowrap !important; font-size:0.78rem !important; }
-        .table .pw-patient-sub { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:7rem; font-size:0.66rem !important; }
-        .table .badge { font-size:0.62rem !important; white-space:nowrap !important; }
-        .table .btn { font-size:0.7rem !important; padding:0.35rem 0.65rem !important; white-space:nowrap !important; }
-        .card-footer { font-size:0.74rem !important; }
-        .text-center.py-5 { padding-top:1.5rem !important; padding-bottom:1.5rem !important; }
+        .card-body { padding:0.7rem 0.8rem !important; }
+        /* Search bar + button stay side by side on one row. */
+        .pw-search-form { display:flex !important; gap:0.5rem !important; align-items:flex-end !important; flex-wrap:nowrap !important; }
+        .pw-search-form .pw-search-field { flex:1 1 auto !important; min-width:0 !important; width:auto !important; }
+        .pw-search-form .pw-search-btns { flex:0 0 auto !important; width:auto !important; }
+        .card-body .form-label { font-size:0.66rem !important; margin-bottom:0.2rem !important; }
+        .card-body .form-control { font-size:0.74rem !important; min-height:2.375rem; }
+        .card-body .btn { font-size:0.7rem !important; }
+        .table { font-size:0.72rem !important; }
+        .table th, .table td { padding:0.45rem 0.55rem !important; }
+        .table .pw-patient-name { white-space:nowrap !important; font-size:0.74rem !important; }
+        .table .pw-patient-sub { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:7rem; font-size:0.62rem !important; }
+        .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
+        .table .btn { font-size:0.66rem !important; padding:0.32rem 0.6rem !important; white-space:nowrap !important; }
+        .card-footer { font-size:0.7rem !important; padding:0.6rem !important; }
+        .text-center.py-5 { padding-top:1.25rem !important; padding-bottom:1.25rem !important; }
+        .text-center h6 { font-size:0.85rem !important; }
+        .text-center p { font-size:0.72rem !important; }
     }
 </style>
 @endpush
@@ -38,12 +47,12 @@
 
 <div class="card fade-in-card mb-4">
     <div class="card-body">
-        <form method="GET" action="{{ route('bhw-president.women.index') }}" class="row g-3 align-items-end">
-            <div class="col-md-9">
+        <form method="GET" action="{{ route('bhw-president.women.index') }}" class="row g-3 align-items-end pw-search-form">
+            <div class="col-md-9 pw-search-field">
                 <label class="form-label">Search Patient</label>
                 <input type="text" name="search" class="form-control" placeholder="Search name, email, or barangay..." value="{{ $search }}">
             </div>
-            <div class="col-md-3 d-flex gap-2">
+            <div class="col-md-3 d-flex gap-2 pw-search-btns">
                 <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-search me-1"></i> Search</button>
                 @if($search !== '')
                     <a href="{{ route('bhw-president.women.index') }}" class="btn btn-outline-secondary">Clear</a>

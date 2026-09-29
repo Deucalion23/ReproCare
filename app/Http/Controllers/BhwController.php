@@ -1108,9 +1108,17 @@ class BhwController extends Controller
             return view('bhw.reports.print', compact('report', 'healthRecords', 'uniquePatients', 'riskDistribution'));
         } else {
             // Pregnancy reports
+            $reportBarangay = $this->ownBarangay();
             $baseQuery = Pregnancy::whereNull('ended_at')
                 ->whereMonth('created_at', $report->report_month)
                 ->whereYear('created_at', $report->report_year)
+                ->where(function ($query) use ($reportBarangay) {
+                    $query->whereHas('woman', function ($w) use ($reportBarangay) {
+                        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $reportBarangay);
+                    })->orWhereHas('walkInPatient', function ($w) use ($reportBarangay) {
+                        \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $reportBarangay);
+                    });
+                })
                 ->with('woman')
                 ->when(($report->filters['patient_filter'] ?? 'all') === 'selected', function ($query) use ($report) {
                     $query->whereIn('user_id', $report->filters['user_ids'] ?? []);
