@@ -205,14 +205,15 @@ class BhwPresidentController extends Controller
         $data['phone'] = $validated['phone'];
         $data['address'] = $request->address ?: implode(', ', array_filter([
             $request->filled('purok') ? $request->purok : null,
-            auth()->user()->barangay,
+            $this->designatedBarangay(),
             'San Carlos City, Pangasinan',
         ]));
 
         // New BHWs belong to the president's own barangay; typed Sitio / Street / Purok
         // entries are added to the registry automatically.
-        $data['barangay'] = auth()->user()->barangay;
-        $data['purok_id'] = \App\Models\Purok::resolveIdFromText($request->purok, auth()->user()->barangay);
+        $presidentBarangay = $this->designatedBarangay();
+        $data['barangay'] = $presidentBarangay;
+        $data['purok_id'] = \App\Models\Purok::resolveIdFromText($request->purok, $presidentBarangay);
 
         if ($request->hasFile('profile_image')) {
             $imageName = time() . '.' . $request->profile_image->extension();
@@ -225,7 +226,7 @@ class BhwPresidentController extends Controller
         }
 
         $bhw = User::create($data);
-        \App\Models\ActivityLog::log('create', "BHW President created BHW {$bhw->name} in ".auth()->user()->barangay);
+        \App\Models\ActivityLog::log('create', "BHW President created BHW {$bhw->name} in ".$this->designatedBarangay());
 
         Cache::forget('bhw_president_dashboard_stats_'.auth()->id());
 
@@ -237,6 +238,7 @@ class BhwPresidentController extends Controller
     public function bhwDetails($id)
     {
         $bhw = User::where('role', 'bhw')->with(['purok', 'activeBhwAssignment.purok'])->findOrFail($id);
+        $this->abortUnlessBhwInArea($bhw);
         $puroks = Purok::orderBy('barangay')->orderBy('name')->get();
 
         $healthRecords = HealthRecord::where('recorded_by_id', $bhw->id)
