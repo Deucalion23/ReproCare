@@ -25,7 +25,7 @@
     <div class="card-body p-4">
         @if($tasks->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover">
+                <table class="table table-hover table-cards-mobile">
                     <thead>
                         <tr>
                             <th>Title</th>
@@ -38,21 +38,21 @@
                     <tbody>
                         @foreach($tasks as $task)
                             <tr>
-                                <td>
+                                <td class="no-card-label" data-label="Title">
                                     <div class="fw-semibold">{{ $task->title }}</div>
                                     @if($task->description)
                                         <small class="text-muted">{{ \Illuminate\Support\Str::limit($task->description, 80) }}</small>
                                     @endif
                                     <div><small class="text-muted">From: {{ $task->assignedBy?->name ?? '—' }}</small></div>
                                 </td>
-                                <td>{{ str_replace('_', ' ', $task->task_type) }}</td>
-                                <td>{{ optional($task->due_date)->format('M j, Y') ?? '—' }}</td>
-                                <td>
+                                <td data-label="Type">{{ str_replace('_', ' ', $task->task_type) }}</td>
+                                <td data-label="Due" style="white-space:nowrap;">{{ optional($task->due_date)->format('M j, Y') ?? '—' }}</td>
+                                <td data-label="Status">
                                     <span class="badge bg-{{ $task->status === 'completed' ? 'success' : ($task->status === 'in_progress' ? 'primary' : ($task->status === 'cancelled' ? 'secondary' : 'warning text-dark')) }}">
                                         {{ str_replace('_', ' ', $task->status) }}
                                     </span>
                                 </td>
-                                <td class="text-end">
+                                <td class="no-card-label text-end" data-label="Actions">
                                     <div class="d-inline-flex gap-1">
                                         @if($task->status === 'pending')
                                             <form method="POST" action="{{ route('bhw.tasks.start', $task->id) }}">
