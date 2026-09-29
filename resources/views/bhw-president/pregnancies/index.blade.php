@@ -8,8 +8,10 @@
         .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
         .page-hero .page-hero-title { font-size:1.02rem !important; }
         .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
-        .preg-queue-tabs { flex-wrap:wrap !important; gap:0.45rem !important; }
-        .preg-queue-tabs .btn { font-size:0.72rem !important; padding:0.45rem 0.8rem !important; }
+        .preg-queue-tabs { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)) !important; gap:0 !important; width:100% !important; }
+        .preg-queue-tabs .btn { font-size:0.72rem !important; padding:0.45rem 0.4rem !important; width:100% !important; text-align:center !important; justify-content:center !important; border-radius:0 !important; margin-left:-1px !important; }
+        .preg-queue-tabs .btn:first-child { border-radius:10px 0 0 10px !important; margin-left:0 !important; }
+        .preg-queue-tabs .btn:last-child { border-radius:0 10px 10px 0 !important; }
         .preg-queue-search { width:100% !important; }
         .preg-queue-search .form-control { font-size:0.78rem !important; min-height:2.5rem; }
         .card-header { padding:0.75rem 0.9rem !important; gap:0.6rem !important; }
