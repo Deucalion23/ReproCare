@@ -57,15 +57,16 @@
     /* ── Mobile: stacked hero, scrollable pills, compact record cards ── */
     @media (max-width: 600px) {
         .page-hero .d-flex.justify-content-between { flex-direction:column; align-items:stretch !important; }
-        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.35rem; width:100%; }
+        .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.3rem; width:100%; }
         .page-hero form.d-flex { grid-column:1 / -1; }
         .page-hero .d-flex.gap-2 .btn {
             min-width:0; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
             text-align:center; align-items:center; justify-content:center;
-            font-size:clamp(0.46rem, 2.2vw, 0.56rem);
-            padding:0.5rem 0.3rem;
+            font-size:clamp(0.42rem, 2vw, 0.5rem);
+            padding:0.5rem 0.2rem;
         }
-        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; font-size:0.8em; }
+        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; font-size:0.85em; }
+        .page-hero .d-flex.gap-2 .btn .me-1 { margin-right:0.2rem !important; }
         .search-bar { max-width:none; width:100%; }
         .search-bar input { font-size:0.78rem; }
         .filter-pills { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; width:100%; }
