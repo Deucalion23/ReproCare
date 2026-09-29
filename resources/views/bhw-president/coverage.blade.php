@@ -8,8 +8,8 @@
 <style>
     /* ── Phones: stacked filter, 2-col stats, compact list ── */
     @media (max-width: 600px) {
-        .form-label { font-size:0.64rem; margin-bottom:0.2rem; }
-        .form-select { font-size:0.72rem; padding:0.45rem 0.7rem; }
+        .form-label { font-size:0.6rem; margin-bottom:0.15rem; }
+        .form-select { font-size:0.68rem; padding:0.4rem 0.6rem; min-height:0; }
         .card-body .row.g-3 { gap:0.5rem !important; }
         .card-body .btn { font-size:0.7rem; padding:0.5rem 0.75rem; display:flex; align-items:center; justify-content:center; }
         .pres-stat-row { gap:0.5rem; }
