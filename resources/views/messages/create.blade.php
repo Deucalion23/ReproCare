@@ -39,6 +39,16 @@
     .rc-btn-ghost { display:inline-flex; align-items:center; gap:.45rem; background:var(--color-surface); border:1px solid var(--color-border); color:var(--color-text); font-weight:700; font-size:.86rem; padding:.65rem 1.2rem; border-radius:12px; text-decoration:none; }
     .rc-btn-ghost:hover { border-color:var(--color-secondary-soft); color:var(--color-secondary-text); background:var(--color-secondary-soft); }
     .hidden { display:none !important; }
+    @media (max-width:640px){
+        .rc-compose-hero{ padding:.95rem 1rem; border-radius:14px; margin-bottom:1rem; }
+        .rc-compose-hero h2{ font-size:1.02rem; }
+        .rc-compose-hero h2 .rc-ico{ width:34px; height:34px; font-size:.95rem; }
+        .rc-compose-hero p{ font-size:.74rem; }
+        .rc-btn-pink, .rc-btn-ghost{ font-size:.78rem; padding:.55rem 1rem; }
+        .rc-form{ padding:.9rem; }
+        .rc-contact-opt .rc-nm{ font-size:.8rem; }
+        .rc-input, .rc-textarea{ font-size:.8rem; }
+    }
 </style>
 @endpush
 

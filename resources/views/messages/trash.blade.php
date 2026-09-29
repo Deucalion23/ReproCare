@@ -2,6 +2,19 @@
 
 @section('title', 'Trash - Messages')
 
+@push('styles')
+<style>
+    @media (max-width:640px){
+        .page-hero{ padding:.9rem 1rem !important; border-radius:14px !important; margin-bottom:.9rem !important; }
+        .page-hero .page-hero-title{ font-size:1.02rem !important; }
+        .page-hero .page-hero-subtitle{ font-size:.74rem !important; }
+    }
+    .rc-trash-row{ gap:.75rem; }
+    .rc-trash-row > div:first-child{ flex:1 1 auto; }
+    .rc-trash-row form{ flex-shrink:0; }
+</style>
+@endpush
+
 @php
     $contentSection = request()->routeIs('midwife.messages.*') ? 'midwife-content' : (request()->routeIs('bhw.messages.*') ? 'bhw-content' : (request()->routeIs('bhw-president.messages.*') ? 'bhw-president-content' : 'user-content'));
     $messagesRouteBase = request()->routeIs('midwife.messages.*') ? 'midwife.messages' : (request()->routeIs('bhw.messages.*') ? 'bhw.messages' : (request()->routeIs('bhw-president.messages.*') ? 'bhw-president.messages' : 'user.messages'));
@@ -22,7 +35,7 @@
     <div class="card"><div class="card-body p-0">
         @forelse($messages as $msg)
             @php $other = $msg->sender_id === auth()->id() ? $msg->receiver : $msg->sender; @endphp
-            <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+            <div class="d-flex justify-content-between align-items-center p-3 border-bottom rc-trash-row">
                 <div style="min-width:0;">
                     <strong>{{ $other?->name ?? 'Unknown' }}</strong>
                     <div class="small text-muted text-truncate" style="max-width:420px;">{{ \Illuminate\Support\Str::limit($msg->body, 80) }}</div>

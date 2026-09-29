@@ -41,7 +41,27 @@
     .rc-send { width:44px; height:44px; border-radius:50%; background:var(--color-secondary); border:1px solid var(--color-secondary); color:var(--color-on-solid); display:inline-flex; align-items:center; justify-content:center; font-size:1.05rem; cursor:pointer; transition:all .2s; box-shadow:0 3px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent); flex-shrink:0; }
     .rc-send:hover { background:var(--color-secondary); transform:scale(1.05); }
     .rc-send:active { transform:scale(.95); }
-    @media (max-width:640px){ .rc-row{ max-width:88%; } .rc-chat-card{ height:82vh; } }
+    @media (max-width:640px){
+        .rc-row{ max-width:88%; }
+        .rc-chat-card{ height:82vh; }
+        /* Phones: wrap the header so nothing overlaps. */
+        .rc-chat-topbar{ flex-wrap:wrap; padding:.7rem .85rem; gap:.6rem; }
+        .rc-chat-peer{ flex:1 1 auto; gap:.6rem; }
+        .rc-back{ width:34px; height:34px; }
+        .rc-peer-avatar img{ width:40px; height:40px; }
+        .rc-peer-name{ font-size:.88rem; }
+        .rc-peer-sub{ font-size:.66rem; flex-wrap:wrap; }
+        .rc-role-pill{ font-size:.58rem; }
+        .rc-peer-extra{ display:none; }
+        .rc-top-actions{ gap:.4rem; margin-left:auto; }
+        .rc-icon-btn{ width:34px; height:34px; }
+        #connDot{ font-size:.62rem; }
+        .rc-stream{ padding:.9rem .8rem; }
+        .rc-bubble{ font-size:.84rem; padding:.7rem .9rem; }
+        .rc-composer{ padding:.7rem .8rem; }
+        .rc-composer-bar input{ font-size:.82rem; }
+        .rc-send{ width:40px; height:40px; }
+    }
 </style>
 @endpush
 
@@ -85,7 +105,7 @@
                 </div>
                 <div style="min-width:0;">
                     <h4 class="rc-peer-name">{{ optional($otherParty)->name ?? 'Healthcare Provider' }}</h4>
-                    <div class="rc-peer-sub"><span class="rc-role-pill">{{ $otherPartyLabel }}</span><span>Active care support</span></div>
+                    <div class="rc-peer-sub"><span class="rc-role-pill">{{ $otherPartyLabel }}</span><span class="rc-peer-extra">Active care support</span></div>
                 </div>
             </div>
             <div class="rc-top-actions">
