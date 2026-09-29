@@ -788,7 +788,7 @@ class BhwPresidentController extends Controller
         }
 
         $pregnancies = $query->latest()->paginate(20)->withQueryString();
-        $pendingCount = Pregnancy::active()->where('workflow_status', 'submitted_to_bhw_president')->count();
+        $pendingCount = Pregnancy::active()->where('workflow_status', 'submitted_to_bhw_president')->tap($inArea)->count();
 
         return view('bhw-president.pregnancies.index', compact('pregnancies', 'search', 'filter', 'pendingCount'));
     }
@@ -797,8 +797,14 @@ class BhwPresidentController extends Controller
     public function reports()
     {
         $filter = request('filter', 'all');
-        
+
+        // Only reports filed by BHWs inside the president's barangay.
+        $barangay = $this->designatedBarangay();
         $reports = BhwMonthlyReport::with('bhw')
+            ->whereHas('bhw', function ($q) use ($barangay) {
+                $q->where('role', 'bhw');
+                \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($q, $barangay);
+            })
             ->when($filter !== 'all', function ($query) use ($filter) {
                 $query->where('report_type', $filter);
             })
@@ -812,6 +818,7 @@ class BhwPresidentController extends Controller
     public function reportShow($id)
     {
         $report = BhwMonthlyReport::with('bhw')->findOrFail($id);
+        $this->abortUnlessReportInArea($report);
 
         if ($report->report_type === 'health_records') {
             $healthRecords = HealthRecord::with(['woman', 'recordedBy'])

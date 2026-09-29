@@ -16,11 +16,11 @@
         /* Search bar + button stay side by side on one row. */
         .pw-search-card { margin-bottom:0.7rem !important; }
         .pw-search-card .card-body { padding:0.6rem 0.7rem !important; }
-        .pw-search-form { display:flex !important; gap:0.4rem !important; align-items:flex-end !important; flex-wrap:nowrap !important; }
-        .pw-search-form .pw-search-field { flex:1 1 auto !important; min-width:0 !important; width:auto !important; }
-        .pw-search-form .pw-search-btns { flex:0 0 auto !important; width:auto !important; }
-        .pw-search-form .pw-search-btns .btn { padding-left:0.7rem !important; padding-right:0.7rem !important; }
-        .pw-search-form .pw-search-label { display:none !important; }
+        .pw-search-form { display:flex !important; flex-direction:column !important; gap:0.5rem !important; align-items:stretch !important; }
+        .pw-search-form .pw-search-field { flex:1 1 auto !important; min-width:0 !important; width:100% !important; }
+        .pw-search-form .pw-search-btns { flex:1 1 auto !important; width:100% !important; }
+        .pw-search-form .pw-search-btns .btn { width:100% !important; justify-content:center !important; padding-left:0.7rem !important; padding-right:0.7rem !important; }
+        .pw-search-form .pw-search-label { display:inline !important; }
         .card-body .form-label { font-size:0.66rem !important; margin-bottom:0.2rem !important; }
         .card-body .form-control { font-size:0.74rem !important; min-height:2.375rem; }
         .card-body .btn { font-size:0.7rem !important; }
