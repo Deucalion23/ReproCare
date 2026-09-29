@@ -8,12 +8,23 @@
 <style>
     /* ── Phones: stacked filter, 2-col stats, compact list ── */
     @media (max-width: 600px) {
-        .form-label { font-size:0.7rem; margin-bottom:0.25rem; }
-        .form-select { font-size:0.76rem; }
-        .progress { height:22px !important; }
-        .progress-bar { font-size:0.66rem; }
-        .main-content table.table-cards-mobile td { font-size:0.72rem !important; }
-        .main-content .badge { font-size:0.62rem !important; }
+        .form-label { font-size:0.64rem; margin-bottom:0.2rem; }
+        .form-select { font-size:0.72rem; padding:0.45rem 0.7rem; }
+        .card-body .row.g-3 { gap:0.5rem !important; }
+        .card-body .btn { font-size:0.7rem; padding:0.5rem 0.75rem; display:flex; align-items:center; justify-content:center; }
+        .pres-stat-row { gap:0.5rem; }
+        .main-content .stat-card { padding:0.7rem !important; }
+        .main-content .stat-icon { width:30px !important; height:30px !important; font-size:0.85rem !important; }
+        .main-content .stat-number { font-size:1.1rem !important; }
+        .main-content .stat-label { font-size:0.56rem !important; }
+        .progress { height:20px !important; }
+        .progress-bar { font-size:0.62rem; }
+        .card-body > p.text-muted { font-size:0.7rem !important; }
+        .main-content table.table-cards-mobile tbody tr { margin-bottom:0.5rem; border-radius:12px; padding:0.1rem 0; }
+        .main-content table.table-cards-mobile td { padding:0.35rem 0.75rem !important; font-size:0.68rem !important; }
+        .main-content table.table-cards-mobile td::before { font-size:0.56rem; margin-bottom:0.1rem; }
+        .main-content .badge { font-size:0.6rem !important; }
+        .main-content .card-body { padding:0.85rem !important; }
     }
 </style>
 @endpush
