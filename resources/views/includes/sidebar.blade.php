@@ -641,15 +641,8 @@
             </li>
         </ul>
 
-        <div class="sidebar-section-label">Analytics</div>
+        <div class="sidebar-section-label">Reports</div>
         <ul class="nav flex-column">
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('bhw-president.analytics') ? 'active' : '' }}"
-                   href="{{ route('bhw-president.analytics') }}">
-                    <i class="bi bi-bar-chart-fill"></i>
-                    <span>Health Analytics</span>
-                </a>
-            </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('bhw-president.coverage') ? 'active' : '' }}"
                    href="{{ route('bhw-president.coverage') }}">
@@ -664,10 +657,6 @@
                     <span>High-Risk Cases</span>
                 </a>
             </li>
-        </ul>
-
-        <div class="sidebar-section-label">Reports</div>
-        <ul class="nav flex-column">
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('bhw-president.reports*') ? 'active' : '' }}"
                    href="{{ route('bhw-president.reports.index') }}">
