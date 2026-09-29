@@ -287,6 +287,10 @@ class BhwPresidentController extends Controller
     public function passHealthRecordToMidwife(Request $request, $id)
     {
         $healthRecord = HealthRecord::with('recordedBy')->findOrFail($id);
+        $healthRecord->loadMissing(['woman:id,barangay', 'walkInPatient:id,barangay']);
+        $this->abortUnlessOwnBarangay(
+            $healthRecord->woman?->barangay ?? $healthRecord->walkInPatient?->barangay
+        );
 
         $healthRecord->update([
             'bhw_president_id' => auth()->id(),
@@ -948,6 +952,7 @@ class BhwPresidentController extends Controller
     public function reportResubmitToMidwife(Request $request, $id)
     {
         $report = BhwMonthlyReport::findOrFail($id);
+        $this->abortUnlessReportInArea($report);
 
         if ($report->submission_status !== 'returned_to_president') {
             return redirect()->route('bhw-president.reports.index')
@@ -978,6 +983,7 @@ class BhwPresidentController extends Controller
         ]);
 
         $report = BhwMonthlyReport::findOrFail($id);
+        $this->abortUnlessReportInArea($report);
 
         if ($report->submission_status !== 'returned_to_president') {
             return redirect()->route('bhw-president.reports.index')
