@@ -321,8 +321,8 @@
                                 </div>
                             </div>
                             <div class="col-12 d-flex gap-2 pt-1">
-                                <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle me-1"></i> Save Changes</button>
-                                <button type="button" class="btn btn-outline-secondary"><i class="bi bi-x-circle me-1"></i> Cancel</button>
+                                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-check-circle me-1"></i> Save Changes</button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center justify-content-center text-center"><i class="bi bi-x-circle me-1"></i> Cancel</button>
                             </div>
                         </div>
                     </form>
