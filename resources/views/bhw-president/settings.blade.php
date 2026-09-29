@@ -98,7 +98,7 @@
     {{-- LEFT NAV --}}
     <div class="settings-sidebar fade-in-card">
         <div class="settings-nav">
-            <a class="settings-nav-item active" onclick="showSection('context', this)" href="#">
+            <a class="settings-nav-item" onclick="showSection('context', this)" href="#">
                 <i class="bi bi-geo-alt-fill" style="color:var(--primary-light);"></i> Barangay Context
             </a>
             <a class="settings-nav-item" onclick="showSection('deadlines', this)" href="#">
@@ -107,7 +107,7 @@
             <a class="settings-nav-item" onclick="showSection('notifications', this)" href="#">
                 <i class="bi bi-bell-fill" style="color:var(--success);"></i> Barangay Alerts
             </a>
-            <a class="settings-nav-item" onclick="showSection('account', this)" href="#">
+            <a class="settings-nav-item active" onclick="showSection('account', this)" href="#">
                 <i class="bi bi-person-fill" style="color:var(--info);"></i> Profile
             </a>
             <a class="settings-nav-item" onclick="showSection('security', this)" href="#">
@@ -141,7 +141,7 @@
         @endif
 
         {{-- BARANGAY CONTEXT --}}
-        <div class="settings-section active" id="section-context">
+        <div class="settings-section" id="section-context">
             <div class="pref-card fade-in-card">
                 <div class="pref-card-header">
                     <div class="pref-card-header-icon"><i class="bi bi-geo-alt-fill"></i></div>
@@ -254,7 +254,7 @@
         </div>
 
         {{-- ACCOUNT --}}
-        <div class="settings-section" id="section-account">
+        <div class="settings-section active" id="section-account">
             <div class="pref-card fade-in-card">
                 <div class="pref-card-header">
                     <div class="pref-card-header-icon" style="background:color-mix(in srgb, var(--color-info) 12%, transparent);color:var(--info);"><i class="bi bi-person-fill"></i></div>
@@ -440,12 +440,17 @@ function showSection(id, el) {
     event.preventDefault();
     document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
-    document.getElementById('section-' + id).classList.add('active');
+    const target = document.getElementById('section-' + id);
+    if (target) target.classList.add('active');
     el.classList.add('active');
     document.querySelectorAll('#section-' + id + ' .fade-in-card').forEach((c,i) => {
         c.classList.remove('visible');
         setTimeout(() => c.classList.add('visible'), i * 60 + 30);
     });
+    // Bring the selected content into view (it sits below the nav on phones).
+    if (target) {
+        try { target.scrollIntoView({ behavior:'smooth', block:'start' }); } catch (e) { target.scrollIntoView(); }
+    }
 }
 document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('#section-appearance .fade-in-card').forEach((c,i) => {
