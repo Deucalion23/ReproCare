@@ -4,6 +4,15 @@
 {{-- Back button on this page asks to log out instead of landing on a stale login page --}}
 @section('body_extra_attrs', 'data-confirm-exit')
 
+@push('styles')
+<style>
+    .bhw-quick-grid { display:grid; grid-template-columns:repeat(4, minmax(0, 1fr)); gap:0.75rem; }
+    @media (max-width: 768px) {
+        .bhw-quick-grid { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    }
+</style>
+@endpush
+
 @section('bhw-content')
 
 @php
