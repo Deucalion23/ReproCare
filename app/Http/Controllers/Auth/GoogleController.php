@@ -58,7 +58,10 @@ class GoogleController extends Controller
             ]);
         }
 
-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        // withTrashed: a previously deleted account still holds its unique
+        // email at the DB level. Without this, the lookup misses while the
+        // insert below keeps violating users_email_unique on every retry.
+        $user = User::withTrashed()->whereRaw('LOWER(email) = ?', [$email])->first();
 
         if ($user) {
             return $this->handleExistingGoogleUser($user, (string) $googleUser->getId());
@@ -85,10 +88,14 @@ class GoogleController extends Controller
             // Race guard: the callback was hit twice at once (double-click on
             // Google's consent screen). The other request already inserted
             // this email → fall through to the normal existing-user flow.
-            $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
+            $user = User::withTrashed()->whereRaw('LOWER(email) = ?', [$email])->first();
 
             if (! $user) {
-                throw $e;
+                report($e);
+
+                return redirect()->route('login')->withErrors([
+                    'email' => 'Google sign-in hit a temporary issue. Please try again.',
+                ])->onlyInput('email');
             }
 
             return $this->handleExistingGoogleUser($user, (string) $googleUser->getId());
@@ -110,6 +117,15 @@ class GoogleController extends Controller
             return redirect()->route('login')->withErrors([
                 'email' => 'This email belongs to a staff account. Please sign in with your email and password.',
             ])->onlyInput('email');
+        }
+
+        // Returning patient whose account was previously deleted: Google just
+        // proved ownership of the email, so restore rather than crash on the
+        // unique index that still covers the trashed row. Account status is
+        // left untouched (RHU approval / blocks still apply below).
+        if ($user->trashed()) {
+            $user->restore();
+            $user = $user->fresh() ?? $user;
         }
 
         if (empty($user->google_id)) {

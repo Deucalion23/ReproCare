@@ -86,6 +86,37 @@ class GoogleOAuthTest extends AutomationTestCase
         $this->assertSame(1, User::whereRaw('LOWER(email) = ?', ['mixedcase-patient@example.com'])->count());
     }
 
+    public function test_callback_restores_soft_deleted_patient(): void
+    {
+        $trashed = $this->patient(['email' => 'restored-patient@example.com', 'is_profile_complete' => false]);
+        $trashed->delete();
+        $this->assertSoftDeleted('users', ['id' => $trashed->id]);
+        $this->mockGoogleUser('google-restore-1', 'restored-patient@example.com', 'Restored Patient');
+
+        $response = $this->get(route('google.callback'));
+
+        $response->assertRedirect(route('profile.complete'));
+        $this->assertAuthenticated();
+        $restored = User::where('email', 'restored-patient@example.com')->first();
+        $this->assertNotNull($restored);
+        $this->assertNull($restored->deleted_at);
+        $this->assertSame('google-restore-1', $restored->google_id);
+    }
+
+    public function test_callback_rejects_soft_deleted_staff(): void
+    {
+        $staff = $this->patient(['role' => 'midwife', 'email' => 'deleted-staff@example.com']);
+        $staff->delete();
+        $this->mockGoogleUser('google-restore-2', 'deleted-staff@example.com', 'Deleted Staff');
+
+        $response = $this->get(route('google.callback'));
+
+        $response->assertRedirect(route('login'));
+        $response->assertSessionHasErrors('email');
+        $this->assertGuest();
+        $this->assertSoftDeleted('users', ['id' => $staff->id]);
+    }
+
     public function test_callback_rejects_staff_emails(): void
     {
         $this->patient(['role' => 'midwife', 'email' => 'midwife-staff@example.com']);
