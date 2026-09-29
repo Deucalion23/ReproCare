@@ -29,6 +29,29 @@
     .ck-archived-btn { border:none !important; border-radius:999px !important; padding:0.6rem 1.25rem !important; font-weight:800 !important; font-size:0.85rem !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; color:var(--color-text) !important; box-shadow:none !important; display:inline-flex; align-items:center; gap:0.5rem; }
     .ck-archived-btn:hover { background:var(--color-border) !important; color:var(--color-text) !important; transform:translateY(-1px); }
     .ck-archived-btn i { color:var(--color-secondary-text); }
+
+    /* ── Small screens: slim hero, 3-across compact stats, compact table ── */
+    @media (max-width: 767.98px) {
+        body .main-content .page-hero { border-radius:1rem !important; }
+        body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
+        body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        body .main-content .page-hero .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
+        body .main-content .ck-stats-row { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; }
+        body .main-content .ck-stats-row > [class*="col-"] { width:auto !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; margin-top:0 !important; }
+        body .main-content .ck-stat { padding:0.7rem 0.65rem !important; border-radius:0.9rem !important; gap:0.5rem; align-items:center; }
+        body .main-content .ck-stat-label { font-size:0.58rem !important; letter-spacing:0.05em; margin-bottom:0.25rem; }
+        body .main-content .ck-stat-number { font-size:1.3rem !important; }
+        body .main-content .ck-stat-icon { width:2rem; height:2rem; border-radius:0.65rem; font-size:0.9rem; }
+        body .main-content .card-header h5 { font-size:0.9rem !important; }
+        body .main-content .card-header { padding:0.8rem 1rem !important; }
+        body .main-content .card-body { padding:0.9rem !important; }
+        body .main-content .table { font-size:0.76rem !important; }
+        body .main-content .table th, body .main-content .table td { padding:0.5rem 0.55rem !important; white-space:nowrap; }
+        body .main-content .table .badge { font-size:0.66rem !important; }
+        body .main-content .empty-state-icon { font-size:2rem !important; }
+        body .main-content .empty-state h6 { font-size:0.9rem !important; }
+        body .main-content .empty-state p { font-size:0.76rem !important; }
+    }
 </style>
 @endpush
 
@@ -67,7 +90,7 @@
     $todayCount = (clone $allCheckups)->filter(fn ($c) => optional($c->scheduled_date)->isToday())->count();
     $upcomingCount = (clone $allCheckups)->filter(fn ($c) => optional($c->scheduled_date)->isFuture())->count();
 @endphp
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 ck-stats-row">
     <div class="col-md-4">
         <div class="stat-card stat-cyan ck-stat fade-in-card">
             <div>
