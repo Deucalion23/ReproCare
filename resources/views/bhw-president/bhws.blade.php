@@ -244,7 +244,7 @@
     </div>
 @endif
 
-<div class="row g-3 mb-4">
+<div class="row g-3 mb-4 pres-stat-row">
     <div class="col-md-6 col-xl-3">
         <div class="stat-card stat-cyan fade-in-card">
             <i class="bi bi-people-fill stat-icon"></i>
