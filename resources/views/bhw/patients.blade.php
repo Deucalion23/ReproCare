@@ -61,10 +61,10 @@
         .page-hero form.d-flex { grid-column:1 / -1; }
         .page-hero .d-flex.gap-2 .btn {
             min-width:0; white-space:nowrap; text-align:center;
-            align-items:center; justify-content:center; font-size:clamp(0.56rem, 2.8vw, 0.68rem);
-            padding:0.5rem 0.25rem;
+            align-items:center; justify-content:center; font-size:clamp(0.52rem, 2.6vw, 0.62rem);
+            padding:0.5rem 0.2rem;
         }
-        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; }
+        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; font-size:0.72em; }
         .search-bar { max-width:none; width:100%; }
         .search-bar input { font-size:0.78rem; }
         .filter-pills { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; width:100%; }
