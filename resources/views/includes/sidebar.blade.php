@@ -708,6 +708,13 @@
         <div class="sidebar-section-label">System</div>
         <ul class="nav flex-column">
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('bhw-president.notifications*') ? 'active' : '' }}"
+                   href="{{ route('bhw-president.notifications.index') }}">
+                    <i class="bi bi-bell-fill"></i>
+                    <span>Notifications</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('bhw-president.settings') ? 'active' : '' }}"
                    href="{{ route('bhw-president.settings') }}">
                     <i class="bi bi-gear-fill"></i>

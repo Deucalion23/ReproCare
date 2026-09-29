@@ -822,6 +822,16 @@ class BhwPresidentController extends Controller
     }
 
     // Settings — Barangay & team level
+    public function notifications()
+    {
+        $notifications = auth()->user()->notifications()
+            ->with('patientAlert')
+            ->orderByRaw('is_read ASC, COALESCE(last_reminded_at, created_at) DESC')
+            ->paginate(20);
+
+        return view('bhw-president.notifications', compact('notifications'));
+    }
+
     public function settings()
     {
         $me = auth()->user()->fresh();

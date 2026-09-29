@@ -166,7 +166,7 @@
                     'cho' => route('cho.dashboard'),
                     'rhu' => route('rhu.dashboard'),
                     'midwife' => route('midwife.notifications.index'),
-                    'bhw_president' => route('bhw-president.dashboard'),
+                    'bhw_president' => route('bhw-president.notifications.index'),
                     'bhw' => route('bhw.notifications.index'),
                     default => route('user.notifications'),
                 };

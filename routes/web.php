@@ -490,6 +490,9 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
     // Settings
     Route::get('/settings', [BhwPresidentController::class, 'settings'])->name('settings');
     Route::put('/settings', [BhwPresidentController::class, 'updateSettings'])->name('settings.update');
+
+    // Notifications
+    Route::get('/notifications', [BhwPresidentController::class, 'notifications'])->name('notifications.index');
     
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {

@@ -2,6 +2,29 @@
 
 @section('title', 'Pregnancy Review Queue - BHW President Portal | ReproCare')
 
+@push('styles')
+<style>
+    @media (max-width: 767.98px) {
+        .page-hero { padding:0.9rem 1rem !important; border-radius:14px !important; margin-bottom:0.9rem !important; }
+        .page-hero .page-hero-title { font-size:1.02rem !important; }
+        .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        .preg-queue-tabs { flex-wrap:wrap !important; gap:0.45rem !important; }
+        .preg-queue-tabs .btn { font-size:0.72rem !important; padding:0.45rem 0.8rem !important; }
+        .preg-queue-search { width:100% !important; }
+        .preg-queue-search .form-control { font-size:0.78rem !important; min-height:2.5rem; }
+        .card-header { padding:0.75rem 0.9rem !important; gap:0.6rem !important; }
+        .table { font-size:0.76rem !important; }
+        .table th, .table td { padding:0.5rem 0.6rem !important; }
+        .table .preg-patient-name { white-space:nowrap !important; font-size:0.78rem !important; }
+        .table .preg-patient-brgy { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:7rem; font-size:0.66rem !important; }
+        .table td.preg-nowrap, .table th.preg-nowrap { white-space:nowrap !important; }
+        .table .badge { font-size:0.62rem !important; white-space:nowrap !important; }
+        .table small { font-size:0.66rem !important; white-space:nowrap !important; }
+        .table .btn { font-size:0.7rem !important; padding:0.35rem 0.65rem !important; white-space:nowrap !important; }
+    }
+</style>
+@endpush
+
 @section('bhw-president-content')
 
 <div class="page-hero fade-in-card">
@@ -10,15 +33,12 @@
             <div class="page-hero-title">Pregnancy Review Queue</div>
             <p class="page-hero-subtitle">Review submissions from BHWs — {{ $pendingCount }} awaiting your decision</p>
         </div>
-        <a href="{{ route('bhw-president.dashboard') }}" class="btn btn-sm btn-light">
-            <i class="bi bi-arrow-left"></i> Back to Dashboard
-        </a>
     </div>
 </div>
 
 <div class="card fade-in-card">
     <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
-        <div class="d-flex gap-2">
+        <div class="d-flex gap-2 preg-queue-tabs">
             <a href="{{ route('bhw-president.pregnancies.index', ['filter' => 'pending']) }}"
                class="btn btn-sm {{ $filter === 'pending' ? 'btn-warning text-white' : 'btn-outline-secondary' }}">
                 Pending ({{ $pendingCount }})
