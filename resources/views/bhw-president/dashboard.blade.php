@@ -13,7 +13,31 @@
 
 {{-- ═══════════════════════════════
      PAGE HERO
-═══════════════════════════════ --}}
+════════════════════════ ══════ --}}
+@push('styles')
+<style>
+    /* Recent Checkups + Recent Health Records: shared look, compact rows. */
+    .pres-view-all {
+        display:inline-flex !important;
+        align-items:center !important;
+        justify-content:center !important;
+        text-align:center !important;
+        white-space:nowrap;
+    }
+    .pres-recent-card .card-header h5 { font-size:0.95rem; }
+    .pres-recent-table > :not(caption) > * > * { padding:0.6rem 0.65rem; font-size:0.82rem; }
+    .pres-recent-table .badge { font-size:0.68rem; }
+    .pres-recent-table small { font-size:0.7rem; }
+    @media (max-width: 767.98px) {
+        .pres-recent-card .card-header { padding:0.7rem 0.85rem !important; gap:0.5rem; }
+        .pres-recent-card .card-header h5 { font-size:0.85rem !important; }
+        .pres-recent-card .pres-view-all { font-size:0.7rem !important; padding:0.35rem 0.7rem !important; }
+        .pres-recent-table > :not(caption) > * > * { padding:0.45rem 0.5rem !important; font-size:0.74rem !important; }
+        .pres-recent-table .badge { font-size:0.62rem !important; }
+        .pres-mini-avatar { width:1.625rem !important; height:1.625rem !important; font-size:0.62rem !important; }
+    }
+</style>
+@endpush
 <div class="page-hero fade-in-card">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
@@ -180,15 +204,15 @@
 ═══════════════════════════════ --}}
 <div class="row g-4">
     <div class="col-lg-6">
-        <div class="card fade-in-card h-100">
+        <div class="card fade-in-card h-100 pres-recent-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Recent Checkups</h5>
-                <a href="{{ route('midwife.checkups.index') }}" class="btn btn-sm btn-outline-primary">View All</a>
+                <a href="{{ route('bhw-president.coverage') }}" class="btn btn-sm btn-outline-primary pres-view-all">View All</a>
             </div>
             <div class="card-body p-0">
                 @if($recentCheckups->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0 table-cards-mobile">
+                    <table class="table table-hover mb-0 table-cards-mobile pres-recent-table">
                         <thead>
                             <tr>
                                 <th>Patient</th>
@@ -201,7 +225,7 @@
                             <tr>
                                 <td class="no-card-label" data-label="Patient">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent-violet));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
+                                        <div class="pres-mini-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent-violet));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
                                             {{ strtoupper(substr(optional($checkup->woman)->name ?? 'U', 0, 1)) }}
                                         </div>
                                         <span style="font-weight:500;">{{ optional($checkup->woman)->name ?? 'Unknown' }}</span>
@@ -229,15 +253,15 @@
     </div>
 
     <div class="col-lg-6">
-        <div class="card fade-in-card h-100">
+        <div class="card fade-in-card h-100 pres-recent-card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h5 class="mb-0">Recent Health Records</h5>
-                <a href="{{ route('midwife.health-records.index') }}" class="btn btn-sm btn-outline-success">View All</a>
+                <a href="{{ route('bhw-president.health-records.index') }}" class="btn btn-sm btn-outline-primary pres-view-all">View All</a>
             </div>
             <div class="card-body p-0">
                 @if($recentHealthRecords->count() > 0)
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0 table-cards-mobile">
+                    <table class="table table-hover mb-0 table-cards-mobile pres-recent-table">
                         <thead>
                             <tr>
                                 <th>Patient</th>
@@ -250,7 +274,7 @@
                             <tr>
                                 <td class="no-card-label" data-label="Patient">
                                     <div class="d-flex align-items-center gap-2">
-                                        <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--success),var(--color-success));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
+                                        <div class="pres-mini-avatar" style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--success),var(--color-success));display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--color-on-solid);">
                                             {{ strtoupper(substr(optional($record->woman)->name ?? 'U', 0, 1)) }}
                                         </div>
                                         <span style="font-weight:500;">{{ optional($record->woman)->name ?? 'Unknown' }}</span>
