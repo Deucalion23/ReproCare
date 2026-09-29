@@ -4,6 +4,20 @@
 
 @section('title', 'Coverage Report - BHW President Portal | ReproCare')
 
+@push('styles')
+<style>
+    /* ── Phones: stacked filter, 2-col stats, compact list ── */
+    @media (max-width: 600px) {
+        .form-label { font-size:0.7rem; margin-bottom:0.25rem; }
+        .form-select { font-size:0.76rem; }
+        .progress { height:22px !important; }
+        .progress-bar { font-size:0.66rem; }
+        .main-content table.table-cards-mobile td { font-size:0.72rem !important; }
+        .main-content .badge { font-size:0.62rem !important; }
+    }
+</style>
+@endpush
+
 @section('bhw-president-content')
 
 <div class="page-hero fade-in-card">
@@ -53,7 +67,7 @@
     </div>
 </div>
 
-<div class="row g-4 mb-4">
+<div class="row g-4 mb-4 pres-stat-row">
     <div class="col-md-3">
         <div class="stat-card stat-purple fade-in-card">
             <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
