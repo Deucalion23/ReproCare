@@ -60,11 +60,12 @@
         .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.35rem; width:100%; }
         .page-hero form.d-flex { grid-column:1 / -1; }
         .page-hero .d-flex.gap-2 .btn {
-            min-width:0; white-space:nowrap; text-align:center;
-            align-items:center; justify-content:center; font-size:clamp(0.52rem, 2.6vw, 0.62rem);
-            padding:0.5rem 0.2rem;
+            min-width:0; max-width:100%; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+            text-align:center; align-items:center; justify-content:center;
+            font-size:clamp(0.5rem, 2.5vw, 0.62rem);
+            padding:0.5rem 0.3rem;
         }
-        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; font-size:0.72em; }
+        .page-hero .d-flex.gap-2 .btn i { flex-shrink:0; font-size:0.8em; }
         .search-bar { max-width:none; width:100%; }
         .search-bar input { font-size:0.78rem; }
         .filter-pills { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.45rem; width:100%; }
