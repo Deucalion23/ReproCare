@@ -23,6 +23,26 @@
     #bhw-preg-table .pg-nowrap {
         white-space:nowrap;
     }
+
+    /* ── Small screens: slim hero, compact filter + table ── */
+    @media (max-width: 767.98px) {
+        body .main-content .page-hero { border-radius:1rem !important; }
+        body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
+        body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        body .main-content .page-hero .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
+        body .main-content .card-body .form-label { font-size:0.7rem !important; margin-bottom:0.25rem !important; }
+        body .main-content .card-body .form-control,
+        body .main-content .card-body .form-select { font-size:0.8rem !important; min-height:2.5rem; }
+        body .main-content .card-body .btn { font-size:0.78rem !important; }
+        #bhw-preg-table > :not(caption) > * > * { padding:0.45rem 0.5rem; font-size:0.76rem; }
+        #bhw-preg-table .badge { font-size:0.66rem !important; }
+        #bhw-preg-table small { font-size:0.68rem !important; overflow-wrap:anywhere; }
+        #bhw-preg-table .tbl-actions .btn { width:2.125rem; height:2.125rem; border-radius:0.65rem; }
+        body .main-content .card-footer { font-size:0.76rem !important; }
+        body .main-content .empty-state-icon { font-size:2rem !important; }
+        body .main-content .empty-state h6 { font-size:0.9rem !important; }
+        body .main-content .empty-state p { font-size:0.76rem !important; }
+    }
 </style>
 @endpush
 
