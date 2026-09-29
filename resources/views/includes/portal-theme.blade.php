@@ -99,6 +99,15 @@
     .btn-hero-primary i, .btn-primary i,
     .main-content .btn-primary i { color:var(--color-on-solid) !important; }
 
+    /* Primary buttons render on the brand purple: keep text white, never dark. */
+    :root[data-theme][data-bs-theme] body .main-content :is(.btn-primary, .btn-hero-primary),
+    :root[data-theme][data-bs-theme] body .main-content :is(.btn-primary, .btn-hero-primary):is(:hover, :active, :focus-visible) {
+        color:#FFFFFF !important;
+    }
+    :root[data-theme][data-bs-theme] body .main-content :is(.btn-primary, .btn-hero-primary) :is(i, svg, span) {
+        color:#FFFFFF !important;
+    }
+
     /* Semantic buttons - appropriate colors, not all pink */
     .main-content .btn-view, .btn-view {
         background:var(--color-info-text) !important;
