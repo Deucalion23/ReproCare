@@ -524,7 +524,7 @@ class BhwPresidentController extends Controller
 
         // Checkup outcomes (for the outcomes chart).
         // Keys are matched case-insensitively: stored values vary ('scheduled' vs 'Scheduled').
-        $statusCounts = Checkup::selectRaw('LOWER(status) as status_key, COUNT(*) as total')
+        $statusCounts = Checkup::where(fn ($q) => $womanInArea($q))->selectRaw('LOWER(status) as status_key, COUNT(*) as total')
             ->groupBy('status_key')
             ->pluck('total', 'status_key')
             ->all();
@@ -538,10 +538,10 @@ class BhwPresidentController extends Controller
             ],
         ];
 
-        // BHW workload: records filed per BHW, top 8 (for the workload chart)
+        // BHW workload: records filed per BHW in this barangay, top 8 (for the workload chart)
         $workload = HealthRecord::selectRaw('recorded_by_id, COUNT(*) as total')
             ->whereNotNull('recorded_by_id')
-            ->whereHas('recordedBy', fn ($q) => $q->where('role', 'bhw'))
+            ->whereHas('recordedBy', fn ($q) => $q->where('role', 'bhw')->tap($area))
             ->groupBy('recorded_by_id')
             ->orderByDesc('total')
             ->limit(8)
@@ -569,7 +569,13 @@ class BhwPresidentController extends Controller
         $month = request('month', Carbon::now()->month);
         $year = request('year', Carbon::now()->year);
 
+        // Coverage is limited to women (registered or walk-in) living in
+        // the president's designated barangay.
+        $barangay = $this->designatedBarangay();
+        $area = fn ($query, $column = 'barangay') => \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($query, $barangay, $column);
+
         $query = User::where('role', 'user')->with(['purok', 'checkups', 'healthRecords', 'pregnancies']);
+        $area($query);
 
         if ($purokId) {
             $query->where('purok_id', $purokId);
@@ -582,6 +588,7 @@ class BhwPresidentController extends Controller
 
         $walkInQuery = \App\Models\WalkInPatient::with(['purok', 'checkupReferrals', 'pregnancies'])
             ->whereNull('converted_to_user_id');
+        $area($walkInQuery, 'barangay');
 
         if ($purokId) {
             $walkInQuery->where('purok_id', $purokId);
@@ -608,9 +615,11 @@ class BhwPresidentController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        // Get unique puroks for filter
-        $purokIds = User::where('role', 'user')->select('purok_id')->distinct()->pluck('purok_id')
-            ->merge(\App\Models\WalkInPatient::select('purok_id')->distinct()->pluck('purok_id'))
+        // Get unique puroks for filter (area women only)
+        $walkInPurokQuery = \App\Models\WalkInPatient::query();
+        $area($walkInPurokQuery);
+        $purokIds = tap(User::where('role', 'user'), $area)->select('purok_id')->distinct()->pluck('purok_id')
+            ->merge($walkInPurokQuery->select('purok_id')->distinct()->pluck('purok_id'))
             ->filter()
             ->unique();
         $puroks = \App\Models\Purok::whereIn('id', $purokIds)
@@ -660,8 +669,18 @@ class BhwPresidentController extends Controller
     // High-Risk Report
     public function highRisk()
     {
+        // Only high-risk pregnancies of women (or walk-in patients) in
+        // the president's designated barangay.
+        $barangay = $this->designatedBarangay();
         $highRiskPregnancies = Pregnancy::active()
             ->highRisk()
+            ->where(function ($query) use ($barangay) {
+                $query->whereHas('woman', function ($w) use ($barangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $barangay);
+                })->orWhereHas('walkInPatient', function ($w) use ($barangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $barangay);
+                });
+            })
             ->with(['woman', 'checkups' => function($q) {
                 $q->latest()->limit(5);
             }])
@@ -734,8 +753,21 @@ class BhwPresidentController extends Controller
         $search = $request->input('search');
         $filter = $request->input('filter', 'pending');
 
+        // Review queue is limited to the president's designated barangay.
+        $barangay = $this->designatedBarangay();
+        $inArea = function ($query) use ($barangay) {
+            $query->where(function ($q) use ($barangay) {
+                $q->whereHas('woman', function ($w) use ($barangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $barangay);
+                })->orWhereHas('walkInPatient', function ($w) use ($barangay) {
+                    \App\Services\BhwPresidentAssignmentService::applyJurisdictionFilter($w, $barangay);
+                });
+            });
+        };
+
         $query = Pregnancy::active()
             ->with(['woman', 'walkInPatient', 'healthRecords']);
+        $inArea($query);
 
         if ($filter === 'pending') {
             $query->where('workflow_status', 'submitted_to_bhw_president');

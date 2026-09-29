@@ -14,10 +14,13 @@
         .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
         .card-body { padding:0.7rem 0.8rem !important; }
         /* Search bar + button stay side by side on one row. */
+        .pw-search-card { margin-bottom:0.7rem !important; }
+        .pw-search-card .card-body { padding:0.6rem 0.7rem !important; }
         .pw-search-form { display:flex !important; gap:0.4rem !important; align-items:flex-end !important; flex-wrap:nowrap !important; }
         .pw-search-form .pw-search-field { flex:1 1 auto !important; min-width:0 !important; width:auto !important; }
         .pw-search-form .pw-search-btns { flex:0 0 auto !important; width:auto !important; }
-        .pw-search-form .pw-search-btns .btn { padding-left:0.6rem !important; padding-right:0.6rem !important; }
+        .pw-search-form .pw-search-btns .btn { padding-left:0.7rem !important; padding-right:0.7rem !important; }
+        .pw-search-form .pw-search-label { display:none !important; }
         .card-body .form-label { font-size:0.66rem !important; margin-bottom:0.2rem !important; }
         .card-body .form-control { font-size:0.74rem !important; min-height:2.375rem; }
         .card-body .btn { font-size:0.7rem !important; }
@@ -50,7 +53,7 @@
     </div>
 </div>
 
-<div class="card fade-in-card mb-4">
+<div class="card fade-in-card mb-4 pw-search-card">
     <div class="card-body">
         <form method="GET" action="{{ route('bhw-president.women.index') }}" class="row g-3 align-items-end pw-search-form">
             <div class="col-md-9 pw-search-field">
@@ -58,7 +61,7 @@
                 <input type="text" name="search" class="form-control" placeholder="Search name, email, or barangay..." value="{{ $search }}">
             </div>
             <div class="col-md-3 d-flex gap-2 pw-search-btns">
-                <button type="submit" class="btn btn-primary flex-fill"><i class="bi bi-search me-1"></i> Search</button>
+                <button type="submit" class="btn btn-primary flex-fill" aria-label="Search"><i class="bi bi-search"></i><span class="pw-search-label"> Search</span></button>
                 @if($search !== '')
                     <a href="{{ route('bhw-president.women.index') }}" class="btn btn-outline-secondary">Clear</a>
                 @endif
