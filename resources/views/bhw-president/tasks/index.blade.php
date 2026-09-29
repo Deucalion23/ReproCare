@@ -51,7 +51,7 @@
         <div class="card-body p-0">
         @if($tasks->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover mb-0">
+                <table class="table table-hover mb-0 table-cards-mobile">
                     <thead>
                         <tr>
                             <th>Title</th>
@@ -65,11 +65,11 @@
                     <tbody>
                         @foreach($tasks as $task)
                         <tr>
-                            <td>{{ $task->title }}</td>
-                            <td>{{ $task->assignedTo->name }}</td>
-                            <td>{{ ucfirst(str_replace('_', ' ', $task->task_type)) }}</td>
-                            <td>{{ $task->due_date ? $task->due_date->format('M d, Y') : '-' }}</td>
-                            <td>
+                            <td class="no-card-label" data-label="Title">{{ $task->title }}</td>
+                            <td data-label="Assigned To">{{ $task->assignedTo->name }}</td>
+                            <td data-label="Type">{{ ucfirst(str_replace('_', ' ', $task->task_type)) }}</td>
+                            <td data-label="Due Date" style="white-space:nowrap;">{{ $task->due_date ? $task->due_date->format('M d, Y') : '-' }}</td>
+                            <td data-label="Status">
                                 @switch($task->status)
                                     @case('pending')
                                         <span class="badge bg-primary">Pending</span>
@@ -85,7 +85,7 @@
                                         @break
                                 @endswitch
                             </td>
-                            <td class="text-center">
+                            <td class="no-card-label text-center" data-label="Actions">
                                 <div class="d-inline-flex align-items-center gap-1 tbl-actions">
                                     <a href="{{ route('bhw-president.tasks.show', $task->id) }}" class="btn btn-sm btn-outline-primary" title="View task" aria-label="View task">
                                         <i class="bi bi-eye"></i>
