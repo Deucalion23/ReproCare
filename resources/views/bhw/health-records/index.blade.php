@@ -33,6 +33,41 @@
     #addRecordModal .form-check-input { width:1rem; height:1rem; margin-top:0.25rem; }
     #addRecordModal .form-check-label { font-size:0.9rem; }
     #addRecordModal .form-check { min-height:1.5rem; margin-bottom:0; }
+
+    /* ── Small screens: slim hero, 3-across compact stats, compact table ── */
+    @media (max-width: 767.98px) {
+        body .main-content .page-hero { border-radius:1rem !important; }
+        body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
+        body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+        body .main-content .page-hero .btn { font-size:0.76rem !important; padding:0.5rem 0.9rem !important; }
+        body .main-content .hr-stats-row { display:grid !important; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; }
+        body .main-content .hr-stats-row > [class*="col-"] { width:auto !important; max-width:none !important; padding-left:0 !important; padding-right:0 !important; margin-top:0 !important; }
+        body .main-content .hr-stats-row .stat-card { padding:0.7rem 0.5rem !important; border-radius:0.9rem !important; }
+        body .main-content .hr-stats-row .stat-icon { font-size:1.1rem !important; }
+        body .main-content .hr-stats-row .stat-label { font-size:0.58rem !important; }
+        body .main-content .hr-stats-row .stat-number { font-size:1.3rem !important; }
+        body .main-content .card-body .form-label { font-size:0.7rem !important; margin-bottom:0.25rem !important; }
+        body .main-content .card-body .form-control { font-size:0.8rem !important; min-height:2.5rem; }
+        body .main-content .card-body .btn { font-size:0.78rem !important; }
+        body .main-content .card-header { padding:0.8rem 1rem !important; }
+        body .main-content .card-header h5 { font-size:0.9rem !important; }
+        #bhw-hr-table > :not(caption) > * > * { padding:0.45rem 0.5rem; font-size:0.76rem; }
+        #bhw-hr-table .hr-date small { font-size:0.66rem; }
+        #bhw-hr-table .badge { font-size:0.66rem !important; }
+        #bhw-hr-table small { font-size:0.68rem !important; overflow-wrap:anywhere; }
+        #bhw-hr-table .tbl-actions .btn { width:2.125rem; height:2.125rem; border-radius:0.65rem; }
+        body .main-content .empty-state-icon { font-size:2rem !important; }
+        body .main-content .empty-state h6 { font-size:0.9rem !important; }
+        body .main-content .empty-state p { font-size:0.76rem !important; }
+        /* Modals: vitals flow in 2 columns so nothing overflows at any zoom. */
+        #addRecordModal .modal-body .row.g-3 { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); }
+        #addRecordModal .modal-body .row.g-3 > [class*="col-"] { width:auto !important; max-width:none !important; }
+        #addRecordModal .form-label { font-size:0.74rem !important; }
+        #addRecordModal .form-control, #addRecordModal .form-select { font-size:0.8rem !important; }
+        div[id^="recordModal"] .modal-body .row.g-3 { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); }
+        div[id^="recordModal"] .modal-body .row.g-3 > [class*="col-"] { width:auto !important; max-width:none !important; }
+        div[id^="recordModal"] .modal-body h4 { font-size:1rem !important; }
+    }
 </style>
 @endpush
 
@@ -60,7 +95,7 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
+    <div class="row g-3 mb-4 hr-stats-row">
         <div class="col-md-4">
             <div class="stat-card stat-cyan fade-in-card">
                 <i class="bi bi-clipboard-data stat-icon"></i>
