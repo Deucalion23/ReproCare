@@ -80,7 +80,8 @@ abstract class AutomationTestCase extends TestCase
             $t->timestamps(); $t->softDeletes();
         });
         Schema::create('pregnancies', function (Blueprint $t) {
-            $t->id(); $t->unsignedBigInteger('user_id'); $t->date('edd')->nullable();
+            $t->id(); $t->unsignedBigInteger('user_id'); $t->date('lmp')->nullable(); $t->date('edd')->nullable();
+            $t->integer('aog')->nullable();
             $t->timestamp('ended_at')->nullable(); $t->timestamps(); $t->softDeletes();
         });
         Schema::create('preventive_interventions', function (Blueprint $t) {

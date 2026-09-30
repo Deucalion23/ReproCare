@@ -173,6 +173,8 @@ class CheckupController extends Controller
             $request->merge(['status' => 'Rescheduled']);
         }
 
+        $previousStatus = $checkup->status;
+
         $checkup->update([
             'user_id' => $request->patient_type === 'registered' ? $request->user_id : null,
             'walk_in_patient_id' => $request->patient_type === 'walk_in' ? $request->walk_in_patient_id : null,
@@ -191,6 +193,14 @@ class CheckupController extends Controller
             );
         }
 
+        // On a fresh transition to Completed, keep one upcoming RHU visit
+        // scheduled for pregnant women (no-op otherwise).
+        $next = null;
+        if ($request->status === 'Completed' && $previousStatus !== 'Completed') {
+            $next = app(\App\Services\PrenatalVisitScheduler::class)
+                ->scheduleNextVisit($checkup->fresh(), Auth::user());
+        }
+
         // Create notification if rescheduled
         if ($request->status === 'Rescheduled' && $dateChanged && $checkup->user_id) {
             Notification::createNotification($checkup->user_id,
@@ -201,6 +211,9 @@ class CheckupController extends Controller
         $successMsg = 'Checkup updated successfully';
         if ($dateChanged && $request->status === 'Rescheduled') {
             $successMsg .= ' (Rescheduled)';
+        }
+        if ($next) {
+            $successMsg .= " — next visit auto-scheduled for {$next->scheduled_date->format('F j, Y')}";
         }
 
         return redirect()->route('midwife.checkups.index')
@@ -230,8 +243,17 @@ class CheckupController extends Controller
             );
         }
 
+        // Keep exactly one upcoming RHU visit scheduled for pregnant women.
+        $next = app(\App\Services\PrenatalVisitScheduler::class)
+            ->scheduleNextVisit($checkup->fresh(), Auth::user());
+
+        $message = 'Checkup marked as completed';
+        if ($next) {
+            $message .= " — next visit auto-scheduled for {$next->scheduled_date->format('F j, Y')}";
+        }
+
         return redirect()->back()
-            ->with('success', 'Checkup marked as completed');
+            ->with('success', $message);
     }
 
     // Mark as Missed

@@ -52,7 +52,7 @@ class PatientProfileDisplayTest extends AutomationTestCase
             $table->softDeletes();
         });
         Schema::table('pregnancies', function (Blueprint $table) {
-            $table->date('lmp')->nullable();
+            if (!Schema::hasColumn('pregnancies', 'lmp')) $table->date('lmp')->nullable();
             $table->boolean('is_high_risk')->default(false);
         });
         Schema::table('health_records', function (Blueprint $table) {

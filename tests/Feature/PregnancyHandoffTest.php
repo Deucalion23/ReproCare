@@ -38,10 +38,10 @@ class PregnancyHandoffTest extends AutomationTestCase
             $t->softDeletes();
         });
         Schema::table('pregnancies', function (Blueprint $t) {
-            $t->unsignedBigInteger('walk_in_patient_id')->nullable();
-            $t->date('lmp')->nullable();
-            $t->boolean('is_high_risk')->default(false);
-            $t->integer('aog')->nullable();
+            if (!Schema::hasColumn('pregnancies', 'walk_in_patient_id')) $t->unsignedBigInteger('walk_in_patient_id')->nullable();
+            if (!Schema::hasColumn('pregnancies', 'lmp')) $t->date('lmp')->nullable();
+            if (!Schema::hasColumn('pregnancies', 'is_high_risk')) $t->boolean('is_high_risk')->default(false);
+            if (!Schema::hasColumn('pregnancies', 'aog')) $t->integer('aog')->nullable();
         });
         // pregnancies.user_id must accept walk-in rows (null user).
         DB::statement('CREATE TABLE __pregnancies_new (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NULL, walk_in_patient_id INTEGER NULL, edd DATE NULL, ended_at TIMESTAMP NULL, lmp DATE NULL, is_high_risk INTEGER DEFAULT 0, aog INTEGER NULL, gravida INTEGER NULL, para INTEGER NULL, created_at TIMESTAMP NULL, updated_at TIMESTAMP NULL, deleted_at TIMESTAMP NULL)');
