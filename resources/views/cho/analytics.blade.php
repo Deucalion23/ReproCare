@@ -207,6 +207,56 @@
         </section>
     </div>
 
+    <section class="an-card an-panel" aria-labelledby="analytics-rhu-areas-title">
+        <div class="an-section-heading">
+            <div>
+                <h2 id="analytics-rhu-areas-title">Pregnant women by barangay</h2>
+                <p class="an-subtitle mb-0">Current open pregnancies per catchment barangay — busiest areas first.</p>
+            </div>
+        </div>
+        @if(count($rhuAreaChart) > 1)
+            <div class="an-topics an-no-print" role="group" aria-label="Choose RHU">
+                @foreach(array_keys($rhuAreaChart) as $rhu)
+                    <button type="button" class="an-topic" aria-pressed="{{ $rhu === $rhuAreaDefault ? 'true' : 'false' }}" data-rhu-areas="{{ $rhu }}">{{ $rhu }}</button>
+                @endforeach
+            </div>
+        @endif
+        @foreach($rhuAreaChart as $rhu => $rows)
+            @php
+                $rhuOpenTotal = array_sum(array_column($rows, 'open'));
+                $rhuOpenMax = max(array_merge([1], array_column($rows, 'open')));
+            @endphp
+            <div data-rhu-areas-panel="{{ $rhu }}" @if($rhu !== $rhuAreaDefault) hidden @endif>
+                <p class="an-subtitle"><strong>{{ $rhu }}</strong> · {{ $rhuOpenTotal }} open now</p>
+                @if($rhuOpenTotal > 0)
+                    <div class="an-risk-list">
+                        @foreach($rows as $row)
+                            <div class="an-risk-row">
+                                <span class="an-risk-label">{{ $row['label'] }}</span>
+                                <div class="an-meter" aria-hidden="true"><span style="width:{{ round($row['open'] / $rhuOpenMax * 100, 2) }}%"></span></div>
+                                <strong>{{ $row['open'] }}</strong>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="an-subtitle">No open pregnancies recorded in {{ $rhu }}.</p>
+                @endif
+            </div>
+        @endforeach
+    </section>
+    <script>
+        document.querySelectorAll('[data-rhu-areas]').forEach(function (pill) {
+            pill.addEventListener('click', function () {
+                document.querySelectorAll('[data-rhu-areas]').forEach(function (other) {
+                    other.setAttribute('aria-pressed', String(other === pill));
+                });
+                document.querySelectorAll('[data-rhu-areas-panel]').forEach(function (panel) {
+                    panel.hidden = panel.getAttribute('data-rhu-areas-panel') !== pill.getAttribute('data-rhu-areas');
+                });
+            });
+        });
+    </script>
+
     <details class="an-card an-panel an-data-notes an-barangay-comparison mb-4">
         <summary>
             <span><span class="an-summary-title">Barangay comparison</span><small>Compare registrations, open pregnancies, risk flags, deaths, and complications by area.</small></span>

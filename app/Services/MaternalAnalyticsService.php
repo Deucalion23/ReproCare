@@ -138,6 +138,56 @@ class MaternalAnalyticsService
         ];
     }
 
+    /**
+     * Open pregnancies per official catchment barangay, for every RHU.
+     * Powers the "Pregnant women by barangay" chart with its RHU switcher.
+     * Pass an RHU to build only that catchment (RHU-role scoping).
+     */
+    public function pregnantWomenByRhuArea(?string $onlyRhu = null): array
+    {
+        $scope = app(AnalyticsScope::class);
+        $relations = ['woman:id,first_name,last_name,barangay', 'walkInPatient:id,first_name,last_name,barangay'];
+        $open = Pregnancy::with($relations)->whereNull('ended_at')->whereNull('delivery_date')
+            ->where(fn ($q) => $q->whereNull('outcome')->orWhere('outcome', ''))
+            ->where('created_at', '<=', now())->get();
+        // Keep the queue's definition of "open": known deceased patients are out.
+        $knownDeaths = MaternalDeath::whereDate('death_date', '<=', today())
+            ->get(['pregnancy_id', 'user_id', 'walk_in_patient_id']);
+        $deceasedPregnancies = array_fill_keys($knownDeaths->pluck('pregnancy_id')->filter()->all(), true);
+        $deceasedUsers = array_fill_keys($knownDeaths->pluck('user_id')->filter()->all(), true);
+        $deceasedWalkIns = array_fill_keys($knownDeaths->pluck('walk_in_patient_id')->filter()->all(), true);
+        $open = $open->reject(fn ($p) => isset($deceasedPregnancies[$p->id])
+            || isset($deceasedUsers[$p->user_id]) || isset($deceasedWalkIns[$p->walk_in_patient_id]));
+
+        $result = [];
+        foreach (AnalyticsScope::RHUS as $rhu) {
+            if ($onlyRhu && $rhu !== $onlyRhu) {
+                continue;
+            }
+            // Official catchment labels (first spelling wins when aliases collide).
+            $labels = [];
+            Barangay::active()->forRhu($rhu)->pluck('name')->each(function ($name) use ($scope, &$labels) {
+                $key = $scope->key($name);
+                $labels[$key] ??= $name;
+            });
+            $counts = [];
+            foreach ($open as $pregnancy) {
+                $key = $scope->key($this->pregnancyArea($pregnancy));
+                if (array_key_exists($key, $labels)) {
+                    $counts[$key] = ($counts[$key] ?? 0) + 1;
+                }
+            }
+            $rows = [];
+            foreach ($labels as $key => $label) {
+                $rows[] = ['key' => $key, 'label' => $label, 'open' => $counts[$key] ?? 0];
+            }
+            usort($rows, fn ($a, $b) => $b['open'] <=> $a['open'] ?: strcmp($a['label'], $b['label']));
+            $result[$rhu] = $rows;
+        }
+
+        return $result;
+    }
+
     public function areaOptions(?string $rhu = null): array
     {
         $scope = app(AnalyticsScope::class);

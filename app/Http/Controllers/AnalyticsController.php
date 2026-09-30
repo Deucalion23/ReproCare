@@ -22,12 +22,15 @@ class AnalyticsController extends Controller
         $portal = $request->user()->role;
         $rhuOptions = AnalyticsScope::RHUS;
         $mapData = app(AnalyticsMap::class)->build($report);
+        // One chart dataset per RHU for the barangay switcher (RHU users: own RHU only).
+        $rhuAreaChart = $analytics->pregnantWomenByRhuArea($filters['rhu'] ?? null);
+        $rhuAreaDefault = $filters['rhu'] ?? 'RHU 1';
         $queue = new LengthAwarePaginator(
             $report['queue']->forPage(max(1, $request->integer('page', 1)), 15)->values(),
             $report['queue']->count(), 15, max(1, $request->integer('page', 1)),
             ['path' => $request->url(), 'query' => $request->query()]
         );
-        return view('cho.analytics', compact('report', 'suggestions', 'aiStatus', 'areaOptions', 'portal', 'rhuOptions', 'mapData', 'queue'));
+        return view('cho.analytics', compact('report', 'suggestions', 'aiStatus', 'areaOptions', 'portal', 'rhuOptions', 'mapData', 'queue', 'rhuAreaChart', 'rhuAreaDefault'));
     }
 
     public function chat(AnalyticsRequest $request)
