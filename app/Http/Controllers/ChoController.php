@@ -502,6 +502,32 @@ class ChoController extends Controller
         ]);
     }
 
+    /**
+     * Archive a registered woman's account from her record file (reason
+     * required, sessions revoked). Retained for audit and restorable from
+     * the Archived Records hub — never a hard delete.
+     */
+    public function archivePatient(Request $request, $id)
+    {
+        $request->validate(['reason' => 'nullable|string|max:1000']);
+
+        $woman = User::where('role', 'user')->findOrFail($id);
+
+        $reason = trim((string) $request->input('reason', ''));
+        if ($reason === '') {
+            $reason = 'Archived by CHO via Registered Women';
+        }
+
+        try {
+            app(\App\Services\ArchiveService::class)->archiveUser($woman, $reason, auth()->user());
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withErrors(['archive' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('cho.patients.index')
+            ->with('success', "Patient record for {$woman->name} archived. Sessions revoked; restorable from Archived Records.");
+    }
+
     public function supplyRequests(Request $request)
     {
         $requests = SupplyRequest::with(['requestedBy', 'approvedBy'])

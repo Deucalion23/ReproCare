@@ -49,7 +49,8 @@ class Rhu1PregnantWomenSeeder extends Seeder
                 ['description' => 'RHU 1 demonstration address.']
             );
 
-            $user = User::updateOrCreate(
+            // seedAccount: never overwrite patient edits on reseed.
+            $user = User::seedAccount(
                 ['email' => $email],
                 [
                     'first_name' => $first,

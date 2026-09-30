@@ -18,7 +18,8 @@ class MariaClaraPregnancySeeder extends Seeder
             ['description' => 'RHU 1 local demonstration address.']
         );
 
-        $woman = User::updateOrCreate(
+        // seedAccount: never overwrite patient edits on reseed.
+        $woman = User::seedAccount(
             ['email' => 'maria.clara@example.test'],
             [
                 'first_name' => 'Maria',

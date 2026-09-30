@@ -48,7 +48,8 @@ class Rhu1BhwSeeder extends Seeder
                 ['description' => 'BHW catchment purok.']
             );
 
-            User::updateOrCreate(
+            // seedAccount: never overwrite staff edits on reseed.
+            User::seedAccount(
                 ['email' => $email],
                 [
                     'first_name' => $first,

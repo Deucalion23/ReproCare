@@ -118,7 +118,8 @@ class RestoreAccountsSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            User::updateOrCreate(
+            // seedAccount: never overwrite staff/patient edits on reseed.
+            User::seedAccount(
                 ['email' => $userData['email']],
                 $userData
             );

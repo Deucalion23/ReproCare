@@ -23,7 +23,17 @@
             <div class="page-hero-title">{{ $woman->first_name }} {{ $woman->last_name }}</div>
             <p class="page-hero-subtitle" style="font-weight:600;">Patient record file · ID #{{ $woman->id }} · read-only oversight.</p>
         </div>
-        <a href="{{ route('cho.patients.index') }}" class="btn btn-outline-primary btn-sm">Back to directory</a>
+        <div class="d-flex gap-2 flex-wrap">
+            @if(($woman->status ?? '') !== 'archived')
+                <form method="POST" action="{{ route('cho.patients.archive', $woman->id) }}" onsubmit="return choPromptArchiveReason(this);">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                        <i class="bi bi-archive me-1"></i> Archive
+                    </button>
+                </form>
+            @endif
+            <a href="{{ route('cho.patients.index') }}" class="btn btn-outline-primary btn-sm">Back to directory</a>
+        </div>
     </div>
 </div>
 
@@ -117,3 +127,18 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // Archive guardrail: require a reason so the audit trail records who / when / why.
+    function choPromptArchiveReason(form) {
+        const reason = prompt('Reason for archiving this record? (e.g. duplicate, test data, moved away)');
+        if (reason === null) return false;
+        if (reason.trim() === '') { alert('A reason for archiving is required.'); return false; }
+        const input = document.createElement('input');
+        input.type = 'hidden'; input.name = 'reason'; input.value = reason.trim();
+        form.appendChild(input);
+        return confirm('Archive this patient record? Sessions will be revoked immediately. It stays restorable from Archived Records.');
+    }
+</script>
+@endpush

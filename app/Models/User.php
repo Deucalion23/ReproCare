@@ -478,6 +478,34 @@ class User extends Authenticatable implements MustVerifyEmail
             ->first();
     }
 
+    /**
+     * Seed a demo/staff account WITHOUT clobbering real edits.
+     *
+     * Seeders run on every production boot, so plain updateOrCreate would
+     * reset address, phone number, photos and names that staff or patients
+     * changed back to seed values. seedAccount creates a missing account,
+     * but on existing rows it only backfills columns that are still empty.
+     * Credentials, role, status and any filled profile field are left alone.
+     */
+    public static function seedAccount(array $unique, array $values): static
+    {
+        $account = static::withTrashed()->where($unique)->first();
+        if (! $account) {
+            return static::create($unique + $values);
+        }
+
+        $backfill = collect($values)
+            ->except(array_merge(array_keys($unique), ['password', 'remember_token']))
+            ->filter(fn ($value, $key) => $value !== null
+                && ($account->getAttribute($key) === null || $account->getAttribute($key) === ''));
+
+        if ($backfill->isNotEmpty()) {
+            $account->fill($backfill->all())->save();
+        }
+
+        return $account->refresh();
+    }
+
     // Profile Image Handling
     //
     // profile_image_data holds a small resized data-URL copy of the avatar

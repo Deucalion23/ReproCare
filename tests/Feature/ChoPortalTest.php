@@ -114,6 +114,27 @@ class ChoPortalTest extends AutomationTestCase
         $this->assertSame('archived', $fresh->status);
     }
 
+    public function test_cho_can_archive_patient_from_record_file(): void
+    {
+        $cho = $this->patient(['role' => 'cho']);
+        $woman = $this->patient(['role' => 'user']);
+
+        $response = $this->actingAs($cho)->get(route('cho.patients.show', $woman->id));
+
+        $response->assertOk();
+        $response->assertSee('Archive', false);
+
+        $response = $this->actingAs($cho)->post(route('cho.patients.archive', $woman->id), [
+            'reason' => 'Test data cleanup',
+        ]);
+
+        $response->assertRedirect(route('cho.patients.index'));
+        $response->assertSessionHas('success');
+        $fresh = \App\Models\User::withTrashed()->find($woman->id);
+        $this->assertNotNull($fresh->deleted_at);
+        $this->assertSame('archived', $fresh->status);
+    }
+
     public function test_patients_cannot_open_cho_portal_pages(): void
     {
         $patient = $this->patient();

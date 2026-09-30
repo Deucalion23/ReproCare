@@ -707,10 +707,12 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::post('/execute', [StaffTransitionController::class, 'execute'])->name('execute');
     });
 
-    // Registered Women: city-wide patient directory with records (read-only).
+    // Registered Women: city-wide patient directory with records (read-only)
+    // plus archive (restorable from the Archived Records hub).
     Route::prefix('patients')->name('patients.')->group(function () {
         Route::get('/', [ChoController::class, 'patients'])->name('index');
         Route::get('/{id}', [ChoController::class, 'patientDetails'])->name('show');
+        Route::post('/{id}/archive', [ChoController::class, 'archivePatient'])->name('archive');
     });
 
     // Learning Materials Management (upload / edit / archive — CHO only here)

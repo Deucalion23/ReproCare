@@ -19,7 +19,8 @@ class HighRiskPregnancySeeder extends Seeder
             ['description' => 'RHU 1 local demonstration address.']
         );
 
-        $woman = User::updateOrCreate(
+        // seedAccount: never overwrite patient edits on reseed.
+        $woman = User::seedAccount(
             ['email' => 'elena.santos.highrisk@example.test'],
             [
                 'first_name' => 'Elena',
