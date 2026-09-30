@@ -699,6 +699,19 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/bhws', [ChoController::class, 'bhws'])->name('bhws');
     });
 
+    // Staff Transitions: replace / transfer with audit + reassignment
+    // (same console as RHU; archiving of outgoing accounts included).
+    Route::prefix('staff-transitions')->name('staff-transitions.')->group(function () {
+        Route::get('/', [StaffTransitionController::class, 'index'])->name('index');
+        Route::post('/execute', [StaffTransitionController::class, 'execute'])->name('execute');
+    });
+
+    // Registered Women: city-wide patient directory with records (read-only).
+    Route::prefix('patients')->name('patients.')->group(function () {
+        Route::get('/', [ChoController::class, 'patients'])->name('index');
+        Route::get('/{id}', [ChoController::class, 'patientDetails'])->name('show');
+    });
+
     // Learning Materials Management (upload / edit / archive — CHO only here)
     Route::prefix('learning')->name('learning.')->group(function () {
         Route::get('/', [LearningController::class, 'adminIndex'])->name('index');

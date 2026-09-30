@@ -1,8 +1,8 @@
-@extends('rhu.layout')
+@extends($transitionLayout ?? 'rhu.layout')
 
-@section('title', 'Staff Transitions - RHU | ReproCare')
+@section('title', $transitionTitle ?? 'Staff Transitions - RHU | ReproCare')
 
-@section('rhu-content')
+@section($transitionSection ?? 'rhu-content')
 
 @php
     $typeLabels = ['midwife_replace' => 'Replace Midwife', 'president_replace' => 'Replace President', 'bhw_transfer' => 'Transfer BHW Roster'];
@@ -17,7 +17,7 @@
     </div>
     <div class="d-flex flex-wrap gap-2 mt-3" style="position:relative;z-index:1;">
         @foreach($typeLabels as $key => $label)
-            <a href="{{ route('rhu.staff-transitions.index', ['type' => $key]) }}"
+            <a href="{{ route($transitionIndexRoute ?? 'rhu.staff-transitions.index', ['type' => $key]) }}"
                class="btn btn-sm {{ $type === $key ? 'btn-filter' : 'btn-outline-secondary' }}" style="border-radius:10px;">{{ $label }}</a>
         @endforeach
     </div>
@@ -41,7 +41,7 @@
         <div class="card fade-in-card mb-4">
             <div class="card-header"><h5 class="mb-0">{{ $typeLabels[$type] }}</h5></div>
             <div class="card-body">
-                <form method="GET" action="{{ route('rhu.staff-transitions.index') }}" class="row g-2 align-items-end mb-3">
+                <form method="GET" action="{{ route($transitionIndexRoute ?? 'rhu.staff-transitions.index') }}" class="row g-2 align-items-end mb-3">
                     <input type="hidden" name="type" value="{{ $type }}">
                     <div class="col-md-8">
                         <label class="form-label">Outgoing Account</label>
@@ -65,7 +65,7 @@
                         @endforeach
                     </div>
 
-                    <form method="POST" action="{{ route('rhu.staff-transitions.execute') }}">
+                    <form method="POST" action="{{ route($transitionExecuteRoute ?? 'rhu.staff-transitions.execute') }}">
                         @csrf
                         <input type="hidden" name="type" value="{{ $type }}">
                         <input type="hidden" name="outgoing_id" value="{{ $outgoing->id }}">
