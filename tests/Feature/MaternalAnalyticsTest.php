@@ -376,7 +376,7 @@ class MaternalAnalyticsTest extends AutomationTestCase
         $this->postJson(route('cho.analytics.chat'), [
             'question' => 'Summarize maternal deaths.', 'from' => '2026-07-01', 'to' => '2026-09-15', 'barangay' => 'Elsewhere',
         ])->assertOk()->assertJsonPath('source', 'rules')->assertJsonFragment([
-            'notice' => 'Free local rules: answers use the selected report.',
+            'notice' => 'Answers use the selected report.',
         ])->assertSee('Elsewhere')->assertSee('0 maternal death');
         Http::assertNothingSent();
     }
@@ -411,7 +411,7 @@ class MaternalAnalyticsTest extends AutomationTestCase
         Http::assertNothingSent();
         config(['services.groq.api_key' => 'hidden-server-key', 'services.groq.model' => 'qwen/qwen3.8-27b']);
         Http::fake(['*' => Http::response(['choices' => [['finish_reason' => 'stop', 'message' => ['content' => 'Review the local chart for exact counts.']]]])]);
-        $this->get(route('cho.analytics'))->assertOk()->assertSee('Online AI')->assertDontSee('hidden-server-key');
+        $this->get(route('cho.analytics'))->assertOk()->assertSee('Assistant')->assertDontSee('hidden-server-key');
         Http::assertNothingSent();
         $this->postJson(route('cho.analytics.chat'), ['question' => 'summary'])
             ->assertOk()->assertJsonPath('source', 'groq')->assertDontSee('hidden-server-key');

@@ -106,7 +106,6 @@
                             <p class="an-subtitle mb-0">Based on recorded data, for your team's review.</p>
                         </div>
                     </div>
-                    <span class="an-badge">Free local rules</span>
                 </div>
                 <div class="an-suggestions">
                     @foreach($suggestions as $suggestion)
@@ -131,14 +130,12 @@
                         <p class="an-subtitle mb-0">Explore priorities, patterns and area workloads.</p>
                     </div>
                 </div>
-                <span id="analytics-provider-status" class="an-badge">{{ $aiStatus['label'] }}</span>
+                <span id="analytics-provider-status" class="an-badge">Assistant</span>
             </div>
-            <p class="an-subtitle mb-3">{{ $aiStatus['description'] }} Apply your filters before asking.</p>
             <form id="analytics-chat" action="{{ route(($portal ?? 'cho').'.analytics.chat') }}" class="an-no-print">
                 @csrf
                 <label for="analytics-question" class="form-label small fw-bold">Your question</label>
-                <p id="analytics-question-help" class="an-subtitle">Ask about maternal or reproductive health, ReproCare, or this report. Do not include patient details. Unrelated questions are outside its scope.</p>
-                <textarea id="analytics-question" aria-describedby="analytics-question-help" name="question" rows="3" maxlength="500" class="form-control mb-2" placeholder="Ask about maternal health, reproductive health, ReproCare, or this report?" required></textarea>
+                <textarea id="analytics-question" name="question" rows="3" maxlength="500" class="form-control mb-2" placeholder="Ask about maternal health, reproductive health, ReproCare, or this report?" required></textarea>
                 <div class="an-topics" role="group" aria-label="Suggested report questions">
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which records need priority review?">Priorities</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize maternal deaths.">Maternal deaths</button>

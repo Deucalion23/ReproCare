@@ -81,7 +81,7 @@ class AIInsightService
             return $this->groqAnswer($question, $report, $fallback);
         }
         if (config('services.analytics_ai.provider', 'rules') !== 'ollama') {
-            return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Free local rules: answers use the selected report.'];
+            return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answers use the selected report.'];
         }
 
         // Server configuration only; callers cannot choose an endpoint or model.
@@ -139,7 +139,7 @@ class AIInsightService
     {
         return match (config('services.analytics_ai.provider', 'rules')) {
             'groq' => app(GroqAnalyticsService::class)->configured()
-                ? ['label' => 'Online AI · Groq', 'description' => 'Online AI answers follow the applied filters. Verify suggestions against the local charts.']
+                ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
                 : ['label' => 'Groq needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             'ollama' => ['label' => 'Local AI · Ollama', 'description' => 'Ollama generates a draft when available. Local rules take over if it is unavailable.'],
             default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable Groq online AI or Ollama local AI.'],
@@ -162,7 +162,7 @@ class AIInsightService
             'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
             'topic' => CloudAnalyticsContext::TOPICS[$topic],
             'area_legend' => $prepared['area_legend'],
-            'notice' => 'Online AI draft (Groq). '.($result['cached'] ? 'Reused a matching answer from the last five minutes. ' : '')
+            'notice' => 'Draft answer. '.($result['cached'] ? 'Reused a matching answer from the last five minutes. ' : '')
                 .'Based on grouped counts and area aliases. Below 5 includes zero. Verify the draft against the exact local charts.',
         ];
     }

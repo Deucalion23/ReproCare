@@ -33,12 +33,12 @@
     <div class="card-body">
         <div class="row g-3" style="font-size:0.875rem;">
             <div class="col-md-4"><div class="rec-label">Email</div><div>{{ $woman->email }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Contact number</div><div>{{ $woman->contact_number ?? 'N/A' }}</div></div>
+            <div class="col-md-4"><div class="rec-label">Contact number</div><div>{{ $woman->display_contact_number }}</div></div>
             <div class="col-md-4"><div class="rec-label">Status</div><div><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
             <div class="col-md-4"><div class="rec-label">Date of birth</div><div>{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' (' . $woman->age . ' y/o)' : 'N/A' }}</div></div>
             <div class="col-md-4"><div class="rec-label">Gender</div><div>{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Barangay</div><div>{{ $woman->barangay ?? 'N/A' }}</div></div>
-            <div class="col-md-8"><div class="rec-label">Address</div><div>{{ $woman->address ?? 'N/A' }}</div></div>
+            <div class="col-md-4"><div class="rec-label">Barangay</div><div>{{ $woman->display_barangay }}</div></div>
+            <div class="col-md-8"><div class="rec-label">Address</div><div>{{ $woman->display_address }}</div></div>
             <div class="col-md-4"><div class="rec-label">Partner</div><div>{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
             <div class="col-md-12"><div class="rec-label">Emergency contacts</div>
                 @forelse($woman->emergencyContacts as $contact)

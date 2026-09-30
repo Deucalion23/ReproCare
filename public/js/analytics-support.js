@@ -53,7 +53,7 @@
                 if (!response.ok) throw new Error(response.status === 422 ? Object.values(data.errors || {}).flat()[0] || 'Check your question and filters.' : 'The report could not be loaded. Please try again.');
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
                 // Model output is untrusted text, never HTML or executable Markdown.
-                notice.textContent = data.notice || ({ groq: 'Online AI draft (Groq)', ollama: 'Local AI draft' }[data.source] || 'Free local rules');
+                notice.textContent = data.notice || ({ groq: 'Draft answer', ollama: 'Draft answer' }[data.source] || 'Assistant');
                 answer.textContent = data.answer;
                 if (data.source === 'groq') {
                     const lines = [data.topic || 'Report summary'];

@@ -51,7 +51,7 @@ class GroqAnalyticsTest extends TestCase
         $this->assertSame('groq', $result['source']);
         $this->assertFalse($result['cached']);
         $this->assertSame('PrivateVillage', $result['area_legend'][0]['label']);
-        $this->assertStringContainsString('Online AI draft', $result['notice']);
+        $this->assertStringContainsString('Draft answer', $result['notice']);
         Http::assertSent(function ($request) {
             $this->assertSame('https://api.groq.com/openai/v1/chat/completions', $request->url());
             $this->assertTrue($request->hasHeader('Authorization', 'Bearer test-only-secret'));

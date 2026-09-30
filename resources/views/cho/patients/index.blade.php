@@ -92,10 +92,10 @@
                             <small class="text-muted">ID: #{{ $woman->id }}</small>
                         </td>
                         <td>
-                            <div>{{ $woman->contact_number ?? 'N/A' }}</div>
+                            <div>{{ $woman->display_contact_number }}</div>
                             <small class="text-muted">{{ $woman->email }}</small>
                         </td>
-                        <td>{{ $woman->barangay ?? 'N/A' }}</td>
+                        <td>{{ $woman->display_barangay }}</td>
                         <td><span class="status-pill status-{{ in_array($woman->status, ['approved', 'pending']) ? $woman->status : 'other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></td>
                         <td>
                             @if($woman->active_pregnancies_count > 0)

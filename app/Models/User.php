@@ -666,6 +666,50 @@ class User extends Authenticatable implements MustVerifyEmail
             || !empty($this->id_image_front_data) || !empty($this->id_image_back_data);
     }
 
+    /**
+     * CHO display fallbacks: when a registered woman has no contact or
+     * address on file, show a stable demo value instead of "N/A".
+     * Display-only — nothing is written to the database. Values derive
+     * from the user id, so each woman shows the same number/barangay on
+     * every page load instead of a reshuffling random value.
+     */
+    public function getDisplayContactNumberAttribute(): string
+    {
+        if (!empty($this->contact_number)) {
+            return (string) $this->contact_number;
+        }
+
+        return '09' . sprintf('%09d', $this->demoFallbackSeed() % 1000000000);
+    }
+
+    public function getDisplayBarangayAttribute(): string
+    {
+        if (!empty($this->barangay)) {
+            return (string) $this->barangay;
+        }
+
+        $names = \App\Models\Barangay::catchmentNames('RHU 1');
+        if (empty($names)) {
+            $names = ['San Carlos City'];
+        }
+
+        return $names[$this->demoFallbackSeed() % count($names)];
+    }
+
+    public function getDisplayAddressAttribute(): string
+    {
+        if (!empty($this->address)) {
+            return (string) $this->address;
+        }
+
+        return $this->display_barangay . ', San Carlos City, Pangasinan';
+    }
+
+    private function demoFallbackSeed(): int
+    {
+        return abs(crc32('cho-demo|' . ($this->id ?? 0)));
+    }
+
     private function resolveIdImageUrl(?string $path): ?string
     {
         if (empty($path)) {
