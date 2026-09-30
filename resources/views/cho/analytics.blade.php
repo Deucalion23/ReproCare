@@ -134,22 +134,19 @@
                 <span id="analytics-provider-status" class="an-badge">{{ $aiStatus['label'] }}</span>
             </div>
             <p class="an-subtitle mb-3">{{ $aiStatus['description'] }} Apply your filters before asking.</p>
-            @if(config('services.analytics_ai.provider') === 'groq')
-                <details class="an-assistant-details">
-                    <summary>What is shared with online AI?</summary>
-                    <p>Your question and grouped report statistics go to Groq. Do not include names, patient identifiers, contacts, or private notes. Patient records, area names, exact dates and exact report counts are excluded.</p>
-                </details>
-            @endif
             <form id="analytics-chat" action="{{ route(($portal ?? 'cho').'.analytics.chat') }}" class="an-no-print">
                 @csrf
                 <label for="analytics-question" class="form-label small fw-bold">Your question</label>
-                <p id="analytics-question-help" class="an-subtitle">Ask about maternal or reproductive health, ReproCare, or this report. Online AI receives your question; do not include patient details. Unrelated questions are outside its scope.</p>
+                <p id="analytics-question-help" class="an-subtitle">Ask about maternal or reproductive health, ReproCare, or this report. Do not include patient details. Unrelated questions are outside its scope.</p>
                 <textarea id="analytics-question" aria-describedby="analytics-question-help" name="question" rows="3" maxlength="500" class="form-control mb-2" placeholder="Ask about maternal health, reproductive health, ReproCare, or this report?" required></textarea>
                 <div class="an-topics" role="group" aria-label="Suggested report questions">
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which records need priority review?">Priorities</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize maternal deaths.">Maternal deaths</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize the monthly registration trend.">Trends</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangays need follow-up planning?">Areas</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most high-risk pregnancies and what should we do?">Highest high-risk area</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most pregnant women right now and what should we do?">Busiest barangay</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most maternal deaths and what should we do?">Most deaths</button>
                 </div>
                 <button id="analytics-ask" class="an-button" type="submit">Ask assistant</button>
             </form>

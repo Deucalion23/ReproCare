@@ -139,7 +139,7 @@ class AIInsightService
     {
         return match (config('services.analytics_ai.provider', 'rules')) {
             'groq' => app(GroqAnalyticsService::class)->configured()
-                ? ['label' => 'Online AI · Groq', 'description' => 'Groq generates a draft when you ask. Local rules remain available if the connection or free quota is unavailable.']
+                ? ['label' => 'Online AI · Groq', 'description' => 'Online AI answers follow the applied filters. Verify suggestions against the local charts.']
                 : ['label' => 'Groq needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             'ollama' => ['label' => 'Local AI · Ollama', 'description' => 'Ollama generates a draft when available. Local rules take over if it is unavailable.'],
             default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable Groq online AI or Ollama local AI.'],
@@ -178,10 +178,39 @@ class AIInsightService
         $q = mb_strtolower($question);
         $t = $report['totals'];
         $scope = "{$report['area_label']}; {$report['filters']['from']} to {$report['filters']['to']}. ";
+        $ranked = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA);
         if (preg_match('/death|died|mortality|namatay|patay/u', $q)) {
+            $worst = $ranked->sortByDesc('deaths')->first();
+            $where = ($worst && $worst['deaths'] > 0)
+                ? "The largest recorded count is in {$worst['label']} ({$worst['deaths']} death record(s) in the period). "
+                : 'No death records were found in this selection. ';
+
             return $scope."{$t['deaths']} maternal death record(s) and {$t['complications']} reported complication event(s). "
-                ."{$t['pending_death_reviews']} death audit(s) are pending or under review. "
-                .'Review the monthly and barangay counts below. These are recorded counts, not mortality rates or predictions; zero records may reflect incomplete reporting.';
+                ."{$t['pending_death_reviews']} death audit(s) are pending or under review. ".$where
+                .'Best next step: complete the pending death audits and review referral and service gaps with the RHU team. '
+                .'These are recorded counts, not mortality rates or predictions; zero records may reflect incomplete reporting.';
+        }
+        if (preg_match('/high.?risk.*(area|barangay|bayan)|most.*high.?risk/u', $q)) {
+            $worst = $ranked->sortByDesc('high_risk')->first();
+            if (! $worst || $worst['high_risk'] <= 0) {
+                return $scope.'No open High/Critical records were found in this selection. '
+                    .'Best next step: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.';
+            }
+
+            return $scope."{$worst['label']} has the largest recorded High/Critical count ({$worst['high_risk']} open now). "
+                .'Best next step: confirm each care plan with the assigned midwife, check outreach staffing and referral transport for that barangay, '
+                .'and re-check its unassessed records. Counts are not population risk rates.';
+        }
+        if (preg_match('/most.*(pregnan|women|open|buntis)|busiest|pinakamarami/u', $q)) {
+            $worst = $ranked->sortByDesc('open')->first();
+            if (! $worst || $worst['open'] <= 0) {
+                return $scope.'No open pregnancy records were found in this selection. '
+                    .'Best next step: confirm reporting completeness and maintain scheduled follow-up.';
+            }
+
+            return $scope."{$worst['label']} has the most open pregnancies right now ({$worst['open']} open). "
+                .'Best next step: align BHW visit schedules and checkup capacity with that workload, and verify reporting completeness before reallocating staff. '
+                .'These are recorded counts, not comparisons of need across populations.';
         }
         if (preg_match('/trend|month|registration|buwan/u', $q)) {
             $peak = collect($report['monthly'])->sortByDesc('registrations')->first();
@@ -202,7 +231,9 @@ class AIInsightService
         }
 
         return $scope.'The free rules assistant can summarize priorities, missed appointments, monthly registrations, recorded maternal deaths and barangay counts. '
-            .'Try "Which records need priority review?" or "Summarize maternal deaths." Patient-specific treatment and future predictions are outside this report.';
+            .'Try "Which records need priority review?", "Which barangay has the most high-risk pregnancies and what should we do?", '
+            .'"Which barangay has the most pregnant women right now?" or "Which barangay has the most maternal deaths?" '
+            .'Patient-specific treatment and future predictions are outside this report.';
     }
 
     private function unavailable(string $fallback): array
