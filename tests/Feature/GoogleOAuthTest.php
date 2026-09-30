@@ -35,6 +35,15 @@ class GoogleOAuthTest extends AutomationTestCase
             $t->timestamps();
             $t->softDeletes();
         });
+
+        if (! Schema::hasTable('puroks')) {
+            Schema::create('puroks', function (Blueprint $t) {
+                $t->id();
+                $t->string('name');
+                $t->string('barangay');
+                $t->timestamps();
+            });
+        }
     }
 
     /**
@@ -59,12 +68,10 @@ class GoogleOAuthTest extends AutomationTestCase
             'middle_initial' => 'S',
             'last_name' => 'Santos',
             'date_of_birth' => '2000-05-10',
-            'gender' => 'female',
             'contact_number' => '09179998888',
             'house_number' => '123',
-            'sitio' => 'Centro',
+            'purok' => 'Purok 1 / Rizal St. / Sitio Centro',
             'barangay' => 'Burgos St',
-            'address_label' => 'Near the chapel',
             'id_image_front' => $this->fakeIdImage('id-front.png'),
             'id_image_back' => $this->fakeIdImage('id-back.png'),
             'partner_name' => 'Jose Santos',
@@ -304,7 +311,8 @@ class GoogleOAuthTest extends AutomationTestCase
         $this->assertSame('Maria', $fresh->first_name);
         $this->assertSame('S', $fresh->middle_initial);
         $this->assertSame('Santos', $fresh->last_name);
-        $this->assertSame('female', $fresh->gender);
+        $this->assertNull($fresh->gender);
+        $this->assertNull($fresh->address_label);
         $this->assertSame('09179998888', $fresh->contact_number);
         $this->assertSame('Burgos St', $fresh->barangay);
         $this->assertStringContainsString('Burgos St', (string) $fresh->address);
@@ -332,8 +340,8 @@ class GoogleOAuthTest extends AutomationTestCase
         ]);
 
         $response->assertSessionHasErrors([
-            'contact_number', 'barangay',
-            'id_image_front', 'id_image_back',
+            'date_of_birth', 'barangay',
+            'id_image_data_front', 'id_image_data_back',
             'emergency_name_1', 'emergency_relationship_1', 'emergency_contact_number_1',
         ]);
         $this->assertFalse((bool) $patient->fresh()->is_profile_complete);

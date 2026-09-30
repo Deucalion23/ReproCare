@@ -191,9 +191,9 @@ class GoogleController extends Controller
 
     /**
      * Show the mandatory profile completion form. This mirrors the regular
-     * self-registration form field-for-field — the ONLY things a Google user
+     * self-registration form step-by-step — the ONLY things a Google user
      * never fills in are email and password (Google supplies the identity).
-     * Name fields arrive pre-filled from Google and stay editable.
+     * Name fields are left blank so the patient types them manually.
      */
     public function showCompleteProfile(Request $request): View|RedirectResponse
     {
@@ -210,8 +210,10 @@ class GoogleController extends Controller
 
     /**
      * Store the onboarding fields and lift the profile gate. Validation
-     * mirrors AuthController::register minus email/password (plus file-upload
-     * ID scans instead of base64 data URIs).
+     * mirrors AuthController::register minus email/password: same fill-ups,
+     * same step-by-step order, no gender field, no address landmark, and the
+     * ID step uses the same upload-or-camera base64 capture as registration
+     * (legacy file uploads still accepted for backward compatibility).
      */
     public function updateCompleteProfile(Request $request): RedirectResponse
     {
@@ -225,20 +227,22 @@ class GoogleController extends Controller
             'first_name' => 'required|string|max:255',
             'middle_initial' => 'nullable|string|max:10',
             'last_name' => 'required|string|max:255',
-            'date_of_birth' => 'nullable|date',
-            'gender' => 'nullable|in:male,female',
-            'contact_number' => 'required|string|max:20',
+            'date_of_birth' => 'required|date|before:tomorrow',
+            'contact_number' => 'nullable|string|max:20',
             'address' => 'nullable|string|max:500',
             'house_number' => 'nullable|string|max:100',
-            'purok' => 'nullable|string|max:100',
+            // Merged "Purok / Street / Sitio" single line (same as signup location step).
+            'purok' => 'nullable|string|max:255',
             'sitio' => 'nullable|string|max:200',
             'barangay' => ['required', 'string', 'max:255', Rule::in(Barangay::allNames())],
             'purok_id' => 'nullable|exists:puroks,id',
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
-            'address_label' => 'nullable|string|max:500',
-            'id_image_front' => 'required|image|mimes:jpeg,png,jpg|max:5120',
-            'id_image_back' => 'required|image|mimes:jpeg,png,jpg|max:5120',
+            // Same capture as regular signup (upload file OR camera → base64).
+            'id_image_data_front' => 'required_without:id_image_front|nullable|string',
+            'id_image_data_back' => 'required_without:id_image_back|nullable|string',
+            'id_image_front' => 'required_without:id_image_data_front|nullable|image|mimes:jpeg,png,jpg|max:5120',
+            'id_image_back' => 'required_without:id_image_data_back|nullable|image|mimes:jpeg,png,jpg|max:5120',
 
             // Partner / Additional Contact
             'partner_name' => 'nullable|string|max:255',
@@ -265,35 +269,60 @@ class GoogleController extends Controller
 
         $barangay = $validated['barangay'];
 
+        // Require an ID photo per side — either the signup-style base64 capture
+        // (upload or camera) or a legacy file upload.
+        $hasFront = $request->filled('id_image_data_front') || $request->hasFile('id_image_front');
+        $hasBack = $request->filled('id_image_data_back') || $request->hasFile('id_image_back');
+
+        if (! $hasFront || ! $hasBack) {
+            return back()->withErrors(array_filter([
+                ...(!$hasFront ? ['id_image_data_front' => 'Front of ID is required — upload a file or capture with your camera.'] : []),
+                ...(!$hasBack ? ['id_image_data_back' => 'Back of ID is required — upload a file or capture with your camera.'] : []),
+            ]))->withInput();
+        }
+
         // Compose full address from components if address field is empty.
+        // "purok" holds the merged "Purok / Street / Sitio" line; a legacy
+        // "sitio" value (older payloads) is appended when different.
+        $purokLine = trim((string) $request->input('purok', ''));
+        $sitioLegacy = trim((string) $request->input('sitio', ''));
+        if ($sitioLegacy !== '' && stripos($purokLine, $sitioLegacy) === false) {
+            $purokLine = trim($purokLine !== '' ? $purokLine.' / '.$sitioLegacy : $sitioLegacy);
+        }
         $addressParts = array_filter([
             $request->filled('house_number') ? 'House/Unit ' . $request->house_number : null,
-            $request->filled('purok') ? (str_starts_with(strtolower($request->purok), 'purok') ? $request->purok : 'Purok ' . $request->purok) : null,
-            $request->filled('sitio') ? $request->sitio : null,
+            $purokLine !== '' ? $purokLine : null,
             $barangay,
             'San Carlos City, Pangasinan'
         ]);
         $resolvedAddress = !empty($validated['address']) ? $validated['address'] : (!empty($addressParts) ? implode(', ', $addressParts) : null);
 
         $resolvedPurokId = $validated['purok_id']
-            ?? Purok::resolveIdFromText($request->input('purok'), $barangay);
+            ?? Purok::resolveIdFromText($purokLine !== '' ? $purokLine : $request->input('purok'), $barangay);
+
+        $idFrontPath = $request->hasFile('id_image_front')
+            ? $request->file('id_image_front')->store('uploads/ids', 'public')
+            : $this->storeIdDataUri((string) $request->input('id_image_data_front'), 'front');
+        $idBackPath = $request->hasFile('id_image_back')
+            ? $request->file('id_image_back')->store('uploads/ids', 'public')
+            : $this->storeIdDataUri((string) $request->input('id_image_data_back'), 'back');
 
         $user->forceFill([
             'first_name' => $validated['first_name'],
             'middle_initial' => $validated['middle_initial'] ?? null,
             'last_name' => $validated['last_name'],
             'date_of_birth' => $validated['date_of_birth'] ?? null,
-            'gender' => $validated['gender'] ?? null,
+            'gender' => null,
             // phone_number (spec) maps to the existing contact_number column.
-            'contact_number' => $validated['contact_number'],
-            'address' => trim(($resolvedAddress ?? '').($request->filled('address_label') ? ' ('.$request->address_label.')' : '')) ?: null,
+            'contact_number' => $validated['contact_number'] ?? null,
+            'address' => $resolvedAddress,
             'barangay' => $barangay,
             'purok_id' => $resolvedPurokId,
             'latitude' => $validated['latitude'] ?? null,
             'longitude' => $validated['longitude'] ?? null,
-            'address_label' => $validated['address_label'] ?? null,
-            'id_image_front' => $request->file('id_image_front')->store('uploads/ids', 'public'),
-            'id_image_back' => $request->file('id_image_back')->store('uploads/ids', 'public'),
+            'address_label' => null,
+            'id_image_front' => $idFrontPath,
+            'id_image_back' => $idBackPath,
             'partner_name' => $validated['partner_name'] ?? null,
             'partner_contact' => $validated['partner_contact'] ?? null,
             'is_profile_complete' => true,
@@ -352,6 +381,25 @@ class GoogleController extends Controller
 
         return redirect()->route('user.dashboard')
             ->with('success', 'Profile completed. Welcome to ReproCare!');
+    }
+
+    /**
+     * Persist a signup-style base64 ID capture (upload or camera) to disk.
+     */
+    protected function storeIdDataUri(string $dataUri, string $side): string
+    {
+        if (preg_match('/^data:image\/(\w+);base64,/', $dataUri, $matches)) {
+            $dataUri = substr($dataUri, strpos($dataUri, ',') + 1);
+            $extension = $matches[1] === 'jpeg' ? 'jpg' : $matches[1];
+        } else {
+            $extension = 'jpg';
+        }
+
+        $fileName = 'id_' . $side . '_' . time() . '_' . \Illuminate\Support\Str::random(8) . '.' . $extension;
+        $path = 'uploads/ids/' . $fileName;
+        \Illuminate\Support\Facades\Storage::disk('public')->put($path, base64_decode($dataUri));
+
+        return $path;
     }
 
     /**
