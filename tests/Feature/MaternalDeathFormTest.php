@@ -29,7 +29,7 @@ class MaternalDeathFormTest extends AutomationTestCase
         });
 
         Schema::table('pregnancies', function (Blueprint $t) {
-            $t->date('lmp')->nullable();
+            if (!Schema::hasColumn('pregnancies', 'lmp')) $t->date('lmp')->nullable();
         });
 
         Schema::table('walk_in_patients', function (Blueprint $t) {
