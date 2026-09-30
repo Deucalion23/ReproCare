@@ -130,7 +130,7 @@
                         <p class="an-subtitle mb-0">Explore priorities, patterns and area workloads.</p>
                     </div>
                 </div>
-                <span id="analytics-provider-status" class="an-badge">Assistant</span>
+                <span id="analytics-provider-status" class="an-badge">{{ $aiStatus['label'] === 'Groq needs setup' ? $aiStatus['label'] : 'Assistant' }}</span>
             </div>
             <form id="analytics-chat" action="{{ route(($portal ?? 'cho').'.analytics.chat') }}" class="an-no-print">
                 @csrf
