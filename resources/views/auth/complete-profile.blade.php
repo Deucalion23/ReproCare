@@ -512,7 +512,7 @@
                 </div>
             </form>
 
-            <form method="POST" action="{{ route('logout') }}" style="margin-top:14px; text-align:center;">
+            <form method="POST" action="{{ route('logout') }}" id="completeSignoutForm" style="margin-top:14px; text-align:center;">
                 @csrf
                 <button type="submit" style="background:none; border:none; color:var(--color-text-muted); font-size:.82rem; cursor:pointer; text-decoration:underline;">Sign out</button>
             </form>
@@ -852,6 +852,15 @@
 
         form.addEventListener('input', scheduleSave);
         form.addEventListener('change', scheduleSave);
+
+        // Signing out = cancelling an unfinished account: wipe the saved
+        // draft so the next visit starts fresh instead of pre-filled.
+        const signoutForm = document.getElementById('completeSignoutForm');
+        if (signoutForm) {
+            signoutForm.addEventListener('submit', function () {
+                try { localStorage.removeItem(KEY); } catch (e) {}
+            });
+        }
 
         // Keep the saved step in sync when navigating (goStep is defined above).
         if (typeof goStep === 'function') {
