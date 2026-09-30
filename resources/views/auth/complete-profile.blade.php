@@ -709,6 +709,7 @@
             return false;
         }
         stopAllIdCameras();
+        try { localStorage.removeItem('reprocare_complete_profile_v1'); } catch (e) {}
         const btn = this.querySelector('.btn-submit');
         if (btn) { btn.disabled = true; btn.innerHTML = 'Creating your account…'; }
     });
@@ -777,5 +778,93 @@
         });
     }
     document.addEventListener('DOMContentLoaded', function() { setupBarangayDropdown(); });
+</script>
+<script>
+    // ── Keep typed info across reloads (text fields + current step) ──
+    // NOTE: file inputs and ID captures can't be restored (browser security +
+    // localStorage size limits), so ID photos need re-selecting after a reload.
+    (function persistCompleteProfileDraft() {
+        const KEY = 'reprocare_complete_profile_v1';
+        const form = document.getElementById('regForm');
+        if (!form || !window.localStorage) return;
+
+        const fieldSelector = 'input[name]:not([type="file"]):not([type="hidden"]):not([name="_token"]), select[name], textarea[name]';
+
+        function collectFields() {
+            return Array.from(form.querySelectorAll(fieldSelector));
+        }
+
+        function saveDraft() {
+            try {
+                const values = {};
+                collectFields().forEach(function (el) {
+                    if (!el.name || el.disabled) return;
+                    if (el.type === 'checkbox' || el.type === 'radio') {
+                        values[el.name] = el.checked ? el.value : (values[el.name] || '');
+                    } else {
+                        values[el.name] = el.value;
+                    }
+                });
+                localStorage.setItem(KEY, JSON.stringify({ values: values, step: (typeof currentStep !== 'undefined' ? currentStep : 1) }));
+            } catch (e) { /* quota / privacy mode — form still works without persistence */ }
+        }
+
+        let saveTimer = null;
+        function scheduleSave() {
+            clearTimeout(saveTimer);
+            saveTimer = setTimeout(saveDraft, 300);
+        }
+
+        function restoreDraft() {
+            let draft = null;
+            try { draft = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) { return; }
+            if (!draft || !draft.values) return;
+            Object.keys(draft.values).forEach(function (name) {
+                const el = form.querySelector('[name="' + name + '"]');
+                if (!el || el.disabled) return;
+                if (el.value) return; // server-provided old() values win
+                if (el.type === 'checkbox' || el.type === 'radio') {
+                    el.checked = (el.value === draft.values[name]);
+                } else if (draft.values[name]) {
+                    el.value = draft.values[name];
+                }
+            });
+            const brgy = document.getElementById('barangayInput');
+            if (brgy && brgy.value) {
+                document.querySelectorAll('.brgy-option-item').forEach(function (item) {
+                    item.classList.toggle('selected', item.dataset.value === brgy.value);
+                });
+            }
+            // Jump back to the step the user was on (no validation on restore).
+            // Skip when the server already jumped to the step holding errors.
+            if (document.querySelector('.error-box')) return;
+            const step = Math.min(Math.max(parseInt(draft.step, 10) || 1, 1), totalSteps);
+            if (step !== 1 && typeof updateLeftNav === 'function') {
+                document.querySelectorAll('.step-panel').forEach(function (p) { p.classList.remove('active'); });
+                const target = document.getElementById('step-' + step);
+                if (target) target.classList.add('active');
+                currentStep = step;
+                document.getElementById('progressFill').style.width = progressPct[step - 1] + '%';
+                document.getElementById('registrationProgress').setAttribute('aria-valuenow', step);
+                updateLeftNav(step);
+            }
+        }
+
+        form.addEventListener('input', scheduleSave);
+        form.addEventListener('change', scheduleSave);
+
+        // Keep the saved step in sync when navigating (goStep is defined above).
+        if (typeof goStep === 'function') {
+            const originalGoStep = goStep;
+            goStep = function (n) {
+                const result = originalGoStep.apply(this, arguments);
+                saveDraft();
+                return result;
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', restoreDraft);
+        if (document.readyState !== 'loading') restoreDraft();
+    })();
 </script>
 @endpush
