@@ -94,9 +94,13 @@ class User extends Authenticatable implements MustVerifyEmail
         'latitude',
         'longitude',
         'address_label',
-        // Step 5 of self-registration: valid ID front/back scan paths
+        // Step 5 of self-registration: valid ID front/back scan paths,
+        // plus a database data-URL copy of each (survives ephemeral disks —
+        // file paths alone kept turning into "No ID on file" after deploys).
         'id_image_front',
         'id_image_back',
+        'id_image_front_data',
+        'id_image_back_data',
     ];
 
     /**
@@ -632,22 +636,34 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Public URL for the front scan of the registrant's valid ID, if any.
-     * Mirrors the profile-image fallback chain (public disk → legacy
-     * public copy) so RHU verifiers never hit a broken image link.
+     * Prefers the database copy (survives ephemeral disks), then falls back
+     * to the file-path chain (public disk → legacy public copy) so RHU
+     * verifiers never hit a broken image link.
      */
     public function getIdImageFrontUrlAttribute(): ?string
     {
+        $inline = $this->getAttribute('id_image_front_data');
+        if (is_string($inline) && str_starts_with($inline, 'data:image')) {
+            return $inline;
+        }
+
         return $this->resolveIdImageUrl($this->id_image_front);
     }
 
     public function getIdImageBackUrlAttribute(): ?string
     {
+        $inline = $this->getAttribute('id_image_back_data');
+        if (is_string($inline) && str_starts_with($inline, 'data:image')) {
+            return $inline;
+        }
+
         return $this->resolveIdImageUrl($this->id_image_back);
     }
 
     public function hasIdImages(): bool
     {
-        return !empty($this->id_image_front) || !empty($this->id_image_back);
+        return !empty($this->id_image_front) || !empty($this->id_image_back)
+            || !empty($this->id_image_front_data) || !empty($this->id_image_back_data);
     }
 
     private function resolveIdImageUrl(?string $path): ?string

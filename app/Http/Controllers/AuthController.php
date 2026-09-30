@@ -81,8 +81,8 @@ class AuthController extends Controller
             'address_label' => 'nullable|string|max:500',
             'email' => 'required|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'id_image_data_front' => 'required|string',
-            'id_image_data_back' => 'required|string',
+            'id_image_data_front' => 'required|string|max:8388608',
+            'id_image_data_back' => 'required|string|max:8388608',
             
             // Partner / Additional Contact
             'partner_name' => 'nullable|string|max:255',
@@ -154,6 +154,9 @@ class AuthController extends Controller
             'status' => 'pending',
             'id_image_front' => $idImageFrontPath,
             'id_image_back'  => $idImageBackPath,
+            // Database copies so the scans survive ephemeral disks (deploys).
+            'id_image_front_data' => $validated['id_image_data_front'],
+            'id_image_back_data'  => $validated['id_image_data_back'],
             'partner_name'   => $validated['partner_name'] ?? null,
             'partner_contact'=> $validated['partner_contact'] ?? null,
         ]);

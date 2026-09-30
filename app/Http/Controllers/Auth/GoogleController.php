@@ -239,8 +239,8 @@ class GoogleController extends Controller
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             // Same capture as regular signup (upload file OR camera → base64).
-            'id_image_data_front' => 'required_without:id_image_front|nullable|string',
-            'id_image_data_back' => 'required_without:id_image_back|nullable|string',
+            'id_image_data_front' => 'required_without:id_image_front|nullable|string|max:8388608',
+            'id_image_data_back' => 'required_without:id_image_back|nullable|string|max:8388608',
             'id_image_front' => 'required_without:id_image_data_front|nullable|image|mimes:jpeg,png,jpg|max:5120',
             'id_image_back' => 'required_without:id_image_data_back|nullable|image|mimes:jpeg,png,jpg|max:5120',
 
@@ -307,6 +307,14 @@ class GoogleController extends Controller
             ? $request->file('id_image_back')->store('uploads/ids', 'public')
             : $this->storeIdDataUri((string) $request->input('id_image_data_back'), 'back');
 
+        // Database copies so the scans survive ephemeral disks (deploys).
+        $idFrontData = $request->filled('id_image_data_front')
+            ? (string) $request->input('id_image_data_front')
+            : self::fileToDataUri($request->file('id_image_front'));
+        $idBackData = $request->filled('id_image_data_back')
+            ? (string) $request->input('id_image_data_back')
+            : self::fileToDataUri($request->file('id_image_back'));
+
         $user->forceFill([
             'first_name' => $validated['first_name'],
             'middle_initial' => $validated['middle_initial'] ?? null,
@@ -323,6 +331,8 @@ class GoogleController extends Controller
             'address_label' => null,
             'id_image_front' => $idFrontPath,
             'id_image_back' => $idBackPath,
+            'id_image_front_data' => $idFrontData,
+            'id_image_back_data' => $idBackData,
             'partner_name' => $validated['partner_name'] ?? null,
             'partner_contact' => $validated['partner_contact'] ?? null,
             'is_profile_complete' => true,
@@ -381,6 +391,30 @@ class GoogleController extends Controller
 
         return redirect()->route('user.dashboard')
             ->with('success', 'Profile completed. Welcome to ReproCare!');
+    }
+
+    /**
+     * Build a data URL from an uploaded file (database copy of the scan).
+     */
+    protected static function fileToDataUri($file): ?string
+    {
+        try {
+            if (! $file || ! method_exists($file, 'getRealPath') || ! is_file($file->getRealPath())) {
+                return null;
+            }
+            $mime = method_exists($file, 'getMimeType') ? ($file->getMimeType() ?: 'image/jpeg') : 'image/jpeg';
+            if (! str_starts_with($mime, 'image/')) {
+                return null;
+            }
+            $raw = @file_get_contents($file->getRealPath());
+            if ($raw === false) {
+                return null;
+            }
+
+            return 'data:' . $mime . ';base64,' . base64_encode($raw);
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 
     /**

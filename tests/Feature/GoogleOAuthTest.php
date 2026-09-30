@@ -321,6 +321,12 @@ class GoogleOAuthTest extends AutomationTestCase
         // Valid ID scans stored for RHU verification.
         Storage::disk('public')->assertExists($fresh->id_image_front);
         Storage::disk('public')->assertExists($fresh->id_image_back);
+        // Database copies persist even when ephemeral disks are wiped.
+        $this->assertStringStartsWith('data:image', (string) $fresh->id_image_front_data);
+        $this->assertStringStartsWith('data:image', (string) $fresh->id_image_back_data);
+        // Accessors serve the DB copy (file-independent).
+        $this->assertStringStartsWith('data:image', (string) $fresh->id_image_front_url);
+        $this->assertStringStartsWith('data:image', (string) $fresh->id_image_back_url);
         // Primary emergency contact recorded.
         $this->assertDatabaseHas('emergency_contacts', [
             'user_id' => $patient->id,

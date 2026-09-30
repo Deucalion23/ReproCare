@@ -37,6 +37,7 @@ abstract class AutomationTestCase extends TestCase
             $t->string('address_label')->nullable();
             $t->string('partner_name')->nullable(); $t->string('partner_contact')->nullable();
             $t->string('id_image_front')->nullable(); $t->string('id_image_back')->nullable();
+            $t->longText('id_image_front_data')->nullable(); $t->longText('id_image_back_data')->nullable();
             $t->timestamp('archived_at')->nullable(); $t->string('archived_reason')->nullable();
             $t->unsignedBigInteger('archived_by')->nullable(); $t->string('rejection_reason')->nullable();
             $t->string('role')->default('user'); $t->string('status')->default('approved');
