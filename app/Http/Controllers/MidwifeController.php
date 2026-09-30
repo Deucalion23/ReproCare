@@ -260,15 +260,28 @@ class MidwifeController extends Controller
 
     public function patientDetails($id)
     {
-        // Eager load all relationships in single query for better performance
+        // Eager load all relationships in single query for better performance.
+        // NOTE: checkups()/healthRecords() branch on $this->role, but Eloquent
+        // resolves relations on a blank instance (always-empty collections),
+        // so those two are queried explicitly below.
         $woman = User::where('role', 'user')->with([
             'emergencyContacts',
             'primaryEmergencyContact',
             'purok',
             'pregnancies' => function($q) { $q->latest()->select('id', 'user_id', 'lmp', 'edd', 'is_high_risk'); },
-            'checkups' => function($q) { $q->with('midwife:id,first_name,middle_initial,last_name')->latest()->select('id', 'user_id', 'midwife_id', 'scheduled_date', 'status', 'purpose'); },
-            'healthRecords' => function($q) { $q->with('recordedBy:id,first_name,middle_initial,last_name')->latest()->select('id', 'user_id', 'recorded_by_id', 'bp', 'weight', 'created_at')->take(50); }
         ])->select('id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay', 'purok_id', 'status', 'date_of_birth', 'contact_number', 'partner_name', 'partner_contact', 'profile_image', 'gender', 'created_at')->findOrFail($id);
+
+        $checkups = \App\Models\Checkup::where('user_id', $woman->id)
+            ->with('midwife:id,first_name,middle_initial,last_name')
+            ->latest()
+            ->select('id', 'user_id', 'midwife_id', 'scheduled_date', 'status', 'purpose')
+            ->get();
+        $healthRecords = \App\Models\HealthRecord::where('user_id', $woman->id)
+            ->with('recordedBy:id,first_name,middle_initial,last_name')
+            ->latest()
+            ->select('id', 'user_id', 'recorded_by_id', 'bp', 'weight', 'created_at')
+            ->take(50)
+            ->get();
 
         // Patient-seen status for the latest risk alert (Seen/Unseen + read_at)
         // so the managing midwife can tell whether the patient opened it.
@@ -277,8 +290,8 @@ class MidwifeController extends Controller
         return view('midwife.patient-details', [
             'woman' => $woman,
             'pregnancies' => $woman->pregnancies,
-            'checkups' => $woman->checkups,
-            'healthRecords' => $woman->healthRecords,
+            'checkups' => $checkups,
+            'healthRecords' => $healthRecords,
             'riskAlertStatus' => $riskAlertStatus,
             'decisionSupport' => app(\App\Services\MaternalAnalyticsService::class)->patientSupport($woman),
         ]);

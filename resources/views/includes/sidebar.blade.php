@@ -97,6 +97,20 @@
                     <span>Supply Requests</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('cho.patients*') ? 'active' : '' }}"
+                   href="{{ route('cho.patients.index') }}">
+                    <i class="bi bi-heart-pulse-fill"></i>
+                    <span>Registered Women</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('cho.staff-transitions*') ? 'active' : '' }}"
+                   href="{{ route('cho.staff-transitions.index') }}">
+                    <i class="bi bi-arrow-left-right"></i>
+                    <span>Staff Transitions</span>
+                </a>
+            </li>
         </ul>
 
         <div class="sidebar-section-label">Maternal Audit</div>

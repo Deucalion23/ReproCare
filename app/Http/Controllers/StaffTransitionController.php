@@ -57,9 +57,24 @@ class StaffTransitionController extends Controller
         $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
         $history = StaffTransition::with('outgoing')->latest()->take(10)->get();
 
-        return view('rhu.staff-transitions.index', compact(
+        // One shared console for RHU and CHO: layout + route names switch by
+        // actor role so each portal renders inside its own shell.
+        $routes = $this->routeNames();
+        $transitionLayout = $routes['actor'] === 'cho' ? 'cho.layout' : 'rhu.layout';
+        $transitionSection = $routes['actor'] === 'cho' ? 'cho-content' : 'rhu-content';
+        $transitionTitle = $routes['actor'] === 'cho'
+            ? 'Staff Transitions - CHO | ReproCare'
+            : 'Staff Transitions - RHU | ReproCare';
+
+        return view('rhu.staff-transitions.index', array_merge(compact(
             'type', 'outgoings', 'outgoing', 'counts', 'candidates', 'patients', 'barangays', 'history'
-        ));
+        ), [
+            'transitionLayout' => $transitionLayout,
+            'transitionSection' => $transitionSection,
+            'transitionIndexRoute' => $routes['index'],
+            'transitionExecuteRoute' => $routes['execute'],
+            'transitionTitle' => $transitionTitle,
+        ]));
     }
 
     public function execute(Request $request)
@@ -129,7 +144,8 @@ class StaffTransitionController extends Controller
                     'catchment_barangays' => array_values($data['catchment_barangays'] ?? ($outgoing->catchment_barangays ?? [])),
                     'role' => 'midwife',
                     'status' => 'approved',
-                    'registered_by_rhu_id' => auth()->id(),
+                    'registered_by_rhu_id' => (auth()->user()->role ?? null) === 'cho' ? null : auth()->id(),
+                    'registered_by_cho_id' => (auth()->user()->role ?? null) === 'cho' ? auth()->id() : null,
                 ]);
             }
 
@@ -162,7 +178,7 @@ class StaffTransitionController extends Controller
             );
         });
 
-        return redirect()->route('rhu.staff-transitions.index', ['type' => 'midwife_replace'])
+        return redirect()->route($this->routeNames()['index'], ['type' => 'midwife_replace'])
             ->with('success', "Midwife replaced. {$incoming->name} now holds {$counts['patients']} patient(s) and {$counts['checkups']} pending checkup(s). {$outgoing->name} is archived with history intact.");
     }
 
@@ -242,7 +258,7 @@ class StaffTransitionController extends Controller
             );
         });
 
-        return redirect()->route('rhu.staff-transitions.index', ['type' => 'president_replace'])
+        return redirect()->route($this->routeNames()['index'], ['type' => 'president_replace'])
             ->with('success', "Presidency transferred to {$incoming->name} for {$barangay}. {$counts['reports']} pending review(s) routed.");
     }
 
@@ -325,11 +341,28 @@ class StaffTransitionController extends Controller
             }
         });
 
-        return redirect()->route('rhu.staff-transitions.index', ['type' => 'bhw_transfer'])
+        return redirect()->route($this->routeNames()['index'], ['type' => 'bhw_transfer'])
             ->with('success', "Roster transferred: {$counts['patients']} patient(s) reassigned. {$outgoing->name} is archived; offline cache invalidated.");
     }
 
     // ─── Helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Route names for the transitions console, following the actor's portal.
+     * RHU and CHO share the console; each lands back in its own pages.
+     *
+     * @return array{actor: string, index: string, execute: string}
+     */
+    protected function routeNames(): array
+    {
+        $actor = (auth()->user()->role ?? null) === 'cho' ? 'cho' : 'rhu';
+
+        return [
+            'actor' => $actor,
+            'index' => $actor . '.staff-transitions.index',
+            'execute' => $actor . '.staff-transitions.execute',
+        ];
+    }
 
     protected function outgoingRole(string $type): string
     {

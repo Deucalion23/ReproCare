@@ -390,6 +390,86 @@ class ChoController extends Controller
         return back()->with('success', 'Staff account activated.');
     }
 
+    /**
+     * Registered Women: city-wide patient directory (read-only oversight).
+     * Account lifecycle (approve/reject/archive) stays in RHU verification
+     * and the Archived Records hub — this page never mutates.
+     */
+    public function patients(Request $request)
+    {
+        $search = $request->input('search');
+        $status = $request->input('status', 'all');
+        $barangay = $request->input('barangay');
+
+        $women = User::where('role', 'user')
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->when($barangay, fn ($query) => $query->where('barangay', $barangay))
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('first_name', 'like', "%{$search}%")
+                        ->orWhere('middle_initial', 'like', "%{$search}%")
+                        ->orWhere('last_name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('contact_number', 'like', "%{$search}%")
+                        ->orWhere('barangay', 'like', "%{$search}%");
+                });
+            })
+            ->withCount(['pregnancies as active_pregnancies_count' => function ($query) {
+                $query->whereNull('ended_at');
+            }])
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $barangays = User::where('role', 'user')
+            ->whereNotNull('barangay')
+            ->distinct()
+            ->orderBy('barangay')
+            ->pluck('barangay');
+
+        $statuses = ['approved', 'pending', 'rejected', 'suspended', 'inactive', 'archived'];
+
+        return view('cho.patients.index', compact('women', 'search', 'status', 'barangay', 'barangays', 'statuses'));
+    }
+
+    /**
+     * One woman's record file: profile, pregnancies, checkups, health
+     * records, emergency contacts (read-only for CHO oversight).
+     */
+    public function patientDetails($id)
+    {
+        // NOTE: User::checkups()/healthRecords() branch on $this->role, but
+        // Eloquent always resolves relations on a blank instance
+        // (Builder::getRelation → newInstance), so eager-loading them yields
+        // permanently empty collections. Query explicitly instead.
+        $woman = User::where('role', 'user')->with(['emergencyContacts', 'purok'])
+            ->select('id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay', 'purok_id', 'status', 'date_of_birth', 'contact_number', 'partner_name', 'partner_contact', 'gender', 'created_at')
+            ->findOrFail($id);
+
+        $pregnancies = Pregnancy::where('user_id', $woman->id)
+            ->latest()
+            ->select('id', 'user_id', 'lmp', 'edd', 'is_high_risk', 'risk_level', 'ended_at', 'outcome')
+            ->get();
+        $checkups = Checkup::where('user_id', $woman->id)
+            ->with('midwife:id,first_name,middle_initial,last_name')
+            ->latest()
+            ->select('id', 'user_id', 'midwife_id', 'scheduled_date', 'status', 'purpose')
+            ->get();
+        $healthRecords = \App\Models\HealthRecord::where('user_id', $woman->id)
+            ->with('recordedBy:id,first_name,middle_initial,last_name')
+            ->latest()
+            ->select('id', 'user_id', 'recorded_by_id', 'bp', 'weight', 'created_at')
+            ->take(50)
+            ->get();
+
+        return view('cho.patients.show', [
+            'woman' => $woman,
+            'pregnancies' => $pregnancies,
+            'checkups' => $checkups,
+            'healthRecords' => $healthRecords,
+        ]);
+    }
+
     public function supplyRequests(Request $request)
     {
         $requests = SupplyRequest::with(['requestedBy', 'approvedBy'])
