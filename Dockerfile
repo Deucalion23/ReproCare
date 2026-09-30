@@ -89,6 +89,9 @@ RUN mkdir -p storage/framework/cache/data \
     && chown -R www-data:www-data storage bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache
 
+# Raise PHP POST/upload limits (base64 ID photos submit as POST body)
+COPY docker/uploads.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Install and prepare container startup entrypoint
 COPY docker/entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN sed -i 's/\r$//' /usr/local/bin/docker-entrypoint.sh \

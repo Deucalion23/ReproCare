@@ -1612,6 +1612,25 @@
         document.getElementById(side + 'UploadArea').classList.remove('has-file');
     }
 
+    // Shrink ID photos before submit so the base64 POST stays far under
+    // PHP's post_max_size (8MB default) — shots straight from modern phone
+    // cameras can otherwise blow past it and throw a bare 413 page.
+    function compressIdImage(dataUrl, callback) {
+        const img = new Image();
+        img.onload = function() {
+            const maxDim = 1280;
+            const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+            if (scale === 1 && dataUrl.length < 1.5 * 1024 * 1024) { callback(dataUrl); return; }
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(img.width * scale));
+            canvas.height = Math.max(1, Math.round(img.height * scale));
+            canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+            callback(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.onerror = function() { callback(dataUrl); };
+        img.src = dataUrl;
+    }
+
     // ── ID upload handler (file picker) ──
     function handleIdUpload(input, side) {
         const file = input.files[0];
@@ -1628,7 +1647,9 @@
         }
         const reader = new FileReader();
         reader.onload = function(e) {
-            setIdPhoto(side, e.target.result, file.name + ' · via upload');
+            compressIdImage(e.target.result, function(compressed) {
+                setIdPhoto(side, compressed, file.name + ' · via upload');
+            });
         };
         reader.readAsDataURL(file);
     }
@@ -1692,12 +1713,12 @@
             alert('Camera is still starting — please wait a moment and try again.');
             return;
         }
-        const maxDim = 1600;
+        const maxDim = 1280;
         const scale = Math.min(1, maxDim / Math.max(video.videoWidth, video.videoHeight));
         canvas.width = Math.round(video.videoWidth * scale);
         canvas.height = Math.round(video.videoHeight * scale);
         canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         setIdPhoto(side, dataUrl, 'Captured with camera · ' + new Date().toLocaleString());
         video.classList.add('captured');
         document.getElementById(side + 'CaptureBtn').style.display = 'none';
@@ -1735,6 +1756,14 @@
             if (currentStep !== 5) goStep(5);
             if (!front) flagMissingId('front');
             if (!back) flagMissingId('back');
+            return false;
+        }
+        // Safety net: never let an oversized POST hit the server's 8MB limit
+        // (bare 413 page). Photos are compressed above, so this rarely fires.
+        if ((front.length + back.length) > 6 * 1024 * 1024) {
+            e.preventDefault();
+            alert('Your ID photos are still too large to send. Please retake them with your camera, or choose smaller files, then try again.');
+            if (front.length >= back.length) { flagMissingId('front'); } else { flagMissingId('back'); }
             return false;
         }
         stopAllIdCameras(); // release webcam before submit
