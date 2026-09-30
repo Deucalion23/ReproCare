@@ -650,6 +650,7 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::post('/{id}/reject', [ChoController::class, 'rejectUser'])->name('reject');
         Route::post('/{id}/deactivate', [ChoController::class, 'deactivateUser'])->name('deactivate');
         Route::post('/{id}/activate', [ChoController::class, 'activateUser'])->name('activate');
+        Route::post('/{id}/archive', [ChoController::class, 'archiveUser'])->name('archive');
     });
 
     // Supply Requests

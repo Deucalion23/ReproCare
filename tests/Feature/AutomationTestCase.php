@@ -42,6 +42,7 @@ abstract class AutomationTestCase extends TestCase
             $t->unsignedBigInteger('archived_by')->nullable(); $t->string('rejection_reason')->nullable();
             $t->string('role')->default('user'); $t->string('status')->default('approved');
             $t->string('contact_number')->nullable(); $t->boolean('sms_opt_out')->default(false);
+            $t->unsignedInteger('pwa_cache_version')->default(1);
             $t->rememberToken();
             $t->timestamps(); $t->softDeletes();
         });

@@ -169,6 +169,12 @@
                                                     <i class="bi bi-person-x"></i> Suspend
                                                 </button>
                                             </form>
+                                            <form method="POST" action="{{ route('cho.users.archive', $u->id) }}" class="d-inline" onsubmit="return choPromptArchiveReason(this);">
+                                                @csrf
+                                                <button type="submit" class="btn btn-xs btn-outline-warning" style="font-size:0.75rem;">
+                                                    <i class="bi bi-archive"></i> Archive
+                                                </button>
+                                            </form>
                                         @elseif(in_array($u->status, ['suspended', 'inactive']))
                                             <form method="POST" action="{{ route('cho.users.activate', $u->id) }}" class="d-inline" onsubmit="return confirm('Re-activate this account? They will be able to log in again.');">
                                                 @csrf
@@ -201,3 +207,18 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+    // Archive guardrail: require a reason so the audit trail records who / when / why.
+    function choPromptArchiveReason(form) {
+        const reason = prompt('Reason for archiving this account? (e.g. resigned, duplicate, test data)');
+        if (reason === null) return false;
+        if (reason.trim() === '') { alert('A reason for archiving is required.'); return false; }
+        const input = document.createElement('input');
+        input.type = 'hidden'; input.name = 'reason'; input.value = reason.trim();
+        form.appendChild(input);
+        return confirm('Archive this account? Sessions will be revoked immediately. It stays restorable from Archived Records.');
+    }
+</script>
+@endpush

@@ -98,6 +98,22 @@ class ChoPortalTest extends AutomationTestCase
         $response->assertSee('Pregnancies (1)');
     }
 
+    public function test_cho_can_archive_staff_from_user_management(): void
+    {
+        $cho = $this->patient(['role' => 'cho']);
+        $staff = $this->patient(['role' => 'rhu']);
+
+        $response = $this->actingAs($cho)->post(route('cho.users.archive', $staff->id), [
+            'reason' => 'Test data cleanup',
+        ]);
+
+        $response->assertRedirect(route('cho.users.index'));
+        $response->assertSessionHas('success');
+        $fresh = \App\Models\User::withTrashed()->find($staff->id);
+        $this->assertNotNull($fresh->deleted_at);
+        $this->assertSame('archived', $fresh->status);
+    }
+
     public function test_patients_cannot_open_cho_portal_pages(): void
     {
         $patient = $this->patient();

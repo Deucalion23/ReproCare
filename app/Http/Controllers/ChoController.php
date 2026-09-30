@@ -391,6 +391,38 @@ class ChoController extends Controller
     }
 
     /**
+     * Archive a staff account (reason required, offboarding guardrails
+     * enforced, sessions revoked). Retained for audit and restorable from
+     * the Archived Records hub — never a hard delete.
+     */
+    public function archiveUser(Request $request, $id)
+    {
+        $request->validate(['reason' => 'nullable|string|max:1000']);
+
+        $user = User::whereIn('role', ['rhu', 'midwife', 'bhw_president', 'bhw'])->findOrFail($id);
+
+        // Never orphan system administration: the last active CHO stays.
+        if ($user->role === 'cho'
+            && User::where('role', 'cho')->where('status', 'approved')->where('id', '!=', $user->id)->count() === 0) {
+            return back()->withErrors(['archive' => 'Cannot archive the last active CHO account.'])->withInput();
+        }
+
+        $reason = trim((string) $request->input('reason', ''));
+        if ($reason === '') {
+            $reason = 'Archived by CHO via User Management';
+        }
+
+        try {
+            app(\App\Services\ArchiveService::class)->archiveUser($user, $reason, auth()->user());
+        } catch (\InvalidArgumentException | \RuntimeException $e) {
+            return back()->withErrors(['archive' => $e->getMessage()])->withInput();
+        }
+
+        return redirect()->route('cho.users.index')
+            ->with('success', "Staff account for {$user->name} archived. Sessions revoked; restorable from Archived Records.");
+    }
+
+    /**
      * Registered Women: city-wide patient directory (read-only oversight).
      * Account lifecycle (approve/reject/archive) stays in RHU verification
      * and the Archived Records hub — this page never mutates.
