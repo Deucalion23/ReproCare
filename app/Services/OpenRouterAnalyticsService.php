@@ -85,6 +85,9 @@ class OpenRouterAnalyticsService
             if (in_array($response->status(), [400, 404, 422], true)) {
                 return $this->failure('model', 'OpenRouter could not use this model or request. Check OPENROUTER_MODEL against the models available in your OpenRouter account.');
             }
+            if ($response->status() === 402) {
+                return $this->failure('billing', 'OpenRouter refused the request for billing reasons — usually no credits left for paid models like GPT-4o-mini. Top up your OpenRouter account or switch OPENROUTER_MODEL to a free :free model.');
+            }
             if (! $response->successful()) {
                 return $this->failure('unavailable', 'OpenRouter is unavailable right now. Please try again later.');
             }

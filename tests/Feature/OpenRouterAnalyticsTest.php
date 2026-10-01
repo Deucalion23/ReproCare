@@ -116,16 +116,17 @@ class OpenRouterAnalyticsTest extends TestCase
         Http::fake(['*' => Http::sequence()
             ->push(['error' => 'test-only-secret'], 401)
             ->push(['error' => 'test-only-secret'], 404)
+            ->push(['error' => 'test-only-secret'], 402)
             ->push(['error' => 'test-only-secret'], 500)
             ->push([], 302, ['Location' => 'https://untrusted.example'])]);
-        foreach (['authentication', 'model', 'unavailable', 'unavailable'] as $expected) {
+        foreach (['authentication', 'model', 'billing', 'unavailable', 'unavailable'] as $expected) {
             $answer = app(AIInsightService::class)->chat('summary', $this->report());
             $this->assertSame('rules', $answer['source']);
             $this->assertSame($expected, $answer['error_code']);
             $this->assertStringNotContainsString('test-only-secret', json_encode($answer));
             $this->assertStringNotContainsString('untrusted.example', json_encode($answer));
         }
-        Http::assertSentCount(4);
+        Http::assertSentCount(5);
     }
 
     public function test_incomplete_answers_are_never_presented_as_ai_success_or_cached(): void
