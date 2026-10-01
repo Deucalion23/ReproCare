@@ -36,6 +36,10 @@ class BhwMonthlyReport extends Model
         'midwife_notes',
         'approved_by_rhu_by',
         'approved_by_rhu_at',
+        'submitted_to_cho_by',
+        'submitted_to_cho_at',
+        'received_by_cho_by',
+        'received_by_cho_at',
         // 1. Rejection Feedback Loop — correction & resubmission state
         'revision_count',
         'rejected_by_id',
@@ -52,6 +56,8 @@ class BhwMonthlyReport extends Model
         'submitted_to_midwife_at' => 'datetime',
         'approved_by_midwife_at' => 'datetime',
         'approved_by_rhu_at' => 'datetime',
+        'submitted_to_cho_at' => 'datetime',
+        'received_by_cho_at' => 'datetime',
         'rejected_at' => 'datetime',
         'resubmitted_at' => 'datetime',
     ];
@@ -116,6 +122,16 @@ class BhwMonthlyReport extends Model
     public function approvedByRhu()
     {
         return $this->belongsTo(User::class, 'approved_by_rhu_by');
+    }
+
+    public function submittedToChoBy()
+    {
+        return $this->belongsTo(User::class, 'submitted_to_cho_by');
+    }
+
+    public function receivedByChoBy()
+    {
+        return $this->belongsTo(User::class, 'received_by_cho_by');
     }
 
     public function submitToPresident($userId)
@@ -222,6 +238,30 @@ class BhwMonthlyReport extends Model
             'submission_status' => 'approved_by_rhu',
             'approved_by_rhu_by' => $userId,
             'approved_by_rhu_at' => now(),
+        ]);
+    }
+
+    /**
+     * RHU passes a validated report to the CHO City Reports queue.
+     */
+    public function submitToCho($userId)
+    {
+        $this->update([
+            'submission_status' => 'submitted_to_cho',
+            'submitted_to_cho_by' => $userId,
+            'submitted_to_cho_at' => now(),
+        ]);
+    }
+
+    /**
+     * CHO acknowledges receipt — the report is now part of City Reports.
+     */
+    public function receiveByCho($userId)
+    {
+        $this->update([
+            'submission_status' => 'received_by_cho',
+            'received_by_cho_by' => $userId,
+            'received_by_cho_at' => now(),
         ]);
     }
 

@@ -30,6 +30,8 @@
                     <option value="submitted_to_midwife" {{ ($status ?? '') === 'submitted_to_midwife' ? 'selected' : '' }}>At Midwife</option>
                     <option value="approved_by_midwife" {{ ($status ?? '') === 'approved_by_midwife' ? 'selected' : '' }}>Validated by Midwife</option>
                     <option value="approved_by_rhu" {{ ($status ?? '') === 'approved_by_rhu' ? 'selected' : '' }}>Approved by RHU (Ready for CHO)</option>
+                    <option value="submitted_to_cho" {{ ($status ?? '') === 'submitted_to_cho' ? 'selected' : '' }}>Passed to CHO (Awaiting Receipt)</option>
+                    <option value="received_by_cho" {{ ($status ?? '') === 'received_by_cho' ? 'selected' : '' }}>Received by CHO</option>
                     <option value="returned_to_president" {{ ($status ?? '') === 'returned_to_president' ? 'selected' : '' }}>Returned to President</option>
                     <option value="needs_revision" {{ ($status ?? '') === 'needs_revision' ? 'selected' : '' }}>Needs Revision</option>
                 </select>
@@ -45,7 +47,7 @@
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead><tr><th class="px-4">Report</th><th>BHW</th><th>Type</th><th>Records</th><th>Status</th></tr></thead>
+                <thead><tr><th class="px-4">Report</th><th>BHW</th><th>Type</th><th>Records</th><th>Status</th><th class="text-end px-4">Action</th></tr></thead>
                 <tbody>
                     @forelse($reports as $report)
                         <tr>
@@ -53,10 +55,20 @@
                             <td>{{ $report->bhw?->name ?? '—' }}</td>
                             <td>{{ ucfirst(str_replace('_', ' ', $report->report_type ?? 'report')) }}</td>
                             <td>{{ $report->total_records }}</td>
-                            <td><span class="badge bg-secondary">{{ ucwords(str_replace('_', ' ', $report->submission_status)) }}</span></td>
+                            <td><span class="badge {{ $report->submission_status === 'submitted_to_cho' ? 'bg-warning text-dark' : ($report->submission_status === 'received_by_cho' ? 'bg-success' : 'bg-secondary') }}">{{ ucwords(str_replace('_', ' ', $report->submission_status)) }}</span></td>
+                            <td class="text-end px-4">
+                                @if($report->submission_status === 'submitted_to_cho')
+                                    <form method="POST" action="{{ route('cho.reports.receive', $report->id) }}" class="d-inline" onsubmit="return confirm('Acknowledge receipt of this validated report into City Reports?');">
+                                        @csrf
+                                        <button type="submit" class="btn btn-sm btn-success text-white"><i class="bi bi-check-lg me-1"></i> Receive</button>
+                                    </form>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
+                            </td>
                         </tr>
                     @empty
-                        <tr><td colspan="5" class="text-center text-muted py-4">No reports for this month.</td></tr>
+                        <tr><td colspan="6" class="text-center text-muted py-4">No reports for this month.</td></tr>
                     @endforelse
                 </tbody>
             </table>

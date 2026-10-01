@@ -1696,6 +1696,41 @@ class RhuController extends Controller
             ->with('success', 'Midwife Monthly Report approved successfully. It is now ready for the CHO.');
     }
 
+    /**
+     * Pass a validated (RHU-approved) report to the CHO City Reports queue.
+     * Only approved_by_rhu reports may be handed off — anything earlier in
+     * the chain stays invisible to the CHO.
+     */
+    public function sendReportToCho(Request $request, $id)
+    {
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'approved_by_rhu') {
+            return redirect()->route('rhu.bhw-reports.index')
+                ->with('error', 'Only RHU-approved reports can be passed to the CHO.');
+        }
+
+        $report->submitToCho(auth()->id());
+
+        // Notify every active CHO account that a validated report awaits.
+        $workflows = app(\App\Services\WorkflowService::class);
+        $choAdmins = User::where('role', 'cho')->where('status', 'approved')->get(['id']);
+        foreach ($choAdmins as $cho) {
+            $workflows->notifyAction(
+                (int) $cho->id,
+                '📥 Validated Report Passed to CHO',
+                'RHU passed validated report "' . ($report->title ?? "#{$report->id}") . '" to City Reports. Please acknowledge receipt.',
+                'info',
+                route('cho.reports.index')
+            );
+        }
+
+        ActivityLog::log('update', "Passed validated midwife monthly report ID: {$report->id} to CHO City Reports", $report);
+
+        return redirect()->route('rhu.bhw-reports.index')
+            ->with('success', 'Report passed to the CHO. It now appears in City Reports as ready for receipt.');
+    }
+
     public function bhwReportReject(Request $request, $id)
     {
         // 1+5. Mandatory reason → Needs Revision queue + notify BHW & President.

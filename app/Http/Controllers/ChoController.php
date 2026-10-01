@@ -662,9 +662,29 @@ class ChoController extends Controller
         return view('cho.reports.index', compact('reports', 'month', 'status'));
     }
 
-    public function exportReportsCsv(Request $request)
+    /**
+     * Acknowledge receipt of a validated report the RHU passed to City
+     * Reports. Only submitted_to_cho reports may be received.
+     */
+    public function receiveReport(Request $request, $id)
     {
-        $pendingSignature = !self::signatureReadyFor(auth()->user()?->fresh());
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'submitted_to_cho') {
+            return redirect()->route('cho.reports.index')
+                ->with('error', 'Only reports passed by the RHU can be received here.');
+        }
+
+        $report->receiveByCho(auth()->id());
+
+        ActivityLog::log('update', "CHO acknowledged receipt of validated report ID: {$report->id} into City Reports", $report);
+
+        return redirect()->route('cho.reports.index')
+            ->with('success', 'Report received into City Reports.');
+    }
+
+    public function exportReportsCsv(Request $request)
+    {        $pendingSignature = !self::signatureReadyFor(auth()->user()?->fresh());
         $month = $request->input('month', now()->format('Y-m'));
         [$year, $mon] = array_map('intval', explode('-', $month) + [date('Y'), date('m')]);
         $reports = BhwMonthlyReport::with('bhw')

@@ -691,6 +691,7 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/', [ChoController::class, 'reports'])->name('index');
         Route::get('/export/csv', [ChoController::class, 'exportReportsCsv'])->name('export.csv');
         Route::get('/export/pdf', [ChoController::class, 'exportReportsPdf'])->name('export.pdf');
+        Route::post('/{id}/receive', [ChoController::class, 'receiveReport'])->name('receive');
     });
 
     // Staff Management (read-only directory; account lifecycle lives under users.*)
@@ -885,6 +886,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/{id}/print', [RhuController::class, 'bhwReportPrint'])->name('print');
         Route::post('/{id}/approve', [RhuController::class, 'bhwReportApprove'])->name('approve');
         Route::post('/{id}/reject', [RhuController::class, 'bhwReportReject'])->name('reject');
+        Route::post('/{id}/send-to-cho', [RhuController::class, 'sendReportToCho'])->name('send-to-cho');
         Route::delete('/{id}', [RhuController::class, 'bhwReportDestroy'])->name('destroy');
     });
 
