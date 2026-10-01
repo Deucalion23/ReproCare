@@ -691,6 +691,7 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::get('/', [ChoController::class, 'reports'])->name('index');
         Route::get('/export/csv', [ChoController::class, 'exportReportsCsv'])->name('export.csv');
         Route::get('/export/pdf', [ChoController::class, 'exportReportsPdf'])->name('export.pdf');
+        Route::get('/{id}', [ChoController::class, 'showReport'])->name('show');
         Route::post('/{id}/receive', [ChoController::class, 'receiveReport'])->name('receive');
     });
 

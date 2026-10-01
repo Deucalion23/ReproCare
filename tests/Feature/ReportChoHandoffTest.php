@@ -123,4 +123,50 @@ class ReportChoHandoffTest extends AutomationTestCase
         $this->actingAs($midwife)->post(route('rhu.bhw-reports.send-to-cho', $report->id))->assertForbidden();
         $this->actingAs($midwife)->post(route('cho.reports.receive', $report->id))->assertForbidden();
     }
+
+    public function test_cho_can_view_submitted_health_records(): void
+    {
+        $cho = $this->patient(['role' => 'cho']);
+        $woman = $this->patient(['first_name' => 'Record', 'last_name' => 'Woman']);
+        $report = $this->validatedReport();
+        \App\Models\HealthRecord::create([
+            'user_id' => $woman->id,
+            'recorded_by_id' => $report->bhw_id,
+            'bp' => '120/80',
+            'risk_level' => 'Low',
+        ]);
+
+        $response = $this->actingAs($cho)->get(route('cho.reports.show', $report->id));
+
+        $response->assertOk();
+        $response->assertSee('Record Woman');
+        $response->assertSee('120/80');
+        $response->assertSee('Unique Patients');
+    }
+
+    public function test_cho_can_view_submitted_pregnancy_registry(): void
+    {
+        $cho = $this->patient(['role' => 'cho']);
+        $woman = $this->patient(['first_name' => 'Registry', 'last_name' => 'Mother']);
+        $report = $this->validatedReport();
+        $report->update(['report_type' => 'pregnancies']);
+        \App\Models\Pregnancy::create([
+            'user_id' => $woman->id,
+            'lmp' => today()->subDays(100)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($cho)->get(route('cho.reports.show', $report->id));
+
+        $response->assertOk();
+        $response->assertSee('Registry Mother');
+        $response->assertSee('Pregnancy Registry Entries');
+    }
+
+    public function test_patients_cannot_open_cho_report_file(): void
+    {
+        $patient = $this->patient();
+        $report = $this->validatedReport();
+
+        $this->actingAs($patient)->get(route('cho.reports.show', $report->id))->assertForbidden();
+    }
 }

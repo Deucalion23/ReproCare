@@ -57,13 +57,12 @@
                             <td>{{ $report->total_records }}</td>
                             <td><span class="badge {{ $report->submission_status === 'submitted_to_cho' ? 'bg-warning text-dark' : ($report->submission_status === 'received_by_cho' ? 'bg-success' : 'bg-secondary') }}">{{ ucwords(str_replace('_', ' ', $report->submission_status)) }}</span></td>
                             <td class="text-end px-4">
+                                <a href="{{ route('cho.reports.show', $report->id) }}" class="btn btn-sm btn-outline-primary"><i class="bi bi-eye me-1"></i> View</a>
                                 @if($report->submission_status === 'submitted_to_cho')
                                     <form method="POST" action="{{ route('cho.reports.receive', $report->id) }}" class="d-inline" onsubmit="return confirm('Acknowledge receipt of this validated report into City Reports?');">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-success text-white"><i class="bi bi-check-lg me-1"></i> Receive</button>
                                     </form>
-                                @else
-                                    <span class="text-muted">—</span>
                                 @endif
                             </td>
                         </tr>
