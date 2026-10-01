@@ -97,14 +97,14 @@ To turn off cloud calls, set `ANALYTICS_AI_PROVIDER=rules` and run `php artisan 
 
 ## Alternative provider: OpenRouter (many free models, one key)
 
-Instead of Groq, the assistant can call any model on [OpenRouter](https://openrouter.ai/) using the same aggregate-only context, caching, cooldown, and fallback rules. Recommended free model for maternal-health suggestions: `meta-llama/llama-3.3-70b-instruct:free` (strong instruction following; alternatives: `qwen/qwen3-32b:free` for reasoning, `google/gemma-3-27b-it:free` for summarization).
+Instead of Groq, the assistant can call any model on [OpenRouter](https://openrouter.ai/) using the same aggregate-only context, caching, cooldown, and fallback rules. The overall analytics model is OpenAI GPT-4o-mini (paid per token, very cheap at this volume; free `:free`-suffix alternatives such as `meta-llama/llama-3.3-70b-instruct:free` also work).
 
 1. Create an account at [openrouter.ai](https://openrouter.ai/), open **Keys**, and create a key. Never paste it into chat, screenshots, or source control.
 2. In `.env` (server only):
    ```dotenv
    ANALYTICS_AI_PROVIDER=openrouter
    OPENROUTER_API_KEY=paste_your_key_here
-   OPENROUTER_MODEL=meta-llama/llama-3.3-70b-instruct:free
+   OPENROUTER_MODEL=openai/gpt-4o-mini
    ```
 3. Run `php artisan config:clear`, then verify without touching patient records:
    ```powershell
