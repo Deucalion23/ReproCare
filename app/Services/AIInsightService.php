@@ -80,6 +80,9 @@ class AIInsightService
         if (config('services.analytics_ai.provider', 'rules') === 'groq') {
             return $this->groqAnswer($question, $report, $fallback);
         }
+        if (config('services.analytics_ai.provider', 'rules') === 'openrouter') {
+            return $this->openRouterAnswer($question, $report, $fallback);
+        }
         if (config('services.analytics_ai.provider', 'rules') !== 'ollama') {
             return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answers use the selected report.'];
         }
@@ -142,7 +145,10 @@ class AIInsightService
                 ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
                 : ['label' => 'Groq needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             'ollama' => ['label' => 'Local AI · Ollama', 'description' => 'Ollama generates a draft when available. Local rules take over if it is unavailable.'],
-            default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable Groq online AI or Ollama local AI.'],
+            'openrouter' => app(OpenRouterAnalyticsService::class)->configured()
+                ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
+                : ['label' => 'OpenRouter needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
+            default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable Groq or OpenRouter online AI, or Ollama local AI.'],
         };
     }
 
@@ -159,6 +165,27 @@ class AIInsightService
 
         return [
             'answer' => $result['answer'], 'source' => 'groq', 'model' => $result['model'],
+            'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
+            'topic' => CloudAnalyticsContext::TOPICS[$topic],
+            'area_legend' => $prepared['area_legend'],
+            'notice' => 'Draft answer. '.($result['cached'] ? 'Reused a matching answer from the last five minutes. ' : '')
+                .'Based on grouped counts and area aliases. Below 5 includes zero. Verify the draft against the exact local charts.',
+        ];
+    }
+
+    private function openRouterAnswer(string $question, array $report, string $fallback): array
+    {
+        $projection = app(CloudAnalyticsContext::class);
+        $topic = $projection->topic($question) ?? 'general';
+        $prepared = $projection->build($report);
+        $result = app(OpenRouterAnalyticsService::class)->summarize($prepared['context'], $topic, true, $question);
+        if (! $result['ok']) {
+            return ['answer' => $fallback, 'source' => 'rules', 'error_code' => $result['error_code'],
+                'notice' => $result['message'].' Showing the local rules answer.'];
+        }
+
+        return [
+            'answer' => $result['answer'], 'source' => 'openrouter', 'model' => $result['model'],
             'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
             'topic' => CloudAnalyticsContext::TOPICS[$topic],
             'area_legend' => $prepared['area_legend'],
