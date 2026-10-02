@@ -295,7 +295,7 @@
         </div>
         <p class="small">A zero means no matching records were found, not that no event occurred. This report excludes archived records. Event counts are not mortality ratios, incidence rates or forecasts; those require verified definitions, reporting completeness and suitable denominators.</p>
         <p class="small">Open pregnancies have no recorded end, delivery date or outcome. Known deceased patients are excluded from the current queue. Old open records may need an outcome update. Historical risk records from other pregnancies are excluded; unlinked appointments cannot be assigned to a pregnancy automatically.</p>
-        <p class="small mb-0">Online AI receives your question, count ranges, numbered months and area aliases. Do not include patient details in your question. Local Ollama receives aggregate figures and your question. Neither can change risk classifications, create appointments, or send messages. Staff must verify any generated summary.</p>
+        <p class="small mb-0">Online AI receives your question, exact aggregate counts, numbered months and area aliases. Do not include patient details in your question. Local Ollama receives aggregate figures and your question. Neither can change risk classifications, create appointments, or send messages. Staff must verify any generated summary.</p>
     </details>
 </div>
 @endsection

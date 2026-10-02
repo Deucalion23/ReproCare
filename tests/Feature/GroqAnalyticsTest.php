@@ -60,8 +60,8 @@ class GroqAnalyticsTest extends TestCase
             }
             $data = json_decode($request['messages'][1]['content'], true);
             $this->assertSame('Which risks need follow-up?', $data['staff_question']);
-            $this->assertSame('10-19', $data['report']['totals']['open']);
-            $this->assertSame('Below 5 (includes zero)', $data['report']['totals']['deaths']);
+            $this->assertSame(18, $data['report']['totals']['open']);
+            $this->assertSame(1, $data['report']['totals']['deaths']);
             $this->assertSame('Area 1', $data['report']['areas'][0]['area']);
             $this->assertSame('Month 1', $data['report']['monthly'][0]['month']);
             $this->assertArrayNotHasKey('queue', $data['report']);
@@ -73,7 +73,7 @@ class GroqAnalyticsTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    public function test_context_masks_small_counts_including_zero_and_rejects_unexpected_record_text(): void
+    public function test_context_sends_exact_counts_and_rejects_unexpected_record_text(): void
     {
         $report = $this->report();
         $report['totals']['open'] = 'Injected private text';
@@ -82,8 +82,9 @@ class GroqAnalyticsTest extends TestCase
         $prepared = app(CloudAnalyticsContext::class)->build($report);
         $context = $prepared['context'];
         $this->assertSame('Unavailable', $context['totals']['open']);
-        $this->assertSame($context['totals']['deaths'], $context['totals']['emergency']);
-        $this->assertSame($context['totals']['deaths'], $context['totals']['complications']);
+        $this->assertSame(1, $context['totals']['deaths']);
+        $this->assertSame(0, $context['totals']['emergency']);
+        $this->assertSame(4, $context['totals']['complications']);
         $this->assertStringNotContainsString('private', strtolower(json_encode($context)));
         $this->assertArrayNotHasKey('extra_field', $context['totals']);
     }
