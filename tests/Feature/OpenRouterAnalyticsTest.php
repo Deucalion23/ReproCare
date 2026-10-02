@@ -61,7 +61,7 @@ class OpenRouterAnalyticsTest extends TestCase
             $this->assertSame('Which risks need follow-up?', $data['staff_question']);
             $this->assertArrayNotHasKey('queue', $data['report']);
             $this->assertFalse($request['stream']);
-            $this->assertSame(900, $request['max_tokens']);
+            $this->assertSame(2000, $request['max_tokens']);
 
             return true;
         });
@@ -118,6 +118,7 @@ class OpenRouterAnalyticsTest extends TestCase
             ->push(['error' => 'test-only-secret'], 404)
             ->push(['error' => 'test-only-secret'], 402)
             ->push(['error' => 'test-only-secret'], 500)
+            ->push(['error' => 'test-only-secret'], 500)
             ->push([], 302, ['Location' => 'https://untrusted.example'])]);
         foreach (['authentication', 'model', 'billing', 'unavailable', 'unavailable'] as $expected) {
             $answer = app(AIInsightService::class)->chat('summary', $this->report());
@@ -126,7 +127,29 @@ class OpenRouterAnalyticsTest extends TestCase
             $this->assertStringNotContainsString('test-only-secret', json_encode($answer));
             $this->assertStringNotContainsString('untrusted.example', json_encode($answer));
         }
-        Http::assertSentCount(5);
+        Http::assertSentCount(6);
+    }
+
+    public function test_success_payload_with_provider_overload_error_retries_once_then_recovers(): void
+    {
+        Http::fake(['*' => Http::sequence()
+            ->push(['id' => 'gen-test', 'error' => ['message' => 'Upstream error from Nvidia: Service temporarily overloaded', 'code' => 503, 'metadata' => ['error_type' => 'provider_overloaded']]])
+            ->push($this->success())]);
+        $result = app(AIInsightService::class)->chat('summary', $this->report());
+        $this->assertSame('openrouter', $result['source']);
+        $this->assertFalse($result['cached']);
+        Http::assertSentCount(2);
+    }
+
+    public function test_persistent_overload_reports_actionable_message_without_provider_details(): void
+    {
+        Http::fake(['*' => Http::response(['error' => 'test-only-secret'], 503)]);
+        $answer = app(AIInsightService::class)->chat('summary', $this->report());
+        $this->assertSame('rules', $answer['source']);
+        $this->assertSame('unavailable', $answer['error_code']);
+        $this->assertStringContainsString('overloaded', $answer['notice']);
+        $this->assertStringNotContainsString('test-only-secret', json_encode($answer));
+        Http::assertSentCount(2);
     }
 
     public function test_incomplete_answers_are_never_presented_as_ai_success_or_cached(): void
