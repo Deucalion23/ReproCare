@@ -80,6 +80,12 @@ class OpenRouterAnalyticsService
                     // count toward this budget, so 900 truncates them
                     // (finish_reason length) before any answer is produced.
                     'max_tokens' => 2000,
+                    // Disable internal reasoning: this task only restates supplied
+                    // numbers, and thinking tokens otherwise consume the output
+                    // budget (finish_reason length) before any answer appears.
+                    // Ignored by non-reasoning models; reasoning traces are
+                    // excluded from the response entirely.
+                    'reasoning' => ['effort' => 'none', 'exclude' => true],
                     ]);
                 } catch (\Throwable $e) {
                     // Transient network failure: retry once, then report it.
