@@ -272,6 +272,15 @@ class AIInsightService
                 ."\nRecommended:\n• ".collect($this->suggestions($report))->take(3)->map(fn ($s) => $s['evidence'].' '.$s['action'])->implode("\n• ");
         }
 
+        if (preg_match('/how (do|can|to)|where|navigate|approve|submit|register|create|add|use the|using|portal|page|button|click|paano|saan|how to use/u', $q)) {
+            return "How to use ReproCare:\n• Patients (women portal): track pregnancy and menstrual cycles, view checkups, message your BHW, join the community forum, and read learning materials."
+                ."\n• BHWs: register women, schedule checkups, record vitals, and submit records and pregnancy reports to your president."
+                ."\n• BHW Presidents: review BHW submissions in the Record Review and Pregnancy Review queues, then approve or pass them to the midwife."
+                ."\n• Midwives: verify records, manage checkups, and use decision support.\n• RHU/CHO: verify accounts, review reports, and read analytics."
+                ."\nApprovals flow: BHW submits → president reviews → midwife verifies."
+                ."\nAsk me about report numbers, areas, trends, or deaths for data answers.";
+        }
+
         return $scope.'The free rules assistant can summarize priorities, missed appointments, monthly registrations, recorded maternal deaths and barangay counts. '
             .'Try "Which records need priority review?", "Which barangay has the most high-risk pregnancies and what should we do?", '
             .'"Which barangay has the most pregnant women right now?" or "Which barangay has the most maternal deaths?" '
