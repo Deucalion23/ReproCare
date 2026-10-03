@@ -318,6 +318,20 @@ class AIInsightService
             return $scope."\nNo barangay records were found in this selection."
                 ."\nBest next step: confirm reporting completeness and maintain scheduled follow-up.";
         }
+        $emptyFocus = (bool) preg_match('/\bno\b|\bwithout\b|\bzero\b|\bempty\b|\bwalang\b|\bwala\b/u', mb_strtolower($question));
+        // "List barangays with NO pregnancies" → only the quiet areas.
+        if ($emptyFocus && ! preg_match('/high.?risk|critical|panganib/u', mb_strtolower($question))) {
+            $quiet = $areas->filter(fn ($a) => $a['open'] <= 0)->sortBy('label')->values();
+            if ($quiet->isEmpty()) {
+                return $scope."\nEvery area in this selection has open pregnancies right now."
+                    ."\nBest next step: keep scheduled follow-up and reporting complete across all areas.";
+            }
+            $lines = $quiet->map(fn ($a) => "• {$a['label']}: 0 open now, {$a['registrations']} registrations in period");
+
+            return $scope."\nBarangays with no open pregnancies (".$quiet->count().' of '.$areas->count()."):"."\n".$lines->implode("\n")
+                ."\nBest next step: verify reporting completeness in these areas — zero records may mean no pregnancies, or missing reports. Confirm with the assigned BHWs."
+                ."\nNote: counts are recorded numbers, not population risk rates.";
+        }
         // "List the in-risk / high-risk women" → the actual at-risk
         // records. This answer is always built locally (source 'rules'):
         // names never leave this server for any cloud model.
