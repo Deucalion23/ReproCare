@@ -54,16 +54,16 @@
                     @if($group->isNotEmpty())
                         <tbody>
                             <tr class="an-group-head an-group-{{ $color }}"><th colspan="8">
-                                <button type="button" class="an-risk-toggle an-group-toggle" id="risk-toggle-{{ $color }}" aria-expanded="true" aria-controls="risk-rows-{{ $color }}">
+                                <button type="button" class="an-risk-toggle an-group-toggle" id="risk-toggle-{{ $color }}" aria-expanded="false" aria-controls="risk-rows-{{ $color }}">
                                     <i class="bi bi-chevron-down an-risk-chevron" aria-hidden="true"></i>
                                     <i class="an-dot" aria-hidden="true"></i>
                                     {{ $label }}
                                     <span class="an-badge">{{ $group->count() }}</span>
-                                    <span class="an-risk-toggle-hint">Collapse</span>
+                                    <span class="an-risk-toggle-hint">Expand</span>
                                 </button>
                             </th></tr>
                         </tbody>
-                        <tbody id="risk-rows-{{ $color }}" class="an-risk-group-rows" aria-labelledby="risk-toggle-{{ $color }}">
+                        <tbody id="risk-rows-{{ $color }}" class="an-risk-group-rows" aria-labelledby="risk-toggle-{{ $color }}" hidden>
                             @foreach($group as $areaStatus)
                                 <tr>
                                     <th scope="row" class="an-loc">{{ $areaStatus['label'] }}</th>
