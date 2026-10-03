@@ -6,7 +6,7 @@ Run on a development/test database after migrations:
 php artisan db:seed --class=TestScenarioAccountsSeeder
 ```
 
-This is an **opt-in** seeder, separate from `DatabaseSeeder`. It creates exactly 100 accounts on a clean run. Every email is `reprocare-test-NNN@example.test` (001–100); the shared password is `TestAccount123!`. Names are distinct pseudo-random first/last-name pairs, stable across runs. No actual mailboxes or real patient information are used. Running it again does not reset existing account edits or duplicate scenario records.
+This is separate from `DatabaseSeeder`. On the deployed Render service, `docker/entrypoint.sh` runs it at startup when fewer than 100 test accounts are present. Set `SEED_TEST_SCENARIOS=false` to disable this deployment behavior. It creates exactly 100 accounts on a clean run. Every email is `reprocare-test-NNN@example.test` (001–100); the shared password is `TestAccount123!`. Names are distinct pseudo-random first/last-name pairs, stable across runs. No actual mailboxes or real patient information are used. Running it again does not reset existing account edits or duplicate scenario records.
 
 | Account numbers | Role or patient situation |
 | --- | --- |
