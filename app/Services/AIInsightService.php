@@ -227,7 +227,8 @@ class AIInsightService
                 ? "The largest recorded count is in {$worst['label']} ({$worst['deaths']} death record(s) in the period). "
                 : 'No death records were found in this selection. ';
 
-            return $scope."\nSpecific data:\n• {$t['deaths']} maternal death record(s)\n• {$t['complications']} reported complication event(s)\n"
+            return $scope."\nIn short: {$t['deaths']} mother(s) died and {$t['complications']} complications were recorded in this period."
+                ."\nSpecific data:\n• {$t['deaths']} maternal death record(s)\n• {$t['complications']} reported complication event(s)\n"
                 ."• {$t['pending_death_reviews']} death audit(s) pending or under review\n• ".$where
                 ."\nRecommended:\n• Complete the pending death audits and review referral and service gaps with the RHU team.\n• Verify each record in the queue before acting."
                 ."\nNote: exact recorded counts, not mortality rates or predictions; zero records may reflect incomplete reporting.";
@@ -239,7 +240,8 @@ class AIInsightService
                     ."\nRecommended: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.";
             }
 
-            return $scope."\nSpecific data:\n• Top area: {$worst['label']} ({$worst['high_risk']} High/Critical open now)\n"
+            return $scope."\nIn short: {$worst['label']} needs the most attention right now ({$worst['high_risk']} high-risk ongoing pregnancies)."
+                ."\nSpecific data:\n• Top area: {$worst['label']} ({$worst['high_risk']} High/Critical open now)\n"
                 ."• Selection totals: {$t['open']} open, {$t['high_risk']} High/Critical, {$t['unassessed']} unassessed. "
                 ."\nRecommended:\n• Confirm each care plan with the assigned midwife.\n• Check outreach staffing and referral transport for that barangay.\n• Re-check its unassessed records."
                 ."\nNote: exact recorded counts, not population risk rates.";
@@ -251,7 +253,8 @@ class AIInsightService
                     ."\nRecommended: confirm reporting completeness and maintain scheduled follow-up.";
             }
 
-            return $scope."\nSpecific data:\n• Busiest area: {$worst['label']} ({$worst['open']} open now)\n"
+            return $scope."\nIn short: {$worst['label']} has the most ongoing pregnancies ({$worst['open']})."
+                ."\nSpecific data:\n• Busiest area: {$worst['label']} ({$worst['open']} open now)\n"
                 ."• Selection totals: {$t['open']} open, {$t['high_risk']} High/Critical, {$t['care_gaps']} with missed or overdue appointments. "
                 ."\nRecommended:\n• Align BHW visit schedules and checkup capacity with that workload.\n• Verify reporting completeness before reallocating staff.\n• Review the high-risk and care-gap lists in the queue."
                 ."\nNote: exact recorded counts, not comparisons of need across populations.";
@@ -259,7 +262,9 @@ class AIInsightService
         if (preg_match('/trend|month|registration|buwan/u', $q)) {
             $peak = collect($report['monthly'])->sortByDesc('registrations')->first();
 
-            return $scope."\nSpecific data:\n• {$t['registrations']} pregnancy registration(s) were recorded. "
+            return $scope."\nIn short: {$t['registrations']} new pregnancies were recorded"
+                .($t['registrations'] ? ", most in {$peak['label']}." : ".")
+                ."\nSpecific data:\n• {$t['registrations']} pregnancy registration(s) were recorded. "
                 .($t['registrations'] ? "\n• Peak month: {$peak['label']} ({$peak['registrations']}; ties are possible). " : '')
                 ."\nRecommended:\n• Keep entry recording complete during peak months.\n• Confirm the queue reflects current follow-up needs."
                 ."\nNote: first and last months may be partial. Registration dates measure entry into the system, not conception; this report does not forecast future pregnancies.";
@@ -272,7 +277,8 @@ class AIInsightService
                 ."\nNote: areas are ordered by recorded high-risk count, then death count. Population denominators are unavailable, so these are not comparisons of risk rates.";
         }
         if (preg_match('/priorit|risk|suggest|decision|follow|summary|summar|recommend|unahin|panganib|missed|appointment/u', $q)) {
-            return $scope."\nSpecific data:\n• {$t['open']} open pregnancy record(s) now\n• {$t['high_risk']} High/Critical\n• {$t['emergency']} emergency-marked\n"
+            return $scope."\nIn short: {$t['open']} ongoing pregnancies need attention, {$t['high_risk']} of them high-risk."
+                ."\nSpecific data:\n• {$t['open']} open pregnancy record(s) now\n• {$t['high_risk']} High/Critical\n• {$t['emergency']} emergency-marked\n"
                 ."• {$t['care_gaps']} with missed or overdue appointments\n• {$t['past_due']} past the expected delivery date\n• {$t['unassessed']} unassessed. "
                 ."\nRecommended:\n• ".collect($this->suggestions($report))->take(3)->map(fn ($s) => $s['evidence'].' '.$s['action'])->implode("\n• ");
         }
