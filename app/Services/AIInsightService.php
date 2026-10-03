@@ -221,55 +221,54 @@ class AIInsightService
                 ? "The largest recorded count is in {$worst['label']} ({$worst['deaths']} death record(s) in the period). "
                 : 'No death records were found in this selection. ';
 
-            return $scope."Specific data: {$t['deaths']} maternal death record(s), {$t['complications']} reported complication event(s), "
-                ."and {$t['pending_death_reviews']} death audit(s) pending or under review. ".$where
-                .'Recommended: complete the pending death audits and review referral and service gaps with the RHU team; verify each record in the queue before acting. '
-                .'These are exact recorded counts, not mortality rates or predictions; zero records may reflect incomplete reporting.';
+            return $scope."\nSpecific data:\n• {$t['deaths']} maternal death record(s)\n• {$t['complications']} reported complication event(s)\n"
+                ."• {$t['pending_death_reviews']} death audit(s) pending or under review\n• ".$where
+                ."\nRecommended:\n• Complete the pending death audits and review referral and service gaps with the RHU team.\n• Verify each record in the queue before acting."
+                ."\nNote: exact recorded counts, not mortality rates or predictions; zero records may reflect incomplete reporting.";
         }
         if (preg_match('/high.?risk.*(area|barangay|bayan)|most.*high.?risk/u', $q)) {
             $worst = $ranked->sortByDesc('high_risk')->first();
             if (! $worst || $worst['high_risk'] <= 0) {
-                return $scope.'Specific data: 0 open High/Critical records in this selection. '
-                    .'Recommended: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.';
+                return $scope."\nSpecific data: 0 open High/Critical records in this selection."
+                    ."\nRecommended: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.";
             }
 
-            return $scope."Specific data: {$worst['label']} has the largest recorded High/Critical count ({$worst['high_risk']} open now); "
-                ."selection totals are {$t['open']} open, {$t['high_risk']} High/Critical, {$t['unassessed']} unassessed. "
-                .'Recommended: (1) confirm each care plan with the assigned midwife, (2) check outreach staffing and referral transport for that barangay, '
-                .'and (3) re-check its unassessed records. Counts are exact recorded counts, not population risk rates.';
+            return $scope."\nSpecific data:\n• Top area: {$worst['label']} ({$worst['high_risk']} High/Critical open now)\n"
+                ."• Selection totals: {$t['open']} open, {$t['high_risk']} High/Critical, {$t['unassessed']} unassessed. "
+                ."\nRecommended:\n• Confirm each care plan with the assigned midwife.\n• Check outreach staffing and referral transport for that barangay.\n• Re-check its unassessed records."
+                ."\nNote: exact recorded counts, not population risk rates.";
         }
         if (preg_match('/most.*(pregnan|women|open|buntis)|busiest|pinakamarami/u', $q)) {
             $worst = $ranked->sortByDesc('open')->first();
             if (! $worst || $worst['open'] <= 0) {
-                return $scope.'Specific data: 0 open pregnancy records in this selection. '
-                    .'Recommended: confirm reporting completeness and maintain scheduled follow-up.';
+                return $scope."\nSpecific data: 0 open pregnancy records in this selection."
+                    ."\nRecommended: confirm reporting completeness and maintain scheduled follow-up.";
             }
 
-            return $scope."Specific data: {$worst['label']} has the most open pregnancies right now ({$worst['open']} open); "
-                ."selection totals are {$t['open']} open, {$t['high_risk']} High/Critical, {$t['care_gaps']} with missed or overdue appointments. "
-                .'Recommended: (1) align BHW visit schedules and checkup capacity with that workload, (2) verify reporting completeness before reallocating staff, '
-                .'and (3) review the high-risk and care-gap lists in the queue. These are exact recorded counts, not comparisons of need across populations.';
+            return $scope."\nSpecific data:\n• Busiest area: {$worst['label']} ({$worst['open']} open now)\n"
+                ."• Selection totals: {$t['open']} open, {$t['high_risk']} High/Critical, {$t['care_gaps']} with missed or overdue appointments. "
+                ."\nRecommended:\n• Align BHW visit schedules and checkup capacity with that workload.\n• Verify reporting completeness before reallocating staff.\n• Review the high-risk and care-gap lists in the queue."
+                ."\nNote: exact recorded counts, not comparisons of need across populations.";
         }
         if (preg_match('/trend|month|registration|buwan/u', $q)) {
             $peak = collect($report['monthly'])->sortByDesc('registrations')->first();
 
-            return $scope."Specific data: {$t['registrations']} pregnancy registration(s) were recorded. "
-                .($t['registrations'] ? "The largest monthly registration count is {$peak['registrations']} ({$peak['label']}; ties are possible). " : '')
-                .'Recommended: keep entry recording complete during peak months and confirm the queue reflects current follow-up needs. '
-                .'The first and last months may be partial. Registration dates measure entry into the system, not conception; this report does not forecast future pregnancies.';
+            return $scope."\nSpecific data:\n• {$t['registrations']} pregnancy registration(s) were recorded. "
+                .($t['registrations'] ? "\n• Peak month: {$peak['label']} ({$peak['registrations']}; ties are possible). " : '')
+                ."\nRecommended:\n• Keep entry recording complete during peak months.\n• Confirm the queue reflects current follow-up needs."
+                ."\nNote: first and last months may be partial. Registration dates measure entry into the system, not conception; this report does not forecast future pregnancies.";
         }
         if (preg_match('/area|barangay|location|lugar/u', $q)) {
-            $areas = collect($report['areas'])->take(5)->map(fn ($a) => "{$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, {$a['deaths']} death record(s) in the period")->implode('; ');
+            $areas = collect($report['areas'])->take(5)->map(fn ($a) => "{$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, {$a['deaths']} death record(s) in the period")->implode("\n• ");
 
-            return $scope.'Specific data: '.($areas ?: 'No records found for this selection.').'. '
-                .'Recommended: prioritize outreach to the areas with the highest recorded high-risk and death counts, confirm staffing and transport, and verify the queue for each area. '
-                .'Areas are ordered by recorded high-risk count, then death count. Population denominators are unavailable, so these are not comparisons of risk rates.';
+            return $scope."\nSpecific data (top 5 areas):\n• ".($areas ?: 'No records found for this selection.').' '
+                ."\nRecommended:\n• Prioritize outreach to the areas with the highest recorded high-risk and death counts.\n• Confirm staffing and transport, and verify the queue for each area."
+                ."\nNote: areas are ordered by recorded high-risk count, then death count. Population denominators are unavailable, so these are not comparisons of risk rates.";
         }
         if (preg_match('/priorit|risk|suggest|decision|follow|summary|summar|recommend|unahin|panganib|missed|appointment/u', $q)) {
-            return $scope."Specific data: there are {$t['open']} open pregnancy record(s) now; {$t['high_risk']} are High/Critical, "
-                ."{$t['emergency']} are emergency-marked, {$t['care_gaps']} have missed or overdue appointments, {$t['past_due']} are past the expected delivery date, "
-                ."and {$t['unassessed']} are unassessed. "
-                .'Recommended: '.collect($this->suggestions($report))->take(3)->map(fn ($s) => $s['evidence'].' '.$s['action'])->implode(' ');
+            return $scope."\nSpecific data:\n• {$t['open']} open pregnancy record(s) now\n• {$t['high_risk']} High/Critical\n• {$t['emergency']} emergency-marked\n"
+                ."• {$t['care_gaps']} with missed or overdue appointments\n• {$t['past_due']} past the expected delivery date\n• {$t['unassessed']} unassessed. "
+                ."\nRecommended:\n• ".collect($this->suggestions($report))->take(3)->map(fn ($s) => $s['evidence'].' '.$s['action'])->implode("\n• ");
         }
 
         return $scope.'The free rules assistant can summarize priorities, missed appointments, monthly registrations, recorded maternal deaths and barangay counts. '
@@ -286,19 +285,27 @@ class AIInsightService
 
     private function detailedAreaAnswer(string $question, array $report): string
     {
-        $scope = "{$report['area_label']}; {$report['filters']['from']} to {$report['filters']['to']}. ";
+        $scope = "{$report['area_label']}; {$report['filters']['from']} to {$report['filters']['to']}.";
         $areas = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA)->values();
         if ($areas->isEmpty()) {
-            return $scope.'No barangay records were found in this selection. '
-                .'Best next step: confirm reporting completeness and maintain scheduled follow-up.';
+            return $scope."\nNo barangay records were found in this selection."
+                ."\nBest next step: confirm reporting completeness and maintain scheduled follow-up.";
         }
-        $lines = $areas->map(fn ($a) => "{$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, "
+        $withOpen = $areas->filter(fn ($a) => $a['open'] > 0)->sortByDesc('open')->values();
+        $lines = $withOpen->map(fn ($a) => "• {$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, "
             ."{$a['registrations']} registrations, {$a['deaths']} deaths, {$a['complications']} complications in period");
+        $quiet = $areas->filter(fn ($a) => $a['open'] <= 0)->map(fn ($a) => $a['label']);
         $top = $areas->sortByDesc('high_risk')->first();
 
-        return $scope.'Every area in this selection ('.$areas->count().' barangays): '.$lines->implode('; ').'. '
-            ."Best next step: start with {$top['label']} ({$top['high_risk']} High/Critical open) — confirm care plans with the assigned midwife "
-            .'and check staffing and referral transport, then work down the list in order. Counts are recorded numbers, not population risk rates.';
+        $answer = $scope."\nBarangays with open pregnancies (".$withOpen->count().' of '.$areas->count()."):";
+        $answer .= $lines->isNotEmpty() ? "\n".$lines->implode("\n") : "\n• None right now.";
+        if ($quiet->isNotEmpty()) {
+            $answer .= "\nNo open pregnancies in: ".$quiet->implode(', ').'.';
+        }
+
+        return $answer."\nBest next step: start with {$top['label']} ({$top['high_risk']} High/Critical open) — confirm care plans "
+            .'with the assigned midwife and check staffing and referral transport, then work down the list in order.'
+            ."\nNote: counts are recorded numbers, not population risk rates.";
     }
 
     private function unavailable(string $fallback): array
