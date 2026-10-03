@@ -140,10 +140,17 @@ class OpenRouterAnalyticsService
             }
 
             $answer = $response->json('choices.0.message.content');
-            if ($response->json('choices.0.finish_reason') !== 'stop' || ! is_string($answer)
-                || trim($answer) === '' || mb_strlen($answer) > 6000
-                || $response->json('choices.0.message.tool_calls')) {
-                return $this->failure('incomplete', 'OpenRouter returned an incomplete answer. Please try again.');
+            $finishReason = $response->json('choices.0.finish_reason');
+            if ($response->json('choices.0.message.tool_calls')) {
+                return $this->failure('incomplete', 'OpenRouter tried to call a tool instead of answering. Please try again.');
+            }
+            if ($finishReason !== 'stop' || ! is_string($answer) || trim($answer) === '') {
+                return $this->failure('incomplete', $finishReason === 'length'
+                    ? 'OpenRouter stopped mid-answer when it hit the length limit. Please try again with a narrower question.'
+                    : 'OpenRouter returned an empty answer. Please try again.');
+            }
+            if (mb_strlen($answer) > 6000) {
+                return $this->failure('incomplete', 'OpenRouter returned an overlong answer. Please try again with a narrower question.');
             }
             $result = ['ok' => true, 'answer' => trim($answer), 'source' => 'openrouter', 'model' => $model,
                 'generated_at' => now()->toIso8601String()];
