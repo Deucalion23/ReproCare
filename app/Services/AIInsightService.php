@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -291,22 +292,30 @@ class AIInsightService
             return $scope."\nNo barangay records were found in this selection."
                 ."\nBest next step: confirm reporting completeness and maintain scheduled follow-up.";
         }
-        // "List the in-risk / high-risk women" → only the at-risk areas,
-        // ordered worst-first. Names stay in the review queue, never in chat.
-        if (preg_match('/high.?risk|critical|in.?risk|at.?risk|panganib/u', mb_strtolower($question))) {
-            $atRisk = $areas->filter(fn ($a) => $a['high_risk'] > 0)
-                ->sortBy([['high_risk', 'desc'], ['open', 'desc'], ['label', 'asc']])->values();
-            if ($atRisk->isEmpty()) {
+        // "List the in-risk / high-risk women" → the actual at-risk
+        // records. This answer is always built locally (source 'rules'):
+        // names never leave this server for any cloud model.
+        if (preg_match('/high.?risk|critical|in.?risk|at.?risk|panganib|women|babae|buntis/u', mb_strtolower($question))) {
+            $severity = ['Critical' => 2, 'High' => 1];
+            $cases = collect($report['queue'] ?? [])
+                ->filter(fn ($e) => in_array($e['risk'] ?? null, ['High', 'Critical'], true))
+                ->sortBy([[fn ($e) => $severity[$e['risk']] ?? 0, 'desc'], ['edd', 'asc'], ['name', 'asc']])->values();
+            if ($cases->isEmpty()) {
                 return $scope."\nNo open High/Critical records in this selection."
                     ."\nBest next step: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.";
             }
-            $lines = $atRisk->map(fn ($a) => "• {$a['label']}: {$a['high_risk']} High/Critical open (of {$a['open']} open now)");
-            $top = $atRisk->first();
+            $lines = $cases->map(function ($e) {
+                $when = ! empty($e['edd']) ? 'EDD '.Carbon::parse($e['edd'])->format('M d, Y') : 'EDD unrecorded';
+                $flags = $e['risk'].(! empty($e['emergency']) ? ', emergency-marked' : '');
 
-            return $scope."\nBarangays with at-risk pregnancies (".$atRisk->count().' of '.$areas->count()."):"."\n".$lines->implode("\n")
-                ."\nBest next step: start with {$top['label']} — confirm each care plan with the assigned midwife and check staffing and referral transport, "
-                .'then work down the list in order. See the pregnancy review queue below for the individual records.'
-                ."\nNote: counts are recorded numbers, not population risk rates.";
+                return "• {$e['name']} — {$e['area']}, {$when} ({$flags})";
+            });
+            $topArea = $areas->sortBy([['high_risk', 'desc'], ['open', 'desc'], ['label', 'asc']])->first();
+
+            return $scope."\nAt-risk women (".$cases->count()."):\n".$lines->implode("\n")
+                ."\nBest next step: start with {$topArea['label']} — confirm each care plan with the assigned midwife and check staffing and referral transport, "
+                .'then work down the list in order. Open any record from the pregnancy review queue below for details.'
+                ."\nNote: for authorized staff review only — do not paste names into any external tool. Counts are recorded numbers, not population risk rates.";
         }
         $withOpen = $areas->filter(fn ($a) => $a['open'] > 0)->sortByDesc('open')->values();
         $lines = $withOpen->map(fn ($a) => "• {$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, "
