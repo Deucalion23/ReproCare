@@ -76,6 +76,14 @@ class AIInsightService
             return ['answer' => 'Please remove names, patient identifiers, contact details, and credentials. Ask a general health, workflow, or report question instead.',
                 'source' => 'rules', 'error_code' => 'private_question', 'notice' => 'Question kept on this server'];
         }
+        // Detail requests ("list all barangays ...") get a full local
+        // enumeration with exact counts. Local rules can state exact
+        // numbers; the cloud only ever receives banded top-10 counts, so
+        // answering locally is both more complete and more private.
+        if ($this->isDetailRequest($question) && app(CloudAnalyticsContext::class)->topic($question) !== null) {
+            return ['answer' => $this->detailedAreaAnswer($question, $report), 'source' => 'rules',
+                'notice' => 'Detailed local listing: exact recorded counts for every area in this selection.'];
+        }
         $fallback = $this->localAnswer($question, $report);
         if (config('services.analytics_ai.provider', 'rules') === 'groq') {
             return $this->groqAnswer($question, $report, $fallback);
@@ -267,7 +275,30 @@ class AIInsightService
         return $scope.'The free rules assistant can summarize priorities, missed appointments, monthly registrations, recorded maternal deaths and barangay counts. '
             .'Try "Which records need priority review?", "Which barangay has the most high-risk pregnancies and what should we do?", '
             .'"Which barangay has the most pregnant women right now?" or "Which barangay has the most maternal deaths?" '
+            .'Ask "List all barangays with open pregnancies" for the full detailed breakdown. '
             .'Patient-specific treatment and future predictions are outside this report.';
+    }
+
+    private function isDetailRequest(string $question): bool
+    {
+        return (bool) preg_match('/\blist\b|\benumerate\b|\bbreakdown\b|\bdetails?\b|\bdetalyado\b|\ball\b|\blahaty?|\bisa-isa\b|\beach\b|\bbawat\b/u', $question);
+    }
+
+    private function detailedAreaAnswer(string $question, array $report): string
+    {
+        $scope = "{$report['area_label']}; {$report['filters']['from']} to {$report['filters']['to']}. ";
+        $areas = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA)->values();
+        if ($areas->isEmpty()) {
+            return $scope.'No barangay records were found in this selection. '
+                .'Best next step: confirm reporting completeness and maintain scheduled follow-up.';
+        }
+        $lines = $areas->map(fn ($a) => "{$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, "
+            ."{$a['registrations']} registrations, {$a['deaths']} deaths, {$a['complications']} complications in period");
+        $top = $areas->sortByDesc('high_risk')->first();
+
+        return $scope.'Every area in this selection ('.$areas->count().' barangays): '.$lines->implode('; ').'. '
+            ."Best next step: start with {$top['label']} ({$top['high_risk']} High/Critical open) — confirm care plans with the assigned midwife "
+            .'and check staffing and referral transport, then work down the list in order. Counts are recorded numbers, not population risk rates.';
     }
 
     private function unavailable(string $fallback): array
