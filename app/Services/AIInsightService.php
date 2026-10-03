@@ -291,11 +291,28 @@ class AIInsightService
             return $scope."\nNo barangay records were found in this selection."
                 ."\nBest next step: confirm reporting completeness and maintain scheduled follow-up.";
         }
+        // "List the in-risk / high-risk women" → only the at-risk areas,
+        // ordered worst-first. Names stay in the review queue, never in chat.
+        if (preg_match('/high.?risk|critical|in.?risk|at.?risk|panganib/u', mb_strtolower($question))) {
+            $atRisk = $areas->filter(fn ($a) => $a['high_risk'] > 0)
+                ->sortBy([['high_risk', 'desc'], ['open', 'desc'], ['label', 'asc']])->values();
+            if ($atRisk->isEmpty()) {
+                return $scope."\nNo open High/Critical records in this selection."
+                    ."\nBest next step: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.";
+            }
+            $lines = $atRisk->map(fn ($a) => "• {$a['label']}: {$a['high_risk']} High/Critical open (of {$a['open']} open now)");
+            $top = $atRisk->first();
+
+            return $scope."\nBarangays with at-risk pregnancies (".$atRisk->count().' of '.$areas->count()."):"."\n".$lines->implode("\n")
+                ."\nBest next step: start with {$top['label']} — confirm each care plan with the assigned midwife and check staffing and referral transport, "
+                .'then work down the list in order. See the pregnancy review queue below for the individual records.'
+                ."\nNote: counts are recorded numbers, not population risk rates.";
+        }
         $withOpen = $areas->filter(fn ($a) => $a['open'] > 0)->sortByDesc('open')->values();
         $lines = $withOpen->map(fn ($a) => "• {$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, "
             ."{$a['registrations']} registrations, {$a['deaths']} deaths, {$a['complications']} complications in period");
         $quiet = $areas->filter(fn ($a) => $a['open'] <= 0)->map(fn ($a) => $a['label']);
-        $top = $areas->sortByDesc('high_risk')->first();
+        $top = $areas->sortBy([['high_risk', 'desc'], ['open', 'desc'], ['label', 'asc']])->first();
 
         $answer = $scope."\nBarangays with open pregnancies (".$withOpen->count().' of '.$areas->count()."):";
         $answer .= $lines->isNotEmpty() ? "\n".$lines->implode("\n") : "\n• None right now.";
