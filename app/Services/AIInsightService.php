@@ -77,6 +77,11 @@ class AIInsightService
             return ['answer' => 'Please remove names, patient identifiers, contact details, and credentials. Ask a general health, workflow, or report question instead.',
                 'source' => 'rules', 'error_code' => 'private_question', 'notice' => 'Question kept on this server'];
         }
+        // Meta questions ("what can you do?") get a capabilities answer.
+        if (preg_match('/\bwhat can (you|u|i ask)|what do you (do|know)|capabilit|anong kaya|kaya mo|commands?\b|^\s*help\s*$/iu', $question)) {
+            return ['answer' => $this->capabilitiesAnswer(), 'source' => 'rules',
+                'notice' => 'Local capabilities guide.'];
+        }
         // Detail requests ("list all barangays ...") get a full local
         // enumeration with exact counts. Local rules can state exact
         // numbers; the cloud only ever receives banded top-10 counts, so
@@ -286,6 +291,18 @@ class AIInsightService
             .'"Which barangay has the most pregnant women right now?" or "Which barangay has the most maternal deaths?" '
             .'Ask "List all barangays with open pregnancies" for the full detailed breakdown. '
             .'Patient-specific treatment and future predictions are outside this report.';
+    }
+
+    private function capabilitiesAnswer(): string
+    {
+        return "Here's what you can ask me about this report:"
+            ."\n• Priorities — which records need review first"
+            ."\n• Areas — busiest barangay, highest high-risk area, most deaths"
+            ."\n• Trends — monthly registration patterns"
+            ."\n• Details — full per-barangay or at-risk listings"
+            ."\n• Portal help — how to use ReproCare and approve records"
+            ."\nTry: \"Which barangay has the most high-risk pregnancies and what should we do?\""
+            ."\nI can't: choose medicines or dosages, identify patients, or predict the future.";
     }
 
     private function isDetailRequest(string $question): bool
