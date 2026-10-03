@@ -62,6 +62,7 @@ class OpenRouterAnalyticsTest extends TestCase
             $this->assertArrayNotHasKey('queue', $data['report']);
             $this->assertFalse($request['stream']);
             $this->assertSame(2000, $request['max_tokens']);
+            $this->assertSame('none', $request['reasoning']['effort']);
 
             return true;
         });
