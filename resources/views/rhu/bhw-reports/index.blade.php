@@ -110,6 +110,7 @@
                                                 'approved_by_rhu' => 'bg-success',
                                                 'approved_by_midwife' => 'bg-primary',
                                                 'returned_to_president' => 'bg-info',
+                                                'submitted_to_cho', 'received_by_cho' => 'bg-success',
                                                 'rejected', 'needs_revision' => 'bg-danger',
                                                 default => 'bg-warning',
                                             };
@@ -117,6 +118,8 @@
                                                 'approved_by_rhu' => 'Approved',
                                                 'approved_by_midwife' => 'Validated by Midwife',
                                                 'returned_to_president' => 'Returned to President',
+                                                'submitted_to_cho' => 'Passed to CHO',
+                                                'received_by_cho' => 'Received by CHO',
                                                 'rejected', 'needs_revision' => 'Needs Revision',
                                                 default => 'Pending Review',
                                             };
@@ -131,6 +134,15 @@
                                             @if($report->submission_status === 'approved_by_midwife')
                                                 <button type="button" class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#approveModal{{ $report->id }}"><i class="bi bi-check-lg"></i></button>
                                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#rejectModal{{ $report->id }}"><i class="bi bi-x-lg"></i></button>
+                                            @endif
+                                            @if($report->submission_status === 'approved_by_rhu')
+                                                <form method="POST" action="{{ route('rhu.bhw-reports.send-to-cho', $report->id) }}" class="d-inline" onsubmit="return confirm('Pass this validated report to CHO City Reports?');">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary" title="Pass to CHO City Reports"><i class="bi bi-send"></i></button>
+                                                </form>
+                                            @endif
+                                            @if(in_array($report->submission_status, ['submitted_to_cho', 'received_by_cho'], true))
+                                                <span class="badge bg-success text-white text-xs" title="This report is with the CHO"><i class="bi bi-check-lg"></i> CHO</span>
                                             @endif
                                         </div>
                                     </td>

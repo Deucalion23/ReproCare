@@ -50,7 +50,7 @@ class CloudAnalyticsContext
                     'current' => 'Open pregnancy, risk and follow-up counts describe today; they do not describe the historical period.',
                     'historical' => 'Registrations use record creation dates; deaths and complications use event dates within the selected period.',
                     'months' => 'Month 1 is the first selected calendar month, in chronological order. First and last months may be partial.',
-                    'privacy' => 'Every count is a range. Below 5 includes zero and does not confirm any event occurred. Never infer an exact count.',
+                    'privacy' => 'Every count is an exact recorded number from the applied filters. Quote only these exact numbers; never invent counts.',
                     'limitations' => 'Recorded counts depend on reporting completeness. Complications can overlap with deaths and are not confirmed near misses. No population denominators or forecasts are available.',
                 ],
                 'totals' => $this->counts($report['totals'] ?? [], self::TOTALS),
@@ -67,28 +67,21 @@ class CloudAnalyticsContext
     {
         $result = [];
         foreach ($keys as $key) {
-            $result[$key] = $this->band($values[$key] ?? null);
+            $result[$key] = $this->exact($values[$key] ?? null);
         }
 
         return $result;
     }
 
-    private function band(mixed $value): string
+    private function exact(mixed $value): mixed
     {
-        if ((! is_int($value) && ! (is_string($value) && ctype_digit($value))) || $value < 0) {
-            return 'Unavailable';
+        if (is_int($value) && $value >= 0) {
+            return $value;
+        }
+        if (is_string($value) && ctype_digit($value)) {
+            return (int) $value;
         }
 
-        return match (true) {
-            $value < 5 => 'Below 5 (includes zero)',
-            $value < 10 => '5-9',
-            $value < 20 => '10-19',
-            $value < 50 => '20-49',
-            $value < 100 => '50-99',
-            $value < 250 => '100-249',
-            $value < 500 => '250-499',
-            $value < 1000 => '500-999',
-            default => '1000 or more',
-        };
+        return 'Unavailable';
     }
 }

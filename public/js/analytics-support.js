@@ -53,14 +53,14 @@
                 if (!response.ok) throw new Error(response.status === 422 ? Object.values(data.errors || {}).flat()[0] || 'Check your question and filters.' : 'The report could not be loaded. Please try again.');
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
                 // Model output is untrusted text, never HTML or executable Markdown.
-                notice.textContent = data.notice || ({ groq: 'Draft answer', ollama: 'Draft answer' }[data.source] || 'Assistant');
+                notice.textContent = data.notice || ({ groq: 'Draft answer', openrouter: 'Draft answer', ollama: 'Draft answer' }[data.source] || 'Assistant');
                 answer.textContent = data.answer;
-                if (data.source === 'groq') {
+                if (data.source === 'groq' || data.source === 'openrouter') {
                     const lines = [data.topic || 'Report summary'];
                     if (Array.isArray(data.area_legend) && data.area_legend.length) {
                         lines.push(data.area_legend.map(area => `${area.alias}: ${area.label}`).join('; '));
                     }
-                    lines.push(`Month 1 starts in ${filters.from.slice(0, 7)}. Exact counts remain in the local charts.`);
+                    lines.push(`Month 1 starts in ${filters.from.slice(0, 7)}. Counts shown are exact recorded numbers for the applied filters.`);
                     context.textContent = lines.join(' ');
                 }
             } catch (error) {

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ActivityLog;
 use App\Models\BhwMonthlyReport;
 use App\Models\Checkup;
+use App\Models\HealthRecord;
 use App\Models\MaternalDeath;
 use App\Models\MaternalMorbidity;
 use App\Models\Pregnancy;
@@ -662,9 +663,71 @@ class ChoController extends Controller
         return view('cho.reports.index', compact('reports', 'month', 'status'));
     }
 
-    public function exportReportsCsv(Request $request)
+    /**
+     * Report file: the validated records submitted under a monthly report,
+     * with the same breakdowns RHU reviews (read-only for CHO oversight).
+     */
+    public function showReport($id)
     {
-        $pendingSignature = !self::signatureReadyFor(auth()->user()?->fresh());
+        $report = BhwMonthlyReport::with(['bhw', 'submittedToChoBy', 'receivedByChoBy'])->findOrFail($id);
+
+        $stats = [
+            'period' => $report->reportPeriod,
+            'submitted_to_cho_at' => $report->submitted_to_cho_at,
+            'received_by_cho_at' => $report->received_by_cho_at,
+        ];
+
+        if ($report->report_type === 'health_records') {
+            $baseQuery = fn () => HealthRecord::where('recorded_by_id', $report->bhw_id)
+                ->whereMonth('created_at', $report->report_month)
+                ->whereYear('created_at', $report->report_year);
+            $records = $baseQuery()->with('recordedBy', 'patient')->paginate(20);
+            $uniquePatients = $baseQuery()->select('user_id')->distinct()->count();
+            $riskDistribution = [
+                'low' => $baseQuery()->where('risk_level', 'Low')->count(),
+                'medium' => $baseQuery()->where('risk_level', 'Medium')->count(),
+                'high' => $baseQuery()->where('risk_level', 'High')->count(),
+            ];
+
+            return view('cho.reports.show', compact('report', 'stats', 'records', 'uniquePatients', 'riskDistribution'));
+        }
+
+        $baseQuery = fn () => Pregnancy::whereMonth('created_at', $report->report_month)
+            ->whereYear('created_at', $report->report_year);
+        $records = $baseQuery()->with('woman')->paginate(20);
+        $uniquePatients = $baseQuery()->select('user_id')->distinct()->count();
+        $riskDistribution = [
+            'low' => $baseQuery()->where('is_high_risk', false)->count(),
+            'high' => $baseQuery()->where('is_high_risk', true)->count(),
+            'medium' => 0,
+        ];
+
+        return view('cho.reports.show', compact('report', 'stats', 'records', 'uniquePatients', 'riskDistribution'));
+    }
+
+    /**
+     * Acknowledge receipt of a validated report the RHU passed to City
+     * Reports. Only submitted_to_cho reports may be received.
+     */
+    public function receiveReport(Request $request, $id)
+    {
+        $report = BhwMonthlyReport::findOrFail($id);
+
+        if ($report->submission_status !== 'submitted_to_cho') {
+            return redirect()->route('cho.reports.index')
+                ->with('error', 'Only reports passed by the RHU can be received here.');
+        }
+
+        $report->receiveByCho(auth()->id());
+
+        ActivityLog::log('update', "CHO acknowledged receipt of validated report ID: {$report->id} into City Reports", $report);
+
+        return redirect()->route('cho.reports.index')
+            ->with('success', 'Report received into City Reports.');
+    }
+
+    public function exportReportsCsv(Request $request)
+    {        $pendingSignature = !self::signatureReadyFor(auth()->user()?->fresh());
         $month = $request->input('month', now()->format('Y-m'));
         [$year, $mon] = array_map('intval', explode('-', $month) + [date('Y'), date('m')]);
         $reports = BhwMonthlyReport::with('bhw')

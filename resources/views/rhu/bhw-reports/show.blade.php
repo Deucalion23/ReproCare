@@ -216,9 +216,21 @@
 
 <div class="d-flex justify-content-between mb-4">
     <x-archive-form :action="route('rhu.bhw-reports.destroy', $report->id)" label="Archive Report" title="Archive report (retained for audit)" btnClass="btn btn-outline-warning" icon="bi bi-archive" confirmText="Archive this report? It will be retained for audit and can be restored." />
-    <a href="{{ route('rhu.bhw-reports.print', $report->id) }}" class="btn btn-primary text-white" target="_blank">
-        <i class="bi bi-printer-fill me-1"></i> Print Report
-    </a>
+    <div class="d-flex gap-2">
+        @if($report->submission_status === 'approved_by_rhu')
+            <form method="POST" action="{{ route('rhu.bhw-reports.send-to-cho', $report->id) }}" class="d-inline" onsubmit="return confirm('Pass this validated report to CHO City Reports?');">
+                @csrf
+                <button type="submit" class="btn btn-success text-white">
+                    <i class="bi bi-send me-1"></i> Pass to CHO
+                </button>
+            </form>
+        @elseif(in_array($report->submission_status, ['submitted_to_cho', 'received_by_cho'], true))
+            <span class="btn btn-outline-success disabled"><i class="bi bi-check-lg me-1"></i> With CHO</span>
+        @endif
+        <a href="{{ route('rhu.bhw-reports.print', $report->id) }}" class="btn btn-primary text-white" target="_blank">
+            <i class="bi bi-printer-fill me-1"></i> Print Report
+        </a>
+    </div>
 </div>
 
 @endsection

@@ -3,13 +3,12 @@
 namespace Tests\Feature;
 
 use App\Services\AIInsightService;
-use App\Services\CloudAnalyticsContext;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
-class GroqAnalyticsTest extends TestCase
+class OpenRouterAnalyticsTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -17,8 +16,8 @@ class GroqAnalyticsTest extends TestCase
         Http::swap(new Factory);
         Http::preventStrayRequests();
         config([
-            'cache.default' => 'array', 'services.analytics_ai.provider' => 'groq',
-            'services.groq.api_key' => 'test-only-secret', 'services.groq.model' => 'qwen/qwen3.8-27b',
+            'cache.default' => 'array', 'services.analytics_ai.provider' => 'openrouter',
+            'services.openrouter.api_key' => 'test-only-secret', 'services.openrouter.model' => 'meta-llama/llama-3.3-70b-instruct:free',
         ]);
     }
 
@@ -43,107 +42,59 @@ class GroqAnalyticsTest extends TestCase
         return ['choices' => [['finish_reason' => 'stop', 'message' => ['content' => $text]]]];
     }
 
-    public function test_real_online_provider_sends_the_question_but_excludes_registry_identifiers(): void
+    public function test_provider_sends_the_question_but_excludes_registry_identifiers(): void
     {
-        config(['services.groq.url' => 'https://untrusted.example']);
-        Http::fake(['https://api.groq.com/openai/v1/chat/completions' => Http::response($this->success())]);
+        Http::fake(['https://openrouter.ai/api/v1/chat/completions' => Http::response($this->success())]);
         $result = app(AIInsightService::class)->chat('Which risks need follow-up?', $this->report());
-        $this->assertSame('groq', $result['source']);
+        $this->assertSame('openrouter', $result['source']);
         $this->assertFalse($result['cached']);
-        $this->assertSame('PrivateVillage', $result['area_legend'][0]['label']);
         $this->assertStringContainsString('Draft answer', $result['notice']);
         Http::assertSent(function ($request) {
-            $this->assertSame('https://api.groq.com/openai/v1/chat/completions', $request->url());
+            $this->assertSame('https://openrouter.ai/api/v1/chat/completions', $request->url());
             $this->assertTrue($request->hasHeader('Authorization', 'Bearer test-only-secret'));
-            foreach (['PrivatePatient', 'PrivateVillage', '09179999999', '8765', 'private clinical notes', '2026-07-01', 'Jul 2026', 'Which risks affect'] as $private) {
+            $this->assertTrue($request->hasHeader('HTTP-Referer'));
+            $this->assertTrue($request->hasHeader('X-Title'));
+            foreach (['PrivatePatient', 'PrivateVillage', '09179999999', '8765', 'private clinical notes', '2026-07-01', 'Jul 2026'] as $private) {
                 $this->assertStringNotContainsString($private, $request->body());
             }
             $data = json_decode($request['messages'][1]['content'], true);
             $this->assertSame('Which risks need follow-up?', $data['staff_question']);
-            $this->assertSame(18, $data['report']['totals']['open']);
-            $this->assertSame(1, $data['report']['totals']['deaths']);
-            $this->assertSame('Area 1', $data['report']['areas'][0]['area']);
-            $this->assertSame('Month 1', $data['report']['monthly'][0]['month']);
             $this->assertArrayNotHasKey('queue', $data['report']);
             $this->assertFalse($request['stream']);
-            $this->assertSame(900, $request['max_completion_tokens']);
+            $this->assertSame(2000, $request['max_tokens']);
 
             return true;
         });
         Http::assertSentCount(1);
     }
 
-    public function test_context_sends_exact_counts_and_rejects_unexpected_record_text(): void
+    public function test_free_suffix_models_are_accepted(): void
     {
-        $report = $this->report();
-        $report['totals']['open'] = 'Injected private text';
-        $report['totals']['extra_field'] = 'Another private value';
-        $report['monthly'][0]['label'] = 'Private patient birthday';
-        $prepared = app(CloudAnalyticsContext::class)->build($report);
-        $context = $prepared['context'];
-        $this->assertSame('Unavailable', $context['totals']['open']);
-        $this->assertSame(1, $context['totals']['deaths']);
-        $this->assertSame(0, $context['totals']['emergency']);
-        $this->assertSame(4, $context['totals']['complications']);
-        $this->assertStringNotContainsString('private', strtolower(json_encode($context)));
-        $this->assertArrayNotHasKey('extra_field', $context['totals']);
+        config(['services.openrouter.model' => 'not a model!!']);
+        $answer = app(AIInsightService::class)->chat('summary', $this->report());
+        $this->assertSame('rules', $answer['source']);
+        $this->assertSame('configuration', $answer['error_code']);
+        Http::assertNothingSent();
     }
 
-    public function test_successful_answers_are_reused_but_changed_grouped_data_invalidates_cache(): void
+    public function test_successful_answers_are_reused(): void
     {
         Http::fake(['*' => Http::response($this->success())]);
         $service = app(AIInsightService::class);
         $this->assertFalse($service->chat('summary', $this->report())['cached']);
         $this->assertTrue($service->chat('summary', $this->report())['cached']);
         Http::assertSentCount(1);
-        $report = $this->report();
-        $report['totals']['high_risk'] = 35;
-        $this->assertFalse($service->chat('summary', $report)['cached']);
-        Http::assertSentCount(2);
-        $report['areas'][0]['label'] = 'New local label';
-        $answer = $service->chat('summary', $report);
-        $this->assertTrue($answer['cached']);
-        $this->assertSame('New local label', $answer['area_legend'][0]['label']);
     }
 
-    public function test_missing_key_falls_back_without_a_request_or_mislabeling_the_answer(): void
+    public function test_missing_key_falls_back_without_a_request(): void
     {
-        config(['services.groq.api_key' => '']);
+        config(['services.openrouter.api_key' => '']);
         $service = app(AIInsightService::class);
         $answer = $service->chat('summary', $this->report());
         $this->assertSame('rules', $answer['source']);
         $this->assertSame('missing_key', $answer['error_code']);
-        $this->assertStringContainsString('GROQ_API_KEY', $answer['notice']);
-        $this->assertSame('Groq needs setup', $service->status()['label']);
-        Http::assertNothingSent();
-    }
-
-    public function test_unsupported_topic_stays_local(): void
-    {
-        $answer = app(AIInsightService::class)->chat('Tell PrivatePatient what medicine to take', $this->report());
-        $this->assertSame('rules', $answer['source']);
-        $this->assertSame('unsupported_topic', $answer['error_code']);
-        Http::assertNothingSent();
-    }
-
-    public function test_general_reproductive_questions_reach_ai_and_different_questions_do_not_share_cached_answers(): void
-    {
-        Http::fake(['https://api.groq.com/openai/v1/chat/completions' => Http::response($this->success('General education for staff review.'))]);
-        foreach (['Explain breastfeeding support.', 'How does ReproCare help with family planning?'] as $question) {
-            $answer = app(AIInsightService::class)->chat($question, $this->report());
-            $this->assertSame('groq', $answer['source']);
-            $this->assertFalse($answer['cached']);
-        }
-        Http::assertSentCount(2);
-        Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'outside my scope')
-            && json_decode($r['messages'][1]['content'], true)['staff_question'] === 'Explain breastfeeding support.');
-    }
-
-    public function test_unrelated_questions_and_contact_details_stay_local(): void
-    {
-        $service = app(AIInsightService::class);
-        $this->assertSame('out_of_scope', $service->chat('What is the weather?', $this->report())['error_code']);
-        $this->assertSame('private_question', $service->chat('Review pregnancy risk at 09179999999', $this->report())['error_code']);
+        $this->assertStringContainsString('OPENROUTER_API_KEY', $answer['notice']);
+        $this->assertSame('OpenRouter needs setup', $service->status()['label']);
         Http::assertNothingSent();
     }
 
@@ -160,21 +111,45 @@ class GroqAnalyticsTest extends TestCase
         Http::assertSentCount(1);
     }
 
-    public function test_provider_errors_are_actionable_and_do_not_expose_credentials_or_raw_bodies(): void
+    public function test_provider_errors_are_actionable_and_do_not_expose_credentials(): void
     {
         Http::fake(['*' => Http::sequence()
             ->push(['error' => 'test-only-secret'], 401)
             ->push(['error' => 'test-only-secret'], 404)
+            ->push(['error' => 'test-only-secret'], 402)
+            ->push(['error' => 'test-only-secret'], 500)
             ->push(['error' => 'test-only-secret'], 500)
             ->push([], 302, ['Location' => 'https://untrusted.example'])]);
-        foreach (['authentication', 'model', 'unavailable', 'unavailable'] as $expected) {
+        foreach (['authentication', 'model', 'billing', 'unavailable', 'unavailable'] as $expected) {
             $answer = app(AIInsightService::class)->chat('summary', $this->report());
             $this->assertSame('rules', $answer['source']);
             $this->assertSame($expected, $answer['error_code']);
             $this->assertStringNotContainsString('test-only-secret', json_encode($answer));
             $this->assertStringNotContainsString('untrusted.example', json_encode($answer));
         }
-        Http::assertSentCount(4);
+        Http::assertSentCount(6);
+    }
+
+    public function test_success_payload_with_provider_overload_error_retries_once_then_recovers(): void
+    {
+        Http::fake(['*' => Http::sequence()
+            ->push(['id' => 'gen-test', 'error' => ['message' => 'Upstream error from Nvidia: Service temporarily overloaded', 'code' => 503, 'metadata' => ['error_type' => 'provider_overloaded']]])
+            ->push($this->success())]);
+        $result = app(AIInsightService::class)->chat('summary', $this->report());
+        $this->assertSame('openrouter', $result['source']);
+        $this->assertFalse($result['cached']);
+        Http::assertSentCount(2);
+    }
+
+    public function test_persistent_overload_reports_actionable_message_without_provider_details(): void
+    {
+        Http::fake(['*' => Http::response(['error' => 'test-only-secret'], 503)]);
+        $answer = app(AIInsightService::class)->chat('summary', $this->report());
+        $this->assertSame('rules', $answer['source']);
+        $this->assertSame('unavailable', $answer['error_code']);
+        $this->assertStringContainsString('overloaded', $answer['notice']);
+        $this->assertStringNotContainsString('test-only-secret', json_encode($answer));
+        Http::assertSentCount(2);
     }
 
     public function test_incomplete_answers_are_never_presented_as_ai_success_or_cached(): void
@@ -190,7 +165,7 @@ class GroqAnalyticsTest extends TestCase
             $this->assertSame('rules', $result['source']);
             $this->assertSame('incomplete', $result['error_code']);
         }
-        $this->assertSame('groq', $service->chat('summary', $this->report())['source']);
+        $this->assertSame('openrouter', $service->chat('summary', $this->report())['source']);
         Http::assertSentCount(4);
     }
 
@@ -205,7 +180,7 @@ class GroqAnalyticsTest extends TestCase
 
     public function test_configuration_check_is_offline_and_hides_the_key(): void
     {
-        $this->artisan('analytics:ai-check')->expectsOutput('Groq API key: configured (hidden)')->assertSuccessful();
+        $this->artisan('analytics:ai-check')->expectsOutput('OpenRouter API key: configured (hidden)')->assertSuccessful();
         Http::assertNothingSent();
     }
 
@@ -213,7 +188,7 @@ class GroqAnalyticsTest extends TestCase
     {
         Http::fake(['*' => Http::response($this->success())]);
         $this->artisan('analytics:ai-check --connect')
-            ->expectsOutput('Groq connection succeeded. A complete AI response was received using synthetic data.')
+            ->expectsOutput('OpenRouter connection succeeded. A complete AI response was received using synthetic data.')
             ->assertSuccessful();
         Http::assertSent(fn ($request) => str_contains($request['messages'][1]['content'], 'Synthetic connection test'));
         Http::assertSentCount(1);

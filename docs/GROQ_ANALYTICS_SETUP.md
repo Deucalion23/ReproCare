@@ -95,10 +95,30 @@ The model is instructed not to infer that an event occurred from a `Below 5` val
 
 To turn off cloud calls, set `ANALYTICS_AI_PROVIDER=rules` and run `php artisan config:clear`. Charts, the queue, and local suggestions continue working. You can switch back to `ollama` for the existing local-model integration.
 
+## Alternative provider: OpenRouter (many free models, one key)
+
+Instead of Groq, the assistant can call any model on [OpenRouter](https://openrouter.ai/) using the same aggregate-only context, caching, cooldown, and fallback rules. The overall analytics model is OpenAI GPT-4o-mini (paid per token, very cheap at this volume; free `:free`-suffix alternatives such as `meta-llama/llama-3.3-70b-instruct:free` also work).
+
+1. Create an account at [openrouter.ai](https://openrouter.ai/), open **Keys**, and create a key. Never paste it into chat, screenshots, or source control.
+2. In `.env` (server only):
+   ```dotenv
+   ANALYTICS_AI_PROVIDER=openrouter
+   OPENROUTER_API_KEY=paste_your_key_here
+   OPENROUTER_MODEL=openai/gpt-4o-mini
+   ```
+3. Run `php artisan config:clear`, then verify without touching patient records:
+   ```powershell
+   php artisan analytics:ai-check
+   php artisan analytics:ai-check --connect
+   ```
+
+Notes: free (`:free`) models are rate-limited (expect 429 cooldowns at peak) and, per OpenRouter's policy, free-tier requests may be retained for provider training — the app only ever sends grouped counts and aliases, never names, IDs, contacts, or notes. Availability of specific free models changes over time; if OpenRouter reports a model error, pick another `:free` model from the OpenRouter catalog.
+
 ## Developer verification
 
 ```powershell
 php artisan test --filter=GroqAnalyticsTest
+php artisan test --filter=OpenRouterAnalyticsTest
 php artisan test
 ```
 
