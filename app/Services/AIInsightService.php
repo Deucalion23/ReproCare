@@ -82,13 +82,11 @@ class AIInsightService
             return ['answer' => $this->capabilitiesAnswer(), 'source' => 'rules',
                 'notice' => 'Local capabilities guide.'];
         }
-        // Detail requests ("list all barangays ...") get a full local
-        // enumeration with exact counts. Local rules can state exact
-        // numbers; the cloud only ever receives banded top-10 counts, so
-        // answering locally is both more complete and more private.
-        if ($this->isDetailRequest($question) && app(CloudAnalyticsContext::class)->topic($question) !== null) {
-            return ['answer' => $this->detailedAreaAnswer($question, $report), 'source' => 'rules',
-                'notice' => 'Detailed local listing: exact recorded counts for every area in this selection.'];
+        // Explicit data lists stay local. The cloud receives only aggregate,
+        // aliased data and must never receive names from the review queue.
+        if ($criteria = app(AnalyticsQuestion::class)->listing($question)) {
+            return ['answer' => $this->listingAnswer($criteria, $report), 'source' => 'rules',
+                'notice' => 'Local listing for the applied report scope.'];
         }
         $fallback = $this->localAnswer($question, $report);
         if (config('services.analytics_ai.provider', 'rules') === 'groq') {
@@ -311,73 +309,74 @@ class AIInsightService
             ."\nI can't: choose medicines or dosages, identify patients, or predict the future.";
     }
 
-    private function isDetailRequest(string $question): bool
+    private function listingAnswer(array $criteria, array $report): string
     {
-        return (bool) preg_match('/\blist\b|\benumerate\b|\bbreakdown\b|\bdetails?\b|\bdetalyado\b|\ball\b|\blahaty?|\bisa-isa\b|\beach\b|\bbawat\b/u', $question);
+        $scope = "{$report['scope_label']}; {$report['filters']['from']} to {$report['filters']['to']}.";
+        $areas = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA)->values();
+        $metric = $criteria['metric'];
+
+        if ($criteria['entity'] === 'patients') {
+            if ($criteria['zero'] && $metric === 'open') {
+                return $scope."\nThis analytics report cannot identify women with no pregnancy record. It only contains recorded pregnancies, not a complete population roster."
+                    ."\nAsk for barangays with no open pregnancies if that is what you need, or review the registered-women records through the appropriate workflow."
+                    ."\nNote: no record does not confirm that a woman is not pregnant.";
+            }
+            $cases = collect($report['queue'] ?? [])->filter(function ($entry) use ($metric) {
+                return match ($metric) {
+                    'high_risk' => in_array($entry['risk'] ?? null, ['High', 'Critical'], true),
+                    'Critical', 'Medium', 'Low', 'Unassessed' => ($entry['risk'] ?? null) === $metric,
+                    default => true,
+                };
+            })->sortBy([['area', 'asc'], ['name', 'asc']])->values();
+            if ($criteria['count']) {
+                return $scope."\n{$cases->count()} matching open pregnancy record(s)."
+                    ."\nUse the Pregnancy review queue to open an authorized record.";
+            }
+            if ($cases->isEmpty()) {
+                return $scope."\nNo matching open pregnancy records were found."
+                    ."\nConfirm reporting completeness before treating this as an absence of need.";
+            }
+            $lines = $cases->map(function ($entry) {
+                $edd = !empty($entry['edd']) ? 'EDD '.Carbon::parse($entry['edd'])->format('M d, Y') : 'EDD unrecorded';
+                return "• {$entry['name']} - {$entry['area']}, {$edd} ({$entry['risk']})";
+            });
+            return $scope."\nMatching women (".$cases->count()."):\n".$lines->implode("\n")
+                ."\nFor authorized staff review only. Do not paste names into an external tool.";
+        }
+
+        $matches = $areas->filter(fn ($area) => $criteria['zero'] ? $this->areaMetricValue($area, $metric) === 0 : $this->areaMetricValue($area, $metric) > 0)
+            ->sortBy('label')->sortByDesc(fn ($area) => $this->areaMetricValue($area, $metric))->values();
+        if ($criteria['count']) {
+            return $scope."\n{$matches->count()} barangay(s) match this request."
+                ."\nRecorded counts are not population risk rates.";
+        }
+        if ($matches->isEmpty()) {
+            return $scope."\nNo barangays match this request."
+                ."\nConfirm reporting completeness before treating zero recorded entries as an absence of need.";
+        }
+        $label = $criteria['zero'] ? 'Barangays with no recorded '.$this->metricLabel($metric) : 'Matching barangays';
+        $lines = $matches->map(fn ($area) => "• {$area['label']}: {$this->areaMetricValue($area, $metric)} {$this->metricLabel($metric)}");
+        return $scope."\n{$label} (".$matches->count()."):\n".$lines->implode("\n")
+            ."\nNote: counts are recorded numbers, not population risk rates. Zero records may reflect missing reports.";
     }
 
-    private function detailedAreaAnswer(string $question, array $report): string
+    private function metricLabel(string $metric): string
     {
-        $scope = "{$report['area_label']}; {$report['filters']['from']} to {$report['filters']['to']}.";
-        $areas = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA)->values();
-        if ($areas->isEmpty()) {
-            return $scope."\nNo barangay records were found in this selection."
-                ."\nBest next step: confirm reporting completeness and maintain scheduled follow-up.";
-        }
-        $emptyFocus = (bool) preg_match('/\bno\b|\bwithout\b|\bzero\b|\bempty\b|\bwalang\b|\bwala\b/u', mb_strtolower($question));
-        // "List barangays with NO pregnancies" → only the quiet areas.
-        if ($emptyFocus && ! preg_match('/high.?risk|critical|panganib/u', mb_strtolower($question))) {
-            $quiet = $areas->filter(fn ($a) => $a['open'] <= 0)->sortBy('label')->values();
-            if ($quiet->isEmpty()) {
-                return $scope."\nEvery area in this selection has open pregnancies right now."
-                    ."\nBest next step: keep scheduled follow-up and reporting complete across all areas.";
-            }
-            $lines = $quiet->map(fn ($a) => "• {$a['label']}: 0 open now, {$a['registrations']} registrations in period");
+        return match ($metric) {
+            'open' => 'open pregnancy record(s)',
+            'high_risk' => 'High/Critical open record(s)',
+            'emergencies' => 'emergency-marked record(s)',
+            default => strtolower($metric).' record(s)',
+        };
+    }
 
-            return $scope."\nBarangays with no open pregnancies (".$quiet->count().' of '.$areas->count()."):"."\n".$lines->implode("\n")
-                ."\nBest next step: verify reporting completeness in these areas — zero records may mean no pregnancies, or missing reports. Confirm with the assigned BHWs."
-                ."\nNote: counts are recorded numbers, not population risk rates.";
-        }
-        // "List the in-risk / high-risk women" → the actual at-risk
-        // records. This answer is always built locally (source 'rules'):
-        // names never leave this server for any cloud model.
-        if (preg_match('/high.?risk|critical|in.?risk|at.?risk|panganib|women|babae|buntis/u', mb_strtolower($question))) {
-            $severity = ['Critical' => 2, 'High' => 1];
-            $cases = collect($report['queue'] ?? [])
-                ->filter(fn ($e) => in_array($e['risk'] ?? null, ['High', 'Critical'], true))
-                ->sortBy([[fn ($e) => $severity[$e['risk']] ?? 0, 'desc'], ['edd', 'asc'], ['name', 'asc']])->values();
-            if ($cases->isEmpty()) {
-                return $scope."\nNo open High/Critical records in this selection."
-                    ."\nBest next step: confirm reporting completeness and keep scheduled follow-up; an absence of recorded flags does not confirm an absence of risk.";
-            }
-            $lines = $cases->map(function ($e) {
-                $when = ! empty($e['edd']) ? 'EDD '.Carbon::parse($e['edd'])->format('M d, Y') : 'EDD unrecorded';
-                $flags = $e['risk'].(! empty($e['emergency']) ? ', emergency-marked' : '');
-
-                return "• {$e['name']} — {$e['area']}, {$when} ({$flags})";
-            });
-            $topArea = $areas->sortBy([['high_risk', 'desc'], ['open', 'desc'], ['label', 'asc']])->first();
-
-            return $scope."\nAt-risk women (".$cases->count()."):\n".$lines->implode("\n")
-                ."\nBest next step: start with {$topArea['label']} — confirm each care plan with the assigned midwife and check staffing and referral transport, "
-                .'then work down the list in order. Open any record from the pregnancy review queue below for details.'
-                ."\nNote: for authorized staff review only — do not paste names into any external tool. Counts are recorded numbers, not population risk rates.";
-        }
-        $withOpen = $areas->filter(fn ($a) => $a['open'] > 0)->sortByDesc('open')->values();
-        $lines = $withOpen->map(fn ($a) => "• {$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical now, "
-            ."{$a['registrations']} registrations, {$a['deaths']} deaths, {$a['complications']} complications in period");
-        $quiet = $areas->filter(fn ($a) => $a['open'] <= 0)->map(fn ($a) => $a['label']);
-        $top = $areas->sortBy([['high_risk', 'desc'], ['open', 'desc'], ['label', 'asc']])->first();
-
-        $answer = $scope."\nBarangays with open pregnancies (".$withOpen->count().' of '.$areas->count()."):";
-        $answer .= $lines->isNotEmpty() ? "\n".$lines->implode("\n") : "\n• None right now.";
-        if ($quiet->isNotEmpty()) {
-            $answer .= "\nNo open pregnancies in: ".$quiet->implode(', ').'.';
+    private function areaMetricValue(array $area, string $metric): int
+    {
+        if (in_array($metric, ['Critical', 'Medium', 'Low', 'Unassessed'], true)) {
+            return (int) ($area['risk_counts'][$metric] ?? 0);
         }
 
-        return $answer."\nBest next step: start with {$top['label']} ({$top['high_risk']} High/Critical open) — confirm care plans "
-            .'with the assigned midwife and check staffing and referral transport, then work down the list in order.'
-            ."\nNote: counts are recorded numbers, not population risk rates.";
+        return (int) ($area[$metric] ?? 0);
     }
 
     private function unavailable(string $fallback): array

@@ -19,7 +19,7 @@ class MaternalAnalyticsService
 
     private const RISK_ORDER = ['Critical' => 5, 'High' => 4, 'Medium' => 3, 'Unassessed' => 2, 'Low' => 1];
 
-    public function report(array $filters): array
+    public function report(array $filters, bool $includeEmptyAreas = false): array
     {
         $from = Carbon::parse($filters['from'])->startOfDay();
         $to = Carbon::parse($filters['to'])->endOfDay();
@@ -97,8 +97,12 @@ class MaternalAnalyticsService
 
         // A selected RHU must show its complete official catchment even before
         // any patients or events have been recorded there.
-        if (!empty($filters['rhu'])) {
-            Barangay::active()->forRhu($filters['rhu'])->pluck('name')->each(function ($name) use (&$areas) {
+        if ($includeEmptyAreas || !empty($filters['rhu'])) {
+            Barangay::active()->pluck('name')->filter(function ($name) use ($area, $catchment, $scope) {
+                $key = $scope->key($name);
+                return ($catchment === null || in_array($key, $catchment, true))
+                    && (!$area || $key === $scope->key($area));
+            })->each(function ($name) use (&$areas) {
                 $key = $this->area($name);
                 $areas[$key] ??= $this->emptyArea($key);
             });

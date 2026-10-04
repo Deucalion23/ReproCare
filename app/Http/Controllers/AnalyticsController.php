@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AnalyticsRequest;
 use App\Services\AIInsightService;
 use App\Services\AnalyticsScope;
+use App\Services\AnalyticsQuestion;
 use App\Services\MaternalAnalyticsService;
 use App\Services\AnalyticsMap;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -35,9 +36,16 @@ class AnalyticsController extends Controller
 
     public function chat(AnalyticsRequest $request)
     {
-        $filters = app(AnalyticsScope::class)->forUser($request->user(), $request->validated());
-        $report = app(MaternalAnalyticsService::class)->report($filters);
-        return response()->json(app(AIInsightService::class)->chat($request->validated('question'), $report));
+        $question = $request->validated('question');
+        $scope = app(AnalyticsScope::class);
+        $filters = $scope->forUser($request->user(), $request->validated());
+        $filters = app(AnalyticsQuestion::class)->filters($question, $filters);
+        $filters = $scope->forUser($request->user(), $filters);
+        $report = app(MaternalAnalyticsService::class)->report($filters, includeEmptyAreas: true);
+        return response()->json(app(AIInsightService::class)->chat($question, $report) + [
+            'filters' => $report['filters'],
+            'scope_label' => $report['scope_label'],
+        ]);
     }
 
     public function pregnancy(\Illuminate\Http\Request $request, int $id)

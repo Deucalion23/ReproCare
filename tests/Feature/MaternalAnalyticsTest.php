@@ -381,6 +381,35 @@ class MaternalAnalyticsTest extends AutomationTestCase
         Http::assertNothingSent();
     }
 
+    public function test_chat_uses_an_rhu_named_in_the_question_without_claiming_that_unrecorded_women_are_not_pregnant(): void
+    {
+        DB::table('barangays')->insert([
+            ['name' => 'Padlan', 'rhu_assignment' => 'RHU 1'],
+            ['name' => 'Outside', 'rhu_assignment' => 'RHU 2'],
+            ['name' => 'Quiet', 'rhu_assignment' => 'RHU 2'],
+        ]);
+        $this->pregnancy(['user_id' => $this->patient(['barangay' => 'Padlan', 'first_name' => 'RhuOneOnly'])->id]);
+        $this->pregnancy(['user_id' => $this->patient(['barangay' => 'Outside', 'first_name' => 'RhuTwoOnly'])->id, 'risk_level' => 'Critical']);
+        $this->actingAs($this->patient(['role' => 'cho']));
+
+        $this->postJson(route('cho.analytics.chat'), ['question' => 'List women in RHU 2 with open pregnancies.'])
+            ->assertOk()->assertJsonPath('source', 'rules')->assertJsonPath('filters.rhu', 'RHU 2')
+            ->assertJsonPath('scope_label', 'RHU 2')->assertSee('RhuTwoOnly')->assertDontSee('RhuOneOnly');
+        $this->postJson(route('cho.analytics.chat'), ['question' => 'List barangays in RHU 2 with critical pregnancies.'])
+            ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')->assertSee('Outside: 1 critical record');
+        $this->postJson(route('cho.analytics.chat'), ['question' => 'What women in RHU 2 have no pregnancy?'])
+            ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')
+            ->assertSee('cannot identify women with no pregnancy record')->assertDontSee('RhuOneOnly');
+        Http::assertNothingSent();
+    }
+
+    public function test_rhu_staff_cannot_override_its_scope_by_naming_another_rhu_in_a_question(): void
+    {
+        $this->actingAs($this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']));
+        $this->postJson(route('rhu.analytics.chat'), ['question' => 'List women in RHU 2 with open pregnancies.'])
+            ->assertForbidden();
+    }
+
     public function test_access_and_filter_validation(): void
     {
         $this->get(route('cho.analytics'))->assertRedirect(route('login'));
