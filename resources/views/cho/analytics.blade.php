@@ -152,13 +152,12 @@
                 </div>
                 <button id="analytics-ask" class="an-button" type="submit">Ask assistant</button>
             </form>
-            <div id="analytics-chat-result" class="an-result" role="status" aria-live="polite" hidden>
-                <div id="analytics-chat-notice" class="an-subtitle mb-2"></div>
-                <div id="analytics-chat-answer" class="an-answer small"></div>
-                <div id="analytics-chat-context" class="an-subtitle mt-3"></div>
-            </div>
-
         </section>
+        <div id="analytics-chat-result" class="an-result an-result-wide" role="status" aria-live="polite" hidden>
+            <div id="analytics-chat-notice" class="an-subtitle mb-2"></div>
+            <div id="analytics-chat-answer" class="an-answer small"></div>
+            <div id="analytics-chat-context" class="an-subtitle mt-3"></div>
+        </div>
     </div>
 
     <div class="an-risk-events">
