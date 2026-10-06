@@ -48,11 +48,12 @@ class AnalyticsQuestion
             return null;
         }
         $count = (bool) preg_match('/\b(?:how many|number of|count|ilan)\b/u', $q);
-        if (!$count && !preg_match('/\b(?:list|show|display|enumerate|which|who|sino|alin|give|find|name|breakdown)\b|\bwhat\s+(?:women|woman|patients?|mothers?)\b/u', $q)) {
+        $listingIntent = $count || (bool) preg_match('/\b(?:list|show|display|enumerate|which|who|sino|alin|give|find|name|breakdown)\b|\bwhat\s+(?:women|woman|patients?|mothers?)\b/u', $q);
+        if (!$listingIntent) {
             return null;
         }
-        // Rankings and recommendations remain conversational model questions.
-        if (preg_match('/\b(?:most|highest|busiest|top|recommend|should)\b/u', $q)) {
+        // Rankings need report interpretation rather than a direct record list.
+        if (preg_match('/\b(?:most|highest|busiest|top)\b/u', $q)) {
             return null;
         }
         $metric = match (true) {
@@ -80,6 +81,8 @@ class AnalyticsQuestion
             'zero' => $metric !== 'Unassessed' && (bool) preg_match('/\b(?:no|without|zero|empty|walang|wala)\b/u', $q),
             'count' => $count,
             'female_only' => $women,
+            'recommendations' => $patients && $metric === 'high_risk'
+                && (bool) preg_match('/\b(?:recommend(?:ation|ed)?|what (?:should|to do)|follow[ -]?up|next steps?)\b/u', $q),
         ];
     }
 }

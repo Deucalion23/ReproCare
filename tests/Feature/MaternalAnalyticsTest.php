@@ -394,11 +394,16 @@ class MaternalAnalyticsTest extends AutomationTestCase
         $this->patient(['barangay' => 'Quiet', 'first_name' => 'RhuTwoNoOpen', 'gender' => 'female']);
         $this->actingAs($this->patient(['role' => 'cho']));
 
+        $this->get(route('cho.analytics'))->assertOk()->assertSee('Open women')->assertSee('All high-risk women')
+            ->assertSee('High-risk to do')->assertSee('Critical patients')->assertSee('No open record');
+
         $this->postJson(route('cho.analytics.chat'), ['question' => 'List women in RHU 2 with open pregnancies.'])
             ->assertOk()->assertJsonPath('source', 'rules')->assertJsonPath('filters.rhu', 'RHU 2')
             ->assertJsonPath('scope_label', 'RHU 2')->assertSee('RhuTwoOnly')->assertDontSee('RhuOneOnly');
         $this->postJson(route('cho.analytics.chat'), ['question' => 'List barangays in RHU 2 with critical pregnancies.'])
             ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')->assertSee('Outside: 1 critical record');
+        $this->postJson(route('cho.analytics.chat'), ['question' => 'List all high-risk women and what recommended follow-up is needed in RHU 2.'])
+            ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')->assertSee('RhuTwoOnly')->assertSee('Arrange urgent clinician review today');
         $this->postJson(route('cho.analytics.chat'), ['question' => 'What women in RHU 2 have no pregnancy?'])
             ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')
             ->assertSee('RhuTwoNoOpen')->assertDontSee('RhuOneNoOpen')->assertDontSee('RhuOneOnly');

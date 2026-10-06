@@ -346,12 +346,14 @@ class AIInsightService
                 return $scope."\nNo matching open pregnancy records were found."
                     ."\nConfirm reporting completeness before treating this as an absence of need.";
             }
-            $lines = $cases->map(function ($entry) {
+            $lines = $cases->map(function ($entry) use ($criteria) {
                 $edd = !empty($entry['edd']) ? 'EDD '.Carbon::parse($entry['edd'])->format('M d, Y') : 'EDD unrecorded';
-                return "• {$entry['name']} - {$entry['area']}, {$edd} ({$entry['risk']})";
+                $line = "• {$entry['name']} - {$entry['area']}, {$edd} ({$entry['risk']})";
+                return $criteria['recommendations'] ? $line.'; To do: '.$this->patientFollowUp($entry) : $line;
             });
-            return $scope."\nMatching women (".$cases->count()."):\n".$lines->implode("\n")
-                ."\nFor authorized staff review only. Do not paste names into an external tool.";
+            $title = $criteria['recommendations'] ? 'Matching women and recommended follow-up' : 'Matching women';
+            return $scope."\n{$title} (".$cases->count()."):\n".$lines->implode("\n")
+                ."\nFor authorized staff review only. Do not paste names into an external tool. Recommendations support staff review and do not replace clinician assessment.";
         }
 
         $matches = $areas->filter(fn ($area) => $criteria['zero'] ? $this->areaMetricValue($area, $metric) === 0 : $this->areaMetricValue($area, $metric) > 0)
@@ -378,6 +380,21 @@ class AIInsightService
             'emergencies' => 'emergency-marked record(s)',
             default => strtolower($metric).' record(s)',
         };
+    }
+
+    private function patientFollowUp(array $entry): string
+    {
+        if (!empty($entry['emergency'])) {
+            return 'Immediately confirm the emergency and referral status with the responsible clinician.';
+        }
+        if (($entry['risk'] ?? null) === 'Critical') {
+            return 'Arrange urgent clinician review today and confirm the referral status.';
+        }
+        if (($entry['care_gap_count'] ?? 0) > 0) {
+            return 'Ask the assigned BHW to confirm attendance and coordinate the overdue follow-up.';
+        }
+
+        return 'Confirm the care plan and next appointment with the assigned midwife.';
     }
 
     private function areaMetricValue(array $area, string $metric): int

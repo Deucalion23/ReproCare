@@ -144,6 +144,11 @@
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most high-risk pregnancies and what should we do?">Highest high-risk area</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most pregnant women right now and what should we do?">Busiest barangay</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most maternal deaths and what should we do?">Most deaths</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with open pregnancies.">Open women</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List all high-risk women.">All high-risk women</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List all high-risk women and what recommended follow-up is needed.">High-risk to do</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List critical-risk patients.">Critical patients</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with no open pregnancy record.">No open record</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="How do I use the portal and approve records?">Portal help</button>
                 </div>
                 <button id="analytics-ask" class="an-button" type="submit">Ask assistant</button>
