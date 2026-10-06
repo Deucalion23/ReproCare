@@ -115,8 +115,8 @@
 .analytics .an-scope-note { display:flex; gap:8px; margin-bottom:12px; font-size:.73rem; color:var(--an-muted); line-height:1.6; }
 .analytics .an-scope-note i { flex-shrink:0; }
 
-/* Independent, content-sized columns keep a short suggestion from stretching. */
-.analytics .an-overview { display:grid; grid-template-columns:minmax(0, 1.25fr) minmax(340px, .9fr); align-items:start; gap:12px; margin-bottom:12px; }
+/* Keep recommendations, questions, and answers in one readable full-width flow. */
+.analytics .an-overview { display:grid; grid-template-columns:minmax(0, 1fr); align-items:start; gap:12px; margin-bottom:12px; }
 .analytics .an-overview-column { display:grid; gap:12px; align-content:start; min-width:0; }
 .analytics .an-risk-events { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); align-items:start; gap:12px; margin-bottom:12px; }
 .analytics .an-risk-events > * { align-self:start; }

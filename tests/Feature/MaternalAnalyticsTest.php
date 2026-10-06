@@ -396,7 +396,7 @@ class MaternalAnalyticsTest extends AutomationTestCase
 
         $this->get(route('cho.analytics'))->assertOk()->assertSee('Open women + to do')->assertSee('All high-risk + to do')
             ->assertSee('Critical + to do')->assertSee('No open record + to do')
-            ->assertSeeInOrder(['id="analytics-suggestions-title"', 'id="analytics-chat-result"'], false)
+            ->assertSeeInOrder(['id="analytics-suggestions-title"', 'id="analytics-assistant-title"', 'id="analytics-chat-result"'], false)
             ->assertSee('class="an-result an-result-wide"', false);
 
         $this->postJson(route('cho.analytics.chat'), ['question' => 'List women in RHU 2 with open pregnancies.'])
