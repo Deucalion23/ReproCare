@@ -81,8 +81,9 @@ class AnalyticsQuestion
             'zero' => $metric !== 'Unassessed' && (bool) preg_match('/\b(?:no|without|zero|empty|walang|wala)\b/u', $q),
             'count' => $count,
             'female_only' => $women,
-            'recommendations' => $patients && $metric === 'high_risk'
-                && (bool) preg_match('/\b(?:recommend(?:ation|ed)?|what (?:should|to do)|follow[ -]?up|next steps?)\b/u', $q),
+            // Patient listings are for staff follow-up, so always include the
+            // appropriate local next step with named results.
+            'recommendations' => $patients && !$count,
         ];
     }
 }

@@ -321,14 +321,17 @@ class AIInsightService
                     $report['filters'], $criteria['female_only']
                 );
                 if ($criteria['count']) {
-                    return $scope."\n{$patients->count()} registered patient account(s) have no open pregnancy record.";
+                    return $scope."\n{$patients->count()} registered patient account(s) have no open pregnancy record."
+                        ."\nRecommended next step: ask assigned BHWs to verify registry status and offer assessment or registration support where relevant.";
                 }
                 if ($patients->isEmpty()) {
-                    return $scope."\nNo registered patient accounts without an open pregnancy record were found.";
+                    return $scope."\nNo registered patient accounts without an open pregnancy record were found."
+                        ."\nRecommended next step: maintain registration outreach and confirm reporting completeness.";
                 }
                 $label = $criteria['female_only'] ? 'Registered women' : 'Registered patients';
                 $lines = $patients->map(fn ($patient) => "• {$patient->name} - ".app(AnalyticsScope::class)->canonicalArea($patient->barangay));
                 return $scope."\n{$label} with no open pregnancy record (".$patients->count()."):\n".$lines->implode("\n")
+                    ."\nRecommended next step: ask assigned BHWs to verify registry status and offer assessment or registration support where relevant."
                     ."\nFor authorized staff review only. No open record does not confirm that a patient is not pregnant.";
             }
             $cases = collect($report['queue'] ?? [])->filter(function ($entry) use ($metric) {
@@ -389,6 +392,9 @@ class AIInsightService
         }
         if (($entry['risk'] ?? null) === 'Critical') {
             return 'Arrange urgent clinician review today and confirm the referral status.';
+        }
+        if (($entry['risk'] ?? null) === 'Unassessed') {
+            return 'Ask a clinician to complete or verify the risk assessment and confirm the next appointment.';
         }
         if (($entry['care_gap_count'] ?? 0) > 0) {
             return 'Ask the assigned BHW to confirm attendance and coordinate the overdue follow-up.';
