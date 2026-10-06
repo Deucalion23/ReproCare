@@ -317,9 +317,19 @@ class AIInsightService
 
         if ($criteria['entity'] === 'patients') {
             if ($criteria['zero'] && $metric === 'open') {
-                return $scope."\nThis analytics report cannot identify women with no pregnancy record. It only contains recorded pregnancies, not a complete population roster."
-                    ."\nAsk for barangays with no open pregnancies if that is what you need, or review the registered-women records through the appropriate workflow."
-                    ."\nNote: no record does not confirm that a woman is not pregnant.";
+                $patients = app(MaternalAnalyticsService::class)->registeredPatientsWithoutOpenPregnancy(
+                    $report['filters'], $criteria['female_only']
+                );
+                if ($criteria['count']) {
+                    return $scope."\n{$patients->count()} registered patient account(s) have no open pregnancy record.";
+                }
+                if ($patients->isEmpty()) {
+                    return $scope."\nNo registered patient accounts without an open pregnancy record were found.";
+                }
+                $label = $criteria['female_only'] ? 'Registered women' : 'Registered patients';
+                $lines = $patients->map(fn ($patient) => "• {$patient->name} - ".app(AnalyticsScope::class)->canonicalArea($patient->barangay));
+                return $scope."\n{$label} with no open pregnancy record (".$patients->count()."):\n".$lines->implode("\n")
+                    ."\nFor authorized staff review only. No open record does not confirm that a patient is not pregnant.";
             }
             $cases = collect($report['queue'] ?? [])->filter(function ($entry) use ($metric) {
                 return match ($metric) {

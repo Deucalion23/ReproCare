@@ -142,6 +142,28 @@ class MaternalAnalyticsService
         ];
     }
 
+    /** Registered patients without an open pregnancy record in the authorized report scope. */
+    public function registeredPatientsWithoutOpenPregnancy(array $filters, bool $femaleOnly): Collection
+    {
+        $scope = app(AnalyticsScope::class);
+        $catchment = $scope->areas($filters['rhu'] ?? null);
+        $selectedArea = $filters['barangay'] ?? null;
+        $deceasedUserIds = MaternalDeath::whereDate('death_date', '<=', today())->whereNotNull('user_id')->pluck('user_id');
+
+        return User::query()->where('role', 'user')->where('status', 'approved')
+            ->when($femaleOnly, fn ($query) => $query->where('gender', 'female'))
+            ->when($deceasedUserIds->isNotEmpty(), fn ($query) => $query->whereNotIn('id', $deceasedUserIds))
+            ->whereDoesntHave('pregnancies', fn ($query) => $query->whereNull('ended_at')->whereNull('delivery_date')
+                ->where(fn ($query) => $query->whereNull('outcome')->orWhere('outcome', ''))
+                ->where('created_at', '<=', now()))
+            ->get(['id', 'first_name', 'middle_initial', 'last_name', 'barangay'])
+            ->filter(function (User $patient) use ($scope, $catchment, $selectedArea) {
+                $area = $scope->key($patient->barangay);
+                return ($catchment === null || in_array($area, $catchment, true))
+                    && (!$selectedArea || $area === $scope->key($selectedArea));
+            })->sortBy(fn (User $patient) => [$scope->canonicalArea($patient->barangay), $patient->name])->values();
+    }
+
     /**
      * Open pregnancies per official catchment barangay, for every RHU.
      * Powers the "Pregnant women by barangay" chart with its RHU switcher.

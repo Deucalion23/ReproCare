@@ -42,7 +42,8 @@ class AnalyticsQuestion
             return null;
         }
         $areas = (bool) preg_match('/\b(?:barangays?|areas?|locations?|brgy|lugar)\b/u', $q);
-        $patients = (bool) preg_match('/\b(?:women|woman|patients?|mothers?|babae|buntis)\b/u', $q);
+        $women = (bool) preg_match('/\b(?:women|woman|mothers?|babae|buntis)\b/u', $q);
+        $patients = $women || (bool) preg_match('/\bpatients?\b/u', $q);
         if (!$areas && !$patients) {
             return null;
         }
@@ -78,6 +79,7 @@ class AnalyticsQuestion
             'metric' => $metric,
             'zero' => $metric !== 'Unassessed' && (bool) preg_match('/\b(?:no|without|zero|empty|walang|wala)\b/u', $q),
             'count' => $count,
+            'female_only' => $women,
         ];
     }
 }

@@ -388,8 +388,10 @@ class MaternalAnalyticsTest extends AutomationTestCase
             ['name' => 'Outside', 'rhu_assignment' => 'RHU 2'],
             ['name' => 'Quiet', 'rhu_assignment' => 'RHU 2'],
         ]);
-        $this->pregnancy(['user_id' => $this->patient(['barangay' => 'Padlan', 'first_name' => 'RhuOneOnly'])->id]);
-        $this->pregnancy(['user_id' => $this->patient(['barangay' => 'Outside', 'first_name' => 'RhuTwoOnly'])->id, 'risk_level' => 'Critical']);
+        $this->pregnancy(['user_id' => $this->patient(['barangay' => 'Padlan', 'first_name' => 'RhuOneOnly', 'gender' => 'female'])->id]);
+        $this->pregnancy(['user_id' => $this->patient(['barangay' => 'Outside', 'first_name' => 'RhuTwoOnly', 'gender' => 'female'])->id, 'risk_level' => 'Critical']);
+        $this->patient(['barangay' => 'Padlan', 'first_name' => 'RhuOneNoOpen', 'gender' => 'female']);
+        $this->patient(['barangay' => 'Quiet', 'first_name' => 'RhuTwoNoOpen', 'gender' => 'female']);
         $this->actingAs($this->patient(['role' => 'cho']));
 
         $this->postJson(route('cho.analytics.chat'), ['question' => 'List women in RHU 2 with open pregnancies.'])
@@ -399,13 +401,22 @@ class MaternalAnalyticsTest extends AutomationTestCase
             ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')->assertSee('Outside: 1 critical record');
         $this->postJson(route('cho.analytics.chat'), ['question' => 'What women in RHU 2 have no pregnancy?'])
             ->assertOk()->assertJsonPath('filters.rhu', 'RHU 2')
-            ->assertSee('cannot identify women with no pregnancy record')->assertDontSee('RhuOneOnly');
+            ->assertSee('RhuTwoNoOpen')->assertDontSee('RhuOneNoOpen')->assertDontSee('RhuOneOnly');
         Http::assertNothingSent();
     }
 
     public function test_rhu_staff_cannot_override_its_scope_by_naming_another_rhu_in_a_question(): void
     {
+        DB::table('barangays')->insert([
+            ['name' => 'Padlan', 'rhu_assignment' => 'RHU 1'],
+            ['name' => 'Outside', 'rhu_assignment' => 'RHU 2'],
+        ]);
+        $this->patient(['barangay' => 'Padlan', 'first_name' => 'RhuOneNoOpen', 'gender' => 'female']);
+        $this->patient(['barangay' => 'Outside', 'first_name' => 'RhuTwoNoOpen', 'gender' => 'female']);
         $this->actingAs($this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']));
+        $this->postJson(route('rhu.analytics.chat'), ['question' => 'What women have no pregnancy?'])
+            ->assertOk()->assertJsonPath('filters.rhu', 'RHU 1')
+            ->assertSee('RhuOneNoOpen')->assertDontSee('RhuTwoNoOpen');
         $this->postJson(route('rhu.analytics.chat'), ['question' => 'List women in RHU 2 with open pregnancies.'])
             ->assertForbidden();
     }
