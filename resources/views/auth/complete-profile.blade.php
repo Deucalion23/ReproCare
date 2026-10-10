@@ -512,9 +512,14 @@
                 </div>
             </form>
 
+            {{-- Cancel escape hatch: signs out so the patient lands back on the
+                 login page, where "Continue with Google" now always shows the
+                 account chooser (switch accounts or back out freely). --}}
             <form method="POST" action="{{ route('logout') }}" id="completeSignoutForm" style="margin-top:14px; text-align:center;">
                 @csrf
-                <button type="submit" style="background:none; border:none; color:var(--color-text-muted); font-size:.82rem; cursor:pointer; text-decoration:underline;">Sign out</button>
+                <button type="submit" class="btn-prev" style="width:100%; justify-content:center;" aria-label="Cancel registration and use a different Google account">
+                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i> Cancel — use a different Google account
+                </button>
             </form>
         </div>
     </div>

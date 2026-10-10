@@ -101,10 +101,15 @@ class GoogleOAuthTest extends AutomationTestCase
         $response = $this->get(route('google.redirect'));
 
         $response->assertRedirect();
+        $location = (string) $response->headers->get('Location');
         $this->assertStringContainsString(
             'accounts.google.com',
-            $response->headers->get('Location')
+            $location
         );
+        // Forces Google's account chooser on every click so patients can
+        // switch accounts (or back out) instead of silently reusing the
+        // last Google session after sign-out.
+        $this->assertStringContainsString('prompt=select_account', $location);
     }
 
     public function test_callback_creates_patient_and_sends_to_profile_completion(): void

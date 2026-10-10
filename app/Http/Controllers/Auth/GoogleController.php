@@ -25,10 +25,18 @@ class GoogleController extends Controller
 {
     /**
      * Redirect the patient to Google's OAuth consent screen.
+     *
+     * `prompt=select_account` forces Google to show its account chooser on
+     * EVERY click (account list + "Use another account" + a way to back
+     * out), instead of silently reusing the last Google session. Without
+     * it, sign out → "Continue with Google" loops straight back into the
+     * same account with no way to switch or cancel.
      */
     public function redirectToGoogle(): RedirectResponse
     {
-        return Socialite::driver('google')->redirect();
+        return Socialite::driver('google')
+            ->with(['prompt' => 'select_account'])
+            ->redirect();
     }
 
     /**
