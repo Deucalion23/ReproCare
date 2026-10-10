@@ -299,7 +299,23 @@ class AuthController extends Controller
 
             // Patient onboarding gates: unverified emails verify first,
             // then incomplete Google profiles complete onboarding.
+            // Demo accounts (User::DEMO_EMAILS) skip both gates: they are
+            // marked verified + complete on the spot and go straight to
+            // the dashboard. Status gates above (RHU approval, blocks)
+            // still apply to them.
             if ($user->role === 'user') {
+                if (User::isDemoAccount($user->email)) {
+                    if (! $user->hasVerifiedEmail()) {
+                        $user->markEmailAsVerified();
+                    }
+
+                    if (! (bool) ($user->is_profile_complete ?? false)) {
+                        $user->forceFill(['is_profile_complete' => true])->save();
+                    }
+
+                    $user = $user->fresh() ?? $user;
+                }
+
                 if (! $user->hasVerifiedEmail()) {
                     return redirect()->route('verification.notice');
                 }

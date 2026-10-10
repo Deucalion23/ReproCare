@@ -163,6 +163,36 @@ class User extends Authenticatable implements MustVerifyEmail
     public const REJECTED_LOGIN_MESSAGE = 'Your account has been rejected, please fill up the correct information needed. It will be reassessed by the RHU 1 administrator for re-verification.';
 
     /**
+     * Demo accounts exempt from the email-verification + onboarding gates:
+     * they verify instantly and log straight into the dashboard (status
+     * gates like RHU approval still apply). Add future demo emails here —
+     * never real patient addresses.
+     */
+    public const DEMO_EMAILS = [
+        'mariasanta@gmail.com',
+    ];
+
+    /**
+     * Case-insensitive demo-account check (see DEMO_EMAILS).
+     */
+    public static function isDemoAccount(?string $email): bool
+    {
+        $email = strtolower(trim((string) $email));
+
+        if ($email === '') {
+            return false;
+        }
+
+        foreach (self::DEMO_EMAILS as $demo) {
+            if (strtolower(trim((string) $demo)) === $email) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Whether this account is still forced through profile completion
      * (missing phone/barangay after Google sign-up).
      */

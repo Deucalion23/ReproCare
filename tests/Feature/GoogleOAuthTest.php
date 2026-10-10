@@ -406,6 +406,28 @@ class GoogleOAuthTest extends AutomationTestCase
         $this->assertTrue($patient->fresh()->hasVerifiedEmail());
     }
 
+    public function test_demo_account_skips_verification_and_onboarding(): void
+    {
+        // Demo accounts (User::DEMO_EMAILS) verify instantly and log
+        // straight into the dashboard — no verification-notice detour, no
+        // Get-started onboarding — while status gates still apply.
+        $demo = $this->patient([
+            'email' => User::DEMO_EMAILS[0],
+            'email_verified_at' => null,
+            'is_profile_complete' => false,
+        ]);
+
+        $response = $this->post(route('login.post'), [
+            'email' => $demo->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('user.dashboard'));
+        $this->assertAuthenticatedAs($demo->fresh());
+        $this->assertTrue($demo->fresh()->hasVerifiedEmail());
+        $this->assertTrue((bool) $demo->fresh()->is_profile_complete);
+    }
+
     public function test_password_login_gates_unverified_then_incomplete_patients(): void
     {
         $unverified = $this->patient(['email_verified_at' => null]);
