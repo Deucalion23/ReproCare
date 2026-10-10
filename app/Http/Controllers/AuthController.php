@@ -262,6 +262,40 @@ class AuthController extends Controller
                 ])->onlyInput('email');
             }
 
+            // Pending patient accounts: demo accounts verify instantly and
+            // log straight in with full access; verified + onboarded users
+            // keep a PROVISIONAL (limited) session instead of being logged
+            // out — dashboard, learning, read-only community and profile
+            // stay open; clinical + write features unlock after RHU
+            // approval. Pending users who still owe verification/onboarding
+            // are sent to finish those flows (session kept so pages work).
+            if ($user->status === 'pending' && ($user->role ?? null) === 'user') {
+                $request->session()->regenerate();
+
+                if (User::isDemoAccount($user->email)) {
+                    if (! $user->hasVerifiedEmail()) {
+                        $user->markEmailAsVerified();
+                    }
+
+                    if (! (bool) ($user->is_profile_complete ?? false)) {
+                        $user->forceFill(['is_profile_complete' => true])->save();
+                    }
+
+                    return redirect()->route('user.dashboard');
+                }
+
+                if ($user->hasVerifiedEmail() && ! $user->needsProfileCompletion()) {
+                    return redirect()->route('user.dashboard')
+                        ->with('provisional_welcome', true);
+                }
+
+                if (! $user->hasVerifiedEmail()) {
+                    return redirect()->route('verification.notice');
+                }
+
+                return redirect()->route('profile.complete');
+            }
+
             // Block pending users from logging in
             if ($user->status === 'pending') {
                 Auth::logout();

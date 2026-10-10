@@ -1,5 +1,7 @@
 @php
     $forumUser = auth()->user();
+    // Provisional patients browse read-only (routes enforce it too).
+    $isProvisional = (bool) ($forumUser?->hasProvisionalAccess());
     $forumLayout = match($forumUser?->role) {
         'bhw_president' => 'bhw-president.layout',
         'midwife' => 'midwife.layout',
@@ -308,6 +310,12 @@
 
                 {{-- Actions --}}
                 <div class="post-action-bar">
+                    @if($isProvisional)
+                    <span class="post-action-btn" style="cursor:default;" title="Liking unlocks after RHU approval of your account">
+                        <i class="bi bi-heart"></i>
+                        {{ $post->likes_count }} {{ Str::plural('Like', $post->likes_count) }}
+                    </span>
+                    @else
                     <form method="POST" action="{{ route('forum.like', $post->id) }}" class="d-inline">
                         @csrf
                         <button type="submit"
@@ -316,6 +324,7 @@
                             {{ $post->likes_count }} {{ Str::plural('Like', $post->likes_count) }}
                         </button>
                     </form>
+                    @endif
 
                     <span class="post-action-btn" style="cursor:default;">
                         <i class="bi bi-chat-dots"></i>
@@ -344,8 +353,16 @@
                 </span>
             </div>
 
-            {{-- Add comment form --}}
+            {{-- Add comment form (locked until RHU approval) --}}
             <div class="comment-form-area">
+                @if($isProvisional)
+                <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px; height:40px; border-radius:50%; background:var(--color-surface-soft); color:var(--color-text-muted);" aria-hidden="true">
+                        <i class="bi bi-lock-fill"></i>
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--color-text-muted);">Commenting unlocks after RHU approval of your account.</div>
+                </div>
+                @else
                 <form method="POST" action="{{ route('forum.comment', $post->id) }}">
                     @csrf
                     <textarea class="comment-textarea"
@@ -362,6 +379,7 @@
                         </button>
                     </div>
                 </form>
+                @endif
             </div>
 
             {{-- Comments list --}}

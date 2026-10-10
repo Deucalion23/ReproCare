@@ -5,6 +5,9 @@
         ->where('is_read', false)
         ->count();
     $isCareRecordsActive = request()->routeIs('user.checkups*') || request()->routeIs('user.health-records*');
+    // Provisional (limited-access) patients: clinical + write tabs show a
+    // lock and bounce to the dashboard with an explanation (full.access).
+    $isProvisional = (bool) ($currentUser?->hasProvisionalAccess());
 @endphp
 
 <!-- ================================================================
@@ -272,6 +275,15 @@
 
     .women-tab-link.active:hover i.nav-icon {
         color:var(--color-on-solid) !important;
+    }
+
+    /* Provisional lock chip on clinical tabs (links stay clickable —
+       the full.access middleware bounces with an explanation). */
+    .women-tab-link .limited-lock,
+    .women-dropdown-item .limited-lock {
+        font-size:10px;
+        opacity:0.75;
+        margin-left:1px;
     }
 
     /* Unread Tab Pill */
@@ -816,59 +828,71 @@
                     </a>
                 </li>
 
-                {{-- My Pregnancy --}}
+                {{-- My Pregnancy (locked until RHU approval) --}}
                 <li class="women-nav-item">
                     <a href="{{ route('user.pregnancies.index') }}"
-                       class="women-tab-link {{ request()->routeIs('user.pregnancies.*') ? 'active' : '' }}">
+                       class="women-tab-link {{ request()->routeIs('user.pregnancies.*') ? 'active' : '' }}"
+                       @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                         <i class="bi bi-heart-pulse-fill nav-icon"></i>
                         <span>My Pregnancy</span>
+                        @if($isProvisional)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                     </a>
                 </li>
 
-                {{-- Cycle & Period --}}
+                {{-- Cycle & Period (locked until RHU approval) --}}
                 <li class="women-nav-item">
                     <a href="{{ route('user.menstruation.index') }}"
-                       class="women-tab-link {{ request()->routeIs('user.menstruation.*') ? 'active' : '' }}">
+                       class="women-tab-link {{ request()->routeIs('user.menstruation.*') ? 'active' : '' }}"
+                       @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                         <i class="bi bi-calendar2-heart-fill nav-icon"></i>
                         <span>Cycle &amp; Period</span>
+                        @if($isProvisional)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                     </a>
                 </li>
 
-                {{-- Care Records Dropdown Group (Checkups + Health Records) --}}
+                {{-- Care Records Dropdown Group (Checkups + Health Records, locked until RHU approval) --}}
                 <li class="women-nav-item dropdown">
                     <button class="women-tab-link dropdown-toggle border-0 {{ $isCareRecordsActive ? 'active' : '' }}"
                             type="button"
                             id="careRecordsDropdown"
                             data-bs-toggle="dropdown"
-                            aria-expanded="false">
+                            aria-expanded="false"
+                            @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                         <i class="bi bi-folder2-open nav-icon"></i>
                         <span>Care Records</span>
+                        @if($isProvisional)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                         <i class="bi bi-chevron-down dropdown-chevron"></i>
                     </button>
                     <ul class="dropdown-menu women-nav-dropdown-menu" aria-labelledby="careRecordsDropdown">
                         <li>
                             <a class="dropdown-item women-dropdown-item {{ request()->routeIs('user.checkups*') ? 'active' : '' }}"
-                               href="{{ route('user.checkups') }}">
+                               href="{{ route('user.checkups') }}"
+                               @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                                 <i class="bi bi-clipboard2-pulse-fill"></i>
                                 <span>Clinic Checkups</span>
+                                @if($isProvisional)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                             </a>
                         </li>
                         <li>
                             <a class="dropdown-item women-dropdown-item {{ request()->routeIs('user.health-records*') ? 'active' : '' }}"
-                               href="{{ route('user.health-records') }}">
+                               href="{{ route('user.health-records') }}"
+                               @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                                 <i class="bi bi-file-earmark-medical-fill"></i>
                                 <span>Health Records</span>
+                                @if($isProvisional)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                             </a>
                         </li>
                     </ul>
                 </li>
 
-                {{-- Messages with Care Team --}}
+                {{-- Messages with Care Team (locked until RHU approval) --}}
                 <li class="women-nav-item">
                     <a href="{{ route('user.messages.index') }}"
-                       class="women-tab-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}">
+                       class="women-tab-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}"
+                       @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                         <i class="bi bi-chat-heart-fill nav-icon"></i>
                         <span>Messages</span>
+                        @if($isProvisional)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                         @if($unreadMessages > 0)
                             <span class="women-tab-badge">{{ $unreadMessages }}</span>
                         @endif
@@ -1014,20 +1038,25 @@
             <a href="{{ route('user.dashboard') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.dashboard') ? 'bg-light text-primary' : '' }}">
                 <i class="bi bi-grid-fill text-primary"></i> Dashboard
             </a>
-            <a href="{{ route('user.pregnancies.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.pregnancies.*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.pregnancies.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.pregnancies.*') ? 'bg-light text-primary' : '' }}" @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-heart-pulse-fill text-danger"></i> My Pregnancy Journey
+                @if($isProvisional)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.menstruation.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.menstruation.*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.menstruation.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.menstruation.*') ? 'bg-light text-primary' : '' }}" @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-calendar2-heart-fill text-danger"></i> Cycle &amp; Menstruation
+                @if($isProvisional)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.checkups') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.checkups*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.checkups') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.checkups*') ? 'bg-light text-primary' : '' }}" @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-clipboard2-pulse-fill text-info"></i> Clinic Checkups
+                @if($isProvisional)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.health-records') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.health-records*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.health-records') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.health-records*') ? 'bg-light text-primary' : '' }}" @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-file-earmark-medical-fill text-warning"></i> Health Records
+                @if($isProvisional)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.messages.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.messages.*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.messages.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.messages.*') ? 'bg-light text-primary' : '' }}" @if($isProvisional) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-chat-heart-fill text-primary"></i> Messages &amp; Care Team
+                @if($isProvisional)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
                 @if($unreadMessages > 0)
                     <span class="badge bg-danger rounded-pill ms-auto">{{ $unreadMessages }}</span>
                 @endif

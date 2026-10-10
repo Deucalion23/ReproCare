@@ -523,11 +523,18 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
 
 // User (Patient) Routes — verified email + completed profile required.
 Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'verified', 'complete.profile', 'role:user', 'prevent-back'])->group(function () {
+    // Open to provisional (limited-access) patients: dashboard, profile
+    // settings and own notifications. Everything clinical or write-heavy
+    // lives in the full.access group below.
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
-    
+
     // Profile - Use unified profile system at /profile
     Route::get('/settings', [UserController::class, 'settings'])->name('settings');
-    
+    Route::get('/notifications', [UserController::class, 'notifications'])->name('notifications');
+
+    // Clinical + write features: full (RHU-approved) access only.
+    // Provisional patients are bounced to the dashboard with a notice.
+    Route::middleware('full.access')->group(function () {
     // Menstruation Tracking
     Route::prefix('menstruation')->name('menstruation.')->group(function () {
         Route::get('/', [UserController::class, 'menstruation'])->name('index');
@@ -538,7 +545,7 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
         Route::post('/', [UserController::class, 'storeMenstruationRecord'])->name('store');
         Route::delete('/{id}', [UserController::class, 'destroyMenstruationRecord'])->name('destroy');
     });
-    
+
     // Cycle Tracking API (Task 1/5)
     Route::get('/cycles', [UserController::class, 'getCycles'])->name('cycles.index');
     Route::post('/cycles', [UserController::class, 'storeCycle'])->name('cycles.store');
@@ -553,13 +560,12 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
         Route::post('/', [UserController::class, 'storePregnancy'])->name('store');
         Route::get('/{id}', [UserController::class, 'showPregnancy'])->name('show');
     });
-    
+
     // View Only
     Route::get('/checkups', [UserController::class, 'checkups'])->name('checkups');
     Route::get('/health-records', [UserController::class, 'healthRecords'])->name('health-records');
     Route::get('/health-records/create', [UserController::class, 'createHealthRecord'])->name('health-records.create');
     Route::post('/health-records', [UserController::class, 'storeHealthRecord'])->name('health-records.store');
-    Route::get('/notifications', [UserController::class, 'notifications'])->name('notifications');
 
     // Messaging
     Route::prefix('messages')->name('messages.')->group(function () {
@@ -573,19 +579,25 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
         Route::post('/{id}/restore', [MessageController::class, 'restore'])->name('restore');
         Route::delete('/{id}', [MessageController::class, 'destroy'])->name('destroy');
     });
+    });
 });
 
-// Forum Routes (All authenticated users; incomplete patient profiles are gated)
+// Forum Routes (browsing open to provisional patients; posting needs full access)
 Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [ForumController::class, 'index'])->name('index');
-    Route::get('/create', [ForumController::class, 'create'])->name('create');
-    Route::post('/', [ForumController::class, 'store'])->name('store');
+
+    Route::middleware('full.access')->group(function () {
+        Route::get('/create', [ForumController::class, 'create'])->name('create');
+        Route::post('/', [ForumController::class, 'store'])->name('store');
+        Route::get('/{id}/edit', [ForumController::class, 'edit'])->name('edit');
+        Route::put('/{id}', [ForumController::class, 'update'])->name('update');
+        Route::delete('/{id}', [ForumController::class, 'destroy'])->name('destroy');
+        Route::post('/{id}/comment', [ForumController::class, 'comment'])->name('comment');
+        Route::post('/{id}/like', [ForumController::class, 'like'])->name('like');
+    });
+
+    // NOTE: show stays last — registered before /create it would swallow it.
     Route::get('/{id}', [ForumController::class, 'show'])->name('show');
-    Route::get('/{id}/edit', [ForumController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [ForumController::class, 'update'])->name('update');
-    Route::delete('/{id}', [ForumController::class, 'destroy'])->name('destroy');
-    Route::post('/{id}/comment', [ForumController::class, 'comment'])->name('comment');
-    Route::post('/{id}/like', [ForumController::class, 'like'])->name('like');
 });
 
 // Profile Routes (Unified for all roles; incomplete patient profiles are gated)

@@ -458,6 +458,9 @@
     $unreadMessages = \App\Models\Message::where('receiver_id', auth()->id())
         ->where('is_read', false)
         ->count();
+    // Provisional patients see lock affordances on clinical dock tabs.
+    $dockProvisional = (bool) (auth()->user()?->hasProvisionalAccess());
+    $lockTitle = 'Unlocks after RHU approval of your account';
 @endphp
 <div class="women-bottom-dock">
     <ul class="women-dock-items">
@@ -470,30 +473,34 @@
         </li>
         <li>
             <a href="{{ route('user.pregnancies.index') }}"
-               class="women-dock-link {{ request()->routeIs('user.pregnancies.*') ? 'active' : '' }}">
+               class="women-dock-link {{ request()->routeIs('user.pregnancies.*') ? 'active' : '' }}"
+               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-heart-pulse-fill"></i>
-                <span>Pregnancy</span>
+                <span>Pregnancy @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
             <a href="{{ route('user.menstruation.index') }}"
-               class="women-dock-link {{ request()->routeIs('user.menstruation.*') ? 'active' : '' }}">
+               class="women-dock-link {{ request()->routeIs('user.menstruation.*') ? 'active' : '' }}"
+               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-calendar2-heart-fill"></i>
-                <span>Cycle</span>
+                <span>Cycle @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
             <a href="{{ route('user.checkups') }}"
-               class="women-dock-link {{ request()->routeIs('user.checkups*') ? 'active' : '' }}">
+               class="women-dock-link {{ request()->routeIs('user.checkups*') ? 'active' : '' }}"
+               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-clipboard2-pulse-fill"></i>
-                <span>Checkups</span>
+                <span>Checkups @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
             <a href="{{ route('user.messages.index') }}"
-               class="women-dock-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}">
+               class="women-dock-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}"
+               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-chat-heart-fill"></i>
-                <span>Care Chat</span>
+                <span>Care Chat @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
                 @if($unreadMessages > 0)
                     <span class="women-dock-unread"></span>
                 @endif
@@ -501,23 +508,17 @@
         </li>
         <li>
             <a href="{{ route('user.health-records') }}"
-               class="women-dock-link {{ request()->routeIs('user.health-records*') ? 'active' : '' }}">
+               class="women-dock-link {{ request()->routeIs('user.health-records*') ? 'active' : '' }}"
+               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-clipboard2-data-fill"></i>
-                <span>Records</span>
+                <span>Records @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
-            <a href="{{ route('learning.index') }}"
-               class="women-dock-link {{ request()->routeIs('learning.*') ? 'active' : '' }}">
-                <i class="bi bi-mortarboard-fill"></i>
-                <span>Learning</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ route('forum.index') }}"
-               class="women-dock-link {{ request()->routeIs('forum.*') ? 'active' : '' }}">
-                <i class="bi bi-chat-quote-fill"></i>
-                <span>Community</span>
+            <a href="{{ route('user.notifications') }}"
+               class="women-dock-link {{ request()->routeIs('user.notifications*') ? 'active' : '' }}">
+                <i class="bi bi-bell-fill"></i>
+                <span>Alerts</span>
             </a>
         </li>
     </ul>

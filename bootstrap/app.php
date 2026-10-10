@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'sync' => \App\Http\Middleware\HandleSyncRequests::class,
             'complete.profile' => \App\Http\Middleware\EnsureProfileComplete::class,
             'account.active' => \App\Http\Middleware\EnsureAccountActive::class,
+            'full.access' => \App\Http\Middleware\EnsureFullAccess::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -193,6 +193,24 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Provisional (limited) access: a patient account that verified its
+     * email and finished onboarding but is still awaiting RHU approval.
+     * Provisional users may browse the dashboard, learning materials,
+     * community posts (read-only) and their own profile — clinical and
+     * write features (pregnancies, cycle logging, checkups, health
+     * records, care chat, community posting) stay locked until approval.
+     * Demo accounts are excluded: they always enjoy full access.
+     */
+    public function hasProvisionalAccess(): bool
+    {
+        return ($this->role ?? null) === 'user'
+            && ($this->status ?? 'approved') === 'pending'
+            && $this->hasVerifiedEmail()
+            && ! $this->needsProfileCompletion()
+            && ! self::isDemoAccount($this->email ?? null);
+    }
+
+    /**
      * Whether this account is still forced through profile completion
      * (missing phone/barangay after Google sign-up).
      */

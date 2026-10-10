@@ -806,10 +806,49 @@
         .mb-4 > .d-flex.gap-2.flex-wrap { grid-template-columns:1fr; }
         .row.g-3.mb-4 > [class*="col-6"] { width:100%; flex:0 0 100%; max-width:100%; }
     }
+
+    /* ── Provisional (limited-access) banner: pending RHU approval ── */
+    .provisional-banner {
+        display:flex; gap:0.8rem; align-items:flex-start;
+        background:var(--color-peach-soft);
+        border:1px solid var(--color-warning);
+        border-radius:18px;
+        padding:1rem 1.2rem;
+        margin-bottom:1.25rem;
+        box-shadow:var(--wp-shadow-sm);
+    }
+    .provisional-icon {
+        width:42px; height:42px; border-radius:13px; flex-shrink:0;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.2rem; color:#FFFFFF;
+        background:linear-gradient(135deg, #1E293B, #0F172A);
+    }
+    .provisional-icon i { color:#FFFFFF !important; }
+    .provisional-title { font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:0.95rem; color:var(--color-text); margin-bottom:2px; }
+    .provisional-text { font-size:0.82rem; color:var(--color-text-muted); line-height:1.55; }
+    .provisional-flash { margin-top:0.5rem; font-size:0.82rem; font-weight:700; color:var(--color-warning-text); }
+    .provisional-welcome { margin-top:0.5rem; font-size:0.82rem; font-weight:700; color:var(--color-success-text); }
 </style>
 @endpush
 
 @section('user-content')
+
+{{-- Provisional access banner: visible until RHU approves the account. --}}
+@if(auth()->user()?->hasProvisionalAccess())
+<div class="provisional-banner" role="status">
+    <div class="provisional-icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></div>
+    <div style="min-width:0;">
+        <div class="provisional-title">Account pending RHU verification — limited access</div>
+        <div class="provisional-text">Learning materials, community browsing and your profile are open now. Pregnancy tracking, cycle logging, checkups, health records and care chat unlock as soon as your account is approved.</div>
+        @if(session('provisional_welcome'))
+            <div class="provisional-welcome">Welcome to ReproCare! You've been signed in with limited access.</div>
+        @endif
+        @if(session('provisional_blocked'))
+            <div class="provisional-flash">{{ session('provisional_blocked') }}</div>
+        @endif
+    </div>
+</div>
+@endif
 
 @php
     $hour = now()->hour;

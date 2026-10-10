@@ -179,15 +179,30 @@ class GoogleController extends Controller
         Auth::login($user, true);
         request()->session()->regenerate();
 
-        // Pending RHU approval: onboarding first, then wait for approval.
+        // Pending RHU approval: demo accounts verify instantly and log
+        // straight in with full access; verified + onboarded patients keep
+        // a PROVISIONAL (limited) session and continue to onboarding /
+        // dashboard routing below; unverified ones are logged out to the
+        // pending notice (Google users are auto-verified, so this is a
+        // defensive fallback only).
         if (($user->status ?? 'approved') === 'pending') {
-            if ($user->needsProfileCompletion()) {
+            if (User::isDemoAccount($user->email)) {
+                if (! $user->hasVerifiedEmail()) {
+                    $user->markEmailAsVerified();
+                }
+
+                if (! (bool) ($user->is_profile_complete ?? false)) {
+                    $user->forceFill(['is_profile_complete' => true])->save();
+                }
+
+                $user = $user->fresh() ?? $user;
+            } elseif ($user->needsProfileCompletion()) {
                 return redirect()->route('profile.complete');
+            } elseif (! $user->hasVerifiedEmail()) {
+                Auth::logout();
+
+                return redirect()->route('login')->with('pending_registration', true);
             }
-
-            Auth::logout();
-
-            return redirect()->route('login')->with('pending_registration', true);
         }
 
         if ($user->needsProfileCompletion()) {

@@ -22,7 +22,12 @@ use Symfony\Component\HttpFoundation\Response;
  *   rejection message on the login page. Never reaches any dashboard.
  * - pending + incomplete patient profile → keep the session, send to
  *   onboarding (Google sign-ups must finish phone + barangay first).
- * - pending (profile done) → log out + pending notice (same as password login).
+ * - pending + verified + complete patient → PROVISIONAL (limited) session
+ *   stays alive; clinical/write routes enforce the limit separately via
+ *   the full.access middleware (dashboard, learning, read-only community
+ *   and profile remain open until RHU approval).
+ * - pending (anything else: unverified, non-patient) → log out + pending
+ *   notice (same as password login).
  * - anything else (suspended/inactive/archived/declined) → log out + inactive
  *   notice. Staff are always created approved, so a non-approved staff
  *   session is abnormal by definition.
@@ -75,6 +80,19 @@ class EnsureAccountActive
 
         if ($status === 'pending' && $user->needsProfileCompletion()) {
             return redirect()->route('profile.complete');
+        }
+
+        // Provisional access: verified + onboarded pending patients keep
+        // their session. The full.access middleware locks clinical and
+        // write features; everything else stays open until RHU approval.
+        // (Demo accounts pass here too — hasProvisionalAccess() excludes
+        // them so they enjoy full access downstream.)
+        if ($status === 'pending'
+            && ($user->role ?? null) === 'user'
+            && $user->hasVerifiedEmail()
+            && ! $user->needsProfileCompletion()
+        ) {
+            return $next($request);
         }
 
         $this->killSession($request);
