@@ -281,7 +281,7 @@
                         </div>
                     </div>
                     <div class="step-btns">
-                        <button type="button" class="btn-next" onclick="goStep(2)">Continue <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-next" onclick="goStep(2)">Continue</button>
                     </div>
                 </div>
 
@@ -354,7 +354,7 @@
                     </div>
                     <div class="step-btns">
                         <button type="button" class="btn-prev" aria-label="Previous step" onclick="goStep(1)"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-                        <button type="button" class="btn-next" onclick="goStep(3)">Continue <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-next" onclick="goStep(3)">Continue</button>
                     </div>
                 </div>
 
@@ -432,7 +432,7 @@
                     </div>
                     <div class="step-btns">
                         <button type="button" class="btn-prev" aria-label="Previous step" onclick="goStep(2)"><i class="bi bi-arrow-left" aria-hidden="true"></i></button>
-                        <button type="button" class="btn-next" onclick="goStep(4)">Continue <i class="bi bi-arrow-right" aria-hidden="true"></i></button>
+                        <button type="button" class="btn-next" onclick="goStep(4)">Continue</button>
                     </div>
                 </div>
 
@@ -518,7 +518,7 @@
             <form method="POST" action="{{ route('logout') }}" id="completeSignoutForm" style="margin-top:14px; text-align:center;">
                 @csrf
                 <button type="submit" class="btn-prev" style="width:100%; justify-content:center;" aria-label="Cancel registration and use a different Google account">
-                    <i class="bi bi-arrow-left-right" aria-hidden="true"></i> Cancel — use a different Google account
+                    Cancel
                 </button>
             </form>
         </div>
