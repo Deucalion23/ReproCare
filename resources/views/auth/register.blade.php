@@ -460,7 +460,12 @@
     .id-camera-start { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; min-height:64px; margin-top:12px; border-radius:14px; border:2px dashed var(--color-border); background:var(--color-surface); color:var(--color-text); font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; font-size:0.95rem; cursor:pointer; transition:all 0.2s; }
     .id-camera-start:hover { border-color:var(--color-info-text); color:var(--color-info-text); }
     .id-camera-start i { font-size:1.3rem; }
-    .id-alt-link { background:none; border:none; color:var(--color-info-text); font-weight:700; font-size:0.84rem; cursor:pointer; padding:10px 4px; margin-top:4px; text-decoration:underline; }
+    .id-alt-link { background:none; border:none; font-weight:700; font-size:0.84rem; cursor:pointer; padding:10px 4px; margin-top:4px; text-decoration:underline; text-underline-offset:3px; }
+    /* Contrast per surface: the camera pane is near-black, the upload box is light. */
+    [id$="CameraFirst"] .id-alt-link { color:#FFFFFF !important; }
+    [id$="CameraFirst"] .id-alt-link:hover { color:var(--color-secondary-soft) !important; }
+    [id$="UploadAlt"] .id-alt-link { color:var(--color-text) !important; }
+    [id$="UploadAlt"] .id-alt-link:hover { color:var(--color-secondary-text) !important; }
     @media (max-width:600px) {
         .id-mode-toggle { display:flex; }
         .id-mode-btn { flex:1; justify-content:center; text-align:center; }
