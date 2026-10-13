@@ -375,7 +375,7 @@
                             <div class="field-row">
                                 <div class="field-item">
                                     <label class="field-label" for="emergency_relationship_1">Relationship <span class="req">*</span></label>
-                                    <div class="field-wrap"><i class="bi bi-heart f-icon" aria-hidden="true"></i><input type="text" name="emergency_relationship_1" value="{{ old('emergency_relationship_1') }}" placeholder="Mother, Spouse…" required id="emergency_relationship_1"></div>
+                                    @include('auth.partials.relationship-select', ['name' => 'emergency_relationship_1', 'required' => true, 'placeholder' => 'Select relationship…'])
                                 </div>
                                 <div class="field-item">
                                     <label class="field-label" for="emergency_contact_number_1">Contact No. <span class="req">*</span></label>
@@ -396,7 +396,7 @@
                             <div class="field-row">
                                 <div class="field-item">
                                     <label class="field-label" for="emergency_relationship_2">Relationship</label>
-                                    <div class="field-wrap"><i class="bi bi-heart f-icon" aria-hidden="true"></i><input type="text" name="emergency_relationship_2" value="{{ old('emergency_relationship_2') }}" placeholder="Sibling, Friend…" id="emergency_relationship_2"></div>
+                                    @include('auth.partials.relationship-select', ['name' => 'emergency_relationship_2', 'required' => false, 'placeholder' => 'Select relationship…'])
                                 </div>
                                 <div class="field-item">
                                     <label class="field-label" for="emergency_contact_number_2">Contact No.</label>
@@ -417,7 +417,7 @@
                             <div class="field-row">
                                 <div class="field-item">
                                     <label class="field-label" for="emergency_relationship_3">Relationship</label>
-                                    <div class="field-wrap"><i class="bi bi-heart f-icon" aria-hidden="true"></i><input type="text" name="emergency_relationship_3" value="{{ old('emergency_relationship_3') }}" placeholder="Neighbor, Relative…" id="emergency_relationship_3"></div>
+                                    @include('auth.partials.relationship-select', ['name' => 'emergency_relationship_3', 'required' => false, 'placeholder' => 'Select relationship…'])
                                 </div>
                                 <div class="field-item">
                                     <label class="field-label" for="emergency_contact_number_3">Contact No.</label>
@@ -582,6 +582,8 @@
             const c1 = document.querySelector('[name="emergency_contact_number_1"]');
             if (!n1.value.trim()) { shake(n1); showFieldError(n1, 'Contact name is required.'); valid = false; }
             if (!r1.value.trim()) { shake(r1); showFieldError(r1, 'Relationship is required.'); valid = false; }
+            const o1 = document.querySelector('[name="emergency_relationship_1_other"]');
+            if (r1.value === 'Others' && o1 && !o1.value.trim()) { shake(o1); showFieldError(o1, 'Please specify the relationship.'); valid = false; }
             if (!c1.value.trim()) { shake(c1); showFieldError(c1, 'Contact number is required.'); valid = false; }
         }
         showStepSummary(step, valid);
@@ -758,13 +760,31 @@
     @endif
 
     function toTitleCase(str) { return str.replace(/\w\S*/g, txt => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()); }
-    const nameFields = ['first_name', 'last_name', 'partner_name', 'emergency_name_1', 'emergency_name_2', 'emergency_name_3', 'emergency_relationship_1', 'emergency_relationship_2', 'emergency_relationship_3'];
+    const nameFields = ['first_name', 'last_name', 'partner_name', 'emergency_name_1', 'emergency_name_2', 'emergency_name_3', 'emergency_relationship_1_other', 'emergency_relationship_2_other', 'emergency_relationship_3_other'];
     nameFields.forEach(id => {
         const el = document.getElementById(id) || document.querySelector(`[name="${id}"]`);
         if (!el) return;
         el.addEventListener('blur', function() { if (this.value.trim()) { this.value = toTitleCase(this.value.trim()); } });
         el.addEventListener('input', function() { if (this.value.length === 1) { this.value = this.value.toUpperCase(); } });
     });
+
+    // Relationship dropdowns: reveal the "specify" box when Others is picked.
+    function setupRelationshipSelects() {
+        ['emergency_relationship_1', 'emergency_relationship_2', 'emergency_relationship_3'].forEach(function (name) {
+            const sel = document.querySelector('select[name="' + name + '"]');
+            if (!sel) return;
+            const other = document.querySelector('[name="' + name + '_other"]');
+            const wrap = other ? other.closest('.rel-other-wrap') : null;
+            function sync(clear) {
+                const isOthers = sel.value === 'Others';
+                if (wrap) wrap.style.display = isOthers ? '' : 'none';
+                if (!isOthers && other && clear !== false) other.value = '';
+            }
+            sel.addEventListener('change', function () { sync(true); });
+            sync(false);
+        });
+    }
+    setupRelationshipSelects();
     const mi = document.getElementById('middle_initial');
     if (mi) { mi.addEventListener('input', function() { this.value = this.value.toUpperCase(); }); }
 </script>

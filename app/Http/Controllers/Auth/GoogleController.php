@@ -274,21 +274,29 @@ class GoogleController extends Controller
             // Primary emergency contact
             'emergency_name_1' => 'required|string|max:255',
             'emergency_relationship_1' => 'required|string|max:255',
+            'emergency_relationship_1_other' => 'nullable|string|max:255|required_if:emergency_relationship_1,Others',
             'emergency_contact_number_1' => 'required|string|max:255',
             'emergency_address_1' => 'nullable|string|max:500',
 
             // Secondary emergency contact
             'emergency_name_2' => 'nullable|string|max:255',
             'emergency_relationship_2' => 'nullable|required_with:emergency_name_2|string|max:255',
+            'emergency_relationship_2_other' => 'nullable|string|max:255|required_if:emergency_relationship_2,Others',
             'emergency_contact_number_2' => 'nullable|required_with:emergency_name_2|string|max:255',
             'emergency_address_2' => 'nullable|string|max:500',
 
             // Tertiary emergency contact
             'emergency_name_3' => 'nullable|string|max:255',
             'emergency_relationship_3' => 'nullable|required_with:emergency_name_3|string|max:255',
+            'emergency_relationship_3_other' => 'nullable|string|max:255|required_if:emergency_relationship_3,Others',
             'emergency_contact_number_3' => 'nullable|required_with:emergency_name_3|string|max:255',
             'emergency_address_3' => 'nullable|string|max:500',
         ]);
+
+        // "Others" relationships resolve to the specify-box text.
+        foreach ([1, 2, 3] as $n) {
+            $validated["emergency_relationship_{$n}"] = $this->resolveEmergencyRelationship($validated, "emergency_relationship_{$n}");
+        }
 
         $barangay = $validated['barangay'];
 
@@ -415,6 +423,23 @@ class GoogleController extends Controller
 
         return redirect()->route('user.dashboard')
             ->with('success', 'Profile completed. Welcome to ReproCare!');
+    }
+
+    /**
+     * Resolve an emergency-contact relationship field: the "Others"
+     * dropdown choice stores the specify-box text instead.
+     */
+    protected function resolveEmergencyRelationship(array $validated, string $field): ?string
+    {
+        $value = trim((string) ($validated[$field] ?? ''));
+
+        if (strcasecmp($value, 'Others') === 0) {
+            $other = trim((string) ($validated[$field . '_other'] ?? ''));
+
+            return $other !== '' ? $other : null;
+        }
+
+        return $value !== '' ? $value : null;
     }
 
     /**

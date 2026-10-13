@@ -341,6 +341,52 @@ class GoogleOAuthTest extends AutomationTestCase
         ]);
     }
 
+    public function test_profile_completion_others_relationship_resolves_specify_text(): void
+    {
+        Storage::fake('public');
+        $patient = $this->patient([
+            'is_profile_complete' => false,
+            'contact_number' => null,
+            'barangay' => null,
+        ]);
+
+        $response = $this->actingAs($patient)->post(
+            route('profile.complete.store'),
+            $this->completionPayload([
+                'emergency_relationship_1' => 'Others',
+                'emergency_relationship_1_other' => 'Ninong',
+            ])
+        );
+
+        $response->assertRedirect(route('user.dashboard'));
+        $this->assertDatabaseHas('emergency_contacts', [
+            'user_id' => $patient->id,
+            'relationship' => 'Ninong',
+            'contact_order' => 1,
+        ]);
+    }
+
+    public function test_profile_completion_others_without_specify_is_rejected(): void
+    {
+        Storage::fake('public');
+        $patient = $this->patient([
+            'is_profile_complete' => false,
+            'contact_number' => null,
+            'barangay' => null,
+        ]);
+
+        $response = $this->actingAs($patient)->post(
+            route('profile.complete.store'),
+            $this->completionPayload([
+                'emergency_relationship_1' => 'Others',
+            ])
+        );
+
+        $response->assertSessionHasErrors('emergency_relationship_1_other');
+        $this->assertFalse((bool) $patient->fresh()->is_profile_complete);
+        $this->assertDatabaseCount('emergency_contacts', 0);
+    }
+
     public function test_profile_completion_rejects_incomplete_payload(): void
     {
         $patient = $this->patient(['is_profile_complete' => false]);

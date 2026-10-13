@@ -91,21 +91,29 @@ class AuthController extends Controller
             // Primary emergency contact validation
             'emergency_name_1' => 'required|string|max:255',
             'emergency_relationship_1' => 'required|string|max:255',
+            'emergency_relationship_1_other' => 'nullable|string|max:255|required_if:emergency_relationship_1,Others',
             'emergency_contact_number_1' => 'required|string|max:255',
             'emergency_address_1' => 'nullable|string|max:500',
-            
+
             // Secondary emergency contact validation
             'emergency_name_2' => 'nullable|string|max:255',
             'emergency_relationship_2' => 'nullable|required_with:emergency_name_2|string|max:255',
+            'emergency_relationship_2_other' => 'nullable|string|max:255|required_if:emergency_relationship_2,Others',
             'emergency_contact_number_2' => 'nullable|required_with:emergency_name_2|string|max:255',
             'emergency_address_2' => 'nullable|string|max:500',
-            
+
             // Tertiary emergency contact validation
             'emergency_name_3' => 'nullable|string|max:255',
             'emergency_relationship_3' => 'nullable|required_with:emergency_name_3|string|max:255',
+            'emergency_relationship_3_other' => 'nullable|string|max:255|required_if:emergency_relationship_3,Others',
             'emergency_contact_number_3' => 'nullable|required_with:emergency_name_3|string|max:255',
             'emergency_address_3' => 'nullable|string|max:500',
         ]);
+
+        // "Others" relationships resolve to the specify-box text.
+        foreach ([1, 2, 3] as $n) {
+            $validated["emergency_relationship_{$n}"] = self::resolveEmergencyRelationship($validated, "emergency_relationship_{$n}");
+        }
 
         $barangay = $validated['barangay'];
 
@@ -204,6 +212,23 @@ class AuthController extends Controller
         // Do NOT auto-login — show pending message
         return redirect()->route('login')
             ->with('pending_registration', true);
+    }
+
+    /**
+     * Resolve an emergency-contact relationship field: the "Others"
+     * dropdown choice stores the specify-box text instead.
+     */
+    protected static function resolveEmergencyRelationship(array $validated, string $field): ?string
+    {
+        $value = trim((string) ($validated[$field] ?? ''));
+
+        if (strcasecmp($value, 'Others') === 0) {
+            $other = trim((string) ($validated[$field . '_other'] ?? ''));
+
+            return $other !== '' ? $other : null;
+        }
+
+        return $value !== '' ? $value : null;
     }
 
     /**
