@@ -447,11 +447,6 @@
         min-height:48px;
     }
     /* ── Beginner-friendly ID step: guide, per-side status, big targets ── */
-    .id-guide { background:var(--color-info-soft); border:1px solid var(--color-border); border-radius:14px; padding:0.9rem 1.1rem; margin-bottom:1.25rem; }
-    .id-guide-title { font-family:'Plus Jakarta Sans', sans-serif; font-weight:800; font-size:0.88rem; color:var(--color-text); margin-bottom:0.4rem; display:flex; align-items:center; gap:6px; }
-    .id-guide-title i { color:var(--color-info-text); }
-    .id-guide-steps { margin:0; padding-left:1.2rem; font-size:0.84rem; line-height:1.7; color:var(--color-text-muted); }
-    .id-guide-steps strong { color:var(--color-text); }
     .id-side-status { display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:700; color:var(--color-text-muted); background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:999px; padding:0.32rem 0.85rem; margin:0.45rem 0 0.65rem; }
     .id-side-status.done { color:var(--color-success-text); background:var(--color-success-soft); border-color:var(--color-success-text); }
     .id-capture-preview { display:none; width:100%; max-height:230px; object-fit:contain; border-radius:12px; margin-top:12px; background:#0b1220; }
@@ -1302,15 +1297,6 @@
                         <h2>Upload your valid ID</h2>
                         <p>We need both sides of a government-issued ID to verify your identity. Accepted: PhilSys, Passport, UMID, Driver's License.</p>
                     </div>
-                    <div class="id-guide" aria-label="How to upload your ID in 3 easy steps">
-                        <div class="id-guide-title"><i class="bi bi-info-circle-fill" aria-hidden="true"></i> How to do this (3 easy steps)</div>
-                        <ol class="id-guide-steps">
-                            <li><strong>The camera is ready first:</strong> tap <em>Tap to turn on the camera</em>, hold your ID flat, then tap <em>Capture photo</em>. Prefer a saved picture? Tap <em>Or upload a saved photo instead</em>.</li>
-                            <li><strong>Add the FRONT of your ID first, then the BACK.</strong> Watch each row change to <em>Done ✓</em>.</li>
-                            <li><strong>Look at each photo.</strong> Words clear? Tap <em>Create My Account</em> below. Blurry? Tap <em>Retake</em>.</li>
-                        </ol>
-                    </div>
-
                     <div class="field-group">
                         <!-- Front of ID -->
                         <div class="field-item">
