@@ -55,15 +55,18 @@ class Barangay extends Model
         return self::RHU_CATCHMENTS[$rhu] ?? [];
     }
 
-    /** All active San Carlos City barangays, ordered by RHU then name. */
+    /** All active San Carlos City barangays, alphabetical (A–Z). */
     public static function allNames(): array
     {
         try {
-            $names = static::active()->orderBy('rhu_assignment')->orderBy('name')->pluck('name')->all();
+            $names = static::active()->orderBy('name')->pluck('name')->all();
             if (!empty($names)) return $names;
         } catch (\Throwable $e) {
         }
 
-        return array_merge(...array_values(self::RHU_CATCHMENTS));
+        $merged = array_merge(...array_values(self::RHU_CATCHMENTS));
+        sort($merged, SORT_STRING | SORT_FLAG_CASE);
+
+        return $merged;
     }
 }
