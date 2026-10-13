@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\ForumPost;
 use App\Models\User;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\View;
 
 /**
@@ -83,6 +85,34 @@ class ProvisionalAccessTest extends AutomationTestCase
         ], $overrides));
     }
 
+    protected function viewOnly(array $overrides = []): User
+    {
+        // Pending, still owing verification + onboarding: browses the
+        // portal in view-only mode, every input blocked.
+        return $this->patient(array_merge([
+            'status' => 'pending',
+            'email_verified_at' => null,
+            'is_profile_complete' => false,
+        ], $overrides));
+    }
+
+    protected function registrationPayload(array $overrides = []): array
+    {
+        return array_merge([
+            'first_name' => 'View',
+            'last_name' => 'Only',
+            'email' => 'viewonly-new-' . uniqid() . '@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'barangay' => 'Burgos St',
+            'id_image_data_front' => 'data:image/png;base64,iVBORw0KGgo=',
+            'id_image_data_back' => 'data:image/png;base64,iVBORw0KGgo=',
+            'emergency_name_1' => 'Ana Reyes',
+            'emergency_relationship_1' => 'Mother',
+            'emergency_contact_number_1' => '09173334444',
+        ], $overrides);
+    }
+
     public function test_pending_verified_complete_login_keeps_limited_session(): void
     {
         $user = $this->provisional();
@@ -96,8 +126,10 @@ class ProvisionalAccessTest extends AutomationTestCase
         $this->assertAuthenticatedAs($user->fresh());
     }
 
-    public function test_pending_unverified_login_goes_to_verification_notice(): void
+    public function test_pending_unverified_complete_login_lands_on_dashboard(): void
     {
+        // Unverified-but-complete pending users browse view-only instead
+        // of parking on the verification notice.
         $user = $this->provisional(['email_verified_at' => null]);
 
         $response = $this->post(route('login.post'), [
@@ -105,7 +137,8 @@ class ProvisionalAccessTest extends AutomationTestCase
             'password' => 'password',
         ]);
 
-        $response->assertRedirect(route('verification.notice'));
+        $response->assertRedirect(route('user.dashboard'));
+        $response->assertSessionHas('viewonly_welcome');
         $this->assertAuthenticatedAs($user->fresh());
     }
 
@@ -217,5 +250,122 @@ class ProvisionalAccessTest extends AutomationTestCase
         $this->get(route('user.pregnancies.index'))->assertOk();
         $this->get(route('user.messages.index'))->assertOk();
         $this->get(route('forum.create'))->assertOk();
+    }
+
+    public function test_registration_signs_new_account_into_view_only_portal(): void
+    {
+        Storage::fake('public');
+        $payload = $this->registrationPayload();
+
+        $response = $this->post(route('register.post'), $payload);
+
+        $response->assertRedirect(route('user.dashboard'));
+        $response->assertSessionHas('viewonly_welcome');
+        $this->assertAuthenticated();
+
+        $user = User::where('email', $payload['email'])->first();
+        $this->assertNotNull($user);
+        $this->assertSame('pending', $user->status);
+        $this->assertTrue($user->hasViewOnlyAccess());
+
+        // And the portal actually renders for them.
+        $this->get(route('user.dashboard'))->assertOk()->assertSee('Browsing in view-only mode');
+    }
+
+    public function test_view_only_login_lands_on_dashboard(): void
+    {
+        $user = $this->viewOnly(['is_profile_complete' => true]);
+
+        $response = $this->post(route('login.post'), [
+            'email' => $user->email,
+            'password' => 'password',
+        ]);
+
+        $response->assertRedirect(route('user.dashboard'));
+        $this->assertAuthenticatedAs($user->fresh());
+    }
+
+    public function test_view_only_user_browses_open_pages(): void
+    {
+        $user = $this->viewOnly();
+        $this->actingAs($user);
+
+        $this->get(route('user.dashboard'))->assertOk()->assertSee('Browsing in view-only mode');
+        $this->get(route('learning.index'))->assertOk();
+        $this->get(route('forum.index'))->assertOk();
+        $this->get(route('user.notifications'))->assertOk();
+        // Own profile resolves through settings (pre-existing redirect).
+        $this->get(route('profile.show'))->assertRedirect(route('user.settings'));
+        $this->get(route('user.settings'))->assertOk();
+    }
+
+    public function test_view_only_clinical_pages_bounce_to_dashboard(): void
+    {
+        $user = $this->viewOnly();
+        $this->actingAs($user);
+
+        foreach ([
+            'user.pregnancies.index',
+            'user.menstruation.index',
+            'user.checkups',
+            'user.health-records',
+            'user.messages.index',
+            'forum.create',
+        ] as $route) {
+            $this->get(route($route))
+                ->assertRedirect(route('user.dashboard'))
+                ->assertSessionHas('provisional_blocked');
+        }
+    }
+
+    public function test_view_only_writes_are_rejected(): void
+    {
+        $user = $this->viewOnly();
+        $this->actingAs($user);
+
+        $this->post(route('user.pregnancies.store'), ['lmp' => '2026-06-01'])
+            ->assertSessionHasErrors('access');
+        $this->assertDatabaseCount('pregnancies', 0);
+
+        $this->post(route('forum.store'), ['content' => 'Blocked post.'])
+            ->assertSessionHasErrors('access');
+        $this->assertDatabaseCount('forum_posts', 0);
+
+        $this->put(route('profile.update'), ['house_number' => '999'])
+            ->assertSessionHasErrors('access');
+        $this->assertNull($user->fresh()->house_number);
+
+        $materialId = DB::table('learning_materials')->insertGetId([
+            'title' => 'Quiz material',
+            'material_type' => 'quiz',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+        $this->post(route('learning.quiz.submit', $materialId), ['answers' => []])
+            ->assertSessionHasErrors('access');
+    }
+
+    public function test_provisional_user_may_still_update_profile(): void
+    {
+        $user = $this->provisional();
+        $this->actingAs($user);
+
+        $this->put(route('profile.update'), ['house_number' => '123'])
+            ->assertSessionDoesntHaveErrors('access');
+
+        $this->assertSame('123', $user->fresh()->house_number);
+    }
+
+    public function test_session_check_treats_pending_sessions_as_active(): void
+    {
+        $this->actingAs($this->viewOnly());
+        $this->getJson(route('api.device.session-check'))->assertJsonPath('active', true);
+
+        $this->actingAs($this->provisional());
+        $this->getJson(route('api.device.session-check'))->assertJsonPath('active', true);
+
+        $suspended = $this->patient(['status' => 'suspended']);
+        $this->actingAs($suspended);
+        $this->getJson(route('api.device.session-check'))->assertJsonPath('active', false);
     }
 }

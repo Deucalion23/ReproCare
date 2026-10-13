@@ -12,6 +12,10 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * - Only applies to the patient role ('user'). Staff roles (cho, rhu,
  *   midwife, bhw, bhw_president) are never gated by this middleware.
+ * - Pending patients are exempt: they browse in view-only / provisional
+ *   mode (a dashboard banner drives them back to onboarding, which they
+ *   must finish to graduate). Only approved-but-incomplete patients are
+ *   forced through the form.
  * - The completion form, its submit endpoint, logout, and email
  *   verification routes are always allowed through (no redirect loop).
  */
@@ -27,6 +31,12 @@ class EnsureProfileComplete
 
         // Staff accounts are never subject to patient onboarding.
         if (($user->role ?? null) !== 'user') {
+            return $next($request);
+        }
+
+        // Pending patients browse in view-only / provisional mode instead
+        // of being forced through onboarding on every page.
+        if (($user->status ?? 'approved') === 'pending') {
             return $next($request);
         }
 

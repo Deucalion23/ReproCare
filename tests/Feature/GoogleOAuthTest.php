@@ -35,6 +35,29 @@ class GoogleOAuthTest extends AutomationTestCase
             $t->timestamps();
             $t->softDeletes();
         });
+        Schema::create('forum_posts', function (Blueprint $t) {
+            $t->id();
+            $t->unsignedBigInteger('user_id')->nullable();
+            $t->text('content')->nullable();
+            $t->string('status')->default('active');
+            $t->string('user_type')->nullable();
+            $t->timestamps();
+            $t->softDeletes();
+        });
+        Schema::create('forum_likes', function (Blueprint $t) {
+            $t->id();
+            $t->unsignedBigInteger('post_id')->nullable();
+            $t->unsignedBigInteger('user_id')->nullable();
+            $t->timestamps();
+        });
+        Schema::create('forum_comments', function (Blueprint $t) {
+            $t->id();
+            $t->unsignedBigInteger('post_id')->nullable();
+            $t->unsignedBigInteger('user_id')->nullable();
+            $t->text('content')->nullable();
+            $t->timestamps();
+            $t->softDeletes();
+        });
 
         if (! Schema::hasTable('puroks')) {
             Schema::create('puroks', function (Blueprint $t) {
@@ -239,13 +262,17 @@ class GoogleOAuthTest extends AutomationTestCase
         $this->assertSame('pending', $rejected->fresh()->status);
     }
 
-    public function test_pending_incomplete_session_keeps_onboarding(): void
+    public function test_pending_incomplete_session_browses_view_only(): void
     {
+        // Pending patients browse in view-only mode instead of being
+        // forced through onboarding on every page (the dashboard banner
+        // drives them back to profile completion, which they must finish
+        // to graduate). Only approved-but-incomplete patients are forced.
         $patient = $this->patient(['status' => 'pending', 'is_profile_complete' => false]);
 
         $response = $this->actingAs($patient)->get(route('forum.index'));
 
-        $response->assertRedirect(route('profile.complete'));
+        $response->assertOk();
         $this->assertAuthenticatedAs($patient->fresh());
     }
 

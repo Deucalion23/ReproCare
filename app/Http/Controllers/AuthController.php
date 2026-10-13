@@ -209,9 +209,15 @@ class AuthController extends Controller
             ]);
         }
 
-        // Do NOT auto-login — show pending message
-        return redirect()->route('login')
-            ->with('pending_registration', true);
+        // New accounts start pending RHU approval: sign them straight into
+        // the portal in view-only mode instead of parking them on the
+        // login page. They can browse immediately; verification,
+        // onboarding and approval progressively unlock the rest.
+        Auth::login($user);
+        $request->session()->regenerate();
+
+        return redirect()->route('user.dashboard')
+            ->with('viewonly_welcome', true);
     }
 
     /**
@@ -289,12 +295,10 @@ class AuthController extends Controller
             }
 
             // Pending patient accounts: demo accounts verify instantly and
-            // log straight in with full access; verified + onboarded users
-            // keep a PROVISIONAL (limited) session instead of being logged
-            // out — dashboard, learning, read-only community and profile
-            // stay open; clinical + write features unlock after RHU
-            // approval. Pending users who still owe verification/onboarding
-            // are sent to finish those flows (session kept so pages work).
+            // log straight in with full access; everyone else keeps their
+            // session and lands on the portal — provisional (limited) when
+            // verified + onboarded, view-only otherwise. Verification,
+            // onboarding and approval progressively unlock the rest.
             if ($user->status === 'pending' && ($user->role ?? null) === 'user') {
                 $request->session()->regenerate();
 
@@ -310,16 +314,12 @@ class AuthController extends Controller
                     return redirect()->route('user.dashboard');
                 }
 
-                if ($user->hasVerifiedEmail() && ! $user->needsProfileCompletion()) {
-                    return redirect()->route('user.dashboard')
-                        ->with('provisional_welcome', true);
+                if ($user->needsProfileCompletion()) {
+                    return redirect()->route('profile.complete');
                 }
 
-                if (! $user->hasVerifiedEmail()) {
-                    return redirect()->route('verification.notice');
-                }
-
-                return redirect()->route('profile.complete');
+                return redirect()->route('user.dashboard')
+                    ->with($user->hasVerifiedEmail() ? 'provisional_welcome' : 'viewonly_welcome', true);
             }
 
             // Block pending users from logging in

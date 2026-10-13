@@ -458,8 +458,9 @@
     $unreadMessages = \App\Models\Message::where('receiver_id', auth()->id())
         ->where('is_read', false)
         ->count();
-    // Provisional patients see lock affordances on clinical dock tabs.
-    $dockProvisional = (bool) (auth()->user()?->hasProvisionalAccess());
+    // Limited-access patients (provisional + view-only) see lock
+    // affordances on clinical dock tabs.
+    $dockLimited = (bool) (auth()->user()?->hasLimitedAccess());
     $lockTitle = 'Unlocks after RHU approval of your account';
 @endphp
 <div class="women-bottom-dock">
@@ -474,33 +475,33 @@
         <li>
             <a href="{{ route('user.pregnancies.index') }}"
                class="women-dock-link {{ request()->routeIs('user.pregnancies.*') ? 'active' : '' }}"
-               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
+               @if($dockLimited) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-heart-pulse-fill"></i>
-                <span>Pregnancy @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
+                <span>Pregnancy @if($dockLimited)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
             <a href="{{ route('user.menstruation.index') }}"
                class="women-dock-link {{ request()->routeIs('user.menstruation.*') ? 'active' : '' }}"
-               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
+               @if($dockLimited) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-calendar2-heart-fill"></i>
-                <span>Cycle @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
+                <span>Cycle @if($dockLimited)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
             <a href="{{ route('user.checkups') }}"
                class="women-dock-link {{ request()->routeIs('user.checkups*') ? 'active' : '' }}"
-               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
+               @if($dockLimited) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-clipboard2-pulse-fill"></i>
-                <span>Checkups @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
+                <span>Checkups @if($dockLimited)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
             <a href="{{ route('user.messages.index') }}"
                class="women-dock-link {{ request()->routeIs('user.messages.*') ? 'active' : '' }}"
-               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
+               @if($dockLimited) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-chat-heart-fill"></i>
-                <span>Care Chat @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
+                <span>Care Chat @if($dockLimited)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
                 @if($unreadMessages > 0)
                     <span class="women-dock-unread"></span>
                 @endif
@@ -509,9 +510,9 @@
         <li>
             <a href="{{ route('user.health-records') }}"
                class="women-dock-link {{ request()->routeIs('user.health-records*') ? 'active' : '' }}"
-               @if($dockProvisional) title="{{ $lockTitle }}" @endif>
+               @if($dockLimited) title="{{ $lockTitle }}" @endif>
                 <i class="bi bi-clipboard2-data-fill"></i>
-                <span>Records @if($dockProvisional)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
+                <span>Records @if($dockLimited)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
             </a>
         </li>
         <li>
@@ -595,6 +596,59 @@
             centerActiveDockTab();
         }
         window.addEventListener('load', centerActiveDockTab);
+    })();
+
+    /* View-only mode (pending patients owing verification/onboarding):
+       the server blocks every state-changing request (readonly/full.access
+       middlewares); this only delivers the "no inputs" UX — submit controls
+       of blocked forms are greyed out and submissions show an explainer.
+       Allowed through: GET/search forms, logout, email verification and
+       profile-completion forms (the graduation paths). */
+    window.RC_VIEW_ONLY = {{ auth()->user()?->hasViewOnlyAccess() ? 'true' : 'false' }};
+    (function () {
+        if (!window.RC_VIEW_ONLY) return;
+        function allowedForm(form) {
+            var method = ((form.getAttribute('method') || 'get') + '').toLowerCase();
+            if (method === 'get' || method === 'dialog') return true;
+            var action = form.getAttribute('action') || '';
+            return /logout|email\/verification|profile\/complete/.test(action);
+        }
+        function viewOnlyToast() {
+            var t = document.getElementById('rc-viewonly-toast');
+            if (!t) {
+                t = document.createElement('div');
+                t.id = 'rc-viewonly-toast';
+                t.setAttribute('role', 'status');
+                t.style.cssText = 'position:fixed;left:50%;bottom:84px;transform:translateX(-50%);z-index:2000;max-width:min(92vw,480px);background:#1E293B;color:#fff;font-size:.82rem;font-weight:600;padding:.7rem 1.1rem;border-radius:999px;box-shadow:0 10px 28px rgba(16,24,40,.35);text-align:center;display:none;';
+                document.body.appendChild(t);
+            }
+            t.textContent = 'View-only mode — this unlocks after verification and RHU approval.';
+            t.style.display = 'block';
+            clearTimeout(t._hide);
+            t._hide = setTimeout(function () { t.style.display = 'none'; }, 3200);
+        }
+        document.addEventListener('submit', function (e) {
+            var form = e.target;
+            if (!(form instanceof HTMLFormElement) || allowedForm(form)) return;
+            e.preventDefault();
+            e.stopPropagation();
+            viewOnlyToast();
+        }, true);
+        function paintBlocked() {
+            document.querySelectorAll('form').forEach(function (form) {
+                if (allowedForm(form)) return;
+                form.querySelectorAll('button:not([type="button"]), input[type="submit"]').forEach(function (btn) {
+                    btn.disabled = true;
+                    btn.title = 'Unlocks after verification and RHU approval';
+                    btn.style.opacity = '0.55';
+                });
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', paintBlocked);
+        } else {
+            paintBlocked();
+        }
     })();
 </script>
 @endpush

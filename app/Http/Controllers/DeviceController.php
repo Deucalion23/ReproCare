@@ -14,10 +14,18 @@ class DeviceController extends Controller
     public function sessionCheck(Request $request)
     {
         $user = $request->user()->fresh();
+        $status = $user->status ?? 'approved';
+
+        // Pending patient sessions are legitimately alive (provisional or
+        // view-only portal access) — reporting them inactive would make the
+        // PWA wipe local data and bounce the user to login. Anything the
+        // account.active middleware would kill stays inactive.
+        $active = $status === 'approved'
+            || ($status === 'pending' && ($user->role ?? null) === 'user');
 
         return response()->json([
-            'status' => $user->status ?? 'approved',
-            'active' => ($user->status ?? 'approved') === 'approved',
+            'status' => $status,
+            'active' => $active,
             'pwa_cache_version' => (int) ($user->pwa_cache_version ?? 1),
         ]);
     }

@@ -1,7 +1,7 @@
 @php
     $forumUser = auth()->user();
-    // Provisional patients browse read-only (routes enforce it too).
-    $isProvisional = (bool) ($forumUser?->hasProvisionalAccess());
+    // Read-only UI for both limited tiers (provisional + view-only).
+    $isLimited = (bool) ($forumUser?->hasLimitedAccess());
     $forumLayout = match($forumUser?->role) {
         'bhw_president' => 'bhw-president.layout',
         'midwife' => 'midwife.layout',
@@ -310,7 +310,7 @@
 
                 {{-- Actions --}}
                 <div class="post-action-bar">
-                    @if($isProvisional)
+                    @if($isLimited)
                     <span class="post-action-btn" style="cursor:default;" title="Liking unlocks after RHU approval of your account">
                         <i class="bi bi-heart"></i>
                         {{ $post->likes_count }} {{ Str::plural('Like', $post->likes_count) }}
@@ -355,7 +355,7 @@
 
             {{-- Add comment form (locked until RHU approval) --}}
             <div class="comment-form-area">
-                @if($isProvisional)
+                @if($isLimited)
                 <div class="d-flex align-items-center gap-3">
                     <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:40px; height:40px; border-radius:50%; background:var(--color-surface-soft); color:var(--color-text-muted);" aria-hidden="true">
                         <i class="bi bi-lock-fill"></i>

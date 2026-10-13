@@ -833,18 +833,40 @@
 
 @section('user-content')
 
-{{-- Provisional access banner: visible until RHU approves the account. --}}
-@if(auth()->user()?->hasProvisionalAccess())
+{{-- Limited-access banners: provisional (verified + onboarded, awaiting
+     RHU approval) and view-only (verification/onboarding outstanding).
+     Bounce flashes from the gate middlewares render under either tier. --}}
+@php
+    $limitedUser = auth()->user();
+@endphp
+@if($limitedUser?->hasLimitedAccess())
 <div class="provisional-banner" role="status">
-    <div class="provisional-icon" aria-hidden="true"><i class="bi bi-hourglass-split"></i></div>
+    <div class="provisional-icon" aria-hidden="true"><i class="bi bi-{{ $limitedUser->hasProvisionalAccess() ? 'hourglass-split' : 'eye-fill' }}"></i></div>
     <div style="min-width:0;">
+        @if($limitedUser->hasProvisionalAccess())
         <div class="provisional-title">Account pending RHU verification — limited access</div>
         <div class="provisional-text">Learning materials, community browsing and your profile are open now. Pregnancy tracking, cycle logging, checkups, health records and care chat unlock as soon as your account is approved.</div>
         @if(session('provisional_welcome'))
             <div class="provisional-welcome">Welcome to ReproCare! You've been signed in with limited access.</div>
         @endif
+        @else
+        <div class="provisional-title">Browsing in view-only mode</div>
+        @if(!$limitedUser->hasVerifiedEmail())
+            <div class="provisional-text">Verify your email to unlock more — check your inbox for the verification link, or <a href="{{ route('verification.notice') }}" class="fw-700">open the verification page</a>.</div>
+        @endif
+        @if($limitedUser->needsProfileCompletion())
+            <div class="provisional-text">Finish <a href="{{ route('profile.complete') }}" class="fw-700">setting up your profile</a> to unlock more features.</div>
+        @endif
+        <div class="provisional-text">Learning materials, community browsing and your profile are open now. Everything else unlocks after RHU approval.</div>
+        @if(session('viewonly_welcome'))
+            <div class="provisional-welcome">Welcome to ReproCare! Look around — your full portal opens after verification and approval.</div>
+        @endif
+        @endif
         @if(session('provisional_blocked'))
             <div class="provisional-flash">{{ session('provisional_blocked') }}</div>
+        @endif
+        @if(session('viewonly_blocked'))
+            <div class="provisional-flash">{{ session('viewonly_blocked') }}</div>
         @endif
     </div>
 </div>

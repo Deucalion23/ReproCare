@@ -26,6 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'complete.profile' => \App\Http\Middleware\EnsureProfileComplete::class,
             'account.active' => \App\Http\Middleware\EnsureAccountActive::class,
             'full.access' => \App\Http\Middleware\EnsureFullAccess::class,
+            'readonly' => \App\Http\Middleware\EnsureReadOnly::class,
+            'email.viewonly' => \App\Http\Middleware\EnsureEmailVerifiedOrViewOnly::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -1,8 +1,9 @@
 @php
     $forumUser = auth()->user();
-    // Provisional patients browse read-only: composers, likes and comment
-    // forms are replaced with an unlock notice (routes enforce it too).
-    $isProvisional = (bool) ($forumUser?->hasProvisionalAccess());
+    // Read-only UI for both limited tiers (provisional + view-only):
+    // composers, likes and comment forms are replaced with an unlock
+    // notice (routes enforce it too).
+    $isLimited = (bool) ($forumUser?->hasLimitedAccess());
     $forumLayout = match($forumUser?->role) {
         'bhw_president' => 'bhw-president.layout',
         'midwife' => 'midwife.layout',
@@ -502,7 +503,7 @@
             <span class="badge forum-role-badge">
                 <i class="bi bi-person-badge me-1"></i> {{ $forumRoleLabel }}
             </span>
-            @if($isProvisional)
+            @if($isLimited)
                 <span class="badge rounded-pill px-3 py-2" style="border:1px solid var(--color-border); background:var(--color-surface-soft); color:var(--color-text-muted); font-size:0.75rem;" title="Posting unlocks after RHU approval of your account">
                     <i class="bi bi-lock-fill me-1"></i> Read-only
                 </span>
@@ -527,7 +528,7 @@
         <div class="col-lg-8">
 
             {{-- Quick Post Creation Card (type directly in the pill — expands in place) --}}
-            @if($isProvisional)
+            @if($isLimited)
             <div class="quick-composer-card fade-in-card">
                 <div class="d-flex align-items-center gap-3">
                     <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px; height:44px; border-radius:50%; background:var(--color-surface-soft); color:var(--color-text-muted); font-size:1.1rem;" aria-hidden="true">
@@ -677,7 +678,7 @@
                     {{-- Interaction Bar --}}
                     <div class="post-engagement-bar">
                         <div class="engagement-actions">
-                            @if($isProvisional)
+                            @if($isLimited)
                             <span class="btn-engage" title="Liking unlocks after RHU approval of your account" style="cursor:default;">
                                 <i class="bi bi-heart"></i>
                                 <span>{{ $post->likes_count }}</span>
@@ -715,7 +716,7 @@
                     <div class="collapse mt-3" id="comments-{{ $post->id }}">
                         <div class="comments-tray">
                             {{-- Add Comment Form (locked until RHU approval) --}}
-                            @if(!$isProvisional)
+                            @if(!$isLimited)
                             <form action="{{ route('forum.comment', $post->id) }}" method="POST" class="mb-3">
                                 @csrf
                                 <div class="input-group">
@@ -766,7 +767,7 @@
                     <p style="color:var(--color-text-muted); max-width:440px; margin:0 auto 1.5rem;">
                         {{ $filter === 'my-posts' ? "You haven't posted in the community yet." : "The community feed is peaceful. Be the first mother or healthcare worker to start a conversation!" }}
                     </p>
-                    @if(!$isProvisional)
+                    @if(!$isLimited)
                     <button type="button" class="btn mx-auto forum-composer-btn" onclick="focusQuickComposer()">
                         <i class="bi bi-plus-circle-fill me-1"></i> Start First Discussion
                     </button>

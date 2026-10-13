@@ -280,6 +280,32 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * View-only access: a patient account still awaiting RHU approval
+     * that has NOT yet finished verification + onboarding. View-only
+     * users may browse the dashboard, learning materials, read-only
+     * community and their own profile — every state-changing input is
+     * blocked (read-only middleware + no-inputs UI) except the flows
+     * that graduate them: email verification, profile completion and
+     * logout. Demo accounts are excluded: they always enjoy full access.
+     */
+    public function hasViewOnlyAccess(): bool
+    {
+        return ($this->role ?? null) === 'user'
+            && ($this->status ?? 'approved') === 'pending'
+            && (! $this->hasVerifiedEmail() || $this->needsProfileCompletion())
+            && ! self::isDemoAccount($this->email ?? null);
+    }
+
+    /**
+     * Either limited tier (provisional or view-only): anything shown with
+     * a lock affordance in the UI keys off this.
+     */
+    public function hasLimitedAccess(): bool
+    {
+        return $this->hasProvisionalAccess() || $this->hasViewOnlyAccess();
+    }
+
+    /**
      * Whether this account is still forced through profile completion
      * (missing phone/barangay after Google sign-up).
      */

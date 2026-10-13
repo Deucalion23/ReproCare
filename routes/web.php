@@ -522,7 +522,7 @@ Route::prefix('bhw-president')->name('bhw-president.')->middleware(['web', 'abso
 });
 
 // User (Patient) Routes — verified email + completed profile required.
-Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'verified', 'complete.profile', 'role:user', 'prevent-back'])->group(function () {
+Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'email.viewonly', 'complete.profile', 'role:user', 'prevent-back'])->group(function () {
     // Open to provisional (limited-access) patients: dashboard, profile
     // settings and own notifications. Everything clinical or write-heavy
     // lives in the full.access group below.
@@ -600,8 +600,9 @@ Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'a
     Route::get('/{id}', [ForumController::class, 'show'])->name('show');
 });
 
-// Profile Routes (Unified for all roles; incomplete patient profiles are gated)
-Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
+// Profile Routes (Unified for all roles; incomplete patient profiles are gated.
+// View-only patients may view but not change anything: readonly bounces writes.)
+Route::prefix('profile')->name('profile.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'readonly', 'prevent-back'])->group(function () {
     Route::get('/', [ProfileController::class, 'show'])->name('show');
     Route::get('/edit', [ProfileController::class, 'edit'])->name('edit');
     Route::put('/', [ProfileController::class, 'update'])->name('update');
@@ -622,7 +623,7 @@ Route::prefix('learning')->name('learning.')->middleware(['web', 'absolute.logou
     Route::get('/training', [LearningController::class, 'hcwTraining'])->name('training');
     Route::get('/week/{week}', [LearningController::class, 'weekGuide'])->name('week-guide');
     Route::get('/{id}', [LearningController::class, 'show'])->name('show');
-    Route::post('/{id}/quiz', [LearningController::class, 'submitQuiz'])->name('quiz.submit');
+    Route::post('/{id}/quiz', [LearningController::class, 'submitQuiz'])->name('quiz.submit')->middleware('readonly');
 });
 
 // Device API Routes (PWA offline-cache + session validation)
