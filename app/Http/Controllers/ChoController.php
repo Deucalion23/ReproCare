@@ -476,7 +476,7 @@ class ChoController extends Controller
         // (Builder::getRelation → newInstance), so eager-loading them yields
         // permanently empty collections. Query explicitly instead.
         $woman = User::where('role', 'user')->with(['emergencyContacts', 'purok'])
-            ->select('id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay', 'purok_id', 'status', 'date_of_birth', 'contact_number', 'partner_name', 'partner_contact', 'gender', 'created_at')
+            ->select('id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay', 'purok_id', 'status', 'date_of_birth', 'contact_number', 'partner_name', 'partner_contact', 'gender', 'created_at', 'id_image_front', 'id_image_back', 'id_image_front_data', 'id_image_back_data')
             ->findOrFail($id);
 
         $pregnancies = Pregnancy::where('user_id', $woman->id)

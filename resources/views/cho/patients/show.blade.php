@@ -61,6 +61,39 @@
     </div>
 </div>
 
+{{-- Valid ID (captured/uploaded at signup; DB copy survives deploys) --}}
+<div class="card fade-in-card mb-4 rec-card">
+    <div class="card-header">Valid ID Documents</div>
+    <div class="card-body">
+        @if($woman->hasIdImages())
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="rec-label mb-2">Front of ID</div>
+                @if($woman->id_image_front_url)
+                    <a href="{{ $woman->id_image_front_url }}" target="_blank" rel="noopener" title="Open full-size front of ID">
+                        <img src="{{ $woman->id_image_front_url }}" alt="Front of valid ID for {{ $woman->first_name }} {{ $woman->last_name }}" style="width:100%; max-height:280px; object-fit:contain; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft);">
+                    </a>
+                @else
+                    <div class="text-muted" style="font-size:0.85rem;">Front not on file.</div>
+                @endif
+            </div>
+            <div class="col-md-6">
+                <div class="rec-label mb-2">Back of ID</div>
+                @if($woman->id_image_back_url)
+                    <a href="{{ $woman->id_image_back_url }}" target="_blank" rel="noopener" title="Open full-size back of ID">
+                        <img src="{{ $woman->id_image_back_url }}" alt="Back of valid ID for {{ $woman->first_name }} {{ $woman->last_name }}" style="width:100%; max-height:280px; object-fit:contain; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft);">
+                    </a>
+                @else
+                    <div class="text-muted" style="font-size:0.85rem;">Back not on file.</div>
+                @endif
+            </div>
+        </div>
+        @else
+        <div class="text-muted" style="font-size:0.875rem;">No valid ID on file for this patient.</div>
+        @endif
+    </div>
+</div>
+
 {{-- Pregnancies --}}
 <div class="card fade-in-card mb-4 rec-card rec-table">
     <div class="card-header">Pregnancies ({{ $pregnancies->count() }})</div>
