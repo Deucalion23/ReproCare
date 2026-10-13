@@ -444,6 +444,23 @@
         font-weight:700; font-size:0.88rem;
         padding:11px 24px; border-radius:var(--r-full);
         border:none; cursor:pointer; transition:all 0.2s;
+        min-height:48px;
+    }
+    /* ── Beginner-friendly ID step: guide, per-side status, big targets ── */
+    .id-guide { background:var(--color-info-soft); border:1px solid var(--color-border); border-radius:14px; padding:0.9rem 1.1rem; margin-bottom:1.25rem; }
+    .id-guide-title { font-family:'Plus Jakarta Sans', sans-serif; font-weight:800; font-size:0.88rem; color:var(--color-text); margin-bottom:0.4rem; display:flex; align-items:center; gap:6px; }
+    .id-guide-title i { color:var(--color-info-text); }
+    .id-guide-steps { margin:0; padding-left:1.2rem; font-size:0.84rem; line-height:1.7; color:var(--color-text-muted); }
+    .id-guide-steps strong { color:var(--color-text); }
+    .id-side-status { display:inline-flex; align-items:center; gap:6px; font-size:0.78rem; font-weight:700; color:var(--color-text-muted); background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:999px; padding:0.32rem 0.85rem; margin:0.45rem 0 0.65rem; }
+    .id-side-status.done { color:var(--color-success-text); background:var(--color-success-soft); border-color:var(--color-success-text); }
+    .id-capture-preview { display:none; width:100%; max-height:230px; object-fit:contain; border-radius:12px; margin-top:12px; background:#0b1220; }
+    .id-mode-btn { min-height:48px; font-size:0.92rem; padding:10px 18px; }
+    @media (max-width:600px) {
+        .id-mode-toggle { display:flex; }
+        .id-mode-btn { flex:1; justify-content:center; text-align:center; }
+        .id-camera-actions { display:flex; gap:10px; }
+        .id-camera-actions .btn-capture { flex:1; justify-content:center; }
     }
     .btn-capture {
         background:var(--color-surface-strong);
@@ -1275,17 +1292,26 @@
                         <h2>Upload your valid ID</h2>
                         <p>We need both sides of a government-issued ID to verify your identity. Accepted: PhilSys, Passport, UMID, Driver's License.</p>
                     </div>
+                    <div class="id-guide" aria-label="How to upload your ID in 3 easy steps">
+                        <div class="id-guide-title"><i class="bi bi-info-circle-fill" aria-hidden="true"></i> How to do this (3 easy steps)</div>
+                        <ol class="id-guide-steps">
+                            <li><strong>Pick how to add each photo:</strong> <em>Upload a saved photo</em> (choose a picture from your phone) or <em>Use camera now</em> (take the photo here).</li>
+                            <li><strong>Add the FRONT of your ID first, then the BACK.</strong> Watch each row change to <em>Done ✓</em>.</li>
+                            <li><strong>Look at each photo.</strong> Words clear? Tap <em>Create My Account</em> below. Blurry? Tap <em>Retake</em>.</li>
+                        </ol>
+                    </div>
 
                     <div class="field-group">
                         <!-- Front of ID -->
                         <div class="field-item">
                             <label class="field-label" for="id-front-file"><i class="bi bi-card-front" aria-hidden="true"></i> Front of ID <span class="req">*</span></label>
+                            <div class="id-side-status" id="frontSideStatus"><i class="bi bi-circle" aria-hidden="true"></i> Waiting — no front photo yet</div>
                             <div class="id-mode-toggle" role="tablist" aria-label="Front ID capture method">
                                 <button type="button" class="id-mode-btn active" id="frontModeUpload" onclick="setIdMode('front','upload')">
-                                    <i class="bi bi-cloud-upload" aria-hidden="true"></i> Upload file
+                                    <i class="bi bi-cloud-upload" aria-hidden="true"></i> Upload a saved photo
                                 </button>
                                 <button type="button" class="id-mode-btn" id="frontModeCamera" onclick="setIdMode('front','camera')">
-                                    <i class="bi bi-camera" aria-hidden="true"></i> Use camera
+                                    <i class="bi bi-camera" aria-hidden="true"></i> Use camera now
                                 </button>
                             </div>
                             <div class="id-upload-area" id="frontUploadArea">
@@ -1294,13 +1320,14 @@
                                 <div class="id-upload-icon" id="frontIcon">
                                     <i class="bi bi-card-image" aria-hidden="true"></i>
                                 </div>
-                                <h4 id="frontTitle">Click or tap to upload</h4>
-                                <p id="frontDesc">Front side of your valid ID · JPG, PNG · Max 5MB</p>
+                                <h4 id="frontTitle">Tap here, then pick a photo of your ID</h4>
+                                <p id="frontDesc">Front side of your valid ID · JPG or PNG · Max 5MB</p>
                                 <img id="id-preview-front" src="" alt="ID Front Preview">
                             </div>
                             <div class="id-camera-pane" id="frontCameraPane" style="display:none;">
                                 <video id="frontVideo" playsinline muted></video>
                                 <canvas id="frontCanvas" style="display:none;"></canvas>
+                                <img class="id-capture-preview" id="frontCapturePreview" src="" alt="Captured front of ID preview">
                                 <div class="id-camera-actions">
                                     <button type="button" class="btn-capture" id="frontCaptureBtn" onclick="captureIdPhoto('front')">
                                         <i class="bi bi-camera-fill" aria-hidden="true"></i> Capture photo
@@ -1309,7 +1336,7 @@
                                         <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Retake
                                     </button>
                                 </div>
-                                <p class="id-camera-hint" id="frontCameraHint">Point your camera at the front of your ID, then capture.</p>
+                                <p class="id-camera-hint" id="frontCameraHint">Hold your ID flat in good light so all 4 corners show, then tap Capture photo.</p>
                                 <div class="id-camera-fallback" id="frontCameraFallback" style="display:none;">
                                     <p><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Camera unavailable — take a photo instead:</p>
                                     <input type="file" accept="image/*" capture="environment" class="form-control"
@@ -1324,12 +1351,13 @@
                         <!-- Back of ID -->
                         <div class="field-item">
                             <label class="field-label" for="id-back-file"><i class="bi bi-card-back" aria-hidden="true"></i> Back of ID <span class="req">*</span></label>
+                            <div class="id-side-status" id="backSideStatus"><i class="bi bi-circle" aria-hidden="true"></i> Waiting — no back photo yet</div>
                             <div class="id-mode-toggle" role="tablist" aria-label="Back ID capture method">
                                 <button type="button" class="id-mode-btn active" id="backModeUpload" onclick="setIdMode('back','upload')">
-                                    <i class="bi bi-cloud-upload" aria-hidden="true"></i> Upload file
+                                    <i class="bi bi-cloud-upload" aria-hidden="true"></i> Upload a saved photo
                                 </button>
                                 <button type="button" class="id-mode-btn" id="backModeCamera" onclick="setIdMode('back','camera')">
-                                    <i class="bi bi-camera" aria-hidden="true"></i> Use camera
+                                    <i class="bi bi-camera" aria-hidden="true"></i> Use camera now
                                 </button>
                             </div>
                             <div class="id-upload-area" id="backUploadArea">
@@ -1338,13 +1366,14 @@
                                 <div class="id-upload-icon" id="backIcon" style="background:var(--pink-light);color:var(--pink-dark);">
                                     <i class="bi bi-card-image" aria-hidden="true"></i>
                                 </div>
-                                <h4 id="backTitle">Click or tap to upload</h4>
-                                <p id="backDesc">Back side of your valid ID · JPG, PNG · Max 5MB</p>
+                                <h4 id="backTitle">Tap here, then pick a photo of your ID</h4>
+                                <p id="backDesc">Back side of your valid ID · JPG or PNG · Max 5MB</p>
                                 <img id="id-preview-back" src="" alt="ID Back Preview">
                             </div>
                             <div class="id-camera-pane" id="backCameraPane" style="display:none;">
                                 <video id="backVideo" playsinline muted></video>
                                 <canvas id="backCanvas" style="display:none;"></canvas>
+                                <img class="id-capture-preview" id="backCapturePreview" src="" alt="Captured back of ID preview">
                                 <div class="id-camera-actions">
                                     <button type="button" class="btn-capture" id="backCaptureBtn" onclick="captureIdPhoto('back')">
                                         <i class="bi bi-camera-fill" aria-hidden="true"></i> Capture photo
@@ -1353,7 +1382,7 @@
                                         <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i> Retake
                                     </button>
                                 </div>
-                                <p class="id-camera-hint" id="backCameraHint">Point your camera at the back of your ID, then capture.</p>
+                                <p class="id-camera-hint" id="backCameraHint">Hold your ID flat in good light so all 4 corners show, then tap Capture photo.</p>
                                 <div class="id-camera-fallback" id="backCameraFallback" style="display:none;">
                                     <p><i class="bi bi-exclamation-triangle" aria-hidden="true"></i> Camera unavailable — take a photo instead:</p>
                                     <input type="file" accept="image/*" capture="environment" class="form-control"
@@ -1594,6 +1623,18 @@
         document.getElementById(side + 'Title').textContent = S + ' ID ready ✓';
         document.getElementById(side + 'Desc').textContent = label;
         document.getElementById(side + 'IdError').style.display = 'none';
+        setIdSideStatus(side, true);
+    }
+    function setIdSideStatus(side, done) {
+        const status = document.getElementById(side + 'SideStatus');
+        if (!status) return;
+        if (done) {
+            status.innerHTML = '<i class="bi bi-check-circle-fill" aria-hidden="true"></i> Done ✓ — photo added, check it below';
+            status.classList.add('done');
+        } else {
+            status.innerHTML = '<i class="bi bi-circle" aria-hidden="true"></i> Waiting — no ' + side + ' photo yet';
+            status.classList.remove('done');
+        }
     }
 
     function clearIdPhoto(side) {
@@ -1603,6 +1644,7 @@
         preview.src = '';
         preview.style.display = 'none';
         document.getElementById(side + 'UploadArea').classList.remove('has-file');
+        setIdSideStatus(side, false);
     }
 
     // Shrink ID photos before submit so the base64 POST stays far under
@@ -1714,18 +1756,22 @@
         const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
         setIdPhoto(side, dataUrl, 'Captured with camera · ' + new Date().toLocaleString());
         video.classList.add('captured');
+        const capPreview = document.getElementById(side + 'CapturePreview');
+        if (capPreview) { capPreview.src = dataUrl; capPreview.style.display = 'block'; }
         document.getElementById(side + 'CaptureBtn').style.display = 'none';
         document.getElementById(side + 'RetakeBtn').style.display = '';
-        document.getElementById(side + 'CameraHint').textContent = capSide(side) + ' of ID captured ✓ — retake if blurry.';
+        document.getElementById(side + 'CameraHint').textContent = 'Photo saved ✓ — look at it above. Words clear? Continue below. Blurry? Tap Retake.';
         stopIdCamera(side);
     }
 
     function retakeIdPhoto(side) {
         clearIdPhoto(side);
+        const capPreview = document.getElementById(side + 'CapturePreview');
+        if (capPreview) { capPreview.src = ''; capPreview.style.display = 'none'; }
         document.getElementById(side + 'Video').classList.remove('captured');
         document.getElementById(side + 'CaptureBtn').style.display = '';
         document.getElementById(side + 'RetakeBtn').style.display = 'none';
-        document.getElementById(side + 'CameraHint').textContent = 'Point your camera at the ' + side + ' of your ID, then capture.';
+        document.getElementById(side + 'CameraHint').textContent = 'Hold your ID flat in good light so all 4 corners show, then tap Capture photo.';
         startIdCamera(side);
     }
 
