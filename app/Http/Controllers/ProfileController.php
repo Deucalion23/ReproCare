@@ -165,6 +165,11 @@ class ProfileController extends Controller
         if ($request->has('contact_number')) {
             $updateData['contact_number'] = $request->filled('contact_number') ? $request->contact_number : null;
         }
+        // Structured house number (also folded into the composed address
+        // below so staff views keep showing it inline).
+        if ($request->filled('house_number')) {
+            $updateData['house_number'] = $request->house_number;
+        }
         if ($request->has('date_of_birth')) {
             $updateData['date_of_birth'] = $request->filled('date_of_birth') ? $request->date_of_birth : null;
         }

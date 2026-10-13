@@ -245,6 +245,15 @@
                         </div>
 
                         <div class="mb-3">
+                            <label for="house_number" class="form-label">House / Unit Number</label>
+                            <input type="text" class="form-control @error('house_number') is-invalid @enderror" id="house_number" name="house_number"
+                                   value="{{ old('house_number', $user->house_number ?? '') }}" placeholder="e.g. 123, Blk 4 Lot 12">
+                            @error('house_number')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
                             <label for="purok" class="form-label">Sitio / Street / Purok</label>
                             <input type="text" class="form-control @error('purok') is-invalid @enderror" id="purok" name="purok"
                                    value="{{ old('purok', $user->purok?->name ?? '') }}" placeholder="e.g. Sitio Malinis, Purok 3">

@@ -347,6 +347,7 @@ class GoogleController extends Controller
             // phone_number (spec) maps to the existing contact_number column.
             'contact_number' => $validated['contact_number'] ?? null,
             'address' => $resolvedAddress,
+            'house_number' => $validated['house_number'] ?? null,
             'barangay' => $barangay,
             'purok_id' => $resolvedPurokId,
             'latitude' => $validated['latitude'] ?? null,

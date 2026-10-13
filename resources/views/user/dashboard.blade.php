@@ -850,6 +850,54 @@
 </div>
 @endif
 
+{{-- Home-address alert: pregnant users missing house/street details get a
+     modal (once per session) pointing at the profile form. Staff read the
+     same profile row, so the address is visible to them once saved. --}}
+@if(!empty($missingAddress))
+@php
+    $missingLabels = implode(' and ', array_map(fn ($key) => \App\Models\User::addressDetailLabel($key), $missingAddress));
+@endphp
+<div class="modal fade" id="addressAlertModal" tabindex="-1" aria-labelledby="addressAlertModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="border-radius:22px; border:1px solid var(--color-border); overflow:hidden;">
+            <div class="modal-body p-4 text-center">
+                <div class="d-inline-flex align-items-center justify-content-center mb-3" style="width:56px; height:56px; border-radius:18px; background:var(--color-peach-soft); color:var(--color-warning-text); font-size:1.5rem;" aria-hidden="true">
+                    <i class="bi bi-geo-alt-fill"></i>
+                </div>
+                <h5 class="fw-800 mb-2" id="addressAlertModalLabel" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text);">Complete your home address</h5>
+                <p class="mb-4" style="font-size:0.88rem; color:var(--color-text-muted); line-height:1.6;">
+                    Your health worker needs your <strong>{{ $missingLabels }}</strong> in your profile so they can find your home during prenatal visits.
+                </p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{{ route('profile.edit') }}" class="btn btn-primary">
+                        <i class="bi bi-pencil-square me-1"></i> Update profile now
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Later</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@if(!empty($showAddressModal))
+@push('scripts')
+<script>
+    (function () {
+        function showAddressAlert() {
+            var el = document.getElementById('addressAlertModal');
+            if (!el || typeof bootstrap === 'undefined' || !bootstrap.Modal) return;
+            bootstrap.Modal.getOrCreateInstance(el).show();
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', showAddressAlert);
+        } else {
+            showAddressAlert();
+        }
+    })();
+</script>
+@endpush
+@endif
+@endif
+
 @php
     $hour = now()->hour;
     $timeOfDay = $hour < 12 ? 'Morning' : ($hour < 17 ? 'Afternoon' : 'Evening');
@@ -1271,7 +1319,7 @@
             <div class="card-body p-0">
                 <div class="list-group list-group-flush community-list">
                     @foreach($recentForumPosts as $post)
-                        @php
+@php
                             $postUser = $post->user;
                             $postAvatar = $postUser->profile_image_url ?? '/images/avatars/avatar-female.svg';
                             $postInitial = strtoupper(substr($postUser->name ?? 'M', 0, 1));

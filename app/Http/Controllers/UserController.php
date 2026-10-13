@@ -45,11 +45,48 @@ class UserController extends Controller
         $unreadNotifications = $user->notifications()->unread()->count();
         $nextPeriod = Cycle::predictNextPeriod($user->id);
 
+        // Home-address nudge: pregnant users missing house/street details
+        // get a modal alert (once per session) plus a persistent
+        // notification until the profile is fixed. Staff read the same
+        // users row, so the address is visible to them the moment it is
+        // saved — no separate sync step needed.
+        $missingAddress = $user->needsAddressCompletion() ? $user->missingAddressDetails() : [];
+        $showAddressModal = false;
+
+        if ($missingAddress !== []) {
+            if (! session()->has('address_modal_shown')) {
+                session()->put('address_modal_shown', true);
+                $showAddressModal = true;
+            }
+
+            $alreadyNotified = $user->notifications()
+                ->where('is_read', false)
+                ->where('action_url', route('profile.edit'))
+                ->where('message', 'like', '%home address%')
+                ->exists();
+
+            if (! $alreadyNotified) {
+                $labels = implode(' and ', array_map(
+                    fn ($key) => \App\Models\User::addressDetailLabel($key),
+                    $missingAddress
+                ));
+
+                $user->notifications()->create([
+                    'title' => 'Complete your home address',
+                    'message' => "Your health worker needs your home address for prenatal visits. Please add your {$labels} in your profile.",
+                    'type' => 'warning',
+                    'action_url' => route('profile.edit'),
+                ]);
+            }
+        }
+
         return view('user.dashboard', compact(
             'activePregnancy',
             'upcomingCheckups',
             'unreadNotifications',
-            'nextPeriod'
+            'nextPeriod',
+            'missingAddress',
+            'showAddressModal'
         ));
     }
 
@@ -101,6 +138,21 @@ class UserController extends Controller
 
     public function storePregnancy(Request $request)
     {
+        // Home address is required once pregnant: health workers need a
+        // findable address for prenatal visits. Send them to complete the
+        // profile first instead of accepting an unvisitable record.
+        $missingAddress = Auth::user()->missingAddressDetails();
+        if ($missingAddress !== []) {
+            $labels = implode(' and ', array_map(
+                fn ($key) => \App\Models\User::addressDetailLabel($key),
+                $missingAddress
+            ));
+
+            return redirect()->route('profile.edit')->withErrors([
+                'address_details' => "Add your {$labels} to your profile first so your health worker can find your home during prenatal visits.",
+            ])->withInput();
+        }
+
         $this->mergePregnancyLifestyleInputs($request);
 
         $request->validate([

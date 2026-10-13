@@ -143,6 +143,7 @@ class AuthController extends Controller
             'gender' => $validated['gender'] ?? null,
             'contact_number' => $validated['contact_number'] ?? null,
             'address' => trim(($resolvedAddress ?? '').($request->filled('address_label') ? ' ('.$request->address_label.')' : '')) ?: null,
+            'house_number' => $validated['house_number'] ?? null,
             'barangay' => $barangay,
             'purok_id' => $resolvedPurokId,
             'latitude' => $validated['latitude'] ?? null,

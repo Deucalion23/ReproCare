@@ -167,7 +167,13 @@ class PregnancyReportingTest extends AutomationTestCase
     public function test_patient_self_report_notifies_care_team(): void
     {
         $midwife = $this->patient(['role' => 'midwife']);
-        $patient = $this->patient(['date_of_birth' => today()->subYears(25)->toDateString()]);
+        // Self-reporting requires a complete home address on the profile
+        // so health workers can find the home for prenatal visits.
+        $patient = $this->patient([
+            'date_of_birth' => today()->subYears(25)->toDateString(),
+            'house_number' => '101',
+            'address' => 'House/Unit 101, Purok 1, Burgos St, San Carlos City, Pangasinan',
+        ]);
 
         $response = $this->actingAs($patient)->post(route('user.pregnancies.store'), [
             'lmp' => today()->subDays(50)->toDateString(),

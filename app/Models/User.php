@@ -33,6 +33,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'gender',
         'contact_number',
         'address',
+        'house_number',
         'barangay',
         'purok_id',
         'assigned_barangay',
@@ -208,6 +209,74 @@ class User extends Authenticatable implements MustVerifyEmail
             && $this->hasVerifiedEmail()
             && ! $this->needsProfileCompletion()
             && ! self::isDemoAccount($this->email ?? null);
+    }
+
+    /**
+     * Which home-address details are still missing for clinical follow-up.
+     * Returns a subset of ['house_number', 'street'] (empty = complete).
+     *
+     * House number is the structured `house_number` column (legacy composed
+     * addresses containing a house/unit marker count as present). The street
+     * level is covered by an assigned purok (`purok_id`) or a street-ish
+     * marker (purok / sitio / st. / street / blvd / ave. / road …) inside
+     * the composed address.
+     *
+     * @return list<string>
+     */
+    public function missingAddressDetails(): array
+    {
+        $missing = [];
+        $address = (string) ($this->address ?? '');
+
+        $hasHouse = trim((string) ($this->house_number ?? '')) !== ''
+            || (bool) preg_match('/\b(house|unit|blk|lot|bldg|building|apartment|apt)\b/i', $address);
+
+        if (! $hasHouse) {
+            $missing[] = 'house_number';
+        }
+
+        $hasStreet = ! empty($this->purok_id)
+            || (bool) preg_match('/\b(purok|sitio|saint|st|street|blvd|boulevard|ave|avenue|road|rd|compound|subdivision|phase|barangay)\b/i', $address);
+
+        if (! $hasStreet) {
+            $missing[] = 'street';
+        }
+
+        return $missing;
+    }
+
+    /**
+     * Whether the user should be nudged (and gated) to complete their home
+     * address: applies once they have an active pregnancy and any address
+     * detail is still missing. Staff need a findable home address for
+     * prenatal visits, so this also blocks self-reported pregnancy
+     * creation until the profile is fixed.
+     */
+    public function needsAddressCompletion(): bool
+    {
+        if (($this->role ?? null) !== 'user') {
+            return false;
+        }
+
+        try {
+            $hasActivePregnancy = $this->pregnancies()->active()->exists();
+        } catch (\Throwable $e) {
+            return false;
+        }
+
+        return $hasActivePregnancy && $this->missingAddressDetails() !== [];
+    }
+
+    /**
+     * Human labels for missingAddressDetails() keys (modal + notification copy).
+     */
+    public static function addressDetailLabel(string $key): string
+    {
+        return match ($key) {
+            'house_number' => 'house / unit number',
+            'street' => 'street / sitio / purok',
+            default => $key,
+        };
     }
 
     /**
