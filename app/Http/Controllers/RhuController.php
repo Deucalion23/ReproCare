@@ -82,6 +82,33 @@ class RhuController extends Controller
         )));
     }
 
+    /**
+     * Live dashboard counters — same queries as dashboard(), computed from
+     * the database on every call so totals update immediately after records
+     * are created, updated, archived, restored or deleted (soft-deleted rows
+     * are excluded by default). Polled by the dashboard via AJAX.
+     */
+    public function dashboardStats()
+    {
+        $completedPregnancies = Pregnancy::completed()->withCount('healthRecords')->get();
+        $totalCompleted = $completedPregnancies->count();
+
+        return response()->json([
+            'totalPatients' => User::where('role', 'user')->where('status', 'approved')->count(),
+            'activePregnancies' => Pregnancy::active()->count(),
+            'highRiskPatients' => Pregnancy::active()->highRisk()->count(),
+            'healthRecords' => HealthRecord::count(),
+            'pendingSupplyRequests' => SupplyRequest::where('status', 'submitted')->count(),
+            'pendingBhwReports' => BhwMonthlyReport::where('submission_status', 'approved_by_midwife')->count(),
+            'maternalDeathsCount' => MaternalDeath::count(),
+            'nearMissCount' => MaternalMorbidity::count(),
+            'ancCoverageRate' => $totalCompleted > 0
+                ? round(($completedPregnancies->filter(fn ($p) => $p->health_records_count >= 4)->count() / $totalCompleted) * 100, 1)
+                : 0,
+            'generated_at' => now()->toDateTimeString(),
+        ]);
+    }
+
     // Settings
     public function settings()
     {
@@ -896,13 +923,46 @@ class RhuController extends Controller
 
     // ─── Supply Requests (RHU → CHO) ────────────────────────────────
 
-    public function supplyRequests()
+    public function supplyRequests(Request $request)
     {
-        $requests = SupplyRequest::with(['requestedBy', 'approvedBy'])
-            ->latest()
-            ->paginate(15);
+        $search = $request->input('search');
+        $status = $request->input('status', 'all');
+        $scope = $request->input('scope', 'all');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        if ($dateFrom !== null && $dateFrom !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dateFrom)) {
+            $dateFrom = null;
+        }
+        if ($dateTo !== null && $dateTo !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $dateTo)) {
+            $dateTo = null;
+        }
 
-        return view('rhu.supply-requests.index', compact('requests'));
+        $requests = SupplyRequest::with(['requestedBy', 'approvedBy'])
+            // RHU staff track their own requests via "Mine"; "All" keeps the
+            // existing full-facility view for coordination.
+            ->when($scope === 'mine', fn ($query) => $query->where('requested_by_id', auth()->id()))
+            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
+            ->when($dateFrom, fn ($query) => $query->whereDate('submitted_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->whereDate('submitted_at', '<=', $dateTo))
+            // Search across request ID, item name, request date and status —
+            // combined with the scope/status/date filters above.
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('supply_requests.id', $search)
+                        ->orWhere('supply_name', 'like', "%{$search}%")
+                        ->orWhere('supply_category', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhereDate('submitted_at', $search)
+                        ->orWhereHas('requestedBy', fn ($u) => $u
+                            ->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%"));
+                });
+            })
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('rhu.supply-requests.index', compact('requests', 'search', 'status', 'scope', 'dateFrom', 'dateTo'));
     }
 
     public function createSupplyRequest()
@@ -958,6 +1018,76 @@ class RhuController extends Controller
 
         return redirect()->route('rhu.supply-requests.index')
             ->with('success', 'Supply request cancelled and archived (retained for audit).');
+    }
+
+    // ─── Health Record Tracking (read-only RHU oversight) ─────────────
+    // Lists every woman's health record entered or updated by midwives/BHWs:
+    // vitals, pregnancy linkage, assigned worker, created/updated dates and
+    // visit history. Read-only — RHU tracks here without creating duplicates
+    // (creation stays with the midwife/BHW consoles). Role middleware on the
+    // route already restricts this to RHU personnel.
+    public function healthRecords(Request $request)
+    {
+        $search = $request->input('search');
+        $riskLevel = $request->input('risk_level', 'all');
+        $barangay = $request->input('barangay');
+
+        $records = HealthRecord::with([
+                'woman:id,first_name,middle_initial,last_name,barangay',
+                'walkInPatient:id,first_name,last_name,barangay',
+                'pregnancy:id,user_id,walk_in_patient_id,lmp,edd,risk_level',
+                'recordedBy:id,first_name,last_name,role',
+            ])
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->whereHas('woman', fn ($w) => $w
+                            ->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%"))
+                        ->orWhereHas('walkInPatient', fn ($w) => $w
+                            ->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%"))
+                        ->orWhere('risk_level', 'like', "%{$search}%");
+                });
+            })
+            ->when($riskLevel !== 'all', fn ($query) => $query->where('risk_level', $riskLevel))
+            ->when($barangay, function ($query) use ($barangay) {
+                $query->where(function ($inner) use ($barangay) {
+                    $inner->whereHas('woman', fn ($w) => $w->where('barangay', $barangay))
+                        ->orWhereHas('walkInPatient', fn ($w) => $w->where('barangay', $barangay));
+                });
+            })
+            ->latest('created_at')
+            ->paginate(15)
+            ->withQueryString();
+
+        $barangays = \App\Models\Barangay::active()->orderBy('name')->pluck('name');
+
+        return view('rhu.health-records.index', compact('records', 'search', 'riskLevel', 'barangay', 'barangays'));
+    }
+
+    public function showHealthRecord($id)
+    {
+        $record = HealthRecord::with([
+                'woman.emergencyContacts',
+                'walkInPatient',
+                'pregnancy.healthRecords' => fn ($q) => $q->latest('created_at')->take(10),
+                'recordedBy:id,first_name,last_name,role',
+                'pregnancy.checkups' => fn ($q) => $q->latest('scheduled_date')->take(10),
+            ])->findOrFail($id);
+
+        $history = HealthRecord::where(function ($query) use ($record) {
+                if ($record->user_id) {
+                    $query->where('user_id', $record->user_id);
+                } else {
+                    $query->where('walk_in_patient_id', $record->walk_in_patient_id);
+                }
+            })
+            ->with('recordedBy:id,first_name,last_name,role')
+            ->latest('created_at')
+            ->take(20)
+            ->get();
+
+        return view('rhu.health-records.show', compact('record', 'history'));
     }
 
     // ─── Maternal Deaths (Feature A) ──────────────────────────────────
@@ -1382,6 +1512,24 @@ class RhuController extends Controller
             'contact_number' => 'nullable|string|max:20',
             'date_of_birth' => 'required|date|before:today',
         ]);
+
+        // Duplicate guard: same first+last name + date of birth, or an
+        // already-used contact number, means this woman is already registered.
+        $duplicate = User::where('role', 'user')
+            ->where('first_name', $request->first_name)
+            ->where('last_name', $request->last_name)
+            ->where('date_of_birth', $request->date_of_birth)
+            ->first();
+        if ($duplicate) {
+            return back()
+                ->withErrors(['duplicate' => "This woman appears to be already registered (record #{$duplicate->id}, {$duplicate->name}). Open her record instead of creating a duplicate."])
+                ->withInput();
+        }
+        if ($request->filled('contact_number') && User::where('role', 'user')->where('contact_number', $request->contact_number)->exists()) {
+            return back()
+                ->withErrors(['contact_number' => 'This contact number is already used by another registered woman.'])
+                ->withInput();
+        }
 
         $purokId = \App\Models\Purok::resolveIdFromText($request->purok, $request->barangay);
 

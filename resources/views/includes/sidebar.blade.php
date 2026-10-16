@@ -273,6 +273,13 @@
         <div class="sidebar-section-label">Maternal Health</div>
         <ul class="nav flex-column">
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('rhu.health-records*') ? 'active' : '' }}"
+                   href="{{ route('rhu.health-records.index') }}">
+                    <i class="bi bi-file-earmark-medical-fill"></i>
+                    <span>Health Records</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('rhu.maternal-deaths*') ? 'active' : '' }}"
                    href="{{ route('rhu.maternal-deaths.index') }}">
                     <i class="bi bi-journal-x"></i>

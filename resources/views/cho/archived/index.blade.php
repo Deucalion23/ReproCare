@@ -150,14 +150,26 @@
                 </li>
             </ul>
 
-            {{-- Tab Search Filter --}}
-            <form method="GET" class="d-flex gap-2">
+            {{-- Tab Search + Archived-Date Filter --}}
+            <form method="GET" class="d-flex gap-2 flex-wrap align-items-end">
                 <input type="hidden" name="tab" value="{{ $activeTab }}">
-                <div class="input-group input-group-sm arch-search" style="max-width:260px;">
+                <div class="input-group input-group-sm arch-search" style="max-width:220px;">
                     <input type="text" name="search" class="form-control" placeholder="Search in this tab..." value="{{ $search }}">
                     <button class="btn" type="submit">
                         <i class="bi bi-search"></i>
                     </button>
+                </div>
+                <div>
+                    <label class="form-label mb-0" style="font-size:0.7rem;font-weight:800;">Archived from</label>
+                    <input type="date" name="date_from" class="form-control form-control-sm" value="{{ $dateFrom ?? '' }}" max="{{ date('Y-m-d') }}">
+                </div>
+                <div>
+                    <label class="form-label mb-0" style="font-size:0.7rem;font-weight:800;">Archived to</label>
+                    <input type="date" name="date_to" class="form-control form-control-sm" value="{{ $dateTo ?? '' }}" max="{{ date('Y-m-d') }}">
+                </div>
+                <div class="d-flex gap-1">
+                    <button class="btn btn-sm btn-primary" type="submit" style="border-radius:999px;font-weight:800;">Filter</button>
+                    <a class="btn btn-sm btn-outline-secondary" style="border-radius:999px;" href="?tab={{ $activeTab }}">Clear</a>
                 </div>
             </form>
         </div>
@@ -165,13 +177,42 @@
 
     <div class="card-body p-0">
 
+        {{-- Bulk selection bar (applies to the visible tab) --}}
+        @php
+            $bulkType = match($activeTab) {
+                'patients' => 'patient',
+                'staff' => 'staff',
+                'health_records' => 'health-record',
+                'materials' => 'learning-material',
+                'pregnancies' => 'pregnancy',
+                'supplies' => 'supply-request',
+                default => 'patient',
+            };
+            $isChoArchive = str_starts_with($archiveRestoreRoute ?? '', 'cho.');
+        @endphp
+        <form method="POST" action="{{ $isChoArchive ? route('cho.archived.bulk-restore') : route('rhu.archived.bulk-restore') }}" id="archive-bulk-form" class="d-flex gap-2 align-items-center flex-wrap px-3 py-2 border-bottom">
+            @csrf
+            <input type="hidden" name="type" value="{{ $bulkType }}">
+            <span class="text-muted" style="font-size:0.78rem;font-weight:700;"><span id="archive-selected-count">0</span> selected</span>
+            <button type="submit" class="btn btn-sm arch-restore-btn" onclick="return confirmBulkRestore()">
+                <i class="bi bi-arrow-counterclockwise me-1"></i> Restore selected
+            </button>
+            @if($isChoArchive)
+            <button type="submit" class="btn btn-sm btn-danger" style="border-radius:999px;font-weight:800;" formaction="{{ route('cho.archived.bulk-delete') }}" onclick="return confirmBulkDelete()">
+                <i class="bi bi-trash3 me-1"></i> Delete permanently
+            </button>
+            @endif
+            <small class="text-muted" style="font-size:0.72rem;">Patient, pregnancy and health records are always retained — permanent delete never applies to them.</small>
+        </form>
+
         {{-- TAB 1: ARCHIVED PATIENTS --}}
         @if($activeTab === 'patients')
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-3 py-3">Patient Name</th>
+                            <th class="px-3 py-3"><input type="checkbox" id="archive-select-all" title="Select all on this page"></th>
+                            <th class="py-3">Patient Name</th>
                             <th class="py-3">Contact / Email</th>
                             <th class="py-3">Barangay</th>
                             <th class="py-3">Archived On</th>
@@ -181,7 +222,8 @@
                     <tbody>
                         @forelse($patients as $patient)
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $patient->id }}" form="archive-bulk-form"></td>
+                                <td>
                                     <div class="fw-700">{{ $patient->first_name }} {{ $patient->last_name }}</div>
                                     <small class="text-muted">ID: #{{ $patient->id }}</small>
                                 </td>
@@ -204,7 +246,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-archive" style="font-size:2rem;"></i>
                                     <p class="mt-2 mb-0">No archived patients found.</p>
                                 </td>
@@ -224,7 +266,8 @@
                 <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-3 py-3">Staff Name</th>
+                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
+                            <th class="py-3">Staff Name</th>
                             <th class="py-3">Role</th>
                             <th class="py-3">Email / Contact</th>
                             <th class="py-3">Archived On</th>
@@ -234,7 +277,8 @@
                     <tbody>
                         @forelse($staff as $member)
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $member->id }}" form="archive-bulk-form"></td>
+                                <td>
                                     <div class="fw-700">{{ $member->first_name }} {{ $member->last_name }}</div>
                                     <small class="text-muted">ID: #{{ $member->id }}</small>
                                 </td>
@@ -261,7 +305,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-person-x" style="font-size:2rem;"></i>
                                     <p class="mt-2 mb-0">No archived staff accounts found.</p>
                                 </td>
@@ -281,7 +325,8 @@
                 <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-3 py-3">Record ID & Patient</th>
+                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
+                            <th class="py-3">Record ID & Patient</th>
                             <th class="py-3">Vital Signs / Vitals</th>
                             <th class="py-3">Risk Level</th>
                             <th class="py-3">Archived Date</th>
@@ -291,7 +336,8 @@
                     <tbody>
                         @forelse($healthRecords as $record)
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $record->id }}" form="archive-bulk-form"></td>
+                                <td>
                                     <div class="fw-700">Record #{{ $record->id }}</div>
                                     <small class="text-muted">{{ $record->user?->name ?? 'Patient' }}</small>
                                 </td>
@@ -323,7 +369,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-file-earmark-medical" style="font-size:2rem;"></i>
                                     <p class="mt-2 mb-0">No archived health records.</p>
                                 </td>
@@ -343,7 +389,8 @@
                 <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-3 py-3">Material Title</th>
+                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
+                            <th class="py-3">Material Title</th>
                             <th class="py-3">Type & Category</th>
                             <th class="py-3">Media Source</th>
                             <th class="py-3">Archived On</th>
@@ -353,7 +400,8 @@
                     <tbody>
                         @forelse($learningMaterials as $mat)
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $mat->id }}" form="archive-bulk-form"></td>
+                                <td>
                                     <div class="fw-700">{{ $mat->title }}</div>
                                     <small class="text-muted">{{ Str::limit($mat->content, 60) }}</small>
                                 </td>
@@ -384,7 +432,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-camera-video-off" style="font-size:2rem;"></i>
                                     <p class="mt-2 mb-0">No archived videos or learning materials found.</p>
                                 </td>
@@ -404,7 +452,8 @@
                 <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-3 py-3">Pregnancy ID & Patient</th>
+                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
+                            <th class="py-3">Pregnancy ID & Patient</th>
                             <th class="py-3">EDD / AOG</th>
                             <th class="py-3">Status</th>
                             <th class="py-3">Archived On</th>
@@ -414,7 +463,8 @@
                     <tbody>
                         @forelse($pregnancies as $preg)
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $preg->id }}" form="archive-bulk-form"></td>
+                                <td>
                                     <div class="fw-700">Pregnancy #{{ $preg->id }}</div>
                                     <small class="text-muted">{{ $preg->user?->name ?? 'Patient' }}</small>
                                 </td>
@@ -439,7 +489,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-heartbreak" style="font-size:2rem;"></i>
                                     <p class="mt-2 mb-0">No archived pregnancies found.</p>
                                 </td>
@@ -459,7 +509,8 @@
                 <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
                     <thead class="table-light">
                         <tr>
-                            <th class="px-3 py-3">Supply Item</th>
+                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
+                            <th class="py-3">Supply Item</th>
                             <th class="py-3">Requested By</th>
                             <th class="py-3">Quantity</th>
                             <th class="py-3">Archived On</th>
@@ -469,7 +520,8 @@
                     <tbody>
                         @forelse($supplyRequests as $sup)
                             <tr>
-                                <td class="px-3">
+                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $sup->id }}" form="archive-bulk-form"></td>
+                                <td>
                                     <div class="fw-700">{{ $sup->supply_name }}</div>
                                     <small class="text-muted">{{ ucfirst($sup->category ?? 'General') }}</small>
                                 </td>
@@ -489,7 +541,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">
+                                <td colspan="6" class="text-center py-5 text-muted">
                                     <i class="bi bi-box" style="font-size:2rem;"></i>
                                     <p class="mt-2 mb-0">No archived supply requests found.</p>
                                 </td>
@@ -505,5 +557,79 @@
 
     </div>
 </div>
+
+{{-- Storage overview: which archived groups use the most space --}}
+<div class="card fade-in-card arch-wrap mt-3" style="border-radius:20px;">
+    <div class="card-header bg-transparent p-3" style="border:none;">
+        <strong><i class="bi bi-hdd me-1"></i> Archive storage overview</strong>
+        <div class="text-muted" style="font-size:0.78rem;">Read-only. Nothing is deleted automatically — permanent deletion requires CHO confirmation per record.</div>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-sm align-middle mb-0" style="font-size:0.82rem;">
+            <thead class="table-light">
+                <tr><th class="px-3">Group</th><th>Archived rows</th><th>Files size</th><th>Note</th></tr>
+            </thead>
+            <tbody>
+                @foreach($storageStats as $row)
+                <tr>
+                    <td class="px-3 fw-700">{{ $row['label'] }}</td>
+                    <td>{{ number_format($row['rows']) }}</td>
+                    <td>{{ $row['bytes'] ?? '—' }}</td>
+                    <td class="text-muted">{{ $row['note'] }}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+(function () {
+    function selected() {
+        return document.querySelectorAll('.archive-select:checked');
+    }
+    function updateCount() {
+        var el = document.getElementById('archive-selected-count');
+        if (el) el.textContent = selected().length;
+    }
+    document.querySelectorAll('.archive-select').forEach(function (box) {
+        box.addEventListener('change', updateCount);
+    });
+    var master = document.getElementById('archive-select-all');
+    if (master) {
+        master.addEventListener('change', function () {
+            document.querySelectorAll('.archive-select').forEach(function (box) { box.checked = master.checked; });
+            updateCount();
+        });
+    }
+    document.querySelectorAll('.archive-select-all').forEach(function (all) {
+        all.addEventListener('change', function () {
+            document.querySelectorAll('.archive-select').forEach(function (box) { box.checked = all.checked; });
+            if (master) master.checked = all.checked;
+            updateCount();
+        });
+    });
+    updateCount();
+    window.confirmBulkRestore = function () {
+        if (selected().length === 0) { alert('Select at least one archived record first.'); return false; }
+        return confirm('Restore ' + selected().length + ' selected record(s)?');
+    };
+    window.confirmBulkDelete = function () {
+        if (selected().length === 0) { alert('Select at least one archived record first.'); return false; }
+        var reason = prompt('PERMANENT deletion cannot be undone.\nType a reason (min 10 characters) for the audit log:');
+        if (reason === null || reason.trim().length < 10) { alert('A reason of at least 10 characters is required. Deletion cancelled.'); return false; }
+        var form = document.getElementById('archive-bulk-form');
+        var confirmInput = document.createElement('input');
+        confirmInput.type = 'hidden'; confirmInput.name = 'confirm'; confirmInput.value = 'PERMANENTLY DELETE';
+        form.appendChild(confirmInput);
+        var reasonInput = document.createElement('input');
+        reasonInput.type = 'hidden'; reasonInput.name = 'reason'; reasonInput.value = reason.trim();
+        form.appendChild(reasonInput);
+        return confirm('Type OK is not needed — click OK to PERMANENTLY delete ' + selected().length + ' record(s). Patient, pregnancy and health records will be skipped and retained.');
+    };
+})();
+</script>
+@endpush
 
 @endsection
