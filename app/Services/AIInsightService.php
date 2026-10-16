@@ -243,11 +243,18 @@ class AIInsightService
         $isRegistrations = (bool) preg_match('/regist|new women|enrol|pregnancy record|pregnan/iu', $question) && ! $isDeaths && ! $isHighRiskArea;
         $isFollowUp = (bool) preg_match('/follow.?up|priorit|unahin|missed|overdue|panganib/iu', $question) && ! $isDeaths;
 
+        $scopeLabel = $report['area_label'] . ($report['scope_label'] ? '; ' . $report['scope_label'] : '');
+
+        // A bare month question ("october 2026 records") names a period but
+        // no topic — answer with a general overview of that month instead of
+        // falling through to the generic assistant text.
         if (! $isCompare && ! $isDeaths && ! $isHighRiskArea && ! $isRegistrations && ! $isFollowUp) {
+            if (! empty($months)) {
+                return ['answer' => $this->monthOverview($months[0], $report, $scopeLabel), 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
+            }
+
             return null;
         }
-
-        $scopeLabel = $report['area_label'] . ($report['scope_label'] ? '; ' . $report['scope_label'] : '');
 
         // Comparison needs two explicit months. Relative phrases resolve
         // against today; a single month cannot be compared with nothing.
@@ -461,7 +468,8 @@ class AIInsightService
             . 'Recommended: complete pending death audits and review referral and service gaps with the RHU team.';
     }
 
-    private function monthHighRiskArea(string $ym, array $report, string $scopeLabel): string
+    /** High-risk pregnancy records filed in a month, limited to the report scope. */
+    private function highRiskRowsInMonth(string $ym, array $report)
     {
         [$y, $m] = explode('-', $ym);
         $query = \App\Models\Pregnancy::with('woman:id,barangay')
@@ -475,6 +483,36 @@ class AIInsightService
             $names = \App\Models\Barangay::active()->forRhu($report['filters']['rhu'])->pluck('name')->all();
             $rows = $names ? $rows->filter(fn ($p) => in_array($p->woman?->barangay, $names, true))->values() : collect();
         }
+
+        return $rows;
+    }
+
+    /** General overview for a bare month question ("october 2026 records"). */
+    private function monthOverview(string $ym, array $report, string $scopeLabel): string
+    {
+        [$y, $m] = explode('-', $ym);
+        $preg = $this->countInMonth(\App\Models\Pregnancy::class, 'created_at', $ym, $report);
+        $women = $this->scopedWomenInMonth($ym, $report);
+        $deathsQuery = \App\Models\MaternalDeath::whereYear('death_date', (int) $y)->whereMonth('death_date', (int) $m);
+        $this->applyScope($deathsQuery, $report, 'barangay');
+        $deaths = $deathsQuery->get(['barangay']);
+        $highRisk = $this->highRiskRowsInMonth($ym, $report);
+        $topDeath = $deaths->countBy(fn ($d) => $d->barangay ?: 'Unrecorded barangay')->sortDesc();
+        $topRisk = $highRisk->countBy(fn ($p) => $p->woman?->barangay ?: 'Unrecorded barangay')->sortDesc();
+
+        return "Selected month: {$this->monthLabel($ym)}; filters: {$scopeLabel}. "
+            . "Specific data: {$preg} pregnancy record(s) filed, {$women} new women registered, "
+            . "{$deaths->count()} maternal death record(s), {$highRisk->count()} high-risk pregnancy record(s). "
+            . ($topRisk->isNotEmpty() ? "Highest high-risk count: {$topRisk->keys()->first()} ({$topRisk->first()}). " : 'No high-risk records filed that month. ')
+            . ($topDeath->isNotEmpty() ? "Deaths by barangay: " . $topDeath->map(fn ($c, $k) => "{$k} ({$c})")->take(5)->implode(', ') . '. ' : '')
+            . 'Zero means no records were filed that month, not missing data. '
+            . 'Recommended: confirm entry completeness with the assigned midwife, prioritize the high-risk records for clinician review, '
+            . 'and complete any pending death audits. Ask me to compare with another month, e.g. "Compare pregnancy records from September 2026 and October 2026."';
+    }
+
+    private function monthHighRiskArea(string $ym, array $report, string $scopeLabel): string
+    {
+        $rows = $this->highRiskRowsInMonth($ym, $report);
         $byArea = $rows->countBy(fn ($p) => $p->woman?->barangay ?: 'Unrecorded barangay')->sortDesc();
         $top = $byArea->keys()->first();
 
