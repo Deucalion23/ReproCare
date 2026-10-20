@@ -10,6 +10,23 @@ class AnalyticsScope
 {
     public const RHUS = ['RHU 1', 'RHU 2', 'RHU 3', 'RHU 4', 'RHU 5'];
 
+    /**
+     * Legacy spellings that all resolve to one canonical area. Keys are the
+     * lower-cased canonical name, values are the accepted raw spellings.
+     */
+    public const AREA_ALIASES = [
+        'burgos st' => [
+            'burgos st',
+            'burgos street',
+            'burgos - padlan st',
+            'burgos-padlan st',
+            'barangay burgos',
+            'burgos padlan',
+            'barangay burgos padlan',
+            'barangay burgos padlan, san carlos city, pangasinan',
+        ],
+    ];
+
     public function forUser(User $user, array $filters): array
     {
         if ($user->role === 'rhu') {
@@ -49,10 +66,39 @@ class AnalyticsScope
     public function canonicalArea(?string $area): string
     {
         $name = preg_replace('/\s+/u', ' ', trim((string) $area));
-        return in_array(mb_strtolower($name), [
-            'burgos st', 'burgos street', 'burgos - padlan st', 'burgos-padlan st',
-            'barangay burgos', 'burgos padlan', 'barangay burgos padlan',
-            'barangay burgos padlan, san carlos city, pangasinan',
-        ], true) ? 'Burgos St' : $name;
+        $lower = mb_strtolower($name);
+
+        foreach (self::AREA_ALIASES as $canonical => $aliases) {
+            if (in_array($lower, $aliases, true)) {
+                return ucwords($canonical);
+            }
+        }
+
+        return $name;
+    }
+
+    /**
+     * SQL LIKE patterns that may hold a row belonging to the given canonical
+     * key. The list is intentionally a superset of the exact PHP match so a
+     * row is never hidden by a spelling variant; callers still re-check the
+     * exact key before returning a record.
+     *
+     * @return array<int, string>
+     */
+    public function matchPatterns(string $canonicalKey): array
+    {
+        $key = mb_strtolower(trim($canonicalKey));
+        if ($key === '') {
+            return [];
+        }
+
+        $variants = array_merge([$key], self::AREA_ALIASES[$key] ?? []);
+
+        $patterns = [];
+        foreach ($variants as $variant) {
+            $patterns[] = '%' . str_replace(' ', '%', mb_strtolower($variant)) . '%';
+        }
+
+        return array_values(array_unique($patterns));
     }
 }

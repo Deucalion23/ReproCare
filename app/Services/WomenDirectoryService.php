@@ -69,63 +69,66 @@ class WomenDirectoryService
 
     /**
      * @return array{women: LengthAwarePaginator, registeredCount: int,
-     *     unregisteredCount: int, barangays: \Illuminate\Support\Collection,
+     *     unregisteredCount: int, totalCount: int, pregnantCount: int,
+     *     pendingCount: int, resultCount: int,
+     *     barangays: \Illuminate\Support\Collection,
      *     statuses: array, scopeLabel: string, catchment: ?array,
-     *     sort: string, sorts: array}
+     *     sort: string, sorts: array, search: string, type: string,
+     *     status: string, barangay: string, dateFrom: string, dateTo: string,
+     *     pregnant: bool}
      */
     public function directory(User $user, array $filters = []): array
     {
         $catchment = $this->catchmentFor($user);
+
         $search = mb_strtolower(trim((string) ($filters['search'] ?? '')));
         $type = in_array(($filters['type'] ?? 'all'), self::TYPES, true) ? $filters['type'] : 'all';
-        $status = (string) ($filters['status'] ?? 'all');
+        $status = trim((string) ($filters['status'] ?? 'all'));
         $barangay = trim((string) ($filters['barangay'] ?? ''));
         $sort = array_key_exists($filters['sort'] ?? '', self::SORTS) ? $filters['sort'] : 'date_desc';
+        $dateFrom = $this->normaliseDate($filters['date_from'] ?? null);
+        $dateTo = $this->normaliseDate($filters['date_to'] ?? null);
+        $pregnant = filter_var($filters['pregnant'] ?? false, FILTER_VALIDATE_BOOLEAN);
 
-        $registered = User::query()
-            ->where('role', 'user')
-            ->with(['purok', 'pregnancies' => fn ($query) => $query->active()])
-            ->latest()
-            ->get()
-            ->filter(fn (User $woman) => $this->inScope($woman->barangay, $catchment))
-            ->each(fn (User $woman) => $woman->type = 'registered');
+        $active = [
+            'search' => $search,
+            'status' => $status,
+            'barangay' => $barangay,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+            'pregnant' => $pregnant,
+        ];
 
-        $unregistered = WalkInPatient::query()
-            ->with(['purok', 'recordedBy', 'pregnancies' => fn ($query) => $query->active()])
-            ->whereNull('user_id')
-            ->whereNull('converted_to_user_id')
-            ->latest()
-            ->get()
-            ->filter(fn (WalkInPatient $woman) => $this->inScope($woman->barangay, $catchment))
-            ->each(fn (WalkInPatient $woman) => $woman->type = 'unregistered');
+        // Scope totals feed the summary cards and stay independent of the
+        // filters currently applied to the table.
+        $registeredTotal = $this->scopedCount(
+            User::query()->where('role', 'user'),
+            $catchment
+        );
+        $unregisteredTotal = $this->scopedCount(
+            WalkInPatient::query()->whereNull('user_id')->whereNull('converted_to_user_id'),
+            $catchment
+        );
+        $pregnantTotal = $this->scopedCount(
+            User::query()->where('role', 'user')->whereHas('pregnancies', fn ($query) => $query->active()),
+            $catchment
+        ) + $this->scopedCount(
+            WalkInPatient::query()
+                ->whereNull('user_id')
+                ->whereNull('converted_to_user_id')
+                ->whereHas('pregnancies', fn ($query) => $query->active()),
+            $catchment
+        );
+        $pendingTotal = $this->scopedCount(
+            User::query()->where('role', 'user')->where('status', 'pending'),
+            $catchment
+        );
 
-        $registeredCount = $registered->count();
-        $unregisteredCount = $unregistered->count();
+        $registered = $this->registeredRows($catchment, $active);
+        $unregistered = $this->unregisteredRows($catchment, $active);
 
-        if ($search !== '') {
-            $registered = $registered->filter(fn (User $woman) => $this->matchesSearch($search, [
-                $woman->name, $woman->email, $woman->contact_number,
-                $woman->address, $woman->barangay, $woman->purok?->name,
-            ]));
-            $unregistered = $unregistered->filter(fn (WalkInPatient $woman) => $this->matchesSearch($search, [
-                $woman->full_name, $woman->contact_number,
-                $woman->address, $woman->barangay, $woman->purok?->name,
-            ]));
-        }
-
-        if ($barangay !== '') {
-            $key = $this->scope->key($barangay);
-            $registered = $registered->filter(fn (User $woman) => $this->scope->key($woman->barangay) === $key);
-            $unregistered = $unregistered->filter(fn (WalkInPatient $woman) => $this->scope->key($woman->barangay) === $key);
-        }
-
-        // Account status only exists for registered women. Choosing one
-        // therefore narrows the directory to portal accounts.
-        if ($status !== 'all') {
-            $registered = $registered->where('status', $status);
-            $unregistered = collect();
-        }
-
+        // The source filter narrows the table. The account-status filter only
+        // exists for portal accounts, so it never hides walk-in women.
         if ($type === 'registered') {
             $unregistered = collect();
         } elseif ($type === 'unregistered') {
@@ -150,11 +153,40 @@ class WomenDirectoryService
             default => $all->sortByDesc('created_at')->values(),
         };
 
+        $resultCount = $all->count();
+
         $page = max(1, (int) request()->input('page', 1));
         $perPage = 15;
+        $pageRows = $all->forPage($page, $perPage)->values();
+
+        // Only the rows on the current page are hydrated with their
+        // relations, so a long directory never loads every record twice.
+        $registeredMap = User::query()
+            ->with(['purok', 'pregnancies' => fn ($query) => $query->active()])
+            ->whereIn('id', $pageRows->where('type', 'registered')->pluck('id')->all())
+            ->get()
+            ->keyBy('id');
+        $walkInMap = WalkInPatient::query()
+            ->with(['purok', 'pregnancies' => fn ($query) => $query->active()])
+            ->whereIn('id', $pageRows->where('type', 'unregistered')->pluck('id')->all())
+            ->get()
+            ->keyBy('id');
+
+        $rows = $pageRows->map(function ($row) use ($registeredMap, $walkInMap) {
+            $model = $row->type === 'registered'
+                ? $registeredMap->get($row->id)
+                : $walkInMap->get($row->id);
+
+            if ($model) {
+                $model->type = $row->type;
+            }
+
+            return $model;
+        })->filter()->values();
+
         $women = new LengthAwarePaginator(
-            $all->forPage($page, $perPage)->values(),
-            $all->count(),
+            $rows,
+            $resultCount,
             $perPage,
             $page,
             ['path' => request()->url(), 'query' => request()->query()]
@@ -168,15 +200,189 @@ class WomenDirectoryService
 
         return [
             'women' => $women,
-            'registeredCount' => $registeredCount,
-            'unregisteredCount' => $unregisteredCount,
+            'registeredCount' => $registeredTotal,
+            'unregisteredCount' => $unregisteredTotal,
+            'totalCount' => $registeredTotal + $unregisteredTotal,
+            'pregnantCount' => $pregnantTotal,
+            'pendingCount' => $pendingTotal,
+            'resultCount' => $resultCount,
             'barangays' => $barangays,
             'statuses' => ['approved', 'pending', 'rejected', 'suspended', 'inactive', 'archived'],
             'scopeLabel' => $this->scopeLabel($user),
             'catchment' => $catchment,
             'sort' => $sort,
             'sorts' => self::SORTS,
+            'search' => $search,
+            'type' => $type,
+            'status' => $status,
+            'barangay' => $barangay,
+            'dateFrom' => $dateFrom,
+            'dateTo' => $dateTo,
+            'pregnant' => $pregnant,
         ];
+    }
+
+    /** Registered women (portal accounts) matching the active filters. */
+    private function registeredRows(?array $catchment, array $filters)
+    {
+        $query = User::query()->where('role', 'user');
+        $this->applyScope($query, $catchment, 'barangay');
+        $this->applyRegisteredSearch($query, $filters['search']);
+        $this->applyCommonFilters($query, $filters, true);
+
+        return $query->get([
+            'id', 'first_name', 'middle_initial', 'last_name', 'barangay', 'purok_id',
+            'contact_number', 'email', 'address', 'house_number', 'date_of_birth',
+            'status', 'created_at',
+        ])
+            ->filter(fn (User $woman) => $this->inScope($woman->barangay, $catchment))
+            ->each(fn (User $woman) => $woman->type = 'registered')
+            ->values();
+    }
+
+    /** Unregistered women (walk-ins without a portal account). */
+    private function unregisteredRows(?array $catchment, array $filters)
+    {
+        $query = WalkInPatient::query()
+            ->whereNull('user_id')
+            ->whereNull('converted_to_user_id');
+        $this->applyScope($query, $catchment, 'barangay');
+        $this->applyUnregisteredSearch($query, $filters['search']);
+        $this->applyCommonFilters($query, $filters, false);
+
+        return $query->get([
+            'id', 'first_name', 'middle_initial', 'last_name', 'barangay', 'purok_id',
+            'contact_number', 'address', 'date_of_birth', 'created_at',
+        ])
+            ->filter(fn (WalkInPatient $woman) => $this->inScope($woman->barangay, $catchment))
+            ->each(fn (WalkInPatient $woman) => $woman->type = 'unregistered')
+            ->values();
+    }
+
+    /**
+     * Constrain a query to the caller's catchment. The SQL pass is a superset
+     * of the exact PHP check, so every result is verified again in PHP before
+     * it can be shown.
+     */
+    private function applyScope($query, ?array $catchment, string $column): void
+    {
+        if ($catchment === null) {
+            return;
+        }
+
+        $patterns = [];
+        foreach ($catchment as $key) {
+            foreach ($this->scope->matchPatterns($key) as $pattern) {
+                $patterns[] = $pattern;
+            }
+        }
+
+        if ($patterns === []) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->where(function ($builder) use ($patterns, $column) {
+            foreach ($patterns as $pattern) {
+                $builder->orWhereRaw("LOWER({$column}) LIKE ?", [$pattern]);
+            }
+        });
+    }
+
+    private function scopedCount($query, ?array $catchment): int
+    {
+        $this->applyScope($query, $catchment, 'barangay');
+
+        return $query->count();
+    }
+
+    private function applyRegisteredSearch($query, string $search): void
+    {
+        if ($search === '') {
+            return;
+        }
+
+        $like = '%' . $this->escapeLike($search) . '%';
+
+        $query->where(function ($builder) use ($like) {
+            $builder->whereRaw('LOWER(first_name) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(middle_initial) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(last_name) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(email) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(contact_number) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(address) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(house_number) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(barangay) LIKE ?', [$like])
+                ->orWhereHas('purok', fn ($purok) => $purok->whereRaw('LOWER(name) LIKE ?', [$like]));
+        });
+    }
+
+    private function applyUnregisteredSearch($query, string $search): void
+    {
+        if ($search === '') {
+            return;
+        }
+
+        $like = '%' . $this->escapeLike($search) . '%';
+
+        $query->where(function ($builder) use ($like) {
+            $builder->whereRaw('LOWER(first_name) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(middle_initial) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(last_name) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(contact_number) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(address) LIKE ?', [$like])
+                ->orWhereRaw('LOWER(barangay) LIKE ?', [$like])
+                ->orWhereHas('purok', fn ($purok) => $purok->whereRaw('LOWER(name) LIKE ?', [$like]));
+        });
+    }
+
+    private function applyCommonFilters($query, array $filters, bool $registered): void
+    {
+        if ($filters['barangay'] !== '') {
+            $patterns = $this->scope->matchPatterns($this->scope->key($filters['barangay']));
+
+            $query->where(function ($builder) use ($patterns) {
+                foreach ($patterns as $pattern) {
+                    $builder->orWhereRaw('LOWER(barangay) LIKE ?', [$pattern]);
+                }
+            });
+        }
+
+        // Account status only exists for portal accounts.
+        if ($registered && $filters['status'] !== '' && $filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        if ($filters['dateFrom'] !== '') {
+            $query->whereDate('created_at', '>=', $filters['dateFrom']);
+        }
+
+        if ($filters['dateTo'] !== '') {
+            $query->whereDate('created_at', '<=', $filters['dateTo']);
+        }
+
+        if ($filters['pregnant']) {
+            $query->whereHas('pregnancies', fn ($pregnancy) => $pregnancy->active());
+        }
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\%', '\_'], $value);
+    }
+
+    private function normaliseDate($value): string
+    {
+        $value = trim((string) $value);
+
+        if ($value === '' || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return '';
+        }
+
+        [$year, $month, $day] = array_map('intval', explode('-', $value));
+
+        return checkdate($month, $day, $year) ? $value : '';
     }
 
     /**
@@ -241,16 +447,5 @@ class WomenDirectoryService
                 ->get(),
             'referrals' => CheckupReferral::where('walk_in_patient_id', $id)->latest()->get(),
         ];
-    }
-
-    private function matchesSearch(string $needle, array $values): bool
-    {
-        foreach ($values as $value) {
-            if ($value !== null && str_contains(mb_strtolower((string) $value), $needle)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 }

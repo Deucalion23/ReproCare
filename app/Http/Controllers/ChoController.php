@@ -460,13 +460,15 @@ class ChoController extends Controller
             'status' => $request->input('status', 'all'),
             'barangay' => $request->input('barangay'),
             'sort' => $request->input('sort', 'date_desc'),
+            'date_from' => $request->input('date_from'),
+            'date_to' => $request->input('date_to'),
+            'pregnant' => $request->input('pregnant'),
         ]);
 
         return view('cho.patients.index', $directory + [
-            'search' => (string) $request->input('search', ''),
-            'type' => (string) $request->input('type', 'all'),
-            'status' => (string) $request->input('status', 'all'),
-            'barangay' => (string) $request->input('barangay', ''),
+            'detailUrl' => fn ($woman) => $woman->type === 'unregistered'
+                ? route('cho.patients.walk-in', $woman->id)
+                : route('cho.patients.show', $woman->id),
         ]);
     }
 

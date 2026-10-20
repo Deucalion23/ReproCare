@@ -148,6 +148,110 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $this->assertDatabaseHas('users', ['email' => 'inside@example.com', 'barangay' => 'Padlan']);
     }
 
+    public function test_search_matches_both_sources_without_leaking_outside_the_catchment(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+        $this->patient(['first_name' => 'Marisol', 'last_name' => 'Reyes', 'barangay' => 'Padlan']);
+        WalkInPatient::create(['first_name' => 'Marites', 'last_name' => 'Cruz', 'barangay' => 'Padlan']);
+        $this->patient(['first_name' => 'Marisol', 'last_name' => 'Sider', 'barangay' => 'Outside']);
+
+        $response = $this->actingAs($rhu)->get(route('rhu.women.index', ['search' => 'mari']));
+
+        $response->assertOk();
+        $response->assertSee('Reyes');
+        $response->assertSee('Cruz');
+        $response->assertDontSee('Sider');
+    }
+
+    public function test_search_by_contact_number_and_purok_name_works(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+        $purok = \App\Models\Purok::create(['name' => 'Mabini', 'barangay' => 'Padlan']);
+        $this->patient(['first_name' => 'Wira', 'last_name' => 'Kontak', 'barangay' => 'Padlan', 'contact_number' => '09175550001']);
+        $this->patient(['first_name' => 'Tovi', 'last_name' => 'Purokly', 'barangay' => 'Padlan', 'purok_id' => $purok->id]);
+
+        $this->actingAs($rhu)->get(route('rhu.women.index', ['search' => '09175550001']))
+            ->assertOk()->assertSee('Wira')->assertDontSee('Tovi');
+        $this->actingAs($rhu)->get(route('rhu.women.index', ['search' => 'mabini']))
+            ->assertOk()->assertSee('Tovi')->assertDontSee('Wira');
+    }
+
+    public function test_account_status_filter_never_hides_unregistered_women(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+        $this->patient(['first_name' => 'Alma', 'last_name' => 'Luzvim', 'barangay' => 'Padlan']);
+        $this->patient(['first_name' => 'Wanda', 'last_name' => 'Luzvim', 'barangay' => 'Padlan', 'status' => 'pending']);
+        WalkInPatient::create(['first_name' => 'Wina', 'last_name' => 'Luzvim', 'barangay' => 'Padlan']);
+
+        $response = $this->actingAs($rhu)->get(route('rhu.women.index', ['status' => 'approved']));
+
+        $response->assertOk();
+        $response->assertSee('Alma');
+        $response->assertSee('Wina');
+        $response->assertDontSee('Wanda');
+    }
+
+    public function test_type_filter_limits_the_listing_to_one_source(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+        $this->patient(['first_name' => 'Zura', 'last_name' => 'Pelayo', 'barangay' => 'Padlan']);
+        WalkInPatient::create(['first_name' => 'Nena', 'last_name' => 'Delos', 'barangay' => 'Padlan']);
+
+        $this->actingAs($rhu)->get(route('rhu.women.index', ['type' => 'registered']))
+            ->assertOk()->assertSee('Zura')->assertDontSee('Nena');
+        $this->actingAs($rhu)->get(route('rhu.women.index', ['type' => 'unregistered']))
+            ->assertOk()->assertSee('Nena')->assertDontSee('Zura');
+    }
+
+    public function test_barangay_and_added_date_filters_narrow_the_listing(): void
+    {
+        $cho = $this->patient(['role' => 'cho']);
+        $older = $this->patient(['first_name' => 'Adira', 'last_name' => 'Luzvim', 'barangay' => 'Padlan']);
+        $older->timestamps = false;
+        $older->created_at = now()->subMonths(3);
+        $older->save();
+        $this->patient(['first_name' => 'Belen', 'last_name' => 'Luzvim', 'barangay' => 'Outside']);
+
+        $this->actingAs($cho)->get(route('cho.patients.index', ['barangay' => 'Padlan']))
+            ->assertOk()->assertSee('Adira')->assertDontSee('Belen');
+
+        $this->actingAs($cho)->get(route('cho.patients.index', ['date_from' => now()->subMonth()->toDateString()]))
+            ->assertOk()->assertSee('Belen')->assertDontSee('Adira');
+    }
+
+    public function test_rhu_cannot_list_women_of_another_catchment_by_crafting_a_filter(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+        $this->patient(['first_name' => 'Hidden', 'last_name' => 'Sider', 'barangay' => 'Outside']);
+
+        $this->actingAs($rhu)->get(route('rhu.women.index', ['barangay' => 'Outside']))
+            ->assertOk()->assertDontSee('Hidden');
+        $this->actingAs($rhu)->get(route('rhu.women.index', ['search' => 'Hidden']))
+            ->assertOk()->assertDontSee('Hidden');
+    }
+
+    public function test_pregnancy_filter_and_summary_counts_reflect_the_scope(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+        $pregnant = $this->patient(['first_name' => 'Mylene', 'last_name' => 'Roca', 'barangay' => 'Padlan']);
+        $this->patient(['first_name' => 'Nadine', 'last_name' => 'Roca', 'barangay' => 'Padlan']);
+        $this->patient(['first_name' => 'Hidden', 'last_name' => 'Roca', 'barangay' => 'Outside']);
+
+        \App\Models\Pregnancy::create([
+            'user_id' => $pregnant->id,
+            'lmp' => now()->subMonths(2)->toDateString(),
+            'edd' => now()->addMonths(2)->toDateString(),
+        ]);
+
+        $response = $this->actingAs($rhu)->get(route('rhu.women.index', ['pregnant' => 1]));
+
+        $response->assertOk()->assertSee('Mylene')->assertDontSee('Nadine')->assertDontSee('Hidden');
+        $response->assertViewHas('pregnantCount', 1);
+        $response->assertViewHas('registeredCount', 2);
+        $response->assertViewHas('unregisteredCount', 0);
+        $response->assertViewHas('totalCount', 2);
+    }
+
     public function test_directory_sorts_by_name_and_date_in_both_directions(): void
     {
         $cho = $this->patient(['role' => 'cho']);
