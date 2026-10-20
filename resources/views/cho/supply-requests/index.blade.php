@@ -21,6 +21,45 @@
     </div>
 @endif
 
+<div class="card fade-in-card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="ID, item, RHU, date, status..." value="{{ $search ?? request('search') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    @foreach(['all', 'draft', 'submitted', 'under_review', 'approved', 'declined', 'delivered'] as $s)
+                        <option value="{{ $s }}" @selected(request('status', 'all') === $s)>{{ $s === 'all' ? 'All statuses' : ucfirst(str_replace('_', ' ', $s)) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Urgency</label>
+                <select name="urgency" class="form-select">
+                    @foreach(['all', 'routine', 'urgent', 'emergency'] as $u)
+                        <option value="{{ $u }}" @selected(request('urgency', 'all') === $u)>{{ $u === 'all' ? 'All urgencies' : ucfirst($u) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input type="date" name="date_from" class="form-control" value="{{ $dateFrom ?? request('date_from') }}" max="{{ date('Y-m-d') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input type="date" name="date_to" class="form-control" value="{{ $dateTo ?? request('date_to') }}" max="{{ date('Y-m-d') }}">
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button class="btn btn-primary" type="submit">Go</button>
+                <a class="btn btn-outline-secondary" href="{{ route('cho.supply-requests.index') }}">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card fade-in-card">
     <div class="card-body p-0">
         @if($requests->count() > 0)

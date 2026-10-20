@@ -644,6 +644,7 @@ Route::prefix('api/notifications')->name('api.notifications.')->middleware(['web
 // CHO Routes
 Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:cho', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [ChoController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/stats', [ChoController::class, 'dashboardStats'])->name('dashboard.stats');
     Route::get('/settings', [ChoController::class, 'settings'])->name('settings');
     Route::put('/settings', [ChoController::class, 'updateSettings'])->name('settings.update');
 
@@ -766,6 +767,8 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
     // Archived Records Hub (No Hard Deletes / Data Integrity)
     Route::prefix('archived')->name('archived.')->group(function () {
         Route::get('/', [ArchivedRecordController::class, 'index'])->name('index');
+        Route::post('/bulk-restore', [ArchivedRecordController::class, 'bulkRestore'])->name('bulk-restore');
+        Route::post('/bulk-delete', [ArchivedRecordController::class, 'bulkDelete'])->name('bulk-delete');
         Route::post('/{type}/{id}/restore', [ArchivedRecordController::class, 'restore'])->name('restore');
     });
 });
@@ -773,6 +776,7 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
 // RHU Routes
 Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:rhu', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [RhuController::class, 'dashboard'])->name('dashboard');
+    Route::get('/dashboard/stats', [RhuController::class, 'dashboardStats'])->name('dashboard.stats');
     Route::get('/analytics', [\App\Http\Controllers\AnalyticsController::class, 'index'])->name('analytics');
     Route::get('/analytics/pregnancies/{id}', [\App\Http\Controllers\AnalyticsController::class, 'pregnancy'])->name('analytics.pregnancies.show');
     Route::post('/analytics/chat', [\App\Http\Controllers\AnalyticsController::class, 'chat'])->middleware('throttle:10,1')->name('analytics.chat');
@@ -851,6 +855,12 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         Route::post('/', [RhuController::class, 'storeSupplyRequest'])->name('store');
         Route::get('/{id}', [RhuController::class, 'showSupplyRequest'])->name('show');
         Route::delete('/{id}', [RhuController::class, 'destroySupplyRequest'])->name('destroy');
+    });
+
+    // Health Record Tracking (read-only RHU oversight of midwife-entered records)
+    Route::prefix('health-records')->name('health-records.')->group(function () {
+        Route::get('/', [RhuController::class, 'healthRecords'])->name('index');
+        Route::get('/{id}', [RhuController::class, 'showHealthRecord'])->name('show');
     });
 
     // Maternal Deaths
@@ -935,6 +945,7 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
     // CHO-only inside the controller).
     Route::prefix('archived')->name('archived.')->group(function () {
         Route::get('/', [ArchivedRecordController::class, 'index'])->name('index');
+        Route::post('/bulk-restore', [ArchivedRecordController::class, 'bulkRestore'])->name('bulk-restore');
         Route::post('/{type}/{id}/restore', [ArchivedRecordController::class, 'restore'])->name('restore');
     });
 });

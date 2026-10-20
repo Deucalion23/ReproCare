@@ -63,6 +63,29 @@ class ChoController extends Controller
         ));
     }
 
+    /**
+     * Live dashboard counters — same queries as dashboard(), computed from
+     * the database on every call so totals update immediately after records
+     * are created, updated, archived, restored or deleted (soft-deleted rows
+     * are excluded by default). Polled by the dashboard via AJAX.
+     */
+    public function dashboardStats()
+    {
+        return response()->json([
+            'totalUsers' => User::whereIn('role', ['rhu', 'midwife', 'bhw_president', 'bhw'])->count(),
+            'totalPatients' => User::where('role', 'user')->where('status', 'approved')->count(),
+            'activePregnancies' => Pregnancy::active()->count(),
+            'highRiskPregnancies' => Pregnancy::active()->highRisk()->count(),
+            'healthRecords' => HealthRecord::count(),
+            'totalSupplyRequests' => SupplyRequest::count(),
+            'pendingSupplyRequests' => SupplyRequest::where('status', 'submitted')->count(),
+            'totalDeaths' => MaternalDeath::count(),
+            'totalNearMiss' => MaternalMorbidity::count(),
+            'ancCoverageRate' => $this->ancCoverageRate(),
+            'generated_at' => now()->toDateTimeString(),
+        ]);
+    }
+
     public function settings()
     {
         return view('cho.settings');
@@ -520,14 +543,40 @@ class ChoController extends Controller
 
     public function supplyRequests(Request $request)
     {
+        $search = $request->input('search');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        foreach (['dateFrom' => $dateFrom, 'dateTo' => $dateTo] as $key => $value) {
+            if ($value !== null && $value !== '' && ! preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) $value)) {
+                ${$key} = null;
+            }
+        }
+
         $requests = SupplyRequest::with(['requestedBy', 'approvedBy'])
             ->when($request->filled('status') && $request->status !== 'all', fn ($query) => $query->where('status', $request->status))
             ->when($request->filled('urgency') && $request->urgency !== 'all', fn ($query) => $query->where('urgency', $request->urgency))
+            ->when($dateFrom, fn ($query) => $query->whereDate('submitted_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->whereDate('submitted_at', '<=', $dateTo))
+            // Search across request ID, item name, requesting RHU, request
+            // date and status — combined with the status/date filters above.
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($inner) use ($search) {
+                    $inner->where('supply_requests.id', $search)
+                        ->orWhere('supply_name', 'like', "%{$search}%")
+                        ->orWhere('supply_category', 'like', "%{$search}%")
+                        ->orWhere('status', 'like', "%{$search}%")
+                        ->orWhereDate('submitted_at', $search)
+                        ->orWhereHas('requestedBy', fn ($u) => $u
+                            ->where('first_name', 'like', "%{$search}%")
+                            ->orWhere('last_name', 'like', "%{$search}%")
+                            ->orWhere('rhu_assignment', 'like', "%{$search}%"));
+                });
+            })
             ->latest('submitted_at')
             ->paginate(15)
             ->withQueryString();
 
-        return view('cho.supply-requests.index', compact('requests'));
+        return view('cho.supply-requests.index', compact('requests', 'search', 'dateFrom', 'dateTo'));
     }
 
     public function showSupplyRequest($id)

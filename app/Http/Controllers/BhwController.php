@@ -230,6 +230,18 @@ class BhwController extends Controller
 
             $userId = $user->id;
 
+            // Duplicate guard: same name + birthdate already on file.
+            // (Email uniqueness is enforced by validation above; contact
+            // duplicates are surfaced on the pending-patients review queue.)
+            if ($request->filled('date_of_birth') && \App\Models\User::where('role', 'user')
+                ->where('id', '!=', $user->id)
+                ->where('first_name', $request->first_name)
+                ->where('last_name', $request->last_name)
+                ->where('date_of_birth', $request->date_of_birth)
+                ->exists()) {
+                \App\Models\ActivityLog::log('duplicate_warning', "Possible duplicate registration for {$user->name} (BHW entry #{$user->id} matches an existing name + birthdate)", $user);
+            }
+
             // Create pregnancy record if pregnant
             if ($request->is_pregnant) {
                 $edd = $request->edd;

@@ -324,6 +324,19 @@ class PregnancyController extends Controller
             'birth_weight_kg' => 'nullable|numeric|min:0.3|max:8',
         ]);
 
+        // Guard: a pregnancy record belongs to exactly one woman. Re-linking it
+        // to a different woman/walk-in would orphan or misattribute its
+        // health records, checkups, referrals and newborns — reject it.
+        $originalUserId = $pregnancy->user_id;
+        $originalWalkInId = $pregnancy->walk_in_patient_id;
+        $requestedUserId = $request->patient_type === 'registered' ? (int) $request->user_id : null;
+        $requestedWalkInId = $request->patient_type === 'walk_in' ? (int) $request->walk_in_patient_id : null;
+        if ($requestedUserId !== (int) $originalUserId || $requestedWalkInId !== (int) $originalWalkInId) {
+            return back()
+                ->withErrors(['patient_link' => 'This pregnancy is linked to its registered woman and cannot be moved to another patient. End this record and start a new pregnancy for the other patient instead.'])
+                ->withInput();
+        }
+
         $duplicateActivePregnancy = Pregnancy::active()
             ->where('id', '!=', $pregnancy->id)
             ->when($request->patient_type === 'registered', fn ($query) => $query->where('user_id', $request->user_id))
@@ -343,8 +356,8 @@ class PregnancyController extends Controller
         $risk = $this->resolveRiskData($request);
 
         $pregnancy->update([
-            'user_id' => $request->patient_type === 'registered' ? $request->user_id : null,
-            'walk_in_patient_id' => $request->patient_type === 'walk_in' ? $request->walk_in_patient_id : null,
+            // Patient link is immutable (guarded above) — never rewrite user_id /
+            // walk_in_patient_id here so related records stay attached.
             'lmp' => $request->lmp,
             'risk_assessment_mode' => $request->risk_assessment_mode,
             'risk_level' => $risk['risk_level'],

@@ -26,6 +26,44 @@
     </div>
 @endif
 
+<div class="card fade-in-card mb-3">
+    <div class="card-body">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="ID, item, date, status..." value="{{ $search ?? '' }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Scope</label>
+                <select name="scope" class="form-select">
+                    <option value="all" @selected(($scope ?? 'all') === 'all')>All requests</option>
+                    <option value="mine" @selected(($scope ?? '') === 'mine')>My requests</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Status</label>
+                <select name="status" class="form-select">
+                    @foreach(['all', 'draft', 'submitted', 'under_review', 'approved', 'declined', 'delivered'] as $s)
+                        <option value="{{ $s }}" @selected(($status ?? 'all') === $s)>{{ $s === 'all' ? 'All statuses' : ucfirst(str_replace('_', ' ', $s)) }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">From</label>
+                <input type="date" name="date_from" class="form-control" value="{{ $dateFrom ?? '' }}" max="{{ date('Y-m-d') }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">To</label>
+                <input type="date" name="date_to" class="form-control" value="{{ $dateTo ?? '' }}" max="{{ date('Y-m-d') }}">
+            </div>
+            <div class="col-md-1 d-flex gap-1">
+                <button class="btn btn-primary" type="submit">Go</button>
+                <a class="btn btn-outline-secondary" href="{{ route('rhu.supply-requests.index') }}">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
 <div class="card fade-in-card">
     <div class="card-body p-0">
         @if($requests->count() > 0)

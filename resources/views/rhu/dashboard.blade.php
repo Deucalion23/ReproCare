@@ -321,6 +321,30 @@ function animateStatNumbers() {
     });
 }
 document.addEventListener('DOMContentLoaded', animateStatNumbers);
+// Real-time dashboard statistics: refresh counters from the database every
+// 30 seconds (and on window focus) without reloading the whole page.
+(function () {
+    var map = { totalPatients: 0, activePregnancies: 1, pendingBhwReports: 2, maternalDeathsCount: 3 };
+    function refresh() {
+        fetch("{{ route('rhu.dashboard.stats') }}", { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (stats) {
+                if (!stats) return;
+                var numbers = document.querySelectorAll('.stat-number');
+                Object.keys(map).forEach(function (key) {
+                    var el = numbers[map[key]];
+                    if (el && stats[key] !== undefined) { el.dataset.count = stats[key]; el.textContent = stats[key]; }
+                });
+                document.querySelectorAll('[data-live-stat]').forEach(function (el) {
+                    var key = el.getAttribute('data-live-stat');
+                    if (stats[key] !== undefined) el.textContent = stats[key];
+                });
+            })
+            .catch(function () {});
+    }
+    setInterval(refresh, 30000);
+    window.addEventListener('focus', refresh);
+})();
 </script>
 @endpush
 

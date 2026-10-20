@@ -104,7 +104,7 @@ class HealthRecordController extends Controller
         $womanId = $request->patient_type === 'registered' ? (int) $request->user_id : null;
         $walkInPatientId = $request->patient_type === 'walk_in' ? (int) $request->walk_in_patient_id : null;
 
-        HealthRecord::create([
+        $healthRecord = HealthRecord::create([
             'user_id' => $womanId,
             'walk_in_patient_id' => $walkInPatientId,
             'pregnancy_id' => HealthRecord::resolvePregnancyIdForWoman($womanId, Carbon::now()),
@@ -132,6 +132,8 @@ class HealthRecordController extends Controller
             'workflow_status' => 'accepted_by_midwife',
             'midwife_accepted_at' => now(),
         ]);
+
+        \App\Models\ActivityLog::log('create', 'Health record recorded for ' . $healthRecord->patient_name . " (risk: {$healthRecord->risk_level})", $healthRecord);
 
         $detectedRisk = $riskData['risk_level'];
         if ($womanId && $request->input('risk_assessment_mode', 'automatic') === 'automatic') {
@@ -228,6 +230,15 @@ class HealthRecordController extends Controller
         $womanId = $request->patient_type === 'registered' ? (int) $request->user_id : null;
         $walkInPatientId = $request->patient_type === 'walk_in' ? (int) $request->walk_in_patient_id : null;
 
+        // Guard: a health record belongs to exactly one woman. Moving it to a
+        // different patient would misattribute vitals/risk and detach it from
+        // its pregnancy — reject the re-link instead of orphaning history.
+        if ($womanId !== (int) $healthRecord->user_id || $walkInPatientId !== (int) $healthRecord->walk_in_patient_id) {
+            return back()
+                ->withErrors(['patient_link' => 'This health record is linked to its patient and cannot be moved to another patient. Create a new record for the other patient instead.'])
+                ->withInput();
+        }
+
         $healthRecord->update($request->only([
             'weight',
             'height',
@@ -245,15 +256,17 @@ class HealthRecordController extends Controller
             'notes',
             'recommendations',
         ]) + [
-            'user_id' => $womanId,
-            'walk_in_patient_id' => $walkInPatientId,
-            'pregnancy_id' => HealthRecord::resolvePregnancyIdForWoman($womanId, $healthRecord->created_at),
+            // Patient link is immutable (guarded above) — keep the original
+            // user/walk-in/pregnancy linkage so history stays attached.
+            'pregnancy_id' => $healthRecord->pregnancy_id ?? HealthRecord::resolvePregnancyIdForWoman($womanId, $healthRecord->created_at),
             'bp' => $this->combineBloodPressure($request),
             'bmi' => $riskData['bmi'],
             'risk_level' => $riskData['risk_level'],
             'risk_assessment_mode' => $request->input('risk_assessment_mode', 'automatic'),
             'risk_notes' => $request->risk_notes ?: ($riskData['auto_notes'] ?? null),
         ]);
+
+        \App\Models\ActivityLog::log('update', 'Health record #' . $healthRecord->id . ' updated for ' . $healthRecord->fresh()->patient_name, $healthRecord);
 
         if ($womanId && $request->input('risk_assessment_mode', 'automatic') === 'automatic') {
             $riskService = new \App\Services\RiskAnalysisService();
