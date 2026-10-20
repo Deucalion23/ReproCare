@@ -26,6 +26,17 @@ class WomenDirectoryScopeTest extends AutomationTestCase
             $t->string('barangay')->nullable();
             $t->timestamps();
         });
+        Schema::create('checkup_referrals', function (Blueprint $t) {
+            $t->id();
+            $t->unsignedBigInteger('user_id')->nullable();
+            $t->unsignedBigInteger('walk_in_patient_id')->nullable();
+            $t->unsignedBigInteger('pregnancy_id')->nullable();
+            $t->text('reason')->nullable();
+            $t->string('urgency')->nullable();
+            $t->string('status')->default('Pending Review');
+            $t->timestamps();
+            $t->softDeletes();
+        });
         Schema::create('emergency_contacts', function (Blueprint $t) {
             $t->id();
             $t->unsignedBigInteger('user_id')->nullable();
@@ -43,6 +54,10 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         });
         Schema::table('pregnancies', function (Blueprint $t) {
             $t->unsignedBigInteger('walk_in_patient_id')->nullable();
+        });
+        Schema::table('health_records', function (Blueprint $t) {
+            $t->unsignedBigInteger('walk_in_patient_id')->nullable();
+            $t->string('weight')->nullable();
         });
         Schema::table('walk_in_patients', function (Blueprint $t) {
             $t->string('middle_initial')->nullable();
@@ -68,9 +83,9 @@ class WomenDirectoryScopeTest extends AutomationTestCase
     public function test_rhu_directory_only_lists_women_in_its_catchment(): void
     {
         $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
-        $this->patient(['first_name' => 'Inside', 'last_name' => 'Registered', 'barangay' => 'Padlan']);
+        $inside = $this->patient(['first_name' => 'Inside', 'last_name' => 'Registered', 'barangay' => 'Padlan']);
         $outside = $this->patient(['first_name' => 'Outside', 'last_name' => 'Registered', 'barangay' => 'Outside']);
-        WalkInPatient::create(['first_name' => 'Inside', 'last_name' => 'Field', 'barangay' => 'Padlan']);
+        $insideField = WalkInPatient::create(['first_name' => 'Inside', 'last_name' => 'Field', 'barangay' => 'Padlan']);
         $outsideField = WalkInPatient::create(['first_name' => 'Outside', 'last_name' => 'Field', 'barangay' => 'Outside']);
 
         $response = $this->actingAs($rhu)->get(route('rhu.women.index'));
@@ -81,6 +96,8 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $response->assertDontSee('Outside');
         $response->assertSee('RHU 1 catchment');
 
+        $this->actingAs($rhu)->get(route('rhu.women.show', ['registered', $inside->id]))->assertOk();
+        $this->actingAs($rhu)->get(route('rhu.women.show', ['unregistered', $insideField->id]))->assertOk();
         $this->actingAs($rhu)->get(route('rhu.women.show', ['registered', $outside->id]))->assertNotFound();
         $this->actingAs($rhu)->get(route('rhu.women.show', ['unregistered', $outsideField->id]))->assertNotFound();
     }
@@ -90,7 +107,7 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $cho = $this->patient(['role' => 'cho']);
         $this->patient(['first_name' => 'Inside', 'last_name' => 'Registered', 'barangay' => 'Padlan']);
         $this->patient(['first_name' => 'Outside', 'last_name' => 'Registered', 'barangay' => 'Outside']);
-        WalkInPatient::create(['first_name' => 'Citywide', 'last_name' => 'Field', 'barangay' => 'Outside']);
+        $field = WalkInPatient::create(['first_name' => 'Citywide', 'last_name' => 'Field', 'barangay' => 'Outside']);
 
         $response = $this->actingAs($cho)->get(route('cho.patients.index'));
 
@@ -99,6 +116,7 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $response->assertSee('Outside');
         $response->assertSee('Citywide');
         $response->assertSee('City-wide');
+        $this->actingAs($cho)->get(route('cho.patients.walk-in', $field->id))->assertOk();
     }
 
     public function test_rhu_registration_only_offers_and_accepts_catchment_barangays(): void
