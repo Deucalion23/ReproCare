@@ -16,22 +16,24 @@
     .wd-mini .card:hover { transform:translateY(-3px); box-shadow:0 10px 26px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent) !important; }
     .wd-mini .card.is-active { border:1px solid var(--color-primary) !important; box-shadow:0 10px 26px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent) !important; }
     .wd-mini .card a { color:inherit; text-decoration:none; }
+    .wd-mini .card .text-muted { font-size:0.7rem !important; }
     .wd-wrap { border:none !important; border-radius:20px !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent) !important; overflow:hidden; }
-    .wd-wrap .card-header { border:none !important; }
-    .wd-tabs .nav-link { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.8rem !important; padding:0.45rem 1rem !important; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
-    .wd-tabs .nav-link.active { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
-    .wd-search { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; border-radius:999px !important; overflow:hidden; }
-    .wd-search .form-control { background:transparent !important; border:none !important; box-shadow:none !important; font-size:0.83rem; }
-    .wd-search .btn { border:none !important; color:var(--color-text) !important; }
+    .wd-wrap .card-header { border:none !important; padding-top:0.9rem; padding-bottom:0.9rem; }
+    .wd-wrap .card-header > .d-flex { gap:0.5rem; }
+    .wd-tabs .nav-link { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text-muted) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
+    .wd-tabs .nav-link.active { background:var(--color-primary) !important; background-color:var(--color-primary) !important; color:#ffffff !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
+    .wd-search { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; border-radius:999px !important; overflow:hidden; max-width:320px; }
+    .wd-search .form-control { background:transparent !important; border:none !important; box-shadow:none !important; font-size:0.82rem; padding-left:0.9rem !important; }
+    .wd-search .btn { border:none !important; background:transparent !important; color:var(--color-text-muted) !important; width:2.2rem; }
     .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
     .wd-filters .wd-field { display:flex; flex-direction:column; gap:0.25rem; }
     .wd-filters label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
     .wd-filters .form-control, .wd-filters .form-select { border-radius:10px !important; border-color:var(--color-input-border) !important; font-size:0.82rem; min-height:36px; }
-    .wd-filters .wd-search-field { flex:1 1 240px; max-width:340px; }
-    .wd-filters .wd-select-field { flex:0 1 160px; min-width:140px; }
-    .wd-filters .wd-date-field { flex:0 1 150px; min-width:140px; }
-    .wd-apply-btn { border:none !important; border-radius:999px !important; font-weight:800 !important; background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; padding:0.45rem 1.15rem !important; font-size:0.8rem !important; }
-    .wd-clear-btn { border-radius:999px !important; padding:0.45rem 0.9rem !important; font-size:0.8rem !important; font-weight:700; }
+    .wd-filters .wd-search-field { flex:1 1 240px; max-width:320px; }
+    .wd-filters .wd-select-field { flex:0 1 150px; min-width:130px; }
+    .wd-filters .wd-date-field { flex:0 1 150px; min-width:130px; }
+    .wd-apply-btn { border:none !important; border-radius:999px !important; font-weight:800 !important; background:var(--color-primary) !important; background-color:var(--color-primary) !important; color:#ffffff !important; padding:0.45rem 1.15rem !important; font-size:0.8rem !important; }
+    .wd-clear-btn { border:1px solid var(--color-border) !important; border-radius:999px !important; padding:0.45rem 0.9rem !important; font-size:0.8rem !important; font-weight:700; color:var(--color-text-muted) !important; background:transparent !important; }
     .wd-wrap table thead th { border:none !important; background:transparent !important; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-text-muted) !important; }
     .wd-wrap table tbody td { border:none !important; vertical-align:middle; }
     .wd-wrap table tbody tr:hover { background:var(--color-bg); }
@@ -154,25 +156,26 @@
 
 <div class="card fade-in-card wd-wrap">
     <div class="card-header bg-transparent p-3">
-        <ul class="nav nav-pills wd-tabs gap-2 flex-wrap" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link {{ $type === 'all' ? 'active' : '' }}" href="{{ $typeLink('all') }}">
-                    <i class="bi bi-people me-1"></i> All ({{ $totalCount }})
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ $type === 'registered' ? 'active' : '' }}" href="{{ $typeLink('registered') }}">
-                    <i class="bi bi-person-check me-1"></i> Registered ({{ $registeredCount }})
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ $type === 'unregistered' ? 'active' : '' }}" href="{{ $typeLink('unregistered') }}">
-                    <i class="bi bi-person-plus me-1"></i> Unregistered ({{ $unregisteredCount }})
-                </a>
-            </li>
-        </ul>
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <ul class="nav nav-pills wd-tabs gap-2 flex-wrap" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link {{ $type === 'all' ? 'active' : '' }}" href="{{ $typeLink('all') }}">
+                        <i class="bi bi-people me-1"></i> All ({{ $totalCount }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ $type === 'registered' ? 'active' : '' }}" href="{{ $typeLink('registered') }}">
+                        <i class="bi bi-person-check me-1"></i> Registered ({{ $registeredCount }})
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{ $type === 'unregistered' ? 'active' : '' }}" href="{{ $typeLink('unregistered') }}">
+                        <i class="bi bi-person-plus me-1"></i> Unregistered ({{ $unregisteredCount }})
+                    </a>
+                </li>
+            </ul>
 
-        <form method="GET" action="{{ route($womenRoute) }}" class="wd-filters mt-3">
+            <form method="GET" action="{{ route($womenRoute) }}" class="wd-filters">
             <div class="wd-field wd-search-field">
                 <label for="wd-search">Search</label>
                 <div class="input-group input-group-sm wd-search">
@@ -239,6 +242,7 @@
                 </a>
             </div>
         </form>
+        </div>
     </div>
 
     <div class="card-body p-0">
