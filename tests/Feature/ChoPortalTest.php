@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Checkup;
 use App\Models\Pregnancy;
+use App\Models\WalkInPatient;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
@@ -16,6 +17,26 @@ class ChoPortalTest extends AutomationTestCase
         Schema::create('barangays', function (Blueprint $t) {
             $t->id(); $t->string('name'); $t->string('rhu_assignment')->nullable();
             $t->boolean('is_active')->default(true); $t->timestamps();
+        });
+        Schema::create('puroks', function (Blueprint $t) {
+            $t->id(); $t->string('name'); $t->string('barangay')->nullable(); $t->timestamps();
+        });
+        Schema::table('pregnancies', function (Blueprint $t) {
+            $t->unsignedBigInteger('walk_in_patient_id')->nullable();
+        });
+        Schema::table('walk_in_patients', function (Blueprint $t) {
+            $t->string('middle_initial')->nullable();
+            $t->unsignedBigInteger('user_id')->nullable();
+            $t->boolean('has_portal_access')->default(false);
+            $t->date('date_of_birth')->nullable();
+            $t->string('address')->nullable();
+            $t->string('barangay')->nullable();
+            $t->unsignedBigInteger('purok_id')->nullable();
+            $t->unsignedBigInteger('recorded_by_id')->nullable();
+            $t->text('reason_for_visit')->nullable();
+            $t->text('notes')->nullable();
+            $t->unsignedBigInteger('converted_to_user_id')->nullable();
+            $t->timestamp('converted_at')->nullable();
         });
         Schema::create('staff_transitions', function (Blueprint $t) {
             $t->id(); $t->string('type');
@@ -64,16 +85,22 @@ class ChoPortalTest extends AutomationTestCase
         $response->assertDontSee('/cho/staff-transitions');
     }
 
-    public function test_cho_registered_women_directory_lists_patients(): void
+    public function test_cho_women_directory_lists_registered_and_unregistered(): void
     {
         $cho = $this->patient(['role' => 'cho']);
-        $woman = $this->patient(['first_name' => 'Directory', 'last_name' => 'Woman']);
+        $this->patient(['first_name' => 'Directory', 'last_name' => 'Woman']);
+        WalkInPatient::create([
+            'first_name' => 'Field', 'last_name' => 'Profile',
+            'barangay' => 'Padlan', 'contact_number' => '09170000000',
+        ]);
 
         $response = $this->actingAs($cho)->get(route('cho.patients.index'));
 
         $response->assertOk();
         $response->assertSee('Directory');
-        $response->assertSee('Registered Women');
+        $response->assertSee('Field');
+        $response->assertSee('All Women');
+        $response->assertSee('Unregistered');
     }
 
     public function test_cho_patient_record_shows_clinical_history(): void

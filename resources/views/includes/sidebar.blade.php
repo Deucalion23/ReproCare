@@ -100,8 +100,8 @@
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('cho.patients*') ? 'active' : '' }}"
                    href="{{ route('cho.patients.index') }}">
-                    <i class="bi bi-heart-pulse-fill"></i>
-                    <span>Registered Women</span>
+                    <i class="bi bi-person-heart"></i>
+                    <span>All Women</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -220,6 +220,13 @@
                     @if($pendingCount > 0)
                         <span style="background:color-mix(in srgb, var(--color-warning) 20%, transparent);color:var(--color-warning-text);font-size:0.68rem;font-weight:700;padding:0.1em 0.5em;border-radius:20px;margin-left:auto;">{{ $pendingCount }}</span>
                     @endif
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('rhu.women*') ? 'active' : '' }}"
+                   href="{{ route('rhu.women.index') }}">
+                    <i class="bi bi-person-heart"></i>
+                    <span>All Women</span>
                 </a>
             </li>
             <li class="nav-item">

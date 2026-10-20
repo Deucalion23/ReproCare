@@ -33,6 +33,7 @@ use App\Http\Controllers\ArchivedRecordController;
 use App\Http\Controllers\PostpartumController;
 use App\Http\Controllers\GisController;
 use App\Http\Controllers\WorkflowController;
+use App\Services\WomenDirectoryService;
 
 // Landing page routes
 Route::get('/', function () {
@@ -722,12 +723,14 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
         Route::post('/execute', [StaffTransitionController::class, 'execute'])->name('execute');
     });
 
-    // Registered Women: city-wide patient directory with records (read-only)
-    // plus archive (restorable from the Archived Records hub).
+    // All Women: city-wide directory of registered + unregistered women.
+    // Account lifecycle actions stay in RHU verification / the archive hub.
     Route::prefix('patients')->name('patients.')->group(function () {
         Route::get('/', [ChoController::class, 'patients'])->name('index');
-        Route::get('/{id}', [ChoController::class, 'patientDetails'])->name('show');
-        Route::post('/{id}/archive', [ChoController::class, 'archivePatient'])->name('archive');
+        Route::get('/walk-in/{id}', [ChoController::class, 'walkInPatientDetails'])
+            ->whereNumber('id')->name('walk-in');
+        Route::get('/{id}', [ChoController::class, 'patientDetails'])->whereNumber('id')->name('show');
+        Route::post('/{id}/archive', [ChoController::class, 'archivePatient'])->whereNumber('id')->name('archive');
     });
 
     // Learning Materials Management (upload / edit / archive — CHO only here)
@@ -775,6 +778,13 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
     Route::post('/analytics/chat', [\App\Http\Controllers\AnalyticsController::class, 'chat'])->middleware('throttle:10,1')->name('analytics.chat');
     Route::get('/settings', [RhuController::class, 'settings'])->name('settings');
     Route::put('/settings', [RhuController::class, 'updateSettings'])->name('settings.update');
+
+    // Women: directory (registered + unregistered, catchment-scoped)
+    Route::get('/women', [RhuController::class, 'women'])->name('women.index');
+    Route::get('/women/{type}/{id}', [RhuController::class, 'womanDetails'])
+        ->whereIn('type', WomenDirectoryService::TYPES)
+        ->whereNumber('id')
+        ->name('women.show');
 
     // Women: registration & account verification (RHU Admin only)
     Route::get('/patients/create', [RhuController::class, 'createPatient'])->name('patients.create');

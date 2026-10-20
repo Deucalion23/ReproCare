@@ -12,6 +12,7 @@ use App\Models\Pregnancy;
 use App\Models\SupplyRequest;
 use App\Models\User;
 use App\Services\AIInsightService;
+use App\Services\WomenDirectoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -424,45 +425,33 @@ class ChoController extends Controller
     }
 
     /**
-     * Registered Women: city-wide patient directory (read-only oversight).
-     * Account lifecycle (approve/reject/archive) stays in RHU verification
-     * and the Archived Records hub — this page never mutates.
+     * All Women: city-wide directory of registered accounts and
+     * unregistered (field-only) profiles. Read-only oversight — account
+     * lifecycle stays in RHU verification and the Archived Records hub.
      */
     public function patients(Request $request)
     {
-        $search = $request->input('search');
-        $status = $request->input('status', 'all');
-        $barangay = $request->input('barangay');
+        $directory = app(WomenDirectoryService::class)->directory(auth()->user(), [
+            'search' => $request->input('search'),
+            'type' => $request->input('type', 'all'),
+            'status' => $request->input('status', 'all'),
+            'barangay' => $request->input('barangay'),
+        ]);
 
-        $women = User::where('role', 'user')
-            ->when($status !== 'all', fn ($query) => $query->where('status', $status))
-            ->when($barangay, fn ($query) => $query->where('barangay', $barangay))
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('middle_initial', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('contact_number', 'like', "%{$search}%")
-                        ->orWhere('barangay', 'like', "%{$search}%");
-                });
-            })
-            ->withCount(['pregnancies as active_pregnancies_count' => function ($query) {
-                $query->whereNull('ended_at');
-            }])
-            ->latest()
-            ->paginate(15)
-            ->withQueryString();
+        return view('cho.patients.index', $directory + [
+            'search' => (string) $request->input('search', ''),
+            'type' => (string) $request->input('type', 'all'),
+            'status' => (string) $request->input('status', 'all'),
+            'barangay' => (string) $request->input('barangay', ''),
+        ]);
+    }
 
-        $barangays = User::where('role', 'user')
-            ->whereNotNull('barangay')
-            ->distinct()
-            ->orderBy('barangay')
-            ->pluck('barangay');
+    /** Unregistered (field-only) woman's record file. */
+    public function walkInPatientDetails($id)
+    {
+        $record = app(WomenDirectoryService::class)->findForUser(auth()->user(), 'unregistered', (int) $id);
 
-        $statuses = ['approved', 'pending', 'rejected', 'suspended', 'inactive', 'archived'];
-
-        return view('cho.patients.index', compact('women', 'search', 'status', 'barangay', 'barangays', 'statuses'));
+        return view('cho.patients.walk-in-show', $record + ['type' => 'unregistered']);
     }
 
     /**

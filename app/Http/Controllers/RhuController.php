@@ -14,6 +14,7 @@ use App\Models\WalkInPatient;
 use App\Models\ActivityLog;
 use App\Models\Purok;
 use App\Services\RiskAnalysisService;
+use App\Services\WomenDirectoryService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
@@ -1404,6 +1405,35 @@ class RhuController extends Controller
 
         return redirect()->route('rhu.pending-patients')
             ->with('success', 'Woman ' . $woman->name . ' has been successfully registered.');
+    }
+
+    /**
+     * All women in this RHU's catchment: registered accounts plus
+     * unregistered field profiles. Read-only directory.
+     */
+    public function women(Request $request)
+    {
+        $directory = app(WomenDirectoryService::class)->directory(auth()->user(), [
+            'search' => $request->input('search'),
+            'type' => $request->input('type', 'all'),
+            'status' => $request->input('status', 'all'),
+            'barangay' => $request->input('barangay'),
+        ]);
+
+        return view('rhu.women.index', $directory + [
+            'search' => (string) $request->input('search', ''),
+            'type' => (string) $request->input('type', 'all'),
+            'status' => (string) $request->input('status', 'all'),
+            'barangay' => (string) $request->input('barangay', ''),
+        ]);
+    }
+
+    /** One woman's record file, scoped to this RHU's catchment. */
+    public function womanDetails($type, $id)
+    {
+        $record = app(WomenDirectoryService::class)->findForUser(auth()->user(), (string) $type, (int) $id);
+
+        return view('rhu.women.show', $record + ['type' => (string) $type]);
     }
 
     public function pendingPatients()
