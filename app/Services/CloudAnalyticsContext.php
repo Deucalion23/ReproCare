@@ -45,7 +45,8 @@ class CloudAnalyticsContext
 
         return [
             'context' => [
-                'scope' => empty($report['filters']['barangay']) ? 'all selected areas' : 'one selected area',
+                'scope' => (empty($report['filters']['barangay']) ? 'all selected areas' : 'one selected area')
+                    .' across the '.count($monthly).' selected month(s)',
                 'definitions' => [
                     'current' => 'Open pregnancy, risk and follow-up counts describe today; they do not describe the historical period.',
                     'historical' => 'Registrations use record creation dates; deaths and complications use event dates within the selected period.',

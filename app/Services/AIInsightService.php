@@ -3,11 +3,15 @@
 namespace App\Services;
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class AIInsightService
 {
+    /** Memoized RHU catchment keys per RHU label (null key = city-wide). */
+    private array $catchments = [];
+
     /** Operational suggestions from recorded facts, with no invented clinical thresholds. */
     public function suggestions(array $report): array
     {
@@ -220,37 +224,42 @@ class AIInsightService
     }
 
     /**
-     * Data-based month/year answers for the required example questions.
-     * Returns null when the question is not month-specific (caller falls back
-     * to localAnswer / cloud providers). Never invents numbers: every count
-     * comes from the database; zero rows are reported as zero, and missing
-     * scope data is labelled as unavailable.
+     * Data-based month/year answers for questions that name a period.
+     * Returns null when the question names no period (caller falls back to
+     * localAnswer / cloud providers), so every other question is answered
+     * from the applied report filters instead of being sent back for a month.
+     * Never invents numbers: counts come from the database inside the report's
+     * date window and area scope; months outside the selected period are
+     * refused with the period named, and zero rows are reported as zero.
      */
     private function monthAwareAnswer(string $question, array $report): ?array
     {
-        $q = mb_strtolower($question);
-        $needsMonth = (bool) preg_match('/compar|versus|vs\.? |this month|last month|this year|last year|january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec|20\d{2}|month|year|quarter/i', $question)
-            || preg_match('/regist|death|died|mortality|high.?risk|follow.?up|priorit|pregnan|women registered|maternal/i', $q);
-
-        if (! $needsMonth) {
+        $months = $this->extractMonthRefs($question);
+        $isDataTopic = (bool) preg_match('/regist|death|died|mortality|high.?risk|follow.?up|priorit|pregnan|women|maternal|complication|trend|record|audit|risk/iu', $question);
+        if ($months === [] && ! ($isDataTopic && $this->mentionsPeriod($question))) {
             return null;
         }
 
-        $months = $this->extractMonthRefs($question);
         $isCompare = (bool) preg_match('/compar|versus|\bvs\b|difference|change|trend|growth|increase|decrease|this month.*last month|last month.*this month/iu', $question);
         $isDeaths = (bool) preg_match('/death|died|mortality|namatay|patay/iu', $question);
         $isHighRiskArea = (bool) preg_match('/high.?risk.*(barangay|area|bayan)|which (barangay|area).*high.?risk/iu', $question);
         $isRegistrations = (bool) preg_match('/regist|new women|enrol|pregnancy record|pregnan/iu', $question) && ! $isDeaths && ! $isHighRiskArea;
         $isFollowUp = (bool) preg_match('/follow.?up|priorit|unahin|missed|overdue|panganib/iu', $question) && ! $isDeaths;
 
-        $scopeLabel = $report['area_label'] . ($report['scope_label'] ? '; ' . $report['scope_label'] : '');
+        $scopeLabel = $this->filterLabel($report);
 
         // A bare month question ("october 2026 records") names a period but
         // no topic — answer with a general overview of that month instead of
         // falling through to the generic assistant text.
         if (! $isCompare && ! $isDeaths && ! $isHighRiskArea && ! $isRegistrations && ! $isFollowUp) {
-            if (! empty($months)) {
-                return ['answer' => $this->monthOverview($months[0], $report, $scopeLabel), 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
+            if ($months !== []) {
+                $window = $this->monthWindow($months[0], $report);
+                if ($window === null) {
+                    return $this->outsidePeriod([$months[0]], $report, $scopeLabel);
+                }
+
+                return ['answer' => $this->monthOverview($window, $report, $scopeLabel).$this->partialNote($window, $report),
+                    'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
             }
 
             return null;
@@ -272,19 +281,26 @@ class AIInsightService
                 ];
             }
             [$a, $b] = [array_slice($months, 0, 1)[0], array_slice($months, 1, 1)[0]];
+            $wa = $this->monthWindow($a, $report);
+            $wb = $this->monthWindow($b, $report);
+            if ($wa === null || $wb === null) {
+                $outside = array_values(array_filter([$wa === null ? $a : null, $wb === null ? $b : null]));
+                return $this->outsidePeriod($outside, $report, $scopeLabel);
+            }
             $answer = $isDeaths
-                ? $this->compareDeaths($a, $b, $report, $scopeLabel)
-                : $this->compareRegistrations($a, $b, $report, $scopeLabel);
+                ? $this->compareDeaths($wa, $wb, $report, $scopeLabel)
+                : $this->compareRegistrations($wa, $wb, $report, $scopeLabel);
 
-            return ['answer' => $answer, 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated months.'];
+            return ['answer' => $answer.$this->partialNote($wa, $report).$this->partialNote($wb, $report),
+                'source' => 'rules', 'notice' => 'Exact recorded counts for the stated months.'];
         }
 
         // Single-month questions: one explicit month, else ask which month.
-        if (empty($months)) {
+        if ($months === []) {
             $relative = $this->resolveRelativeMonths($question);
             $months = $relative ? array_slice($relative, 0, 1) : [];
         }
-        if (empty($months)) {
+        if ($months === []) {
             return [
                 'answer' => 'Which month and year should I analyze? For example: "How many maternal deaths were recorded in October 2026?"',
                 'source' => 'rules',
@@ -293,18 +309,92 @@ class AIInsightService
             ];
         }
         $month = $months[0];
+        $window = $this->monthWindow($month, $report);
+        if ($window === null) {
+            return $this->outsidePeriod([$month], $report, $scopeLabel);
+        }
+        $note = $this->partialNote($window, $report);
 
         if ($isDeaths) {
-            return ['answer' => $this->monthDeaths($month, $report, $scopeLabel), 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
+            return ['answer' => $this->monthDeaths($window, $report, $scopeLabel).$note, 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
         }
         if ($isHighRiskArea) {
-            return ['answer' => $this->monthHighRiskArea($month, $report, $scopeLabel), 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
+            return ['answer' => $this->monthHighRiskArea($window, $report, $scopeLabel).$note, 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
         }
         if ($isFollowUp) {
             return ['answer' => $this->priorityFollowUp($report, $scopeLabel), 'source' => 'rules', 'notice' => 'Based on recorded health records and system rules.'];
         }
 
-        return ['answer' => $this->monthRegistrations($month, $report, $scopeLabel), 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
+        return ['answer' => $this->monthRegistrations($window, $report, $scopeLabel).$note, 'source' => 'rules', 'notice' => 'Exact recorded counts for the stated month.'];
+    }
+
+    /** True when the question names a month, a year, or this/last month style period. */
+    private function mentionsPeriod(string $question): bool
+    {
+        if ($this->extractMonthRefs($question) !== []) {
+            return true;
+        }
+
+        return (bool) preg_match('/\b(?:this|last|next|previous|coming)\s+(?:month|year|quarter)\b|\b20\d{2}\b/iu', $question);
+    }
+
+    /**
+     * The part of a named month inside the applied date filter, or null when
+     * the month sits entirely outside it. Counts never leave the selected
+     * period, so answers always match the report's own monthly numbers.
+     */
+    private function monthWindow(string $ym, array $report): ?array
+    {
+        $monthStart = Carbon::createFromFormat('Y-m', $ym)->startOfMonth();
+        $monthEnd = $monthStart->copy()->endOfMonth();
+        $from = Carbon::parse($report['filters']['from'])->startOfDay();
+        $to = Carbon::parse($report['filters']['to'])->endOfDay();
+        if ($monthEnd->lt($from) || $monthStart->gt($to)) {
+            return null;
+        }
+        $start = $monthStart->gt($from) ? $monthStart : $from;
+        $end = $monthEnd->lt($to) ? $monthEnd : $to;
+
+        return ['ym' => $ym, 'start' => $start, 'end' => $end,
+            'partial' => ! $start->eq($monthStart) || ! $end->eq($monthEnd)];
+    }
+
+    /** A named month outside the applied date filter: state it, never invent counts. */
+    private function outsidePeriod(array $yms, array $report, string $scopeLabel): array
+    {
+        $names = implode(' and ', array_map(fn (string $ym) => $this->monthLabel($ym), $yms));
+        $verb = count($yms) > 1 ? 'are' : 'is';
+
+        return [
+            'answer' => "{$names} {$verb} outside the selected report period ("
+                .$report['filters']['from'].' to '.$report['filters']['to'].'), so this report holds no data for '
+                .(count($yms) > 1 ? 'them' : 'it').' under the current filters. '
+                .'Apply a wider From–To range (up to three years) to include '
+                .(count($yms) > 1 ? 'those months' : 'that month').'.'
+                ."\nFilters: {$scopeLabel}.",
+            'source' => 'rules',
+            'error_code' => 'outside_period',
+            'notice' => 'Outside the selected report period — no data was queried.',
+        ];
+    }
+
+    /** Boundary months only count the days inside the applied period; say so. */
+    private function partialNote(array $window, array $report): string
+    {
+        if (! $window['partial']) {
+            return '';
+        }
+
+        return ' Note: only the part of '.$this->monthLabel($window['ym'])
+            .' inside the selected period ('.$report['filters']['from'].' to '.$report['filters']['to'].') is counted.';
+    }
+
+    /** The filters driving this answer: area, period, and RHU or city-wide scope. */
+    private function filterLabel(array $report): string
+    {
+        $filters = $report['filters'];
+
+        return "{$report['area_label']}; {$filters['from']} to {$filters['to']}; ".($report['scope_label'] ?? 'City-wide · All RHUs');
     }
 
     /** Find explicit month+year references, e.g. "October 2026", "Oct 2026", "10/2026", "2026-10". */
@@ -362,49 +452,92 @@ class AIInsightService
         return Carbon::createFromFormat('Y-m', $ym)->format('F Y');
     }
 
-    /** Scope a query to the report's barangay + RHU catchment, like the service. */
-    private function applyScope($query, array $report, string $barangayColumn = 'barangay')
+    /**
+     * Whether a recorded area value falls inside the report's barangay and
+     * RHU filters. Uses the same canonical key match as the report itself, so
+     * legacy barangay spellings answer identically to the charts. Unknown or
+     * unrecorded locations are only included when the report includes them.
+     */
+    private function areaInScope(?string $raw, array $report): bool
     {
-        if (! empty($report['filters']['barangay'])) {
-            $query->where($barangayColumn, $report['filters']['barangay']);
+        $scope = app(AnalyticsScope::class);
+        $key = $scope->key($raw) ?: MaternalAnalyticsService::UNKNOWN_AREA;
+        $selected = $report['filters']['barangay'] ?? null;
+        if ($selected !== null && $selected !== '' && $key !== $scope->key($selected)) {
+            return false;
         }
-        if (! empty($report['filters']['rhu'])) {
-            $names = \App\Models\Barangay::active()->forRhu($report['filters']['rhu'])->pluck('name')->all();
-            if ($names) {
-                $query->whereIn($barangayColumn, $names);
-            } else {
-                $query->whereRaw('1 = 0');
-            }
-        }
+        $catchment = $this->catchment($report);
 
-        return $query;
+        return $catchment === null || in_array($key, $catchment, true);
     }
 
-    private function countInMonth(string $model, string $dateColumn, string $ym, array $report, ?string $barangayColumn = null): int
+    /** Memoized RHU catchment keys (null = city-wide), shared by every row check. */
+    private function catchment(array $report): ?array
     {
-        [$y, $m] = explode('-', $ym);
-        $query = $model::whereYear($dateColumn, (int) $y)->whereMonth($dateColumn, (int) $m);
-        if ($barangayColumn) {
-            $this->applyScope($query, $report, $barangayColumn);
+        $rhu = $report['filters']['rhu'] ?? null;
+        if (! array_key_exists($rhu, $this->catchments)) {
+            $this->catchments[$rhu] = app(AnalyticsScope::class)->areas($rhu);
         }
 
-        return (int) $query->count();
+        return $this->catchments[$rhu];
     }
 
-    private function compareRegistrations(string $a, string $b, array $report, string $scopeLabel): string
+    /** Pregnancy records filed inside the window, inside the report's area scope. */
+    private function pregnanciesBetween(array $window, array $report): Collection
     {
-        $pa = $this->countInMonth(\App\Models\Pregnancy::class, 'created_at', $a, $report);
-        $pb = $this->countInMonth(\App\Models\Pregnancy::class, 'created_at', $b, $report);
-        $wa = $this->scopedWomenInMonth($a, $report);
-        $wb = $this->scopedWomenInMonth($b, $report);
+        return \App\Models\Pregnancy::with(['woman:id,barangay', 'walkInPatient:id,barangay'])
+            ->whereBetween('created_at', [$window['start']->toDateTimeString(), $window['end']->toDateTimeString()])
+            ->get(['id', 'user_id', 'walk_in_patient_id'])
+            ->filter(fn ($pregnancy) => $this->areaInScope($pregnancy->woman?->barangay ?? $pregnancy->walkInPatient?->barangay, $report))
+            ->values();
+    }
+
+    /** Maternal deaths inside the window, inside the report's area scope. */
+    private function deathsBetween(array $window, array $report): Collection
+    {
+        return \App\Models\MaternalDeath::whereBetween('death_date', [$window['start']->toDateString(), $window['end']->toDateString()])
+            ->get(['id', 'barangay', 'cause_category', 'audit_status'])
+            ->filter(fn ($death) => $this->areaInScope($death->barangay, $report))
+            ->values();
+    }
+
+    /** Women accounts created inside the window, inside the report's area scope. */
+    private function womenBetween(array $window, array $report): int
+    {
+        return \App\Models\User::where('role', 'user')
+            ->whereBetween('created_at', [$window['start']->toDateTimeString(), $window['end']->toDateTimeString()])
+            ->get(['id', 'barangay'])
+            ->filter(fn ($woman) => $this->areaInScope($woman->barangay, $report))
+            ->count();
+    }
+
+    /** High-risk pregnancy records filed inside the window, inside the report's area scope. */
+    private function highRiskBetween(array $window, array $report): Collection
+    {
+        return \App\Models\Pregnancy::with(['woman:id,barangay', 'walkInPatient:id,barangay'])
+            ->whereBetween('pregnancies.created_at', [$window['start'], $window['end']])
+            ->where(fn ($query) => $query->whereIn('risk_level', ['High', 'Critical'])->orWhere('is_high_risk', true))
+            ->get(['id', 'user_id', 'walk_in_patient_id', 'risk_level', 'is_high_risk'])
+            ->filter(fn ($pregnancy) => $this->areaInScope($pregnancy->woman?->barangay ?? $pregnancy->walkInPatient?->barangay, $report))
+            ->values();
+    }
+
+    private function compareRegistrations(array $wa, array $wb, array $report, string $scopeLabel): string
+    {
+        $a = $wa['ym'];
+        $b = $wb['ym'];
+        $pa = $this->pregnanciesBetween($wa, $report)->count();
+        $pb = $this->pregnanciesBetween($wb, $report)->count();
+        $womenA = $this->womenBetween($wa, $report);
+        $womenB = $this->womenBetween($wb, $report);
         $diffP = $pb - $pa;
-        $diffW = $wb - $wa;
+        $diffW = $womenB - $womenA;
 
         return "Selected range: {$this->monthLabel($a)} vs {$this->monthLabel($b)}; filters: {$scopeLabel}. "
             . "Specific data: pregnancy records — {$this->monthLabel($a)}: {$pa}, {$this->monthLabel($b)}: {$pb}, "
             . "difference: " . ($diffP >= 0 ? '+' : '') . "{$diffP}" . $this->pct($pa, $pb) . ". "
-            . "New women registered — {$this->monthLabel($a)}: {$wa}, {$this->monthLabel($b)}: {$wb}, "
-            . "difference: " . ($diffW >= 0 ? '+' : '') . "{$diffW}" . $this->pct($wa, $wb) . ". "
+            . "New women registered — {$this->monthLabel($a)}: {$womenA}, {$this->monthLabel($b)}: {$womenB}, "
+            . "difference: " . ($diffW >= 0 ? '+' : '') . "{$diffW}" . $this->pct($womenA, $womenB) . ". "
             . 'Zero means no records were filed that month, not missing data. '
             . 'Recommended: confirm entry completeness for the lower month with the assigned midwife before treating the gap as a real decline.';
     }
@@ -419,30 +552,24 @@ class AIInsightService
         return ' (' . ($p >= 0 ? '+' : '') . "{$p}% vs previous month)";
     }
 
-    private function scopedWomenInMonth(string $ym, array $report): int
+    private function monthRegistrations(array $window, array $report, string $scopeLabel): string
     {
-        [$y, $m] = explode('-', $ym);
-        $query = \App\Models\User::where('role', 'user')->whereYear('created_at', (int) $y)->whereMonth('created_at', (int) $m);
-        $this->applyScope($query, $report);
+        $month = $this->monthLabel($window['ym']);
+        $p = $this->pregnanciesBetween($window, $report)->count();
+        $w = $this->womenBetween($window, $report);
 
-        return (int) $query->count();
-    }
-
-    private function monthRegistrations(string $ym, array $report, string $scopeLabel): string
-    {
-        $p = $this->countInMonth(\App\Models\Pregnancy::class, 'created_at', $ym, $report);
-        $w = $this->scopedWomenInMonth($ym, $report);
-
-        return "Selected month: {$this->monthLabel($ym)}; filters: {$scopeLabel}. "
-            . "Specific data: {$p} pregnancy record(s) filed and {$w} new women registered in {$this->monthLabel($ym)}. "
+        return "Selected month: {$month}; filters: {$scopeLabel}. "
+            . "Specific data: {$p} pregnancy record(s) filed and {$w} new women registered in {$month}. "
             . 'Zero means no records were filed that month, not missing data. '
             . 'Recommended: verify entry completeness with the assigned midwife and confirm follow-up for each new record.';
     }
 
-    private function compareDeaths(string $a, string $b, array $report, string $scopeLabel): string
+    private function compareDeaths(array $wa, array $wb, array $report, string $scopeLabel): string
     {
-        $da = $this->countInMonth(\App\Models\MaternalDeath::class, 'death_date', $a, $report, 'barangay');
-        $db = $this->countInMonth(\App\Models\MaternalDeath::class, 'death_date', $b, $report, 'barangay');
+        $a = $wa['ym'];
+        $b = $wb['ym'];
+        $da = $this->deathsBetween($wa, $report)->count();
+        $db = $this->deathsBetween($wb, $report)->count();
         $diff = $db - $da;
 
         return "Selected range: {$this->monthLabel($a)} vs {$this->monthLabel($b)}; filters: {$scopeLabel}. "
@@ -452,55 +579,32 @@ class AIInsightService
             . 'Recommended: review outstanding death audits and documented referral or service gaps; counts alone do not establish a cause or trend.';
     }
 
-    private function monthDeaths(string $ym, array $report, string $scopeLabel): string
+    private function monthDeaths(array $window, array $report, string $scopeLabel): string
     {
-        [$y, $m] = explode('-', $ym);
-        $query = \App\Models\MaternalDeath::whereYear('death_date', (int) $y)->whereMonth('death_date', (int) $m);
-        $this->applyScope($query, $report, 'barangay');
-        $deaths = $query->get(['barangay', 'cause_category', 'audit_status']);
+        $month = $this->monthLabel($window['ym']);
+        $deaths = $this->deathsBetween($window, $report);
         $pending = $deaths->whereIn('audit_status', ['pending', 'under_review'])->count();
         $byArea = $deaths->countBy(fn ($d) => $d->barangay ?: 'Unrecorded barangay')->sortDesc();
 
-        return "Selected month: {$this->monthLabel($ym)}; filters: {$scopeLabel}. "
+        return "Selected month: {$month}; filters: {$scopeLabel}. "
             . "Specific data: {$deaths->count()} maternal death record(s), {$pending} audit(s) pending or under review. "
             . ($byArea->isNotEmpty() ? 'By barangay: ' . $byArea->map(fn ($c, $k) => "{$k} ({$c})")->take(5)->implode(', ') . '. ' : 'No deaths recorded in any barangay that month. ')
             . 'Zero means no deaths recorded, not missing data. '
             . 'Recommended: complete pending death audits and review referral and service gaps with the RHU team.';
     }
 
-    /** High-risk pregnancy records filed in a month, limited to the report scope. */
-    private function highRiskRowsInMonth(string $ym, array $report)
-    {
-        [$y, $m] = explode('-', $ym);
-        $query = \App\Models\Pregnancy::with('woman:id,barangay')
-            ->whereYear('pregnancies.created_at', (int) $y)->whereMonth('pregnancies.created_at', (int) $m)
-            ->where(fn ($q) => $q->whereIn('risk_level', ['High', 'Critical'])->orWhere('is_high_risk', true));
-        $rows = $query->get(['id', 'user_id', 'risk_level', 'is_high_risk']);
-        if (! empty($report['filters']['barangay'])) {
-            $rows = $rows->filter(fn ($p) => ($p->woman?->barangay ?? '') === $report['filters']['barangay'])->values();
-        }
-        if (! empty($report['filters']['rhu'])) {
-            $names = \App\Models\Barangay::active()->forRhu($report['filters']['rhu'])->pluck('name')->all();
-            $rows = $names ? $rows->filter(fn ($p) => in_array($p->woman?->barangay, $names, true))->values() : collect();
-        }
-
-        return $rows;
-    }
-
     /** General overview for a bare month question ("october 2026 records"). */
-    private function monthOverview(string $ym, array $report, string $scopeLabel): string
+    private function monthOverview(array $window, array $report, string $scopeLabel): string
     {
-        [$y, $m] = explode('-', $ym);
-        $preg = $this->countInMonth(\App\Models\Pregnancy::class, 'created_at', $ym, $report);
-        $women = $this->scopedWomenInMonth($ym, $report);
-        $deathsQuery = \App\Models\MaternalDeath::whereYear('death_date', (int) $y)->whereMonth('death_date', (int) $m);
-        $this->applyScope($deathsQuery, $report, 'barangay');
-        $deaths = $deathsQuery->get(['barangay']);
-        $highRisk = $this->highRiskRowsInMonth($ym, $report);
+        $month = $this->monthLabel($window['ym']);
+        $preg = $this->pregnanciesBetween($window, $report)->count();
+        $women = $this->womenBetween($window, $report);
+        $deaths = $this->deathsBetween($window, $report);
+        $highRisk = $this->highRiskBetween($window, $report);
         $topDeath = $deaths->countBy(fn ($d) => $d->barangay ?: 'Unrecorded barangay')->sortDesc();
-        $topRisk = $highRisk->countBy(fn ($p) => $p->woman?->barangay ?: 'Unrecorded barangay')->sortDesc();
+        $topRisk = $highRisk->countBy(fn ($p) => ($p->woman?->barangay ?? $p->walkInPatient?->barangay) ?: 'Unrecorded barangay')->sortDesc();
 
-        return "Selected month: {$this->monthLabel($ym)}; filters: {$scopeLabel}. "
+        return "Selected month: {$month}; filters: {$scopeLabel}. "
             . "Specific data: {$preg} pregnancy record(s) filed, {$women} new women registered, "
             . "{$deaths->count()} maternal death record(s), {$highRisk->count()} high-risk pregnancy record(s). "
             . ($topRisk->isNotEmpty() ? "Highest high-risk count: {$topRisk->keys()->first()} ({$topRisk->first()}). " : 'No high-risk records filed that month. ')
@@ -510,19 +614,20 @@ class AIInsightService
             . 'and complete any pending death audits. Ask me to compare with another month, e.g. "Compare pregnancy records from September 2026 and October 2026."';
     }
 
-    private function monthHighRiskArea(string $ym, array $report, string $scopeLabel): string
+    private function monthHighRiskArea(array $window, array $report, string $scopeLabel): string
     {
-        $rows = $this->highRiskRowsInMonth($ym, $report);
-        $byArea = $rows->countBy(fn ($p) => $p->woman?->barangay ?: 'Unrecorded barangay')->sortDesc();
+        $month = $this->monthLabel($window['ym']);
+        $rows = $this->highRiskBetween($window, $report);
+        $byArea = $rows->countBy(fn ($p) => ($p->woman?->barangay ?? $p->walkInPatient?->barangay) ?: 'Unrecorded barangay')->sortDesc();
         $top = $byArea->keys()->first();
 
         if (! $top) {
-            return "Selected month: {$this->monthLabel($ym)}; filters: {$scopeLabel}. "
+            return "Selected month: {$month}; filters: {$scopeLabel}. "
                 . 'Specific data: 0 high-risk pregnancy records filed that month. '
                 . 'An absence of recorded flags does not confirm an absence of risk — confirm reporting completeness and keep scheduled follow-up.';
         }
 
-        return "Selected month: {$this->monthLabel($ym)}; filters: {$scopeLabel}. "
+        return "Selected month: {$month}; filters: {$scopeLabel}. "
             . "Specific data: {$top} recorded the highest number of high-risk pregnancies ({$byArea[$top]} of {$rows->count()} high-risk records that month). "
             . ($byArea->count() > 1 ? 'Other areas: ' . $byArea->except($top)->map(fn ($c, $k) => "{$k} ({$c})")->take(5)->implode(', ') . '. ' : '')
             . 'Counts are recorded cases, not population risk rates. '
@@ -553,7 +658,7 @@ class AIInsightService
     {
         $q = mb_strtolower($question);
         $t = $report['totals'];
-        $scope = "{$report['area_label']}; {$report['filters']['from']} to {$report['filters']['to']}. ";
+        $scope = $this->filterLabel($report).'. ';
         $ranked = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA);
         if (preg_match('/death|died|mortality|namatay|patay/u', $q)) {
             $worst = $ranked->sortByDesc('deaths')->first();
@@ -647,7 +752,7 @@ class AIInsightService
 
     private function listingAnswer(array $criteria, array $report): string
     {
-        $scope = "{$report['scope_label']}; {$report['filters']['from']} to {$report['filters']['to']}.";
+        $scope = $this->filterLabel($report).'.';
         $areas = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA)->values();
         $metric = $criteria['metric'];
 

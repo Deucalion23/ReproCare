@@ -9,7 +9,7 @@ Open **CHO → Analytics**. The dashboard and its rules assistant work immediate
 1. Select a date range (up to three years) and barangay, then click **Apply filters**.
 2. Read **Suggested next steps** and the evidence shown on each card.
 3. Review the **Pregnancy review queue**. The **Review** button opens the corresponding pregnancy, including walk-in records. The queue is paginated, with 15 records per page.
-4. Use **Priorities**, **Maternal deaths**, **Trends** or **Areas**, then click **Ask assistant**. The answer uses the filters already applied to the report. Changing the controls without applying them does not change the assistant's selection.
+4. Use **Priorities**, **Maternal deaths**, **Trends** or **Areas**, then click **Ask assistant**. The answer uses the filters already applied to the report (date range, barangay, and RHU or city-wide scope). Month-specific questions are answered only for months inside the applied range; a month outside the range is reported as outside the filters instead of inventing counts. Changing the controls without applying them does not change the assistant's selection.
 5. Use **Print report** for a printable report. It includes the currently displayed queue page, not all queue pages.
 
 Current open pregnancies and follow-up priorities are a snapshot of today in the selected area. The date range applies to historical registrations, maternal deaths and complication events. Old pregnancies with no recorded outcome remain open even when their expected delivery date has passed; staff should verify and update those records.
