@@ -41,9 +41,6 @@
                 Registered and unregistered women in your scope area · {{ $scopeLabel }}.
             </p>
         </div>
-        <a href="{{ route('rhu.patients.create') }}" class="btn btn-primary">
-            <i class="bi bi-person-plus-fill me-1"></i> Register Woman
-        </a>
     </div>
 </div>
 
