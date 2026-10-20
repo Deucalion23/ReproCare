@@ -83,9 +83,19 @@
                     </select>
                 </div>
             </div>
+            <div class="col-md-3 col-lg-2">
+                <div class="input-group usr-group">
+                    <span class="input-group-text"><i class="bi bi-arrow-down-up"></i></span>
+                    <select name="sort" class="form-select" aria-label="Sort women by">
+                        @foreach ($sorts as $key => $label)
+                            <option value="{{ $key }}" {{ $sort === $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
             <div class="col-md-2 col-lg-2 d-flex gap-2">
                 <button type="submit" class="usr-apply-btn flex-fill">Apply</button>
-                @if ($search !== '' || $type !== 'all' || $status !== 'all' || $barangay !== '')
+                @if ($search !== '' || $type !== 'all' || $status !== 'all' || $barangay !== '' || $sort !== 'date_desc')
                     <a href="{{ route('cho.patients.index') }}" class="btn btn-outline-secondary" title="Clear filters">
                         <i class="bi bi-x-lg"></i>
                     </a>
@@ -94,15 +104,15 @@
         </form>
 
         <div class="wd-type-pills mt-3">
-            <a href="{{ route('cho.patients.index', array_filter(['search' => $search, 'barangay' => $barangay, 'status' => $status])) }}"
+            <a href="{{ route('cho.patients.index', array_filter(['search' => $search, 'barangay' => $barangay, 'status' => $status, 'sort' => $sort])) }}"
                class="wd-type-pill {{ $type === 'all' ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i> All · {{ $registeredCount + $unregisteredCount }}
             </a>
-            <a href="{{ route('cho.patients.index', array_filter(['search' => $search, 'barangay' => $barangay, 'status' => $status, 'type' => 'registered'])) }}"
+            <a href="{{ route('cho.patients.index', array_filter(['search' => $search, 'barangay' => $barangay, 'status' => $status, 'sort' => $sort, 'type' => 'registered'])) }}"
                class="wd-type-pill {{ $type === 'registered' ? 'active' : '' }}">
                 <i class="bi bi-person-check-fill"></i> Registered · {{ $registeredCount }}
             </a>
-            <a href="{{ route('cho.patients.index', array_filter(['search' => $search, 'barangay' => $barangay, 'status' => $status, 'type' => 'unregistered'])) }}"
+            <a href="{{ route('cho.patients.index', array_filter(['search' => $search, 'barangay' => $barangay, 'status' => $status, 'sort' => $sort, 'type' => 'unregistered'])) }}"
                class="wd-type-pill {{ $type === 'unregistered' ? 'active' : '' }}">
                 <i class="bi bi-person-plus-fill"></i> Unregistered · {{ $unregisteredCount }}
             </a>

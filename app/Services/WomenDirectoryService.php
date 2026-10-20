@@ -23,6 +23,16 @@ class WomenDirectoryService
 {
     public const TYPES = ['registered', 'unregistered'];
 
+    /** Sort keys available in the directory UI. */
+    public const SORTS = [
+        'date_desc' => 'Newest first',
+        'date_asc' => 'Oldest first',
+        'name_asc' => 'Name (A–Z)',
+        'name_desc' => 'Name (Z–A)',
+        'dob_asc' => 'Age (oldest)',
+        'dob_desc' => 'Age (youngest)',
+    ];
+
     public function __construct(private AnalyticsScope $scope)
     {
     }
@@ -60,7 +70,8 @@ class WomenDirectoryService
     /**
      * @return array{women: LengthAwarePaginator, registeredCount: int,
      *     unregisteredCount: int, barangays: \Illuminate\Support\Collection,
-     *     statuses: array, scopeLabel: string, catchment: ?array}
+     *     statuses: array, scopeLabel: string, catchment: ?array,
+     *     sort: string, sorts: array}
      */
     public function directory(User $user, array $filters = []): array
     {
@@ -69,6 +80,7 @@ class WomenDirectoryService
         $type = in_array(($filters['type'] ?? 'all'), self::TYPES, true) ? $filters['type'] : 'all';
         $status = (string) ($filters['status'] ?? 'all');
         $barangay = trim((string) ($filters['barangay'] ?? ''));
+        $sort = array_key_exists($filters['sort'] ?? '', self::SORTS) ? $filters['sort'] : 'date_desc';
 
         $registered = User::query()
             ->where('role', 'user')
@@ -120,9 +132,23 @@ class WomenDirectoryService
             $registered = collect();
         }
 
-        $all = $registered->concat($unregistered)
-            ->sortBy(fn ($woman) => mb_strtolower($woman->type === 'unregistered' ? $woman->full_name : $woman->name))
-            ->values();
+        $nameOf = fn ($woman) => mb_strtolower($woman->type === 'unregistered' ? $woman->full_name : $woman->name);
+
+        $all = $registered->concat($unregistered);
+
+        $all = match ($sort) {
+            'name_asc' => $all->sortBy($nameOf)->values(),
+            'name_desc' => $all->sortBy($nameOf)->reverse()->values(),
+            'dob_asc' => $all
+                ->sortBy(fn ($woman) => $woman->date_of_birth?->timestamp ?? PHP_INT_MAX)
+                ->values(),
+            'dob_desc' => $all
+                ->sortBy(fn ($woman) => $woman->date_of_birth?->timestamp ?? -1)
+                ->reverse()
+                ->values(),
+            'date_asc' => $all->sortBy('created_at')->values(),
+            default => $all->sortByDesc('created_at')->values(),
+        };
 
         $page = max(1, (int) request()->input('page', 1));
         $perPage = 15;
@@ -148,6 +174,8 @@ class WomenDirectoryService
             'statuses' => ['approved', 'pending', 'rejected', 'suspended', 'inactive', 'archived'],
             'scopeLabel' => $this->scopeLabel($user),
             'catchment' => $catchment,
+            'sort' => $sort,
+            'sorts' => self::SORTS,
         ];
     }
 

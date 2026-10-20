@@ -1566,6 +1566,7 @@ class RhuController extends Controller
             'type' => $request->input('type', 'all'),
             'status' => $request->input('status', 'all'),
             'barangay' => $request->input('barangay'),
+            'sort' => $request->input('sort', 'date_desc'),
         ]);
 
         return view('rhu.women.index', $directory + [

@@ -100,4 +100,28 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $response->assertSee('Citywide');
         $response->assertSee('City-wide');
     }
+
+    public function test_directory_sorts_by_name_and_date_in_both_directions(): void
+    {
+        $cho = $this->patient(['role' => 'cho']);
+        $beta = $this->patient(['first_name' => 'Beta', 'last_name' => 'Woman', 'barangay' => 'Padlan']);
+        $beta->timestamps = false; $beta->created_at = now()->subDays(2); $beta->save();
+        $this->patient(['first_name' => 'Alpha', 'last_name' => 'Woman', 'barangay' => 'Padlan']);
+        $older = WalkInPatient::create(['first_name' => 'Charlie', 'last_name' => 'Field', 'barangay' => 'Padlan']);
+        $older->timestamps = false;
+        $older->created_at = now()->subDays(5);
+        $older->save();
+
+        $this->actingAs($cho)->get(route('cho.patients.index', ['sort' => 'name_asc']))
+            ->assertOk()->assertSeeInOrder(['Alpha', 'Beta', 'Charlie']);
+        $this->actingAs($cho)->get(route('cho.patients.index', ['sort' => 'name_desc']))
+            ->assertOk()->assertSeeInOrder(['Charlie', 'Beta', 'Alpha']);
+        $this->actingAs($cho)->get(route('cho.patients.index', ['sort' => 'date_asc']))
+            ->assertOk()->assertSeeInOrder(['Charlie', 'Beta', 'Alpha']);
+        $this->actingAs($cho)->get(route('cho.patients.index', ['sort' => 'date_desc']))
+            ->assertOk()->assertSeeInOrder(['Alpha', 'Beta', 'Charlie']);
+        // Unknown sort keys fall back to the default (newest first).
+        $this->actingAs($cho)->get(route('cho.patients.index', ['sort' => 'bogus']))
+            ->assertOk()->assertViewHas('sort', 'date_desc');
+    }
 }
