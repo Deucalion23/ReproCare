@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
 
 class RhuController extends Controller
 {
@@ -1494,9 +1495,31 @@ class RhuController extends Controller
 
     public function createPatient()
     {
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $allowed = $this->scopedBarangayNames();
+        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name'])
+            ->filter(fn ($area) => in_array($area->name, $allowed, true))
+            ->values();
 
         return view('rhu.patients.create', compact('barangays'));
+    }
+
+    /**
+     * Active barangay names inside this RHU's catchment. Registration is
+     * limited to the account's scope area so an RHU cannot register women
+     * belonging to another RHU's barangays.
+     *
+     * @return array<int, string>
+     */
+    private function scopedBarangayNames(): array
+    {
+        $catchment = app(WomenDirectoryService::class)->catchmentFor(auth()->user());
+        $scope = app(\App\Services\AnalyticsScope::class);
+
+        return \App\Models\Barangay::active()->get(['name'])
+            ->filter(fn ($area) => $catchment === null || in_array($scope->key($area->name), $catchment, true))
+            ->pluck('name')
+            ->values()
+            ->all();
     }
 
     public function storePatient(Request $request)
@@ -1508,7 +1531,7 @@ class RhuController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
             'address' => 'nullable|string|max:255',
-            'barangay' => 'required|string|max:255',
+            'barangay' => ['required', 'string', 'max:255', Rule::in($this->scopedBarangayNames())],
             'purok' => 'required|string|max:100',
             'contact_number' => 'nullable|string|max:20',
             'date_of_birth' => 'required|date|before:today',

@@ -5,15 +5,12 @@
 @section('rhu-content')
 <div class="py-4">
     <div class="page-hero fade-in-card mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+        <div style="position:relative;z-index:1;">
             <div>
                 <h1 class="page-hero-title">Register New Woman
                 </h1>
                 <p class="page-hero-subtitle">Create an enrolled woman account and assign the correct purok.</p>
             </div>
-            <a href="{{ route('rhu.pending-patients') }}" class="btn-hero-primary">
-                <i class="bi bi-arrow-left"></i> Back to Verification
-            </a>
         </div>
     </div>
 

@@ -101,6 +101,35 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $response->assertSee('City-wide');
     }
 
+    public function test_rhu_registration_only_offers_and_accepts_catchment_barangays(): void
+    {
+        $rhu = $this->patient(['role' => 'rhu', 'rhu_assignment' => 'RHU 1']);
+
+        $this->actingAs($rhu)->get(route('rhu.patients.create'))
+            ->assertOk()
+            ->assertSee('value="Padlan"', false)
+            ->assertDontSee('value="Outside"', false);
+
+        // Submitting a barangay outside the catchment is rejected.
+        $payload = [
+            'first_name' => 'Out', 'last_name' => 'Sider',
+            'email' => 'outside@example.com', 'password' => 'secret123',
+            'password_confirmation' => 'secret123', 'purok' => 'Purok 1',
+            'barangay' => 'Outside', 'date_of_birth' => '2000-01-01',
+        ];
+        $this->actingAs($rhu)->from(route('rhu.patients.create'))
+            ->post(route('rhu.patients.store'), $payload)
+            ->assertSessionHasErrors('barangay');
+        $this->assertDatabaseMissing('users', ['email' => 'outside@example.com']);
+
+        // A catchment barangay registers normally.
+        $payload['first_name'] = 'In'; $payload['last_name'] = 'Sider';
+        $payload['email'] = 'inside@example.com'; $payload['barangay'] = 'Padlan';
+        $this->actingAs($rhu)->post(route('rhu.patients.store'), $payload)
+            ->assertRedirect(route('rhu.pending-patients'));
+        $this->assertDatabaseHas('users', ['email' => 'inside@example.com', 'barangay' => 'Padlan']);
+    }
+
     public function test_directory_sorts_by_name_and_date_in_both_directions(): void
     {
         $cho = $this->patient(['role' => 'cho']);
