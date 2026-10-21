@@ -27,7 +27,7 @@ return [
 
     'openrouter' => [
         'api_key' => env('OPENROUTER_API_KEY', ''),
-        'model' => env('OPENROUTER_MODEL', 'openai/gpt-4o-mini'),
+        'model' => env('OPENROUTER_MODEL', 'google/gemini-2.0-flash-exp:free'),
     ],
 
     'postmark' => [
