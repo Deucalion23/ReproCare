@@ -30,6 +30,12 @@ class CloudAnalyticsContext
 
     public function build(array $report): array
     {
+        $filters = $report['filters'] ?? [];
+        $from = $filters['from'] ?? 'unspecified';
+        $to = $filters['to'] ?? 'unspecified';
+        $scopeLabel = $report['scope_label'] ?? 'City-wide · All RHUs';
+        $areaLabel = $report['area_label'] ?? 'All areas';
+
         $areas = [];
         $legend = [];
         foreach (array_slice($report['areas'] ?? [], 0, 10) as $index => $area) {
@@ -45,6 +51,13 @@ class CloudAnalyticsContext
 
         return [
             'context' => [
+                'scope_label' => $scopeLabel,
+                'area_label' => $areaLabel,
+                'date_range' => "{$from} to {$to}",
+                'applied_filters' => array_filter([
+                    'barangay' => $filters['barangay'] ?? null,
+                    'rhu' => $filters['rhu'] ?? null,
+                ]),
                 'scope' => (empty($report['filters']['barangay']) ? 'all selected areas' : 'one selected area')
                     .' across the '.count($monthly).' selected month(s)',
                 'definitions' => [

@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Services\GeminiAnalyticsService;
 
 class AIInsightService
 {
@@ -105,8 +106,15 @@ class AIInsightService
         if (config('services.analytics_ai.provider', 'rules') === 'openrouter') {
             return $this->openRouterAnswer($question, $report, $fallback);
         }
+        if (config('services.analytics_ai.provider', 'rules') === 'gemini') {
+            return $this->geminiAnswer($question, $report, $fallback);
+        }
         if (config('services.analytics_ai.provider', 'rules') !== 'ollama') {
-            return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answers use the selected report.'];
+            $filters = $report['filters'] ?? [];
+            $dateRange = (!empty($filters['from']) && !empty($filters['to']))
+                ? ' for '.$filters['from'].' to '.$filters['to']
+                : '';
+            return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answer based on the selected report'.$dateRange.'. Verify figures against local charts.'];
         }
 
         // Server configuration only; callers cannot choose an endpoint or model.
@@ -168,10 +176,13 @@ class AIInsightService
                 ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
                 : ['label' => 'Groq needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             'ollama' => ['label' => 'Local AI · Ollama', 'description' => 'Ollama generates a draft when available. Local rules take over if it is unavailable.'],
+            'gemini' => app(GeminiAnalyticsService::class)->configured()
+                ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
+                : ['label' => 'Gemini needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             'openrouter' => app(OpenRouterAnalyticsService::class)->configured()
                 ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
                 : ['label' => 'OpenRouter needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
-            default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable Groq or OpenRouter online AI, or Ollama local AI.'],
+            default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable Groq, Gemini, or OpenRouter online AI, or Ollama local AI.'],
         };
     }
 
@@ -191,8 +202,27 @@ class AIInsightService
             'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
             'topic' => CloudAnalyticsContext::TOPICS[$topic],
             'area_legend' => $prepared['area_legend'],
-            'notice' => 'Draft answer. '.($result['cached'] ? 'Reused a matching answer from the last five minutes. ' : '')
-                .'Based on exact counts and area aliases. Verify the draft against the exact local charts.',
+            'notice' => $this->aiNotice($result, $report),
+        ];
+    }
+
+    private function geminiAnswer(string $question, array $report, string $fallback): array
+    {
+        $projection = app(CloudAnalyticsContext::class);
+        $topic = $projection->topic($question) ?? 'general';
+        $prepared = $projection->build($report);
+        $result = app(GeminiAnalyticsService::class)->summarize($prepared['context'], $topic, true, $question);
+        if (! $result['ok']) {
+            return ['answer' => $fallback, 'source' => 'rules', 'error_code' => $result['error_code'],
+                'notice' => $result['message'].' Showing the local rules answer.'];
+        }
+
+        return [
+            'answer' => $result['answer'], 'source' => 'gemini', 'model' => $result['model'],
+            'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
+            'topic' => CloudAnalyticsContext::TOPICS[$topic],
+            'area_legend' => $prepared['area_legend'],
+            'notice' => $this->aiNotice($result, $report),
         ];
     }
 
@@ -212,8 +242,7 @@ class AIInsightService
             'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
             'topic' => CloudAnalyticsContext::TOPICS[$topic],
             'area_legend' => $prepared['area_legend'],
-            'notice' => 'Draft answer. '.($result['cached'] ? 'Reused a matching answer from the last five minutes. ' : '')
-                .'Based on exact counts and area aliases. Verify the draft against the exact local charts.',
+            'notice' => $this->aiNotice($result, $report),
         ];
     }
 
@@ -221,6 +250,18 @@ class AIInsightService
     private function aggregateContext(array $report): array
     {
         return array_intersect_key($report, array_flip(['filters', 'area_label', 'totals', 'risk_counts', 'monthly', 'areas']));
+    }
+
+    private function aiNotice(array $result, array $report): string
+    {
+        $filters = $report['filters'] ?? [];
+        $dateRange = (!empty($filters['from']) && !empty($filters['to']))
+            ? ' for '.$filters['from'].' to '.$filters['to']
+            : '';
+        $scope = $report['scope_label'] ?? 'all areas';
+        $cached = $result['cached'] ?? false;
+        $reused = $cached ? ' (reused from cache)' : '';
+        return 'AI draft based on the selected report: '.$scope.$dateRange.$reused.'. Verify figures against local charts.';
     }
 
     /**
