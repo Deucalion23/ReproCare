@@ -75,7 +75,8 @@ class GeminiAnalyticsService
                     'maxOutputTokens' => 2000,
                 ],
             ])->query(['key' => $apiKey])
-              ->connectTimeout(5)->timeout(20)->withoutRedirecting()->acceptJson();
+              ->connectTimeout(5)->timeout(20)->withoutRedirecting()->acceptJson()
+              ->withOptions(['verify' => false]);
 
             if (in_array($response->status(), [401, 403], true)) {
                 return $this->failure('authentication', 'Gemini rejected the API key. Check GEMINI_API_KEY and model permissions in Google AI Studio, then clear the app configuration cache.');
