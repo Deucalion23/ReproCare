@@ -15,14 +15,7 @@ return [
     */
 
     'analytics_ai' => [
-        'provider' => env('ANALYTICS_AI_PROVIDER', 'rules'),
-        'url' => env('OLLAMA_URL', 'http://127.0.0.1:11434'),
-        'model' => env('OLLAMA_MODEL', 'llama3.2:1b'),
-    ],
-
-    'groq' => [
-        'api_key' => env('GROQ_API_KEY', ''),
-        'model' => env('GROQ_MODEL', 'qwen/qwen3.8-27b'),
+        'provider' => env('ANALYTICS_AI_PROVIDER', 'openrouter'),
     ],
 
     'openrouter' => [
