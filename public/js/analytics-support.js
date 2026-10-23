@@ -31,8 +31,8 @@
         };
 
         const parsePatientItem = (text) => {
-            // Flexible match: Name - Barangay, EDD Date, (Risk); To do: todo
-            const m = text.match(/^([^-–]+?)\s*[-–]\s*([^,]+?),\s*EDD\s*([^;(]+?)\s*\(([^)]+)\)\s*;\s*To do:\s*(.+)$/i);
+            // Flexible match: Name - Barangay, EDD Date (Risk); To do: todo
+            const m = text.match(/^(.+?)\s*[-–]\s*([^,]+?),\s*EDD\s*([^;]*?)\s*\(([^)]+)\)\s*;\s*To do:\s*(.+)$/i);
             if (!m) return null;
             return {
                 name: m[1].trim(),
@@ -41,6 +41,7 @@
                 risk: m[4].trim(),
                 todo: m[5].trim()
             };
+        };
         };
 
         const renderPatientCards = (text) => {
