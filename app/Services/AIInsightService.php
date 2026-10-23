@@ -69,20 +69,44 @@ class AIInsightService
 
     public function chat(string $question, array $report): array
     {
-        $question = trim($question);
-        if ($question === '') {
-            return ['answer' => 'Please type a question.', 'source' => 'rules', 'error_code' => 'empty_question', 'notice' => 'Type a question about this report.'];
+        if (preg_match('/\b(?:what medicine to take|prescribe|dosage for|what dose should)\b/iu', $question)) {
+            return ['answer' => 'I can explain general maternal and reproductive health topics, but cannot choose an individual’s medicine or dosage. Please ask the responsible clinician to review the patient’s care plan.',
+                'source' => 'rules', 'error_code' => 'unsupported_topic', 'notice' => 'Individual treatment requires clinician review'];
         }
-        if (mb_strlen($question) > 1000) {
-            return ['answer' => 'Please keep your question under 1,000 characters.', 'source' => 'rules', 'error_code' => 'question_too_long', 'notice' => 'Shorten your question and try again.'];
+        if (preg_match('/\b(weather|bitcoin|crypto|football|basketball|movie|celebrity|stock price|gambling)\b/iu', $question)) {
+            return ['answer' => 'That question is outside my scope. I can help with maternal and reproductive health, ReproCare, and this analytics report.',
+                'source' => 'rules', 'error_code' => 'out_of_scope', 'notice' => 'Outside the assistant’s scope'];
         }
-
+        if (preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|(?:\+?63|0)9\d[\d\s-]{8,}|\bgsk_[A-Za-z0-9]+|\b(?:patient\s*(?:id|name)|medical record number)\s*[:#]/iu', $question)) {
+            return ['answer' => 'Please remove names, patient identifiers, contact details, and credentials. Ask a general health, workflow, or report question instead.',
+                'source' => 'rules', 'error_code' => 'private_question', 'notice' => 'Question kept on this server'];
+        }
+        // Meta questions ("what can you do?") get a capabilities answer.
+        if (preg_match('/\bwhat can (you|u|i ask)|what do you (do|know)|capabilit|anong kaya|kaya mo|commands?\b|^\s*help\s*$/iu', $question)) {
+            return ['answer' => $this->capabilitiesAnswer(), 'source' => 'rules',
+                'notice' => 'Local capabilities guide.'];
+        }
+        // Explicit data lists stay local. The cloud receives only aggregate,
+        // aliased data and must never receive names from the review queue.
+        if ($criteria = app(AnalyticsQuestion::class)->listing($question)) {
+            return ['answer' => $this->listingAnswer($criteria, $report), 'source' => 'rules',
+                'notice' => 'Local listing for the applied report scope.'];
+        }
+        // Month-aware, data-based answers run before any generic summary so
+        // comparisons name exact months with real counts from the database.
+        $monthAnswer = $this->monthAwareAnswer($question, $report);
+        if ($monthAnswer !== null) {
+            return $monthAnswer;
+        }
         $fallback = $this->localAnswer($question, $report);
-        if (config('services.analytics_ai.provider', 'openrouter') === 'openrouter') {
+        if (config('services.analytics_ai.provider', 'rules') === 'openrouter') {
             return $this->openRouterAnswer($question, $report, $fallback);
         }
-
-        return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answer based on the selected report. Verify figures against local charts.'];
+        $filters = $report['filters'] ?? [];
+        $dateRange = (!empty($filters['from']) && !empty($filters['to']))
+            ? ' for '.$filters['from'].' to '.$filters['to']
+            : '';
+        return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answer based on the selected report'.$dateRange.'. Verify figures against local charts.'];
     }
 
     /** Configuration status only: rendering analytics must never call a model. */
