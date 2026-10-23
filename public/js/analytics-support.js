@@ -31,7 +31,8 @@
         };
 
         const parsePatientItem = (text) => {
-            const m = text.match(/^([^–-]+)\s*–\s*([^,]+),\s*EDD\s*([^;(]+?)\s*\(([^)]+)\);\s*To do:\s*(.+)$/i);
+            // Flexible match: Name - Barangay, EDD Date, (Risk); To do: todo
+            const m = text.match(/^([^-–]+?)\s*[-–]\s*([^,]+?),\s*EDD\s*([^;(]+?)\s*\(([^)]+)\)\s*;\s*To do:\s*(.+)$/i);
             if (!m) return null;
             return {
                 name: m[1].trim(),
@@ -43,7 +44,9 @@
         };
 
         const renderPatientCards = (text) => {
-            const items = text.split(/•\s*/).filter(s => s.trim().length).map(parsePatientItem).filter(Boolean);
+            // Split by bullet and try to parse each patient item
+            const chunks = text.split(/•\s*/).filter(s => s.trim().length);
+            const items = chunks.map(parsePatientItem).filter(Boolean);
             if (!items.length) return null;
 
             const grid = document.createElement('div');
@@ -89,17 +92,16 @@
             const body = document.createElement('div');
             body.className = 'an-answer-body';
 
-            // Try patient-card rendering first (local listing data)
-            if (htmlSafeText.includes('EDD') && htmlSafeText.includes('To do:')) {
-                const cards = renderPatientCards(htmlSafeText);
-                if (cards) {
-                    body.appendChild(cards);
-                    wrap.appendChild(body);
-                    container.appendChild(wrap);
-                    return;
-                }
+            // Try patient-card rendering first (local listing data with names)
+            const cards = renderPatientCards(htmlSafeText);
+            if (cards) {
+                body.appendChild(cards);
+                wrap.appendChild(body);
+                container.appendChild(wrap);
+                return;
             }
 
+            // Fallback: paragraph / bullet list rendering
             const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
             let currentList = null;
             paras.forEach(para => {
