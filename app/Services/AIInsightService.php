@@ -76,16 +76,12 @@ class AIInsightService
         if (mb_strlen($question) > 1000) {
             return ['answer' => 'Please keep your question under 1,000 characters.', 'source' => 'rules', 'error_code' => 'question_too_long', 'notice' => 'Shorten your question and try again.'];
         }
-        // Protect patient confidentiality: never disclose specific names or identifiers via AI.
-        if (preg_match('/\b(list|show|tell|give|names? of|who are|which)\b.*\b(name|named|identif|contact|phone|number|MRN|record)\b/iu', $question)
-            || preg_match('/\b(list|show|tell|give|names? of|who are|which)\b.*\b(women|patients|pregnancies|individuals|people)\b/iu', $question)) {
-            return ['answer' => 'Patient names and individual identifiers are confidential and are not disclosed through the AI assistant. Please review the local priority queue or patient charts in ReproCare for specific names and follow-up details.',
-                'source' => 'rules', 'error_code' => 'confidential_names', 'notice' => 'Patient names are kept local and are not shared with the AI model.'];
-        }
+
         $fallback = $this->localAnswer($question, $report);
         if (config('services.analytics_ai.provider', 'openrouter') === 'openrouter') {
             return $this->openRouterAnswer($question, $report, $fallback);
         }
+
         return ['answer' => $fallback, 'source' => 'rules', 'notice' => 'Answer based on the selected report. Verify figures against local charts.'];
     }
 
