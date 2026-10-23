@@ -293,6 +293,12 @@
 .analytics .an-answer-body ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
 .analytics .an-answer-body li { position:relative; padding-left:26px; font-size:.84rem; line-height:1.8; color:var(--an-text); }
 .analytics .an-answer-body li::before { content:''; position:absolute; left:6px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--an-accent); flex-shrink:0; }
+/* Patient card view when AI returns name-delimited list */
+.analytics .an-patient-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; margin-top:8px; }
+.analytics .an-patient-card { display:flex; flex-direction:column; gap:8px; padding:12px 14px; border:1px solid var(--an-border); border-radius:10px; background:var(--an-surface); }
+.analytics .an-patient-name { font-weight:750; color:var(--an-text); font-size:.85rem; }
+.analytics .an-patient-meta { font-size:.75rem; color:var(--an-muted); display:flex; gap:8px; flex-wrap:wrap; }
+.analytics .an-patient-meta span { white-space:nowrap; }
 .analytics .an-answer-body strong { color:var(--an-text); }
 .analytics .an-answer-actions { display:flex; align-items:center; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid var(--an-border); flex-wrap:wrap; }
 .analytics .an-action-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; border:1px solid var(--an-border); background:var(--an-surface); color:var(--an-text); font-size:.72rem; font-weight:600; cursor:pointer; transition:all .15s ease; }

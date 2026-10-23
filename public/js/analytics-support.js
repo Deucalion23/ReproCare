@@ -29,7 +29,6 @@
             container.innerHTML = '';
             const wrap = document.createElement('div');
             wrap.className = 'an-answer-wrap';
-            const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
 
             const header = document.createElement('div');
             header.className = 'an-answer-header';
@@ -39,6 +38,7 @@
             const body = document.createElement('div');
             body.className = 'an-answer-body';
             let currentList = null;
+            const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
             paras.forEach(para => {
                 const lines = para.split(/\n+/).map(l => l.trim()).filter(l => l.length);
                 const isList = lines.every(l => l.startsWith('- ') || l.startsWith('• ') || l.startsWith('– '));
