@@ -75,9 +75,22 @@
         const sourceBadge = (source, model, cached) => {
             const label = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
             const span = document.createElement('span');
-            span.className = `an-answer-source${cached ? ' cached' : ''}`;
+            span.className = `an-answer-source ${source}${cached ? ' cached' : ''}`;
             span.innerHTML = `<span class="dot"></span>${label}${model ? ' · ' + model : ''}${cached ? ' · cached' : ''}`;
             return span;
+        };
+
+        const copyAnswer = (text) => {
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = document.getElementById('analytics-copy-btn');
+                const orig = btn.innerHTML;
+                btn.innerHTML = '<i class="bi bi-check2" aria-hidden="true"></i> Copied';
+                btn.classList.add('copied');
+                setTimeout(() => {
+                    btn.innerHTML = orig;
+                    btn.classList.remove('copied');
+                }, 1500);
+            });
         };
 
         form.addEventListener('submit', async event => {
@@ -112,6 +125,30 @@
                 notice.textContent = '';
                 renderAnswer(answer, data.answer);
                 answer.appendChild(sourceBadge(data.source, data.model, data.cached));
+                const actions = document.createElement('div');
+                actions.className = 'an-answer-actions';
+                const copyBtn = document.createElement('button');
+                copyBtn.id = 'analytics-copy-btn';
+                copyBtn.className = 'an-action-btn';
+                copyBtn.innerHTML = '<i class="bi bi-clipboard" aria-hidden="true"></i> Copy';
+                copyBtn.addEventListener('click', () => copyAnswer(data.answer));
+                actions.appendChild(copyBtn);
+                const verified = document.createElement('span');
+                verified.className = 'an-answer-verified';
+                verified.innerHTML = '<i class="bi bi-check2-circle" aria-hidden="true"></i> Verified counts';
+                actions.appendChild(verified);
+                const regenBtn = document.createElement('button');
+                regenBtn.className = 'an-action-btn';
+                regenBtn.innerHTML = '<i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Regenerate';
+                regenBtn.addEventListener('click', () => {
+                    question.value = question.value.trim();
+                    form.dispatchEvent(new Event('submit'));
+                });
+                actions.appendChild(regenBtn);
+                answer.appendChild(actions);
+                const ts = document.createElement('div');
+                ts.className = 'an-answer-timestamp';
+                answer.appendChild(ts);
                 if (data.source === 'groq' || data.source === 'openrouter') {
                     const lines = [data.topic || 'Report summary'];
                     if (Array.isArray(data.area_legend) && data.area_legend.length) {
