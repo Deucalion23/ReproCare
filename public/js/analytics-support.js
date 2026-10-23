@@ -103,7 +103,7 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(response.status === 422 ? Object.values(data.errors || {}).flat()[0] || 'Check your question and filters.' : 'The report could not be loaded. Please try again.');
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
-                notice.textContent = data.notice || ({ groq: 'Draft answer', openrouter: 'Draft answer', ollama: 'Draft answer' }[data.source] || 'Assistant');
+                notice.textContent = '';
                 renderAnswer(answer, data.answer);
                 answer.appendChild(sourceBadge(data.source, data.model, data.cached));
                 if (data.source === 'groq' || data.source === 'openrouter') {

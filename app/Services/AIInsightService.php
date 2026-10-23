@@ -188,14 +188,7 @@ class AIInsightService
 
     private function aiNotice(array $result, array $report): string
     {
-        $filters = $report['filters'] ?? [];
-        $dateRange = (!empty($filters['from']) && !empty($filters['to']))
-            ? ' for '.$filters['from'].' to '.$filters['to']
-            : '';
-        $scope = $report['scope_label'] ?? 'all areas';
-        $cached = $result['cached'] ?? false;
-        $reused = $cached ? ' (reused from cache)' : '';
-        return 'AI draft based on the selected report: '.$scope.$dateRange.$reused.'. Verify figures against local charts.';
+        return '';
     }
 
     /**
