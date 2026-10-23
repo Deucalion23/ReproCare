@@ -24,6 +24,57 @@
         });
         question.addEventListener('input', updateTopics);
 
+        const escapeHtml = (text) => {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        const parsePatientItem = (text) => {
+            const m = text.match(/^([^–-]+)\s*–\s*([^,]+),\s*EDD\s*([^;(]+?)\s*\(([^)]+)\);\s*To do:\s*(.+)$/i);
+            if (!m) return null;
+            return {
+                name: m[1].trim(),
+                barangay: m[2].trim(),
+                edd: m[3].trim(),
+                risk: m[4].trim(),
+                todo: m[5].trim()
+            };
+        };
+
+        const renderPatientCards = (text) => {
+            const items = text.split(/•\s*/).filter(s => s.trim().length).map(parsePatientItem).filter(Boolean);
+            if (!items.length) return null;
+
+            const grid = document.createElement('div');
+            grid.className = 'an-patient-list';
+
+            items.forEach(item => {
+                const card = document.createElement('article');
+                card.className = 'an-patient-card';
+
+                const riskClass = item.risk.toLowerCase();
+
+                card.innerHTML = `
+                    <div class="an-patient-info">
+                        <div class="an-patient-name">${escapeHtml(item.name)}</div>
+                        <div class="an-patient-meta">
+                            <span>${escapeHtml(item.barangay)}</span>
+                            <span>•</span>
+                            <span>EDD ${escapeHtml(item.edd)}</span>
+                        </div>
+                    </div>
+                    <div class="an-patient-actions">
+                        <span class="an-badge ${riskClass}">${escapeHtml(item.risk)}</span>
+                        <div class="an-patient-todo">${escapeHtml(item.todo)}</div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            return grid;
+        };
+
         /** Safely render untrusted AI text into structured DOM (no innerHTML). */
         const renderAnswer = (container, htmlSafeText) => {
             container.innerHTML = '';
@@ -37,8 +88,20 @@
 
             const body = document.createElement('div');
             body.className = 'an-answer-body';
-            let currentList = null;
+
+            // Try patient-card rendering first (local listing data)
+            if (htmlSafeText.includes('EDD') && htmlSafeText.includes('To do:')) {
+                const cards = renderPatientCards(htmlSafeText);
+                if (cards) {
+                    body.appendChild(cards);
+                    wrap.appendChild(body);
+                    container.appendChild(wrap);
+                    return;
+                }
+            }
+
             const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
+            let currentList = null;
             paras.forEach(para => {
                 const lines = para.split(/\n+/).map(l => l.trim()).filter(l => l.length);
                 const isList = lines.every(l => l.startsWith('- ') || l.startsWith('• ') || l.startsWith('– '));

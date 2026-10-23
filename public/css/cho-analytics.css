@@ -299,6 +299,7 @@
 .analytics .an-patient-name { font-weight:750; color:var(--an-text); font-size:.85rem; }
 .analytics .an-patient-meta { font-size:.75rem; color:var(--an-muted); display:flex; gap:8px; flex-wrap:wrap; }
 .analytics .an-patient-meta span { white-space:nowrap; }
+.analytics .an-patient-todo { font-size:.78rem; color:var(--an-text); margin-top:6px; line-height:1.5; }
 .analytics .an-answer-body strong { color:var(--an-text); }
 .analytics .an-answer-actions { display:flex; align-items:center; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid var(--an-border); flex-wrap:wrap; }
 .analytics .an-action-btn { display:inline-flex; align-items:center; gap:6px; padding:6px 14px; border-radius:8px; border:1px solid var(--an-border); background:var(--an-surface); color:var(--an-text); font-size:.72rem; font-weight:600; cursor:pointer; transition:all .15s ease; }
