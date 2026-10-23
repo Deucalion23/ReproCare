@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class GeminiAnalyticsService
@@ -24,18 +23,8 @@ class GeminiAnalyticsService
             return $this->failure('configuration', 'Check GEMINI_MODEL and the selected report topic.');
         }
         $apiKey = trim((string) config('services.gemini.api_key'));
-        $keyFingerprint = hash('sha256', $apiKey);
-        $cacheKey = 'analytics:gemini:v1:'.hash('sha256', $keyFingerprint.$model.$topic.json_encode([$context, $question], JSON_THROW_ON_ERROR));
-        $cooldownKey = 'analytics:gemini:cooldown:'.$keyFingerprint;
 
         try {
-            if ($useCache && ($cached = Cache::get($cacheKey))) {
-                return $cached + ['cached' => true];
-            }
-            if ($useCache && Cache::has($cooldownKey)) {
-                return $this->failure('rate_limited', 'Gemini has reached a usage limit. Wait a minute and try again, or check the limits in your Google AI account.');
-            }
-
             $systemPrompt = 'You assist authorized health staff with administrative analytics. '
                 .'Always anchor your answer to the applied report scope: state the area label, date range, and scope at the start, then answer only from this filtered report. '
                 .'Your scope is maternal and reproductive health education, ReproCare workflows, and report-based decision support. '
@@ -82,9 +71,6 @@ class GeminiAnalyticsService
                 return $this->failure('authentication', 'Gemini rejected the API key. Check GEMINI_API_KEY and model permissions in Google AI Studio, then clear the app configuration cache.');
             }
             if ($response->status() === 429) {
-                if ($useCache) {
-                    Cache::put($cooldownKey, true, 60);
-                }
                 return $this->failure('rate_limited', 'Gemini has reached a usage limit. Wait a minute and try again, or check the limits in your Google AI account.');
             }
             if (in_array($response->status(), [400, 404, 422], true)) {
@@ -102,12 +88,9 @@ class GeminiAnalyticsService
             }
 
             $result = ['ok' => true, 'answer' => trim($answer), 'source' => 'gemini', 'model' => $model,
-                'generated_at' => now()->toIso8601String()];
-            if ($useCache) {
-                Cache::put($cacheKey, $result, 300);
-            }
+                'generated_at' => now()->toIso8601String(), 'cached' => false];
 
-            return $result + ['cached' => false];
+            return $result;
         } catch (\Throwable $e) {
             return $this->failure('connection', 'The app could not complete the Gemini request. Check the internet connection and PHP HTTPS certificate configuration, then try again.');
         }

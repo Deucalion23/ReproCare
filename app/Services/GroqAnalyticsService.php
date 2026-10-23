@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 
 class GroqAnalyticsService
@@ -74,10 +73,6 @@ class GroqAnalyticsService
                 return $this->failure('authentication', 'Groq rejected the key or model access. Check your API key and model permissions in Groq, then clear the app configuration cache.');
             }
             if ($response->status() === 429) {
-                if ($useCache) {
-                    Cache::put($cooldownKey, true, 60);
-                }
-
                 return $this->failure('rate_limited', 'Groq has reached a usage limit. Wait a minute and try again, or check the limits in your Groq account.');
             }
             if (in_array($response->status(), [400, 404, 422], true)) {
@@ -93,13 +88,9 @@ class GroqAnalyticsService
                 return $this->failure('incomplete', 'Groq returned an incomplete answer. Please try again.');
             }
             $result = ['ok' => true, 'answer' => trim($answer), 'source' => 'groq', 'model' => $model,
-                'generated_at' => now()->toIso8601String()];
-            // Only complete answers are cached. Keys contain hashes, never API keys or questions.
-            if ($useCache) {
-                Cache::put($cacheKey, $result, 300);
-            }
+                'generated_at' => now()->toIso8601String(), 'cached' => false];
 
-            return $result + ['cached' => false];
+            return $result;
         } catch (\Throwable $e) {
             // Do not log authentication headers, prompts, response bodies, or provider exceptions.
             return $this->failure('connection', 'The app could not complete the Groq request. Check the internet connection and PHP HTTPS certificate configuration, then try again.');
