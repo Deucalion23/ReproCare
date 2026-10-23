@@ -167,10 +167,13 @@
 .analytics .an-answer-source { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:.65rem; font-weight:700; background:color-mix(in srgb, var(--an-accent) 12%, transparent); color:var(--an-accent); border:1px solid color-mix(in srgb, var(--an-accent) 35%, transparent); white-space:nowrap; }
 .analytics .an-answer-source .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
 .analytics .an-answer-source.cached { background:color-mix(in srgb, var(--color-success) 12%, transparent); color:var(--color-success-text); border-color:color-mix(in srgb, var(--color-success) 35%, transparent); }
-.analytics .an-answer-body { display:flex; flex-direction:column; gap:8px; }
+.analytics .an-answer-header { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.08em; color:var(--an-accent); }
+.analytics .an-answer-header i { width:18px; height:18px; display:grid; place-items:center; border-radius:6px; background:var(--an-accent-soft); color:var(--an-accent); font-size:.8rem; }
+.analytics .an-answer-body { display:flex; flex-direction:column; gap:12px; }
 .analytics .an-answer-body p { margin:0; font-size:.82rem; line-height:1.75; }
-.analytics .an-answer-body ul { margin:0 0 0 16px; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; }
-.analytics .an-answer-body li { position:relative; padding-left:20px; font-size:.82rem; line-height:1.75; }
+.analytics .an-answer-body p + p { margin-top:8px; }
+.analytics .an-answer-body ul { margin:0 0 0 18px; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; }
+.analytics .an-answer-body li { position:relative; padding-left:22px; font-size:.82rem; line-height:1.75; }
 .analytics .an-answer-body li::before { content:'–'; position:absolute; left:0; top:1px; color:var(--an-accent); font-weight:800; }
 .analytics .an-answer-body strong { color:var(--an-text); }
 .analytics .an-answer-body .an-data-callout { margin-top:8px; padding:10px 12px; border:1px dashed var(--an-border); border-radius:10px; background:color-mix(in srgb, var(--an-accent) 6%, transparent); font-size:.78rem; line-height:1.65; }

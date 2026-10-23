@@ -30,6 +30,12 @@
             const wrap = document.createElement('div');
             wrap.className = 'an-answer-wrap';
             const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
+
+            const header = document.createElement('div');
+            header.className = 'an-answer-header';
+            header.innerHTML = '<i class="bi bi-robot" aria-hidden="true"></i>AI Answer';
+            wrap.appendChild(header);
+
             const body = document.createElement('div');
             body.className = 'an-answer-body';
             let currentList = null;
