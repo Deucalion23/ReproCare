@@ -162,7 +162,18 @@
 .analytics .an-result { background:var(--an-soft); border:1px solid var(--an-border); border-radius:12px; padding:15px; margin-top:16px; }
 .analytics .an-result-wide { grid-column:1 / -1; min-width:0; margin-top:0; }
 .analytics .an-result[hidden] { display:none; }
-.analytics .an-answer { white-space:pre-wrap; overflow-wrap:anywhere; line-height:1.75; }
+.analytics .an-answer { overflow-wrap:anywhere; line-height:1.75; }
+.analytics .an-answer-wrap { display:flex; flex-direction:column; gap:10px; }
+.analytics .an-answer-source { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; font-size:.65rem; font-weight:700; background:color-mix(in srgb, var(--an-accent) 12%, transparent); color:var(--an-accent); border:1px solid color-mix(in srgb, var(--an-accent) 35%, transparent); white-space:nowrap; }
+.analytics .an-answer-source .dot { width:6px; height:6px; border-radius:50%; background:currentColor; }
+.analytics .an-answer-source.cached { background:color-mix(in srgb, var(--color-success) 12%, transparent); color:var(--color-success-text); border-color:color-mix(in srgb, var(--color-success) 35%, transparent); }
+.analytics .an-answer-body { display:flex; flex-direction:column; gap:8px; }
+.analytics .an-answer-body p { margin:0; font-size:.82rem; line-height:1.75; }
+.analytics .an-answer-body ul { margin:0 0 0 16px; padding:0; list-style:none; display:flex; flex-direction:column; gap:4px; }
+.analytics .an-answer-body li { position:relative; padding-left:20px; font-size:.82rem; line-height:1.75; }
+.analytics .an-answer-body li::before { content:'–'; position:absolute; left:0; top:1px; color:var(--an-accent); font-weight:800; }
+.analytics .an-answer-body strong { color:var(--an-text); }
+.analytics .an-answer-body .an-data-callout { margin-top:8px; padding:10px 12px; border:1px dashed var(--an-border); border-radius:10px; background:color-mix(in srgb, var(--an-accent) 6%, transparent); font-size:.78rem; line-height:1.65; }
 .analytics .an-assistant-footer { display:flex; align-items:flex-start; gap:7px; padding-top:14px; margin:14px 0 0; border-top:1px solid var(--an-border); font-size:.7rem; color:var(--an-muted); line-height:1.6; }
 
 .analytics .an-charts { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); align-items:stretch; gap:12px; margin-bottom:12px; }

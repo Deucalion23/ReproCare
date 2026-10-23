@@ -23,6 +23,57 @@
             });
         });
         question.addEventListener('input', updateTopics);
+
+        /** Safely render untrusted AI text into structured DOM (no innerHTML). */
+        const renderAnswer = (container, htmlSafeText) => {
+            container.innerHTML = '';
+            const wrap = document.createElement('div');
+            wrap.className = 'an-answer-wrap';
+            const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
+            const body = document.createElement('div');
+            body.className = 'an-answer-body';
+            let currentList = null;
+            paras.forEach(para => {
+                const lines = para.split(/\n+/).map(l => l.trim()).filter(l => l.length);
+                const isList = lines.every(l => l.startsWith('- ') || l.startsWith('• ') || l.startsWith('– '));
+                if (isList) {
+                    if (!currentList) {
+                        currentList = document.createElement('ul');
+                        body.appendChild(currentList);
+                    }
+                    lines.forEach(l => {
+                        const li = document.createElement('li');
+                        li.textContent = l.replace(/^[–\-•]\s*/, '');
+                        currentList.appendChild(li);
+                    });
+                } else {
+                    currentList = null;
+                    const p = document.createElement('p');
+                    const parts = para.split(/\*\*([^*]+)\*\*/);
+                    parts.forEach((part, i) => {
+                        if (i % 2 === 1) {
+                            const b = document.createElement('strong');
+                            b.textContent = part;
+                            p.appendChild(b);
+                        } else if (part.length) {
+                            p.append(document.createTextNode(part));
+                        }
+                    });
+                    body.appendChild(p);
+                }
+            });
+            wrap.appendChild(body);
+            container.appendChild(wrap);
+        };
+
+        const sourceBadge = (source, model, cached) => {
+            const label = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
+            const span = document.createElement('span');
+            span.className = `an-answer-source${cached ? ' cached' : ''}`;
+            span.innerHTML = `<span class="dot"></span>${label}${model ? ' · ' + model : ''}${cached ? ' · cached' : ''}`;
+            return span;
+        };
+
         form.addEventListener('submit', async event => {
             event.preventDefault();
             if (button.disabled || !question.value.trim()) return;
@@ -31,7 +82,7 @@
             result.hidden = false;
             result.setAttribute('aria-busy', 'true');
             notice.textContent = 'Preparing an answer for the applied filters…';
-            answer.textContent = '';
+            answer.innerHTML = '';
             context.textContent = '';
             const controller = new AbortController();
             const timer = setTimeout(() => controller.abort(), 30000);
@@ -52,22 +103,26 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(response.status === 422 ? Object.values(data.errors || {}).flat()[0] || 'Check your question and filters.' : 'The report could not be loaded. Please try again.');
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
-                // Model output is untrusted text, never HTML or executable Markdown.
                 notice.textContent = data.notice || ({ groq: 'Draft answer', openrouter: 'Draft answer', ollama: 'Draft answer' }[data.source] || 'Assistant');
-                answer.textContent = data.answer;
+                answer.appendChild(sourceBadge(data.source, data.model, data.cached));
+                renderAnswer(answer, data.answer);
                 if (data.source === 'groq' || data.source === 'openrouter') {
                     const lines = [data.topic || 'Report summary'];
                     if (Array.isArray(data.area_legend) && data.area_legend.length) {
                         lines.push(data.area_legend.map(area => `${area.alias}: ${area.label}`).join('; '));
                     }
-                    lines.push(`Month 1 starts in ${filters.from.slice(0, 7)}. Counts shown are exact recorded numbers for the applied filters.`);
+                    lines.push(`Counts shown are exact recorded numbers for the applied filters.`);
                     context.textContent = lines.join(' ');
                 }
             } catch (error) {
                 notice.textContent = 'Answer unavailable';
-                answer.textContent = error.name === 'AbortError'
+                answer.innerHTML = '';
+                answer.appendChild(sourceBadge('rules', null, false));
+                const p = document.createElement('p');
+                p.textContent = error.name === 'AbortError'
                     ? 'The request took too long. Try again; the suggested next steps remain available above.'
                     : error.message || 'Unable to connect. Please try again.';
+                answer.appendChild(p);
             } finally {
                 clearTimeout(timer);
                 button.disabled = false;
