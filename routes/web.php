@@ -9,6 +9,7 @@ use App\Http\Controllers\BhwPresidentController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CheckupController;
 use App\Http\Controllers\HealthRecordController;
+use App\Http\Controllers\PatientConditionController;
 use App\Http\Controllers\PregnancyController;
 use App\Http\Controllers\MenstruationController;
 use App\Http\Controllers\FamilyPlanningController;
@@ -810,6 +811,13 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         ->whereIn('type', WomenDirectoryService::TYPES)
         ->whereNumber('id')
         ->name('women.show');
+    Route::post('/women/registered/{womanId}/conditions', [PatientConditionController::class, 'store'])
+        ->whereNumber('womanId')
+        ->name('women.conditions.store');
+    Route::put('/women/registered/{womanId}/conditions/{conditionId}', [PatientConditionController::class, 'update'])
+        ->whereNumber('womanId')
+        ->whereNumber('conditionId')
+        ->name('women.conditions.update');
 
     // Women: registration & account verification (RHU Admin only)
     Route::get('/patients/create', [RhuController::class, 'createPatient'])->name('patients.create');

@@ -466,6 +466,11 @@
     </div>
 </div>
 
+@include('partials.patient-conditions', [
+    'medicalConditions' => $medicalConditions,
+    'canManageConditions' => $canManageConditions,
+])
+
 {{-- ═══════════════════════════════
      HEALTH RECORDS CARD
 ═══════════════════════════════ --}}

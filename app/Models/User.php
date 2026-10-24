@@ -352,6 +352,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(EmergencyContact::class, 'user_id')->ordered();
     }
 
+    public function patientConditions()
+    {
+        return $this->hasMany(PatientCondition::class, 'user_id')->latest();
+    }
+
     public function primaryEmergencyContact()
     {
         return $this->hasOne(EmergencyContact::class, 'user_id')->where('contact_order', 1);
