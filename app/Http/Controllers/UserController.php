@@ -281,6 +281,7 @@ class UserController extends Controller
         }
 
         $maternalCare = $pregnancy->maternalCareTargetClient;
+        $postpartumPlan = $pregnancy->familyPlanningRecords()->latest()->first();
         $checkups = Auth::user()->checkups()
             ->where('pregnancy_id', $pregnancy->id)
             ->orderBy('scheduled_date', 'desc')
@@ -288,7 +289,7 @@ class UserController extends Controller
             ->get();
         $nextCheckup = Auth::user()->checkups()->scheduled()->upcoming()->orderBy('scheduled_date')->first();
 
-        return view('user.pregnancies.show', compact('pregnancy', 'maternalCare', 'checkups', 'nextCheckup'));
+        return view('user.pregnancies.show', compact('pregnancy', 'maternalCare', 'checkups', 'nextCheckup', 'postpartumPlan'));
     }
 
     // Menstruation Tracking

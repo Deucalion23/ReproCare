@@ -59,10 +59,14 @@ class PostpartumController extends Controller
     public function showMother($id)
     {
         $mother = User::where('role', 'user')
-            ->with(['newborns.immunizations', 'postpartumVisits.recordedBy', 'pregnancies'])
+            ->with(['newborns.immunizations', 'postpartumVisits.recordedBy', 'pregnancies', 'familyPlanningRecords.pregnancy'])
             ->findOrFail($id);
 
-        return view('postpartum.show', compact('mother'));
+        $postpartumPlans = $mother->familyPlanningRecords
+            ->where('is_postpartum_plan', true)
+            ->filter(fn ($plan) => $plan->pregnancy?->delivery_date !== null);
+
+        return view('postpartum.show', compact('mother', 'postpartumPlans'));
     }
 
     public function createNewborn(Request $request)

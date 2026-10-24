@@ -7,16 +7,17 @@ use Illuminate\Database\Eloquent\Model;
 class FamilyPlanningRecord extends Model
 {
     protected $fillable = [
-        'user_id', 'recorded_by_id', 'preferred_method', 'method_given',
+        'user_id', 'pregnancy_id', 'is_postpartum_plan', 'postpartum_start_timing', 'recorded_by_id', 'preferred_method', 'method_given',
         'pregnancy_intention', 'counseling_date', 'start_date', 'stop_date',
         'next_follow_up', 'side_effects', 'notes', 'informed_choice_confirmed', 'status',
     ];
 
     protected $casts = [
         'counseling_date' => 'date', 'start_date' => 'date', 'stop_date' => 'date',
-        'next_follow_up' => 'date', 'informed_choice_confirmed' => 'boolean',
+        'next_follow_up' => 'date', 'informed_choice_confirmed' => 'boolean', 'is_postpartum_plan' => 'boolean',
     ];
 
     public function client() { return $this->belongsTo(User::class, 'user_id'); }
+    public function pregnancy() { return $this->belongsTo(Pregnancy::class); }
     public function recordedBy() { return $this->belongsTo(User::class, 'recorded_by_id'); }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\FamilyPlanningRecord;
+use App\Models\Pregnancy;
 use App\Models\User;
 use App\Services\BhwPresidentAssignmentService;
 use Illuminate\Http\Request;
@@ -17,13 +18,18 @@ class FamilyPlanningController extends Controller
         return view('user.family-planning.index', compact('records'));
     }
 
-    public function patientCreate() { return view('user.family-planning.create'); }
+    public function patientCreate()
+    {
+        $activePregnancy = auth()->user()->pregnancyBlockingMenstrualLogging();
+        return view('user.family-planning.create', compact('activePregnancy'));
+    }
 
     public function patientStore(Request $request)
     {
         $data = $this->validated($request, false);
         $data['user_id'] = auth()->id();
         $data['status'] = 'requested';
+        $this->attachPostpartumPlan($data, $request);
         FamilyPlanningRecord::create($data);
         return redirect()->route('user.family-planning.index')->with('success', 'Your counseling request was saved. A health worker will discuss options with you privately.');
     }
@@ -50,6 +56,7 @@ class FamilyPlanningController extends Controller
         $this->ensureClientInScope((int) $data['user_id']);
         $data['recorded_by_id'] = auth()->id();
         $data['informed_choice_confirmed'] = $request->boolean('informed_choice_confirmed');
+        $this->attachPostpartumPlan($data, $request);
         FamilyPlanningRecord::create($data);
         return redirect()->route($this->staffRoute('index'))->with('success', 'Family-planning service record saved.');
     }
@@ -67,6 +74,7 @@ class FamilyPlanningController extends Controller
         $data = $this->validated($request, true);
         $this->ensureClientInScope((int) $data['user_id']);
         $data['informed_choice_confirmed'] = $request->boolean('informed_choice_confirmed');
+        $this->attachPostpartumPlan($data, $request, $record);
         $record->update($data);
         return redirect()->route($this->staffRoute('index'))->with('success', 'Family-planning service record updated.');
     }
@@ -76,6 +84,8 @@ class FamilyPlanningController extends Controller
         $rules = [
             'preferred_method' => 'nullable|in:'.implode(',', self::METHODS),
             'pregnancy_intention' => 'nullable|in:trying,avoiding,undecided,spacing',
+            'is_postpartum_plan' => 'nullable|boolean',
+            'postpartum_start_timing' => 'nullable|in:immediately_after_delivery,before_discharge,six_week_visit,undecided',
             'notes' => 'nullable|string|max:1000',
         ];
         if ($staff) {
@@ -87,6 +97,18 @@ class FamilyPlanningController extends Controller
             ];
         }
         return $request->validate($rules);
+    }
+
+    /** Attach a plan only to the client's current pregnancy; never trust a pregnancy ID from the browser. */
+    private function attachPostpartumPlan(array &$data, Request $request, ?FamilyPlanningRecord $existing = null): void
+    {
+        $isPlan = $request->boolean('is_postpartum_plan');
+        $data['is_postpartum_plan'] = $isPlan;
+        $data['postpartum_start_timing'] = $isPlan ? ($data['postpartum_start_timing'] ?? 'undecided') : null;
+        $currentPregnancyId = Pregnancy::where('user_id', $data['user_id'])->whereNull('ended_at')->latest('lmp')->value('id');
+        // An existing plan must remain connected after delivery, when there
+        // is no longer an open pregnancy record to find.
+        $data['pregnancy_id'] = $isPlan ? ($currentPregnancyId ?: $existing?->pregnancy_id) : null;
     }
 
     private function clients()

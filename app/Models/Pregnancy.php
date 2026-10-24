@@ -138,6 +138,11 @@ class Pregnancy extends Model
         return $this->hasMany(Newborn::class, 'pregnancy_id');
     }
 
+    public function familyPlanningRecords()
+    {
+        return $this->hasMany(FamilyPlanningRecord::class);
+    }
+
     // Alias for backward compatibility
     public function user()
     {
