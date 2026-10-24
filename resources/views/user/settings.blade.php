@@ -459,21 +459,13 @@
                                            placeholder="e.g. 123, Unit 4B, Lot 7">
                                 </div>
 
-                                {{-- Purok (free text, adapting to sign up page) --}}
+                                {{-- One location-detail field: never split purok, sitio, and street. --}}
                                 <div class="col-md-6">
-                                    <label class="form-label">Purok <span class="text-muted fw-normal">(Optional)</span></label>
+                                    <label class="form-label">Purok / Sitio / Street <span class="text-muted fw-normal">(Optional)</span></label>
                                     <input type="text" name="purok" class="form-control"
-                                           value="{{ old('purok') }}"
-                                           placeholder="e.g. Purok 1, Purok Centro">
-                                    <small class="text-muted">Enter your purok name or number if applicable.</small>
-                                </div>
-
-                                {{-- Sitio / Street --}}
-                                <div class="col-md-6">
-                                    <label class="form-label">Sitio / Street <span class="text-muted fw-normal">(Optional)</span></label>
-                                    <input type="text" name="sitio" class="form-control"
-                                           value="{{ old('sitio') }}"
-                                           placeholder="e.g. Sitio Malaya, Rizal St.">
+                                           value="{{ old('purok', auth()->user()->purok?->name ?? '') }}"
+                                           placeholder="e.g. Purok 1, Sitio Malaya, Rizal St.">
+                                    <small class="text-muted">Enter your purok, sitio, or street in one line.</small>
                                 </div>
 
                                 {{-- City & Province --}}
@@ -972,7 +964,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     @if($errors->any())
-        @if(old('_section') === 'address' || $errors->has('barangay') || $errors->has('house_number') || $errors->has('purok') || $errors->has('sitio'))
+        @if(old('_section') === 'address' || $errors->has('barangay') || $errors->has('house_number') || $errors->has('purok'))
             const addrNav = document.querySelector('.settings-nav-item[onclick*="address"]');
             showSection('address', addrNav);
             toggleAddressEdit(true);

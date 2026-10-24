@@ -108,7 +108,7 @@ class ProfileController extends Controller
             default => 'users',
         };
 
-        $isAddressUpdate = $request->input('_section') === 'address' || (!$request->has('first_name') && ($request->has('barangay') || $request->has('house_number') || $request->has('purok') || $request->has('sitio')));
+        $isAddressUpdate = $request->input('_section') === 'address' || (!$request->has('first_name') && ($request->has('barangay') || $request->has('house_number') || $request->has('purok')));
         $isHealthUpdate  = $request->input('_section') === 'health' || (!$request->has('first_name') && ($request->has('blood_type') || $request->has('height') || $request->has('weight') || $request->has('medical_history') || $request->has('medical_notes')));
         $isPasswordUpdate = $request->has('password') && !$request->has('first_name');
 
@@ -123,7 +123,6 @@ class ProfileController extends Controller
             'barangay' => 'nullable|string|max:255',
             'house_number' => 'nullable|string|max:100',
             'purok' => 'nullable|string|max:100',
-            'sitio' => 'nullable|string|max:200',
             'address' => 'nullable|string|max:500',
             'purok_id' => 'nullable',
             'date_of_birth' => 'nullable|date|before:today',
@@ -187,7 +186,7 @@ class ProfileController extends Controller
             }
         }
 
-        // Free-text Sitio / Street / Purok entries join the registry automatically.
+        // One free-text Purok / Sitio / Street line can join the registry automatically.
         if ($request->filled('purok') && empty($updateData['purok_id'])) {
             $resolvedId = \App\Models\Purok::resolveIdFromText(
                 $request->purok,
@@ -201,12 +200,11 @@ class ProfileController extends Controller
         // Compose full address if parts provided or accept address directly
         if ($request->filled('address')) {
             $updateData['address'] = $request->address;
-        } elseif ($request->filled('house_number') || $request->filled('purok') || $request->filled('sitio') || $request->filled('barangay')) {
+        } elseif ($request->filled('house_number') || $request->filled('purok') || $request->filled('barangay')) {
             $targetBarangay = $request->filled('barangay') ? $request->barangay : $user->barangay;
             $addressParts = array_filter([
                 $request->filled('house_number') ? 'House/Unit ' . $request->house_number : null,
-                $request->filled('purok') ? (str_starts_with(strtolower($request->purok), 'purok') ? $request->purok : 'Purok ' . $request->purok) : null,
-                $request->filled('sitio') ? $request->sitio : null,
+                $request->filled('purok') ? $request->purok : null,
                 $targetBarangay,
                 'San Carlos City, Pangasinan'
             ]);

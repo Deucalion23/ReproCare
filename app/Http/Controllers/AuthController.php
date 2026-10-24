@@ -73,7 +73,6 @@ class AuthController extends Controller
             'address' => 'nullable|string|max:500',
             'house_number' => 'nullable|string|max:100',
             'purok' => 'nullable|string|max:100',
-            'sitio' => 'nullable|string|max:200',
             'barangay' => ['required', 'string', 'max:255', Rule::in(Barangay::allNames())],
             'purok_id' => 'nullable|exists:puroks,id',
             'latitude' => 'nullable|numeric|between:-90,90',
@@ -120,8 +119,7 @@ class AuthController extends Controller
         // Compose full address from components if address field is empty
         $addressParts = array_filter([
             $request->filled('house_number') ? 'House/Unit ' . $request->house_number : null,
-            $request->filled('purok') ? (str_starts_with(strtolower($request->purok), 'purok') ? $request->purok : 'Purok ' . $request->purok) : null,
-            $request->filled('sitio') ? $request->sitio : null,
+            $request->filled('purok') ? $request->purok : null,
             $barangay,
             'San Carlos City, Pangasinan'
         ]);

@@ -254,7 +254,7 @@
                         </div>
 
                         <div class="mb-3">
-                            <label for="purok" class="form-label">Sitio / Street / Purok</label>
+                            <label for="purok" class="form-label">Purok / Sitio / Street</label>
                             <input type="text" class="form-control @error('purok') is-invalid @enderror" id="purok" name="purok"
                                    value="{{ old('purok', $user->purok?->name ?? '') }}" placeholder="e.g. Sitio Malinis, Purok 3">
                             @error('purok')

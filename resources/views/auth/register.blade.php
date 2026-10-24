@@ -1113,39 +1113,21 @@
                             </div>
                         </div>
 
-                        {{-- Purok --}}
+                        {{-- Combined local address detail --}}
                         <div class="field-item mt-2">
                             <label class="field-label" for="purok">
                                 <i class="bi bi-pin-map-fill me-1" aria-hidden="true" style="color:var(--primary);"></i>
-                                Purok <span style="color:var(--text-faint);font-weight:500;">(Optional)</span>
+                                Purok / Sitio / Street <span style="color:var(--text-faint);font-weight:500;">(Optional)</span>
                             </label>
                             <div class="field-wrap">
                                 <i class="bi bi-geo-alt f-icon" aria-hidden="true"></i>
                                 <input type="text" name="purok"
                                        value="{{ old('purok') }}"
-                                       placeholder="e.g. Purok 1, Purok Centro, Purok Ilang-Ilang"
+                                       placeholder="e.g. Purok 1, Sitio Malaya, Rizal St."
                                        autocomplete="off" id="purok">
                             </div>
                             <span style="font-size:0.75rem;color:var(--text-faint);margin-top:4px;display:block;">
-                                <i class="bi bi-info-circle me-1" aria-hidden="true"></i>Enter your purok name or number if applicable.
-                            </span>
-                        </div>
-
-                        {{-- Sitio / Street --}}
-                        <div class="field-item mt-2">
-                            <label class="field-label" for="sitio">
-                                <i class="bi bi-signpost-2-fill me-1" aria-hidden="true" style="color:var(--primary);"></i>
-                                Sitio / Street <span style="color:var(--text-faint);font-weight:500;">(Optional)</span>
-                            </label>
-                            <div class="field-wrap">
-                                <i class="bi bi-geo f-icon" aria-hidden="true"></i>
-                                <input type="text" name="sitio"
-                                       value="{{ old('sitio') }}"
-                                       placeholder="e.g. Sitio Malaya, Rizal St."
-                                       autocomplete="off" id="sitio">
-                            </div>
-                            <span style="font-size:0.75rem;color:var(--text-faint);margin-top:4px;display:block;">
-                                <i class="bi bi-info-circle me-1" aria-hidden="true"></i>Enter your sitio, street name, or landmark near your home.
+                                <i class="bi bi-info-circle me-1" aria-hidden="true"></i>Enter your purok, sitio, or street in one line.
                             </span>
                         </div>
                     </div>
