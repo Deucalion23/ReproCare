@@ -489,6 +489,14 @@
             </a>
         </li>
         <li>
+            <a href="{{ route('user.family-planning.index') }}"
+               class="women-dock-link {{ request()->routeIs('user.family-planning.*') ? 'active' : '' }}"
+               @if($dockLimited) title="{{ $lockTitle }}" @endif>
+                <i class="bi bi-shield-plus"></i>
+                <span>Planning @if($dockLimited)<i class="bi bi-lock-fill" style="font-size:8px;" aria-hidden="true"></i>@endif</span>
+            </a>
+        </li>
+        <li>
             <a href="{{ route('user.checkups') }}"
                class="women-dock-link {{ request()->routeIs('user.checkups*') ? 'active' : '' }}"
                @if($dockLimited) title="{{ $lockTitle }}" @endif>

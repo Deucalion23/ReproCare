@@ -512,6 +512,13 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('midwife.family-planning*') ? 'active' : '' }}"
+                   href="{{ route('midwife.family-planning.index') }}">
+                    <i class="bi bi-shield-plus"></i>
+                    <span>Family Planning</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('midwife.checkups*') ? 'active' : '' }}"
                    href="{{ route('midwife.checkups.index') }}">
                     <i class="bi bi-clipboard-heart-fill"></i>
@@ -765,6 +772,13 @@
                    href="{{ route('bhw.patients') }}">
                     <i class="bi bi-people-fill"></i>
                     <span>Women</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('bhw.family-planning*') ? 'active' : '' }}"
+                   href="{{ route('bhw.family-planning.index') }}">
+                    <i class="bi bi-shield-plus"></i>
+                    <span>Family Planning</span>
                 </a>
             </li>
             <li class="nav-item">

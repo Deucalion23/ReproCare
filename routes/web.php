@@ -11,6 +11,7 @@ use App\Http\Controllers\CheckupController;
 use App\Http\Controllers\HealthRecordController;
 use App\Http\Controllers\PregnancyController;
 use App\Http\Controllers\MenstruationController;
+use App\Http\Controllers\FamilyPlanningController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\LearningController;
 use App\Http\Controllers\NotificationController;
@@ -237,6 +238,14 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
         Route::delete('/{id}', [MenstruationController::class, 'destroy'])->name('destroy');
         Route::get('/patient/{userId}', [MenstruationController::class, 'patientRecords'])->name('patient');
     });
+
+    Route::prefix('family-planning')->name('family-planning.')->group(function () {
+        Route::get('/', [FamilyPlanningController::class, 'staffIndex'])->name('index');
+        Route::get('/create', [FamilyPlanningController::class, 'staffCreate'])->name('create');
+        Route::post('/', [FamilyPlanningController::class, 'staffStore'])->name('store');
+        Route::get('/{record}/edit', [FamilyPlanningController::class, 'staffEdit'])->name('edit');
+        Route::put('/{record}', [FamilyPlanningController::class, 'staffUpdate'])->name('update');
+    });
     
     // Reports
     Route::prefix('reports')->name('reports.')->group(function () {
@@ -318,6 +327,13 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
 // BHW Routes
 Route::prefix('bhw')->name('bhw.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'role:bhw', 'prevent-back'])->group(function () {
     Route::get('/dashboard', [BhwController::class, 'dashboard'])->name('dashboard');
+    Route::prefix('family-planning')->name('family-planning.')->group(function () {
+        Route::get('/', [FamilyPlanningController::class, 'staffIndex'])->name('index');
+        Route::get('/create', [FamilyPlanningController::class, 'staffCreate'])->name('create');
+        Route::post('/', [FamilyPlanningController::class, 'staffStore'])->name('store');
+        Route::get('/{record}/edit', [FamilyPlanningController::class, 'staffEdit'])->name('edit');
+        Route::put('/{record}', [FamilyPlanningController::class, 'staffUpdate'])->name('update');
+    });
     Route::get('/settings', [BhwController::class, 'settings'])->name('settings');
     Route::put('/settings', [BhwController::class, 'updateSettings'])->name('settings.update');
     Route::get('/notifications', [BhwController::class, 'notifications'])->name('notifications.index');
@@ -536,6 +552,11 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
     // Clinical + write features: full (RHU-approved) access only.
     // Provisional patients are bounced to the dashboard with a notice.
     Route::middleware('full.access')->group(function () {
+    Route::prefix('family-planning')->name('family-planning.')->group(function () {
+        Route::get('/', [FamilyPlanningController::class, 'patientIndex'])->name('index');
+        Route::get('/request', [FamilyPlanningController::class, 'patientCreate'])->name('create');
+        Route::post('/request', [FamilyPlanningController::class, 'patientStore'])->name('store');
+    });
     // Menstruation Tracking
     Route::prefix('menstruation')->name('menstruation.')->group(function () {
         Route::get('/', [UserController::class, 'menstruation'])->name('index');

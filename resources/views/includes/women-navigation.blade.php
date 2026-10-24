@@ -4,7 +4,7 @@
     $unreadMessages = \App\Models\Message::where('receiver_id', $currentUser?->id)
         ->where('is_read', false)
         ->count();
-    $isCareRecordsActive = request()->routeIs('user.checkups*') || request()->routeIs('user.health-records*');
+    $isCareRecordsActive = request()->routeIs('user.checkups*') || request()->routeIs('user.health-records*') || request()->routeIs('user.family-planning*');
     // Limited-access patients (provisional + view-only): clinical + write
     // tabs show a lock and bounce to the dashboard with an explanation
     // (full.access / readonly middlewares).
@@ -871,6 +871,15 @@
                                @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
                                 <i class="bi bi-clipboard2-pulse-fill"></i>
                                 <span>Clinic Checkups</span>
+                                @if($isLimited)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item women-dropdown-item {{ request()->routeIs('user.family-planning*') ? 'active' : '' }}"
+                               href="{{ route('user.family-planning.index') }}"
+                               @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
+                                <i class="bi bi-shield-plus"></i>
+                                <span>Family Planning</span>
                                 @if($isLimited)<i class="bi bi-lock-fill limited-lock" aria-hidden="true"></i>@endif
                             </a>
                         </li>

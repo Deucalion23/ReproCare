@@ -1,0 +1,9 @@
+@extends(auth()->user()->role === 'midwife' ? 'midwife.layout' : 'bhw.layout')
+@section(auth()->user()->role === 'midwife' ? 'midwife-content' : 'bhw-content')
+<div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><div><h1 class="h3 mb-1">Family Planning</h1><p class="text-muted mb-0">Private counseling, resupply, and follow-up tracking.</p></div><a class="btn btn-primary" href="{{ route(auth()->user()->role === 'midwife' ? 'midwife.family-planning.create' : 'bhw.family-planning.create') }}"><i class="bi bi-plus-lg me-1"></i> Add service record</a></div>
+@if($dueCount)<div class="alert alert-warning"><i class="bi bi-calendar-x me-2"></i>{{ $dueCount }} client(s) have a follow-up due or overdue.</div>@endif
+<div class="card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Client</th><th>Preference / method</th><th>Status</th><th>Follow-up</th><th></th></tr></thead><tbody>
+@forelse($records as $record)<tr><td><strong>{{ $record->client->name }}</strong><br><small class="text-muted">{{ $record->client->barangay }}</small></td><td>{{ $record->method_given ? ucfirst(str_replace('_', ' ', $record->method_given)) : ucfirst(str_replace('_', ' ', $record->preferred_method ?? 'Not stated')) }}</td><td><span class="badge text-bg-secondary">{{ ucfirst($record->status) }}</span></td><td>{{ $record->next_follow_up?->format('M j, Y') ?? '—' }}</td><td><a class="btn btn-sm btn-outline-primary" href="{{ route(auth()->user()->role === 'midwife' ? 'midwife.family-planning.edit' : 'bhw.family-planning.edit', $record) }}">Review</a></td></tr>
+@empty<tr><td colspan="5" class="text-center text-muted py-4">No records in your service area.</td></tr>@endforelse
+</tbody></table></div></div>{{ $records->links() }}
+@endsection

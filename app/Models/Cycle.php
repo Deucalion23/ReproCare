@@ -17,12 +17,19 @@ class Cycle extends Model
         'period_start_date',
         'period_end_date',
         'cycle_length',
+        'flow_intensity',
+        'pain_score',
+        'missed_school_work_days',
+        'irregular_bleeding',
+        'severe_symptoms',
         'notes',
     ];
 
     protected $casts = [
         'period_start_date' => 'date',
         'period_end_date' => 'date',
+        'irregular_bleeding' => 'boolean',
+        'severe_symptoms' => 'boolean',
     ];
 
     // Relationships

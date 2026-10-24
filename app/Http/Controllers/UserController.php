@@ -326,6 +326,10 @@ class UserController extends Controller
         $validated = $request->validate([
             'start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,NULL,id,user_id,'.Auth::id(),
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
+            'pain_score' => 'nullable|integer|min:0|max:10',
+            'missed_school_work_days' => 'nullable|integer|min:0|max:31',
+            'irregular_bleeding' => 'nullable|boolean',
+            'severe_symptoms' => 'nullable|boolean',
             'notes' => 'nullable|string',
         ], ['start_date.unique' => 'That period start date is already logged.']);
 
@@ -333,6 +337,10 @@ class UserController extends Controller
             'user_id' => Auth::id(),
             'period_start_date' => $validated['start_date'],
             'period_end_date' => $validated['end_date'] ?? null,
+            'pain_score' => $validated['pain_score'] ?? null,
+            'missed_school_work_days' => $validated['missed_school_work_days'] ?? null,
+            'irregular_bleeding' => $request->boolean('irregular_bleeding'),
+            'severe_symptoms' => $request->boolean('severe_symptoms'),
             'notes' => $validated['notes'] ?? null,
         ]);
 

@@ -64,6 +64,23 @@
                             <div class="form-text">The day your period bleeding started</div>
                         </div>
 
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="pain_score" class="form-label">Period pain (0–10, optional)</label>
+                                <input type="number" min="0" max="10" class="form-control" id="pain_score" name="pain_score" value="{{ old('pain_score') }}">
+                                <div class="form-text">0 means no pain; 10 means the worst pain you can imagine.</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="missed_school_work_days" class="form-label">Days missed from school/work</label>
+                                <input type="number" min="0" max="31" class="form-control" id="missed_school_work_days" name="missed_school_work_days" value="{{ old('missed_school_work_days', 0) }}">
+                            </div>
+                            <div class="col-12">
+                                <div class="form-check"><input class="form-check-input" type="checkbox" value="1" id="irregular_bleeding" name="irregular_bleeding" @checked(old('irregular_bleeding'))><label class="form-check-label" for="irregular_bleeding">Bleeding feels unusual for me (between periods, much heavier/lighter, or unpredictable)</label></div>
+                                <div class="form-check mt-2"><input class="form-check-input" type="checkbox" value="1" id="severe_symptoms" name="severe_symptoms" @checked(old('severe_symptoms'))><label class="form-check-label" for="severe_symptoms">I have severe symptoms or I am worried and would like advice from a health worker</label></div>
+                                <div class="form-text">These flags help you decide when to seek care. They do not diagnose PCOS, endometriosis, or any condition.</div>
+                            </div>
+                        </div>
+
                         <div class="mb-4">
                             <label for="end_date" class="form-label">
                                 <i class="bi bi-calendar-check me-1" style="color:var(--primary-light);"></i>

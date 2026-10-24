@@ -223,6 +223,14 @@
         </div>
     @endif
 
+    @php($recentConcern = $records->first(fn ($record) => $record->severe_symptoms || $record->irregular_bleeding || ($record->pain_score ?? 0) >= 7 || ($record->missed_school_work_days ?? 0) > 0))
+    @if($recentConcern)
+        <div class="alert alert-warning mb-4" role="alert">
+            <i class="bi bi-heart-pulse-fill me-2"></i><strong>Your recent log suggests you may benefit from a consultation.</strong>
+            Severe pain, unusual bleeding, or symptoms that disrupt daily life should be discussed with a midwife or health worker. This is not a diagnosis.
+        </div>
+    @endif
+
     <!-- Hero Cycle Card -->
     <div class="cycle-hero mb-4">
         <div class="cycle-hero-content cycle-hero-layout">
@@ -406,6 +414,9 @@
                                         <span class="badge period-days-badge">
                                             {{ $bleedDays ? $bleedDays . ' day' . ($bleedDays != 1 ? 's' : '') : 'Ongoing' }}
                                         </span>
+                                        @if($record->severe_symptoms || $record->irregular_bleeding || ($record->pain_score ?? 0) >= 7)
+                                            <span class="badge text-bg-warning">Care advice</span>
+                                        @endif
                                         <form action="{{ route('user.menstruation.destroy', $record->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
