@@ -146,7 +146,7 @@
         };
 
         /** Safely render untrusted AI text into structured DOM (no innerHTML). */
-        const renderAnswer = (container, htmlSafeText, source) => {
+        const renderAnswer = (container, htmlSafeText, source, combined = false) => {
             container.innerHTML = '';
             const wrap = document.createElement('div');
             wrap.className = 'an-answer-wrap';
@@ -155,7 +155,9 @@
             header.className = 'an-answer-header';
             header.innerHTML = source === 'rules'
                 ? '<i class="bi bi-database-check" aria-hidden="true"></i>Local report answer'
-                : '<i class="bi bi-robot" aria-hidden="true"></i>AI answer';
+                : combined
+                    ? '<i class="bi bi-stars" aria-hidden="true"></i>Local data + AI answer'
+                    : '<i class="bi bi-robot" aria-hidden="true"></i>AI answer';
             wrap.appendChild(header);
 
             const body = document.createElement('div');
@@ -230,7 +232,7 @@
                 notice.textContent = data.error_code && typeof data.notice === 'string'
                     ? data.notice
                     : '';
-                renderAnswer(answer, data.answer, data.source);
+                renderAnswer(answer, data.answer, data.source, data.combined);
                 answer.appendChild(sourceBadge(data.source, data.model, data.cached, data.combined));
                 const actions = document.createElement('div');
                 actions.className = 'an-answer-actions';

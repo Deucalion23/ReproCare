@@ -84,10 +84,16 @@ class AIInsightService
             return ['answer' => $this->capabilitiesAnswer(), 'source' => 'rules',
                 'notice' => 'Local capabilities guide.'];
         }
-        // Explicit data lists stay local. The cloud receives only aggregate,
-        // aliased data and must never receive names from the review queue.
+        // Named list facts are computed locally. Send only their aggregate
+        // summary to AI so custom questions still receive an AI explanation.
         if ($criteria = app(AnalyticsQuestion::class)->listing($question)) {
-            return ['answer' => $this->listingAnswer($criteria, $report), 'source' => 'rules',
+            $questionFacts = [];
+            $localAnswer = $this->listingAnswer($criteria, $report, $questionFacts);
+            if (config('services.analytics_ai.provider', 'rules') === 'openrouter') {
+                return $this->openRouterAnswer($question, $report, $localAnswer, true, $questionFacts);
+            }
+
+            return ['answer' => $localAnswer, 'source' => 'rules',
                 'notice' => 'Local listing for the applied report scope.'];
         }
         // Month-aware, data-based answers run before any generic summary so
@@ -159,11 +165,20 @@ class AIInsightService
         ];
     }
 
-    private function openRouterAnswer(string $question, array $report, string $fallback, bool $includeLocalData = true): array
+    private function openRouterAnswer(
+        string $question,
+        array $report,
+        string $fallback,
+        bool $includeLocalData = true,
+        array $questionFacts = []
+    ): array
     {
         $projection = app(CloudAnalyticsContext::class);
         $topic = $projection->topic($question) ?? 'general';
         $prepared = $projection->build($report);
+        if ($questionFacts !== []) {
+            $prepared['context']['question_specific_data'] = $questionFacts;
+        }
         $result = app(OpenRouterAnalyticsService::class)->summarize($prepared['context'], $topic, true, $question);
         if (! $result['ok']) {
             return ['answer' => $fallback, 'source' => 'rules', 'error_code' => $result['error_code'],
@@ -778,19 +793,26 @@ class AIInsightService
             ."\n• Predictions about future pregnancies or outbreaks";
     }
 
-    private function listingAnswer(array $criteria, array $report): string
+    private function listingAnswer(array $criteria, array $report, array &$questionFacts): string
     {
         $scope = $this->filterLabel($report).'.';
         $areas = collect($report['areas'])->where('key', '!=', MaternalAnalyticsService::UNKNOWN_AREA)->values();
         $metric = $criteria['metric'];
 
         if ($criteria['entity'] === 'patients') {
-            if (($criteria['registration_year'] ?? null) !== null && $metric === 'open') {
-                $year = (int) $criteria['registration_year'];
+            if (($criteria['period_year'] ?? null) !== null && $metric === 'open') {
+                $year = (int) $criteria['period_year'];
                 $history = app(MaternalAnalyticsService::class)->pregnancyRegistrationsByPatientForYear($report['filters'], $year);
                 $patients = collect($history['patients']);
                 $scope = ($report['area_label'] ?? 'All barangays').'; '.$year.'; '.($report['scope_label'] ?? 'City-wide · All RHUs').'.';
                 $summary = "Pregnancy registrations created during {$year}: {$history['registration_count']} record(s) for {$patients->count()} distinct patient(s).";
+                $questionFacts = [
+                    'period' => (string) $year,
+                    'measure' => 'pregnancy registrations by registry creation date',
+                    'registration_records' => $history['registration_count'],
+                    'distinct_patients' => $patients->count(),
+                    'limitations' => 'Registration counts do not establish everyone pregnant at any point during the year. Names were excluded from this summary.',
+                ];
 
                 if ($criteria['count']) {
                     return $scope."\n{$summary}\nThis counts registry creation dates, not everyone who may have been pregnant at any point during the year.";
@@ -803,6 +825,46 @@ class AIInsightService
 
                 return $scope."\nWomen with pregnancy records registered during {$year} (".$patients->count()."):\n".$lines->implode("\n")
                     ."\n{$summary}\nRegistry names are retrieved locally within your authorized area. Registration date does not establish everyone who was pregnant at any point during the year.";
+            }
+            if (($criteria['period_year'] ?? null) !== null && in_array($metric, ['high_risk', 'Critical', 'High', 'Medium', 'Low'], true)) {
+                $year = (int) $criteria['period_year'];
+                $levels = $metric === 'high_risk' ? ['High', 'Critical'] : [$metric];
+                $history = app(MaternalAnalyticsService::class)->riskAssessmentPatientsForYear($report['filters'], $year, $levels);
+                $patients = collect($history['patients']);
+                $scope = ($report['area_label'] ?? 'All barangays').'; '.$year.'; '.($report['scope_label'] ?? 'City-wide · All RHUs').'.';
+                $riskCounts = collect($history['assessment_counts_by_level'])->map(fn ($count, $level) => "{$level}: {$count}")->implode(', ');
+                $questionFacts = [
+                    'period' => (string) $year,
+                    'measure' => 'risk assessments recorded in health records during the calendar year',
+                    'risk_levels' => $levels,
+                    'distinct_patients' => $history['patient_count'],
+                    'matching_assessments' => $history['assessment_count'],
+                    'assessment_counts_by_level' => $history['assessment_counts_by_level'],
+                    'limitations' => 'Counts represent recorded assessments during the year, not proof that a patient remained at that risk level all year. Names were excluded from this summary.',
+                ];
+                $summary = "{$history['patient_count']} distinct patient(s) had {$history['assessment_count']} matching risk assessment(s) recorded in {$year}".
+                    ($riskCounts !== '' ? " ({$riskCounts})." : '.');
+
+                if ($patients->isEmpty()) {
+                    return $scope."\nNo matching risk assessments were recorded during {$year}.\nThis is based on saved health-record assessments in the selected area scope.";
+                }
+
+                $lines = $patients->map(fn (array $patient) => "• {$patient['name']} - {$patient['area']} (".implode(', ', $patient['levels'])."; {$patient['assessments']} assessment(s))");
+
+                return $scope."\nPatients with matching risk assessments recorded during {$year} (".$patients->count()."):\n".$lines->implode("\n")
+                    ."\n{$summary}\nNames are retrieved locally within your authorized area. Assessments show recorded risk at those dates, not a risk level maintained for the full year.";
+            }
+            if (($criteria['period_year'] ?? null) !== null) {
+                $year = (int) $criteria['period_year'];
+                $questionFacts = [
+                    'period' => (string) $year,
+                    'requested_measure' => $this->metricLabel($metric),
+                    'available' => false,
+                    'limitation' => 'The current open-pregnancy queue is not a historical record. Do not use current queue totals to answer this requested year.',
+                ];
+
+                return ($report['area_label'] ?? 'All barangays').'; '.$year.'; '.($report['scope_label'] ?? 'City-wide · All RHUs').'.'
+                    ."\nThe selected historical measure is not available as a year-specific patient list. The current open-pregnancy queue cannot answer who matched this measure during {$year}.";
             }
             if ($criteria['zero'] && $metric === 'open') {
                 $patients = app(MaternalAnalyticsService::class)->registeredPatientsWithoutOpenPregnancy(
@@ -832,6 +894,12 @@ class AIInsightService
                     default => true,
                 };
             })->sortBy([['area', 'asc'], ['name', 'asc']])->values();
+            $questionFacts = [
+                'measure' => 'current open pregnancy records matching the requested local list',
+                'matching_records' => $cases->count(),
+                'period' => 'current queue at report generation time',
+                'limitations' => 'The list names stay local; this summary contains no patient names or identifiers.',
+            ];
             if ($criteria['count']) {
                 return $scope."\n{$cases->count()} matching open pregnancy record(s)."
                     ."\nUse the Pregnancy review queue to open an authorized record.";
@@ -848,6 +916,19 @@ class AIInsightService
             $title = $criteria['recommendations'] ? 'Matching women and recommended follow-up' : 'Matching women';
             return $scope."\n{$title} (".$cases->count()."):\n".$lines->implode("\n")
                 ."\nFor authorized staff review only. Do not paste names into an external tool. Recommendations support staff review and do not replace clinician assessment.";
+        }
+
+        if (($criteria['period_year'] ?? null) !== null) {
+            $year = (int) $criteria['period_year'];
+            $questionFacts = [
+                'period' => (string) $year,
+                'requested_measure' => $this->metricLabel($metric),
+                'available' => false,
+                'limitation' => 'The supplied area summary does not contain this measure for the requested historical year. Do not substitute current counts.',
+            ];
+
+            return ($report['area_label'] ?? 'All barangays').'; '.$year.'; '.($report['scope_label'] ?? 'City-wide · All RHUs').'.'
+                ."\nThis measure is not available by area for {$year} in the current local report data.";
         }
 
         $matches = $areas->filter(fn ($area) => $criteria['zero'] ? $this->areaMetricValue($area, $metric) === 0 : $this->areaMetricValue($area, $metric) > 0)

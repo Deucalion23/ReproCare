@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Checkup;
 use App\Models\Barangay;
+use App\Models\HealthRecord;
 use App\Models\MaternalDeath;
 use App\Models\MaternalMorbidity;
 use App\Models\Pregnancy;
@@ -204,6 +205,81 @@ class MaternalAnalyticsService
         usort($patients, fn (array $a, array $b) => strcmp($a['area'], $b['area']) ?: strcmp($a['name'], $b['name']));
 
         return ['registration_count' => $records->count(), 'patients' => $patients];
+    }
+
+    /** Historical named risk assessments. Names stay local; facts are safe to summarize with online AI. */
+    public function riskAssessmentPatientsForYear(array $filters, int $year, array $levels): array
+    {
+        $scope = app(AnalyticsScope::class);
+        $catchment = $scope->areas($filters['rhu'] ?? null);
+        $selectedArea = $filters['barangay'] ?? null;
+        $from = Carbon::create($year, 1, 1)->startOfDay();
+        $to = Carbon::create($year, 12, 31)->endOfDay();
+        $relations = [
+            'woman:id,first_name,middle_initial,last_name,barangay',
+            'walkInPatient:id,first_name,middle_initial,last_name,barangay',
+            'pregnancy.woman:id,first_name,middle_initial,last_name,barangay',
+            'pregnancy.walkInPatient:id,first_name,middle_initial,last_name,barangay',
+        ];
+        $records = HealthRecord::with($relations)
+            ->whereBetween('created_at', [$from, $to])
+            ->whereIn('risk_level', $levels)
+            ->get(['id', 'user_id', 'walk_in_patient_id', 'pregnancy_id', 'risk_level', 'created_at'])
+            ->filter(function (HealthRecord $record) use ($scope, $catchment, $selectedArea) {
+                $area = $record->woman?->barangay
+                    ?? $record->walkInPatient?->barangay
+                    ?? $record->pregnancy?->woman?->barangay
+                    ?? $record->pregnancy?->walkInPatient?->barangay;
+                $areaKey = $scope->key($area);
+
+                return ($catchment === null || in_array($areaKey, $catchment, true))
+                    && (! $selectedArea || $areaKey === $scope->key($selectedArea));
+            });
+
+        $patients = [];
+        $assessmentCounts = array_fill_keys($levels, 0);
+        foreach ($records as $record) {
+            $person = $record->woman ?? $record->walkInPatient
+                ?? $record->pregnancy?->woman ?? $record->pregnancy?->walkInPatient;
+            if (! $person) {
+                continue;
+            }
+            $isRegistered = $person instanceof User;
+            $identity = ($isRegistered ? 'user:' : 'walkin:').$person->getKey();
+            $area = $record->woman?->barangay
+                ?? $record->walkInPatient?->barangay
+                ?? $record->pregnancy?->woman?->barangay
+                ?? $record->pregnancy?->walkInPatient?->barangay;
+            if (! isset($patients[$identity])) {
+                $patients[$identity] = [
+                    'name' => trim((string) ($isRegistered ? $person->name : $person->full_name)),
+                    'area' => $area ?: 'Unrecorded barangay',
+                    'levels' => [],
+                    'assessments' => 0,
+                ];
+            }
+            $level = (string) $record->risk_level;
+            $patients[$identity]['levels'][$level] = true;
+            $patients[$identity]['assessments']++;
+            if (array_key_exists($level, $assessmentCounts)) {
+                $assessmentCounts[$level]++;
+            }
+        }
+
+        $patients = array_values(array_map(function (array $patient) {
+            $patient['levels'] = array_keys($patient['levels']);
+            sort($patient['levels']);
+
+            return $patient;
+        }, $patients));
+        usort($patients, fn (array $a, array $b) => strcmp($a['area'], $b['area']) ?: strcmp($a['name'], $b['name']));
+
+        return [
+            'assessment_count' => $records->count(),
+            'patient_count' => count($patients),
+            'assessment_counts_by_level' => $assessmentCounts,
+            'patients' => $patients,
+        ];
     }
 
     /**
