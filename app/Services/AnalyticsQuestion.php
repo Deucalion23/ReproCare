@@ -38,43 +38,31 @@ class AnalyticsQuestion
     {
         $q = mb_strtolower(trim($question));
         // Do not turn health education or workflow instructions into a data dump.
-        if (preg_match('/\b(?:how (?:do|can|to|should)|what (?:is|are|causes)|explain|why|paano)\b/u', $q)) {
+        if (preg_match('/\b(?:how (?:do|can|to|should)|what (?:is|are|causes)|explain|why|paano)\b/u', $q) && !preg_match('/\b(priority|priorities|review|list|show|which)\b/u', $q)) {
             return null;
         }
         $areas = (bool) preg_match('/\b(?:barangays?|areas?|locations?|brgy|lugar)\b/u', $q);
         $women = (bool) preg_match('/\b(?:women|woman|mothers?|babae|buntis)\b/u', $q);
-        $patients = $women || (bool) preg_match('/\bpatients?\b/u', $q);
-        // "Show the list of open pregnancies" asks for records, not for a month
-        // to analyze, so it is treated as a patient listing of open records.
-        $records = (bool) preg_match('/\bpregnan\w*\b/u', $q)
-            && (bool) preg_match('/\b(?:list|show|display|enumerate|name|breakdown)\b/u', $q);
-        if (!$areas && !$patients && !$records) {
+        $patients = !$areas && ($women || (bool) preg_match('/\b(?:patients?|records?|priority|priorities|review|risk|critical|high[ -]?risk|medium[ -]?risk|low[ -]?risk|unassessed|emergency|emergencies|missed|overdue|appointment|past due|edd)\b/u', $q));
+        if (!$areas && !$patients) {
             return null;
         }
-        $patients = $patients || $records;
-        $count = (bool) preg_match('/\b(?:how many|number of|count|ilan)\b/u', $q);
-        $listingIntent = $count || (bool) preg_match('/\b(?:list|show|display|enumerate|which|who|sino|alin|give|find|name|breakdown)\b|\bwhat\s+(?:women|woman|patients?|mothers?)\b/u', $q);
-        if (!$listingIntent) {
-            return null;
-        }
-        // Rankings need report interpretation rather than a direct record list.
-        if (preg_match('/\b(?:most|highest|busiest|top)\b/u', $q)) {
-            return null;
-        }
+        $patients = $patients || !$areas;
+        $count = false; // Never just count for clinical/record review questions — always show specific data (who it is).
         $metric = match (true) {
-            (bool) preg_match('/\b(?:deaths?|died|mortality|namatay)\b/u', $q) => 'deaths',
-            (bool) preg_match('/\bcomplications?\b/u', $q) => 'complications',
-            (bool) preg_match('/\bregistrations?\b/u', $q) => 'registrations',
-            (bool) preg_match('/\b(?:high[ -]?risk|at[ -]?risk|in[ -]?risk|risky|panganib)\b/u', $q) => 'high_risk',
-            (bool) preg_match('/\bcritical\b/u', $q) => 'Critical',
-            (bool) preg_match('/\bmedium[ -]?risk\b/u', $q) => 'Medium',
-            (bool) preg_match('/\blow[ -]?risk\b/u', $q) => 'Low',
-            (bool) preg_match('/\b(?:emergency|emergencies)\b/u', $q) => 'emergencies',
-            (bool) preg_match('/\b(?:unassessed|without assessment)\b/u', $q) => 'Unassessed',
-            (bool) preg_match('/\b(?:missed|overdue|appointment|care gap)\b/u', $q) => 'care_gaps',
-            (bool) preg_match('/\b(?:past|expected delivery|edd|overdue delivery)\b/u', $q) => 'past_due',
-            (bool) preg_match('/\bpregnan\w*\b|\bbuntis\b/u', $q) => 'open',
-            default => null,
+            (bool) preg_match('#\b(?:priority|priorities|review|urgent)\b#u', $q) => 'high_risk',
+            (bool) preg_match('#\b(?:deaths?|died|mortality|namatay)\b#u', $q) => 'deaths',
+            (bool) preg_match('#\bcomplications?\b#u', $q) => 'complications',
+            (bool) preg_match('#\bregistrations?\b#u', $q) => 'registrations',
+            (bool) preg_match('#\b(?:high[ -]?risk|at[ -]?risk|in[ -]?risk|risky|panganib)\b#u', $q) => 'high_risk',
+            (bool) preg_match('#\bcritical\b#u', $q) => 'Critical',
+            (bool) preg_match('#\bmedium[ -]?risk\b#u', $q) => 'Medium',
+            (bool) preg_match('#\blow[ -]?risk\b#u', $q) => 'Low',
+            (bool) preg_match('#\b(?:emergency|emergencies)\b#u', $q) => 'emergencies',
+            (bool) preg_match('#\b(?:unassessed|without assessment)\b#u', $q) => 'Unassessed',
+            (bool) preg_match('#\b(?:missed|overdue|appointment|care gap)\b#u', $q) => 'care_gaps',
+            (bool) preg_match('#\b(?:past|expected delivery|edd|overdue delivery)\b#u', $q) => 'past_due',
+            default => 'open',
         };
         if ($metric === null) {
             return null;
@@ -82,17 +70,14 @@ class AnalyticsQuestion
         if ($patients && !$areas && in_array($metric, ['deaths', 'complications', 'registrations'], true)) {
             return null; // The queue contains current pregnancy records, not these event registries.
         }
-        $pureCount = (bool) preg_match('/\b(?:how many.*only|count.*only|total number only)\b/u', $q);
-        $count = $areas ? (bool) preg_match('/\b(?:how many|number of|count|ilan)\b/u', $q) : $pureCount;
         return [
             'entity' => $areas ? 'areas' : 'patients',
             'metric' => $metric,
             'zero' => $metric !== 'Unassessed' && (bool) preg_match('/\b(?:no|without|zero|empty|walang|wala)\b/u', $q),
-            'count' => $count,
+            'count' => false,
             'female_only' => $women,
-            // Patient listings are for staff follow-up, so always include the
-            // appropriate local next step with named results.
-            'recommendations' => $patients && !$count,
+            // Patient listings are for staff follow-up, so always include recommendations and specific named results.
+            'recommendations' => true,
         ];
     }
 }
