@@ -785,6 +785,25 @@ class AIInsightService
         $metric = $criteria['metric'];
 
         if ($criteria['entity'] === 'patients') {
+            if (($criteria['registration_year'] ?? null) !== null && $metric === 'open') {
+                $year = (int) $criteria['registration_year'];
+                $history = app(MaternalAnalyticsService::class)->pregnancyRegistrationsByPatientForYear($report['filters'], $year);
+                $patients = collect($history['patients']);
+                $scope = ($report['area_label'] ?? 'All barangays').'; '.$year.'; '.($report['scope_label'] ?? 'City-wide · All RHUs').'.';
+                $summary = "Pregnancy registrations created during {$year}: {$history['registration_count']} record(s) for {$patients->count()} distinct patient(s).";
+
+                if ($criteria['count']) {
+                    return $scope."\n{$summary}\nThis counts registry creation dates, not everyone who may have been pregnant at any point during the year.";
+                }
+                if ($patients->isEmpty()) {
+                    return $scope."\nNo named pregnancy records registered during {$year} were found in this area scope.\nThis does not establish that no one was pregnant; it reflects records in ReproCare.";
+                }
+
+                $lines = $patients->map(fn (array $patient) => "• {$patient['name']} - {$patient['area']}".($patient['records'] > 1 ? " ({$patient['records']} records)" : ''));
+
+                return $scope."\nWomen with pregnancy records registered during {$year} (".$patients->count()."):\n".$lines->implode("\n")
+                    ."\n{$summary}\nRegistry names are retrieved locally within your authorized area. Registration date does not establish everyone who was pregnant at any point during the year.";
+            }
             if ($criteria['zero'] && $metric === 'open') {
                 $patients = app(MaternalAnalyticsService::class)->registeredPatientsWithoutOpenPregnancy(
                     $report['filters'], $criteria['female_only']

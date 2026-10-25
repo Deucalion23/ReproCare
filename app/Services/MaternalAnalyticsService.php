@@ -164,6 +164,48 @@ class MaternalAnalyticsService
             })->sortBy(fn (User $patient) => [$scope->canonicalArea($patient->barangay), $patient->name])->values();
     }
 
+    /** Pregnancy registrations during a requested calendar year, scoped to the caller's RHU and area filters. */
+    public function pregnancyRegistrationsByPatientForYear(array $filters, int $year): array
+    {
+        $scope = app(AnalyticsScope::class);
+        $catchment = $scope->areas($filters['rhu'] ?? null);
+        $selectedArea = $filters['barangay'] ?? null;
+        $from = Carbon::create($year, 1, 1)->startOfDay();
+        $to = Carbon::create($year, 12, 31)->endOfDay();
+        $relations = ['woman:id,first_name,middle_initial,last_name,barangay', 'walkInPatient:id,first_name,middle_initial,last_name,barangay'];
+        $records = Pregnancy::with($relations)
+            ->whereBetween('created_at', [$from, $to])
+            ->get(['id', 'user_id', 'walk_in_patient_id'])
+            ->filter(function (Pregnancy $pregnancy) use ($scope, $catchment, $selectedArea) {
+                $areaKey = $scope->key($this->pregnancyArea($pregnancy));
+
+                return ($catchment === null || in_array($areaKey, $catchment, true))
+                    && (! $selectedArea || $areaKey === $scope->key($selectedArea));
+            });
+
+        $patients = [];
+        foreach ($records as $pregnancy) {
+            $person = $pregnancy->woman ?? $pregnancy->walkInPatient;
+            if (! $person) {
+                continue;
+            }
+            $identity = ($pregnancy->user_id ? 'user:' : 'walkin:').($pregnancy->user_id ?? $pregnancy->walk_in_patient_id);
+            if (! isset($patients[$identity])) {
+                $patients[$identity] = [
+                    'name' => trim((string) ($pregnancy->user_id ? $person->name : $person->full_name)),
+                    'area' => $this->pregnancyArea($pregnancy) ?: 'Unrecorded barangay',
+                    'records' => 0,
+                ];
+            }
+            $patients[$identity]['records']++;
+        }
+
+        $patients = array_values($patients);
+        usort($patients, fn (array $a, array $b) => strcmp($a['area'], $b['area']) ?: strcmp($a['name'], $b['name']));
+
+        return ['registration_count' => $records->count(), 'patients' => $patients];
+    }
+
     /**
      * Open pregnancies per official catchment barangay, for every RHU.
      * Powers the "Pregnant women by barangay" chart with its RHU switcher.
