@@ -225,7 +225,9 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(response.status === 422 ? Object.values(data.errors || {}).flat()[0] || 'Check your question and filters.' : 'The report could not be loaded. Please try again.');
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
-                notice.textContent = '';
+                notice.textContent = data.error_code && typeof data.notice === 'string'
+                    ? data.notice
+                    : '';
                 renderAnswer(answer, data.answer);
                 answer.appendChild(sourceBadge(data.source, data.model, data.cached, data.combined));
                 const actions = document.createElement('div');
@@ -236,10 +238,12 @@
                 copyBtn.innerHTML = '<i class="bi bi-clipboard" aria-hidden="true"></i> Copy';
                 copyBtn.addEventListener('click', () => copyAnswer(data.answer));
                 actions.appendChild(copyBtn);
-                const verified = document.createElement('span');
-                verified.className = 'an-answer-verified';
-                verified.innerHTML = '<i class="bi bi-check2-circle" aria-hidden="true"></i> Verified counts';
-                actions.appendChild(verified);
+                if (data.combined) {
+                    const verified = document.createElement('span');
+                    verified.className = 'an-answer-verified';
+                    verified.innerHTML = '<i class="bi bi-check2-circle" aria-hidden="true"></i> Includes verified local data';
+                    actions.appendChild(verified);
+                }
                 const regenBtn = document.createElement('button');
                 regenBtn.className = 'an-action-btn';
                 regenBtn.innerHTML = '<i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Regenerate';

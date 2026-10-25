@@ -113,7 +113,7 @@ class AIInsightService
     {
         return match (config('services.analytics_ai.provider', 'openrouter')) {
             'openrouter' => app(OpenRouterAnalyticsService::class)->configured()
-                ? ['label' => 'Assistant', 'description' => 'Combines verified local report data with AI context. General questions are answered by AI.']
+                ? ['label' => 'Online AI · OpenRouter', 'description' => 'Custom questions are answered by OpenRouter. Report questions combine its context with verified local data.']
                 : ['label' => 'OpenRouter needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable OpenRouter online AI.'],
         };

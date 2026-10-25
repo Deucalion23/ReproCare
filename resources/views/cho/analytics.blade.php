@@ -130,8 +130,9 @@
                         <p class="an-subtitle mb-0">Report answers pair verified local data with AI context. You can also ask general questions.</p>
                     </div>
                 </div>
-                <span id="analytics-provider-status" class="an-badge">{{ $aiStatus['label'] === 'Groq needs setup' ? $aiStatus['label'] : 'Assistant' }}</span>
+                <span id="analytics-provider-status" class="an-badge" title="{{ $aiStatus['description'] }}">{{ $aiStatus['label'] }}</span>
             </div>
+            <p class="an-subtitle mb-3" id="analytics-provider-description">{{ $aiStatus['description'] }}</p>
             <form id="analytics-chat" action="{{ route(($portal ?? 'cho').'.analytics.chat') }}" class="an-no-print">
                 @csrf
                 <label for="analytics-question" class="form-label small fw-bold">Your question</label>
