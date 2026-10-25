@@ -294,9 +294,14 @@
 .analytics .an-answer-body { display:flex; flex-direction:column; gap:14px; }
 .analytics .an-answer-body p { margin:0; font-size:.84rem; line-height:1.8; color:var(--an-text); }
 .analytics .an-answer-body p + p { margin-top:4px; }
-.analytics .an-answer-body ul { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+.analytics .an-answer-body .an-answer-heading { margin:6px 0 -4px; font-size:.78rem; font-weight:800; letter-spacing:.03em; text-transform:uppercase; color:var(--an-accent); }
+.analytics .an-answer-body ul,
+.analytics .an-answer-body ol { margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:8px; }
+.analytics .an-answer-body ol { counter-reset:an-answer-step; }
 .analytics .an-answer-body li { position:relative; padding-left:26px; font-size:.84rem; line-height:1.8; color:var(--an-text); }
-.analytics .an-answer-body li::before { content:''; position:absolute; left:6px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--an-accent); flex-shrink:0; }
+.analytics .an-answer-body ul > li::before { content:''; position:absolute; left:6px; top:9px; width:5px; height:5px; border-radius:50%; background:var(--an-accent); flex-shrink:0; }
+.analytics .an-answer-body ol > li { counter-increment:an-answer-step; padding-left:28px; }
+.analytics .an-answer-body ol > li::before { content:counter(an-answer-step) '.'; position:absolute; left:0; top:0; color:var(--an-accent); font-weight:800; font-variant-numeric:tabular-nums; }
 /* Patient card view when AI returns name-delimited list */
 .analytics .an-patient-list { display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:10px; margin-top:8px; }
 .analytics .an-patient-card { display:flex; flex-direction:column; gap:8px; padding:12px 14px; border:1px solid var(--an-border); border-radius:10px; background:var(--an-surface); }

@@ -78,6 +78,73 @@
             return grid;
         };
 
+        const BULLET_RE = /^[•\-*–—]\s+/;
+        const NUMBERED_RE = /^\d{1,2}[.)]\s+/;
+
+        /** Inline **bold** support, built from text nodes so no HTML is injected. */
+        const renderInline = (el, text) => {
+            text.split(/\*\*([^*]+)\*\*/).forEach((part, index) => {
+                if (index % 2 === 1) {
+                    const strong = document.createElement('strong');
+                    strong.textContent = part;
+                    el.appendChild(strong);
+                } else if (part.length) {
+                    el.append(document.createTextNode(part));
+                }
+            });
+        };
+
+        /**
+         * Render the answer line by line so it never collapses into one block:
+         * bullet or numbered lines become lists, short labels ending in a colon
+         * (or bold/markdown headings) become section headings, and every other
+         * line stands alone as its own paragraph.
+         */
+        const renderAnswerText = (body, text) => {
+            let list = null;
+            let listTag = null;
+            text.split(/\r?\n/).forEach(rawLine => {
+                const line = rawLine.trim();
+                if (!line) {
+                    list = null;
+                    listTag = null;
+                    return;
+                }
+
+                const bullet = BULLET_RE.test(line);
+                if (bullet || NUMBERED_RE.test(line)) {
+                    const tag = bullet ? 'UL' : 'OL';
+                    if (!list || listTag !== tag) {
+                        list = document.createElement(tag);
+                        listTag = tag;
+                        body.appendChild(list);
+                    }
+                    const li = document.createElement('li');
+                    renderInline(li, line.replace(bullet ? BULLET_RE : NUMBERED_RE, '').trim());
+                    list.appendChild(li);
+                    return;
+                }
+
+                list = null;
+                listTag = null;
+
+                const heading = line.match(/^#{1,4}\s+(.+)$/)
+                    || line.match(/^\*\*(.+?)\*\*:?$/)
+                    || line.match(/^([A-Za-z][^:*]{1,59}):$/);
+                if (heading) {
+                    const label = document.createElement('p');
+                    label.className = 'an-answer-heading';
+                    renderInline(label, heading[1].trim().replace(/:$/, ''));
+                    body.appendChild(label);
+                    return;
+                }
+
+                const para = document.createElement('p');
+                renderInline(para, line);
+                body.appendChild(para);
+            });
+        };
+
         /** Safely render untrusted AI text into structured DOM (no innerHTML). */
         const renderAnswer = (container, htmlSafeText) => {
             container.innerHTML = '';
@@ -101,38 +168,8 @@
                 return;
             }
 
-            // Fallback: paragraph / bullet list rendering
-            const paras = htmlSafeText.split(/\n\n+/).filter(p => p.trim().length);
-            let currentList = null;
-            paras.forEach(para => {
-                const lines = para.split(/\n+/).map(l => l.trim()).filter(l => l.length);
-                const isList = lines.every(l => l.startsWith('- ') || l.startsWith('• ') || l.startsWith('– '));
-                if (isList) {
-                    if (!currentList) {
-                        currentList = document.createElement('ul');
-                        body.appendChild(currentList);
-                    }
-                    lines.forEach(l => {
-                        const li = document.createElement('li');
-                        li.textContent = l.replace(/^[–\-•]\s*/, '');
-                        currentList.appendChild(li);
-                    });
-                } else {
-                    currentList = null;
-                    const p = document.createElement('p');
-                    const parts = para.split(/\*\*([^*]+)\*\*/);
-                    parts.forEach((part, i) => {
-                        if (i % 2 === 1) {
-                            const b = document.createElement('strong');
-                            b.textContent = part;
-                            p.appendChild(b);
-                        } else if (part.length) {
-                            p.append(document.createTextNode(part));
-                        }
-                    });
-                    body.appendChild(p);
-                }
-            });
+            // Fallback: line-based paragraphs, bullet lists and numbered lists
+            renderAnswerText(body, htmlSafeText);
             wrap.appendChild(body);
             container.appendChild(wrap);
         };
