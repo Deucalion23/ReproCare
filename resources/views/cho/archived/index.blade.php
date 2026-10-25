@@ -523,10 +523,10 @@
                                 <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $sup->id }}" form="archive-bulk-form"></td>
                                 <td>
                                     <div class="fw-700">{{ $sup->supply_name }}</div>
-                                    <small class="text-muted">{{ ucfirst($sup->category ?? 'General') }}</small>
+                                    <small class="text-muted">{{ ucfirst($sup->supply_category ?? 'General') }}</small>
                                 </td>
                                 <td>{{ $sup->requestedBy?->name ?? 'Staff' }}</td>
-                                <td>{{ $sup->quantity }} {{ $sup->unit ?? 'units' }}</td>
+                                <td>{{ $sup->quantity_requested ?? 0 }} {{ $sup->unit ?? 'units' }}</td>
                                 <td>
                                     <span class="text-muted">{{ $sup->deleted_at ? $sup->deleted_at->format('M d, Y') : 'N/A' }}</span>
                                 </td>
