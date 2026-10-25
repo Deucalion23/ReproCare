@@ -276,12 +276,10 @@ class AIInsightService
             $months = $relative ? array_slice($relative, 0, 1) : [];
         }
         if ($months === []) {
-            return [
-                'answer' => 'Which month and year should I analyze? For example: "How many maternal deaths were recorded in October 2026?"',
-                'source' => 'rules',
-                'error_code' => 'needs_period',
-                'notice' => 'Waiting for the month to analyze — no data was queried.',
-            ];
+            // A period like "last year" was named but no single month resolved.
+            // Answer for the applied report period instead of asking the staff
+            // member to restate a month the filters already cover.
+            return null;
         }
         $month = $months[0];
         $window = $this->monthWindow($month, $report);

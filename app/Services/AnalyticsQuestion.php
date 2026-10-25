@@ -44,9 +44,14 @@ class AnalyticsQuestion
         $areas = (bool) preg_match('/\b(?:barangays?|areas?|locations?|brgy|lugar)\b/u', $q);
         $women = (bool) preg_match('/\b(?:women|woman|mothers?|babae|buntis)\b/u', $q);
         $patients = $women || (bool) preg_match('/\bpatients?\b/u', $q);
-        if (!$areas && !$patients) {
+        // "Show the list of open pregnancies" asks for records, not for a month
+        // to analyze, so it is treated as a patient listing of open records.
+        $records = (bool) preg_match('/\bpregnan\w*\b/u', $q)
+            && (bool) preg_match('/\b(?:list|show|display|enumerate|name|breakdown)\b/u', $q);
+        if (!$areas && !$patients && !$records) {
             return null;
         }
+        $patients = $patients || $records;
         $count = (bool) preg_match('/\b(?:how many|number of|count|ilan)\b/u', $q);
         $listingIntent = $count || (bool) preg_match('/\b(?:list|show|display|enumerate|which|who|sino|alin|give|find|name|breakdown)\b|\bwhat\s+(?:women|woman|patients?|mothers?)\b/u', $q);
         if (!$listingIntent) {
