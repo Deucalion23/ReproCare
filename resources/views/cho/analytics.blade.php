@@ -126,8 +126,8 @@
                 <div class="an-title-group">
                     <span class="an-icon"><i class="bi bi-stars" aria-hidden="true"></i></span>
                     <div>
-                        <h2 id="analytics-assistant-title">Ask about this report</h2>
-                        <p class="an-subtitle mb-0">Explore priorities, patterns and patient situations. Report answers include next steps.</p>
+                        <h2 id="analytics-assistant-title">Ask the assistant</h2>
+                        <p class="an-subtitle mb-0">Report answers pair verified local data with AI context. You can also ask general questions.</p>
                     </div>
                 </div>
                 <span id="analytics-provider-status" class="an-badge">{{ $aiStatus['label'] === 'Groq needs setup' ? $aiStatus['label'] : 'Assistant' }}</span>
@@ -135,8 +135,8 @@
             <form id="analytics-chat" action="{{ route(($portal ?? 'cho').'.analytics.chat') }}" class="an-no-print">
                 @csrf
                 <label for="analytics-question" class="form-label small fw-bold">Your question</label>
-                <textarea id="analytics-question" name="question" rows="3" maxlength="500" class="form-control mb-2" placeholder="Ask about maternal health, reproductive health, ReproCare, or this report?" required></textarea>
-                <div class="an-topics" role="group" aria-label="Quick report questions">
+                <textarea id="analytics-question" name="question" rows="3" maxlength="500" class="form-control mb-2" placeholder="Ask about this report, ReproCare, health, or another topic…" required></textarea>
+                <div class="an-topics" role="group" aria-label="Suggested report questions">
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which records need priority review?">Priorities</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with open pregnancies and what follow-up is needed.">Open pregnancies</button>
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List all high-risk women and what recommended follow-up is needed.">High-risk follow-up</button>

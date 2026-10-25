@@ -73,15 +73,6 @@ class AIInsightService
             return ['answer' => 'I can explain general maternal and reproductive health topics, but cannot choose an individual’s medicine or dosage. Please ask the responsible clinician to review the patient’s care plan.',
                 'source' => 'rules', 'error_code' => 'unsupported_topic', 'notice' => 'Individual treatment requires clinician review'];
         }
-        // Only clearly unrelated topics are refused here. A question that also
-        // names maternal care or this system is connected, so it goes on to be
-        // interpreted against the report ("how does weather affect pregnant
-        // women in our catchment?" is answerable in part).
-        if (preg_match('/\b(weather|bitcoin|crypto|football|basketball|movie|celebrity|stock price|gambling)\b/iu', $question)
-            && ! preg_match('/\b(maternal|pregnan\w*|health|bhw|midwife|rhu|cho|patient|women|woman|barangay|record|appointment|clinic|care)\b/iu', $question)) {
-            return ['answer' => 'That question is outside my scope: it does not connect to maternal and reproductive health, ReproCare, or this analytics report.',
-                'source' => 'rules', 'error_code' => 'out_of_scope', 'notice' => 'Outside the assistant’s scope'];
-        }
         if (preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|(?:\+?63|0)9\d[\d\s-]{8,}|\bgsk_[A-Za-z0-9]+|\b(?:patient\s*(?:id|name)|medical record number)\s*[:#]/iu', $question)) {
             return ['answer' => 'Please remove names, patient identifiers, contact details, and credentials. Ask a general health, workflow, or report question instead.',
                 'source' => 'rules', 'error_code' => 'private_question', 'notice' => 'Question kept on this server'];
@@ -102,12 +93,13 @@ class AIInsightService
         // Month-aware, data-based answers run before any generic summary so
         // comparisons name exact months with real counts from the database.
         $monthAnswer = $this->monthAwareAnswer($question, $report);
-        if ($monthAnswer !== null) {
+        if (isset($monthAnswer['error_code'])) {
             return $monthAnswer;
         }
-        $fallback = $this->localAnswer($question, $report);
+        $fallback = $monthAnswer['answer'] ?? $this->localAnswer($question, $report);
+        $includeLocalData = $monthAnswer !== null || $this->isReportQuestion($question);
         if (config('services.analytics_ai.provider', 'rules') === 'openrouter') {
-            return $this->openRouterAnswer($question, $report, $fallback);
+            return $this->openRouterAnswer($question, $report, $fallback, $includeLocalData);
         }
         $filters = $report['filters'] ?? [];
         $dateRange = (!empty($filters['from']) && !empty($filters['to']))
@@ -121,7 +113,7 @@ class AIInsightService
     {
         return match (config('services.analytics_ai.provider', 'openrouter')) {
             'openrouter' => app(OpenRouterAnalyticsService::class)->configured()
-                ? ['label' => 'Assistant', 'description' => 'Answers follow the applied filters. Verify suggestions against the local charts.']
+                ? ['label' => 'Assistant', 'description' => 'Combines verified local report data with AI context. General questions are answered by AI.']
                 : ['label' => 'OpenRouter needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable OpenRouter online AI.'],
         };
@@ -167,7 +159,7 @@ class AIInsightService
         ];
     }
 
-    private function openRouterAnswer(string $question, array $report, string $fallback): array
+    private function openRouterAnswer(string $question, array $report, string $fallback, bool $includeLocalData = true): array
     {
         $projection = app(CloudAnalyticsContext::class);
         $topic = $projection->topic($question) ?? 'general';
@@ -179,12 +171,28 @@ class AIInsightService
         }
 
         return [
-            'answer' => $result['answer'], 'source' => 'openrouter', 'model' => $result['model'],
+            'answer' => $this->combinedAnswer($includeLocalData ? $fallback : null, $result['answer']),
+            'source' => 'openrouter', 'combined' => $includeLocalData, 'model' => $result['model'],
             'cached' => $result['cached'], 'generated_at' => $result['generated_at'],
             'topic' => CloudAnalyticsContext::TOPICS[$topic],
             'area_legend' => $prepared['area_legend'],
             'notice' => $this->aiNotice($result, $report),
         ];
+    }
+
+    /** Exact report facts stay local; the model receives only the aggregate projection. */
+    private function combinedAnswer(?string $localAnswer, string $aiAnswer): string
+    {
+        if ($localAnswer === null || trim($localAnswer) === '') {
+            return $aiAnswer;
+        }
+
+        return "Verified local report data and guidance:\n{$localAnswer}\n\nAI context:\n{$aiAnswer}";
+    }
+
+    private function isReportQuestion(string $question): bool
+    {
+        return (bool) preg_match('/report|record|pregnan|maternal|death|died|mortality|risk|follow.?up|appointment|area|barangay|location|trend|month|registration|women|patient|clinic|queue|buntis|buwan|namatay|patay|health data|this selection|these filters/iu', $question);
     }
 
     /** Explicit allowlist: no patient names, IDs, contacts, notes or queue rows reach the model. */

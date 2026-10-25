@@ -174,8 +174,9 @@
             container.appendChild(wrap);
         };
 
-        const sourceBadge = (source, model, cached) => {
-            const label = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
+        const sourceBadge = (source, model, cached, combined = false) => {
+            const provider = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
+            const label = combined ? `Local data + ${provider}` : provider;
             const span = document.createElement('span');
             span.className = `an-answer-source ${source}${cached ? ' cached' : ''}`;
             span.innerHTML = `<span class="dot"></span>${label}${model ? ' · ' + model : ''}${cached ? ' · cached' : ''}`;
@@ -226,7 +227,7 @@
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
                 notice.textContent = '';
                 renderAnswer(answer, data.answer);
-                answer.appendChild(sourceBadge(data.source, data.model, data.cached));
+                answer.appendChild(sourceBadge(data.source, data.model, data.cached, data.combined));
                 const actions = document.createElement('div');
                 actions.className = 'an-answer-actions';
                 const copyBtn = document.createElement('button');
@@ -251,7 +252,7 @@
                 const ts = document.createElement('div');
                 ts.className = 'an-answer-timestamp';
                 answer.appendChild(ts);
-                if (data.source === 'groq' || data.source === 'openrouter') {
+                if (data.combined && (data.source === 'groq' || data.source === 'openrouter')) {
                     const lines = [data.topic || 'Report summary'];
                     if (Array.isArray(data.area_legend) && data.area_legend.length) {
                         lines.push(data.area_legend.map(area => `${area.alias}: ${area.label}`).join('; '));

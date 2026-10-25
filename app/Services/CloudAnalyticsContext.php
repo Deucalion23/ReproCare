@@ -6,12 +6,12 @@ namespace App\Services;
 class CloudAnalyticsContext
 {
     public const TOPICS = [
-        // These name the likely focus of the question; they never replace it.
+        // These name the likely focus; they never replace the staff's question.
         'priorities' => 'Focus area: recorded follow-up priorities for staff review.',
         'mortality' => 'Focus area: recorded maternal-death and complication events.',
         'trends' => 'Focus area: pregnancy registration patterns across the selected months.',
         'areas' => 'Focus area: area workloads for outreach planning.',
-        'general' => 'Interpret the staff question against this system — maternal or reproductive health, ReproCare workflows, or the supplied report — and answer the part it connects to from the supplied report. Explain the connection in one line; decline only when no connection exists after that analysis.',
+        'general' => 'Answer the staff question directly. Use the supplied report only when it is relevant; otherwise answer from general knowledge and be clear about uncertainty.',
     ];
 
     private const TOTALS = ['open', 'high_risk', 'emergency', 'registrations', 'deaths', 'complications', 'pending_death_reviews', 'care_gaps', 'past_due', 'unassessed'];
