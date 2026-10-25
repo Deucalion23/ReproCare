@@ -136,20 +136,64 @@
                 @csrf
                 <label for="analytics-question" class="form-label small fw-bold">Your question</label>
                 <textarea id="analytics-question" name="question" rows="3" maxlength="500" class="form-control mb-2" placeholder="Ask about maternal health, reproductive health, ReproCare, or this report?" required></textarea>
-                <div class="an-topics" role="group" aria-label="Suggested report questions">
+                <div class="an-topics" role="group" aria-label="Quick report questions">
                     <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which records need priority review?">Priorities</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize maternal deaths.">Maternal deaths</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize the monthly registration trend.">Trends</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangays need follow-up planning?">Areas</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most high-risk pregnancies and what should we do?">Highest high-risk area</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most pregnant women right now and what should we do?">Busiest barangay</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most maternal deaths and what should we do?">Most deaths</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with open pregnancies and what follow-up is needed.">Open women + to do</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List all high-risk women and what recommended follow-up is needed.">All high-risk + to do</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List critical-risk patients and what follow-up is needed.">Critical + to do</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with no open pregnancy record and what should staff do.">No open record + to do</button>
-                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="How do I use the portal and approve records?">Portal help</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with open pregnancies and what follow-up is needed.">Open pregnancies</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List all high-risk women and what recommended follow-up is needed.">High-risk follow-up</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangays need follow-up planning?">Area planning</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize the monthly pregnancy registration trend.">Registration trends</button>
+                    <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize maternal deaths and complications in the selected report.">Deaths &amp; complications</button>
                 </div>
+                <details class="an-assistant-details an-prompt-library">
+                    <summary>Explore 24 more report questions</summary>
+                    <div class="an-prompt-groups">
+                        <section class="an-prompt-category" aria-labelledby="analytics-prompts-follow-up">
+                            <h3 id="analytics-prompts-follow-up">Open pregnancies &amp; follow-up</h3>
+                            <div class="an-topics" role="group" aria-label="Open pregnancy and follow-up questions">
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="How many open pregnancies have missed or overdue appointments?">Missed / overdue appointments</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize open pregnancies past their expected delivery dates.">Past expected delivery dates</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List registered women with no open pregnancy record.">No open pregnancy record</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="How many registered women have no open pregnancy record?">Count women without an open record</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with medium-risk open pregnancies and recommended follow-up.">Medium-risk follow-up</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with low-risk open pregnancies and recommended follow-up.">Low-risk follow-up</button>
+                            </div>
+                        </section>
+                        <section class="an-prompt-category" aria-labelledby="analytics-prompts-risk">
+                            <h3 id="analytics-prompts-risk">Risk &amp; safety</h3>
+                            <div class="an-topics" role="group" aria-label="Risk and safety questions">
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with critical-risk open pregnancies and recommended follow-up.">Critical-risk follow-up</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List unassessed women with open pregnancies and recommended follow-up.">Unassessed pregnancies</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List women with emergency-marked open pregnancies and recommended follow-up.">Emergency-marked records</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="How many women with open pregnancies are unassessed?">Count unassessed women</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with emergency-marked pregnancies.">Emergencies by barangay</button>
+                            </div>
+                        </section>
+                        <section class="an-prompt-category" aria-labelledby="analytics-prompts-areas">
+                            <h3 id="analytics-prompts-areas">Areas &amp; coverage</h3>
+                            <div class="an-topics" role="group" aria-label="Area and coverage questions">
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with open pregnancies.">Open pregnancies by barangay</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with high-risk pregnancies.">High-risk by barangay</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with medium-risk pregnancies.">Medium-risk by barangay</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with maternal death records.">Maternal deaths by barangay</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with reported complication events.">Complications by barangay</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with missed or overdue appointments.">Missed appointments by area</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="List barangays with no recorded high-risk pregnancies.">Areas with no recorded high-risk cases</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which barangay has the most pregnant women right now?">Busiest barangay</button>
+                            </div>
+                        </section>
+                        <section class="an-prompt-category" aria-labelledby="analytics-prompts-trends">
+                            <h3 id="analytics-prompts-trends">Trends &amp; events</h3>
+                            <div class="an-topics" role="group" aria-label="Trend and event questions">
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Which month had the most pregnancy registrations?">Peak registration month</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize monthly pregnancy registration patterns.">Monthly registration patterns</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Compare pregnancy registrations between last month and this month.">Compare recent months</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize monthly maternal complication trends.">Monthly complications</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="How many maternal death audits are pending or under review?">Pending death audits</button>
+                                <button type="button" class="an-topic" aria-pressed="false" data-analytics-question="Summarize maternal deaths and complications in the selected report.">Deaths and complications</button>
+                            </div>
+                        </section>
+                    </div>
+                </details>
                 <button id="analytics-ask" class="an-button" type="submit">Ask assistant</button>
             </form>
         </section>

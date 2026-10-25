@@ -113,6 +113,22 @@ class MaternalAnalyticsTest extends AutomationTestCase
         $this->getJson(route('cho.analytics', ['rhu' => 'RHU 99']))->assertUnprocessable();
     }
 
+    public function test_analytics_assistant_offers_grouped_questions_across_supported_report_topics(): void
+    {
+        $this->actingAs($this->patient(['role' => 'cho']))
+            ->get(route('cho.analytics'))
+            ->assertOk()
+            ->assertSee('Explore 24 more report questions')
+            ->assertSee('Open pregnancies & follow-up')
+            ->assertSee('Risk & safety')
+            ->assertSee('Areas & coverage')
+            ->assertSee('Trends & events')
+            ->assertSee('data-analytics-question="List women with critical-risk open pregnancies and recommended follow-up."', false)
+            ->assertSee('data-analytics-question="List unassessed women with open pregnancies and recommended follow-up."', false)
+            ->assertSee('data-analytics-question="List barangays with no recorded high-risk pregnancies."', false)
+            ->assertSee('data-analytics-question="How many maternal death audits are pending or under review?"', false);
+    }
+
     public function test_unassigned_rhu_is_denied_and_legacy_map_moves_into_analytics(): void
     {
         $this->actingAs($this->patient(['role' => 'rhu']));

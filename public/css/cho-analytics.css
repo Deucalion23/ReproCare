@@ -159,6 +159,10 @@
 .analytics .an-assistant-details { margin:12px 0 16px; color:var(--an-muted); font-size:.73rem; }
 .analytics .an-assistant-details summary { cursor:pointer; width:fit-content; }
 .analytics .an-assistant-details p { margin:8px 0 0; line-height:1.6; }
+.analytics .an-prompt-library { padding-top:10px; border-top:1px solid var(--an-border); }
+.analytics .an-prompt-groups { display:grid; gap:12px; margin-top:12px; }
+.analytics .an-prompt-category h3 { margin:0; color:var(--an-text); font-size:.73rem; font-weight:750; }
+.analytics .an-prompt-category .an-topics { margin:7px 0 0; }
 .analytics .an-result { background:var(--an-soft); border:1px solid var(--an-border); border-radius:12px; padding:15px; margin-top:16px; }
 .analytics .an-result-wide { grid-column:1 / -1; min-width:0; margin-top:0; }
 .analytics .an-result[hidden] { display:none; }
