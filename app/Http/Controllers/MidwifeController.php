@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Pregnancy;
 use App\Models\Checkup;
 use App\Models\HealthRecord;
+use App\Models\PatientCondition;
 use App\Models\Bhw;
 use App\Models\BhwProfile;
 use App\Models\BhwMonthlyReport;
@@ -264,12 +265,20 @@ class MidwifeController extends Controller
         // NOTE: checkups()/healthRecords() branch on $this->role, but Eloquent
         // resolves relations on a blank instance (always-empty collections),
         // so those two are queried explicitly below.
+        $womanColumns = [
+            'id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay',
+            'purok_id', 'status', 'date_of_birth', 'contact_number', 'partner_name',
+            'partner_contact', 'profile_image', 'gender', 'created_at',
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'medical_history')) {
+            $womanColumns[] = 'medical_history';
+        }
         $woman = User::where('role', 'user')->with([
             'emergencyContacts',
             'primaryEmergencyContact',
             'purok',
             'pregnancies' => function($q) { $q->latest()->select('id', 'user_id', 'lmp', 'edd', 'is_high_risk'); },
-        ])->select('id', 'first_name', 'middle_initial', 'last_name', 'email', 'address', 'barangay', 'purok_id', 'status', 'date_of_birth', 'contact_number', 'partner_name', 'partner_contact', 'profile_image', 'gender', 'created_at')->findOrFail($id);
+        ])->select($womanColumns)->findOrFail($id);
 
         $checkups = \App\Models\Checkup::where('user_id', $woman->id)
             ->with('midwife:id,first_name,middle_initial,last_name')
@@ -282,6 +291,10 @@ class MidwifeController extends Controller
             ->select('id', 'user_id', 'recorded_by_id', 'bp', 'weight', 'created_at')
             ->take(50)
             ->get();
+        $medicalConditions = PatientCondition::where('user_id', $woman->id)
+            ->with(['recordedBy:id,first_name,middle_initial,last_name', 'updatedBy:id,first_name,middle_initial,last_name'])
+            ->latest()
+            ->get();
 
         // Patient-seen status for the latest risk alert (Seen/Unseen + read_at)
         // so the managing midwife can tell whether the patient opened it.
@@ -292,6 +305,8 @@ class MidwifeController extends Controller
             'pregnancies' => $woman->pregnancies,
             'checkups' => $checkups,
             'healthRecords' => $healthRecords,
+            'medicalConditions' => $medicalConditions,
+            'canManageConditions' => false,
             'riskAlertStatus' => $riskAlertStatus,
             'decisionSupport' => app(\App\Services\MaternalAnalyticsService::class)->patientSupport($woman),
         ]);

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Pregnancy;
 use App\Models\Checkup;
 use App\Models\HealthRecord;
+use App\Models\PatientCondition;
 use App\Models\BhwMonthlyReport;
 use App\Models\SupplyRequest;
 use App\Models\MaternalDeath;
@@ -1604,8 +1605,17 @@ class RhuController extends Controller
     public function womanDetails($type, $id)
     {
         $record = app(WomenDirectoryService::class)->findForUser(auth()->user(), (string) $type, (int) $id);
+        $record['medicalConditions'] = $type === 'registered'
+            ? PatientCondition::where('user_id', $record['woman']->id)
+                ->with(['recordedBy:id,first_name,middle_initial,last_name', 'updatedBy:id,first_name,middle_initial,last_name'])
+                ->latest()
+                ->get()
+            : collect();
 
-        return view('rhu.women.show', $record + ['type' => (string) $type]);
+        return view('rhu.women.show', $record + [
+            'type' => (string) $type,
+            'canManageConditions' => $type === 'registered',
+        ]);
     }
 
     public function pendingPatients()

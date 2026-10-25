@@ -220,6 +220,13 @@
     </div>
 </div>
 
+@if($type === 'registered')
+    @include('partials.patient-conditions', [
+        'medicalConditions' => $medicalConditions,
+        'canManageConditions' => $canManageConditions,
+    ])
+@endif
+
 <div class="card fade-in-card mb-4 rec-card rec-table">
     <div class="card-header fw-bold">Recent Health Records (latest {{ $healthRecords->count() }})</div>
     <div class="table-responsive">
