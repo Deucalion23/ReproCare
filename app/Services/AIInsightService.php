@@ -81,8 +81,10 @@ class AIInsightService
             return ['answer' => 'Please remove names, patient identifiers, contact details, and credentials. Ask a general health, workflow, or report question instead.',
                 'source' => 'rules', 'error_code' => 'private_question', 'notice' => 'Question kept on this server'];
         }
-        // Meta questions ("what can you do?") get a capabilities answer.
-        if (preg_match('/\bwhat can (you|u|i ask)|what do you (do|know)|capabilit|anong kaya|kaya mo|commands?\b|^\s*help\s*$/iu', $question)) {
+        // Meta questions ("what can you do?", "can you answer any question?")
+        // get a capabilities answer instead of a report summary, so the model
+        // is never asked to answer a question about itself from report data.
+        if ($this->isCapabilityQuestion($question)) {
             return ['answer' => $this->capabilitiesAnswer(), 'source' => 'rules',
                 'notice' => 'Local capabilities guide.'];
         }
@@ -706,16 +708,36 @@ class AIInsightService
             .'Patient-specific treatment and future predictions are outside this report.';
     }
 
+    /**
+     * True for questions about the assistant itself ("can you answer any
+     * question?", "what can you do?") that name no report topic. A question
+     * that asks about data — even when it starts with "can you answer" — is
+     * left to the report and the model.
+     */
+    private function isCapabilityQuestion(string $question): bool
+    {
+        $meta = (bool) preg_match('/\b(?:what can (?:you|u)(?: do| answer| help| tell| show)?|what can i ask|what (?:questions|else can you)|which questions|can you answer (?:any|all|every|this|that|my|me)|can you (?:answer|help|do) (?:any|all|every)|are you able to answer|do you (?:answer|know|access|have)|who are you|what are you|capabilit|anong kaya|kaya mo|commands?|^\s*help\s*$)/iu', $question);
+        if (! $meta) {
+            return false;
+        }
+
+        return ! preg_match('/regist|death|died|mortality|pregnan|barangay|risk|month|trend|follow|appointment|complication|patient|woman|women|audit/iu', $question);
+    }
+
     private function capabilitiesAnswer(): string
     {
-        return "Here's what you can ask me about this report:"
+        return 'Yes, I can answer questions about this analytics report — but not any topic at all.'
+            ."\nI can answer:"
             ."\n• Priorities — which records need review first"
             ."\n• Areas — busiest barangay, highest high-risk area, most deaths"
             ."\n• Trends — monthly registration patterns"
             ."\n• Details — full per-barangay or at-risk listings"
             ."\n• Portal help — how to use ReproCare and approve records"
             ."\nTry: \"Which barangay has the most high-risk pregnancies and what should we do?\""
-            ."\nI can't: choose medicines or dosages, identify patients, or predict the future.";
+            ."\nI cannot answer:"
+            ."\n• Medicines, dosages or individual treatment decisions"
+            ."\n• Individual patient identification"
+            ."\n• Predictions about future pregnancies or outbreaks";
     }
 
     private function listingAnswer(array $criteria, array $report): string
