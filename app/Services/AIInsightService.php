@@ -73,8 +73,13 @@ class AIInsightService
             return ['answer' => 'I can explain general maternal and reproductive health topics, but cannot choose an individual’s medicine or dosage. Please ask the responsible clinician to review the patient’s care plan.',
                 'source' => 'rules', 'error_code' => 'unsupported_topic', 'notice' => 'Individual treatment requires clinician review'];
         }
-        if (preg_match('/\b(weather|bitcoin|crypto|football|basketball|movie|celebrity|stock price|gambling)\b/iu', $question)) {
-            return ['answer' => 'That question is outside my scope. I can help with maternal and reproductive health, ReproCare, and this analytics report.',
+        // Only clearly unrelated topics are refused here. A question that also
+        // names maternal care or this system is connected, so it goes on to be
+        // interpreted against the report ("how does weather affect pregnant
+        // women in our catchment?" is answerable in part).
+        if (preg_match('/\b(weather|bitcoin|crypto|football|basketball|movie|celebrity|stock price|gambling)\b/iu', $question)
+            && ! preg_match('/\b(maternal|pregnan\w*|health|bhw|midwife|rhu|cho|patient|women|woman|barangay|record|appointment|clinic|care)\b/iu', $question)) {
+            return ['answer' => 'That question is outside my scope: it does not connect to maternal and reproductive health, ReproCare, or this analytics report.',
                 'source' => 'rules', 'error_code' => 'out_of_scope', 'notice' => 'Outside the assistant’s scope'];
         }
         if (preg_match('/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}|(?:\+?63|0)9\d[\d\s-]{8,}|\bgsk_[A-Za-z0-9]+|\b(?:patient\s*(?:id|name)|medical record number)\s*[:#]/iu', $question)) {
@@ -685,6 +690,28 @@ class AIInsightService
                 ."\nRecommended:\n• Prioritize outreach to the areas with the highest recorded high-risk and death counts.\n• Confirm staffing and transport, and verify the queue for each area."
                 ."\nNote: areas are ordered by recorded high-risk count, then death count. Population denominators are unavailable, so these are not comparisons of risk rates.";
         }
+        // Custom operational wording is mapped to the recorded numbers rather
+        // than refused: name the connection, then answer what the report holds.
+        if (preg_match('/staff|staffing|workload|capacity|outreach|manpower|burnout|coverage|schedule/u', $q)) {
+            $busiest = $ranked->sortByDesc('open')->take(3)
+                ->map(fn ($a) => "{$a['label']}: {$a['open']} open now, {$a['high_risk']} High/Critical")
+                ->implode("\n• ");
+
+            return $scope."\nHow this connects: staffing and outreach load appear here as open records, risk flags and care gaps by area."
+                ."\nSpecific data:\n• {$t['open']} open pregnancy record(s), {$t['high_risk']} High/Critical, {$t['care_gaps']} with missed or overdue appointments"
+                ."\nBusiest areas by open records:\n• ".($busiest ?: 'No open pregnancy records in this selection.')
+                ."\nRecommended:\n• Align BHW visit schedules and checkup capacity with the busiest areas.\n• Confirm staffing and referral transport before reallocating staff.\n• Verify reporting completeness before treating these counts as workload totals."
+                ."\nNote: recorded counts, not population need or staffing ratios.";
+        }
+        if (preg_match('/completeness|incomplete|missing|data quality|accuracy|accurate|reporting|compliance|target|goal|performance|kpi|backlog/u', $q)) {
+            return $scope."\nHow this connects: reporting completeness shows in this report as unassessed records, missed appointments, past-due outcomes and pending audits."
+                ."\nSpecific data:\n• {$t['unassessed']} open record(s) without a recognized risk assessment\n"
+                ."• {$t['care_gaps']} with missed or overdue appointments\n"
+                ."• {$t['past_due']} past the expected delivery date with no recorded outcome\n"
+                ."• {$t['pending_death_reviews']} death audit(s) pending or under review"
+                ."\nRecommended:\n• Ask a clinician to complete the unassessed records.\n• Ask assigned BHWs to confirm attendance and close missed appointments.\n• Complete pending death audits and record missing outcomes."
+                ."\nNote: this report measures recorded entries; care delivered outside the system is invisible here.";
+        }
         if (preg_match('/priorit|risk|suggest|decision|follow|summary|summar|recommend|unahin|panganib|missed|appointment/u', $q)) {
             return $scope."\nIn short: {$t['open']} ongoing pregnancies need attention, {$t['high_risk']} of them high-risk."
                 ."\nSpecific data:\n• {$t['open']} open pregnancy record(s) now\n• {$t['high_risk']} High/Critical\n• {$t['emergency']} emergency-marked\n"
@@ -692,7 +719,10 @@ class AIInsightService
                 ."\nRecommended:\n• ".collect($this->suggestions($report))->take(3)->map(fn ($s) => $s['evidence'].' '.$s['action'])->implode("\n• ");
         }
 
-        if (preg_match('/how (do|can|to)|where|navigate|approve|submit|register|create|add|use the|using|portal|page|button|click|paano|saan|how to use/u', $q)) {
+        // Navigation help only when the question names an actual workflow step,
+        // so "how can we improve compliance?" is answered from the data instead.
+        if (preg_match('/how (do|can|to)|where|navigate|paano|saan/u', $q)
+            && preg_match('/approve|submit|register|create|add|use the|using|portal|page|button|click|record|checkup|sign in|log in/u', $q)) {
             return "How to use ReproCare:\n• Patients (women portal): track pregnancy and menstrual cycles, view checkups, message your BHW, join the community forum, and read learning materials."
                 ."\n• BHWs: register women, schedule checkups, record vitals, and submit records and pregnancy reports to your president."
                 ."\n• BHW Presidents: review BHW submissions in the Record Review and Pregnancy Review queues, then approve or pass them to the midwife."
@@ -701,7 +731,9 @@ class AIInsightService
                 ."\nAsk me about report numbers, areas, trends, or deaths for data answers.";
         }
 
-        return $scope.'The free rules assistant can summarize priorities, missed appointments, monthly registrations, recorded maternal deaths and barangay counts. '
+        return $scope.'I could not map that question to a recorded metric, so this rules answer has nothing to check. '
+            .'This assistant works from recorded counts: open pregnancies, high or critical risk, missed appointments, registrations, deaths, complications, audits and barangay totals. '
+            .'Naming the topic with the area or month usually lets it answer. '
             .'Try "Which records need priority review?", "Which barangay has the most high-risk pregnancies and what should we do?", '
             .'"Which barangay has the most pregnant women right now?" or "Which barangay has the most maternal deaths?" '
             .'Ask "List all barangays with open pregnancies" for the full detailed breakdown. '
