@@ -1,0 +1,1 @@
+- [Code publishing preference](code-publishing.md) — the user wants every code change pushed to GitHub and deployed to Render.
