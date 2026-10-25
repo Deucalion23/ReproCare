@@ -410,8 +410,8 @@ class MaternalAnalyticsTest extends AutomationTestCase
         $this->patient(['barangay' => 'Quiet', 'first_name' => 'RhuTwoNoOpen', 'gender' => 'female']);
         $this->actingAs($this->patient(['role' => 'cho']));
 
-        $this->get(route('cho.analytics'))->assertOk()->assertSee('Open women + to do')->assertSee('All high-risk + to do')
-            ->assertSee('Critical + to do')->assertSee('No open record + to do')
+        $this->get(route('cho.analytics'))->assertOk()->assertSee('Open pregnancies')->assertSee('High-risk follow-up')
+            ->assertSee('Critical-risk follow-up')->assertSee('No open pregnancy record')
             ->assertSeeInOrder(['id="analytics-suggestions-title"', 'id="analytics-assistant-title"', 'id="analytics-chat-result"'], false)
             ->assertSee('class="an-result an-result-wide"', false);
 

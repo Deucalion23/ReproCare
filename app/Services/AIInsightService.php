@@ -799,6 +799,9 @@ class AIInsightService
                 return match ($metric) {
                     'high_risk' => in_array($entry['risk'] ?? null, ['High', 'Critical'], true),
                     'Critical', 'Medium', 'Low', 'Unassessed' => ($entry['risk'] ?? null) === $metric,
+                    'care_gaps' => ($entry['care_gap_count'] ?? 0) > 0,
+                    'past_due' => !empty($entry['edd']) && Carbon::parse($entry['edd'])->lt(today()),
+                    'emergencies' => !empty($entry['emergency']),
                     default => true,
                 };
             })->sortBy([['area', 'asc'], ['name', 'asc']])->values();

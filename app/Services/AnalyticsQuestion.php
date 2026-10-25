@@ -71,6 +71,8 @@ class AnalyticsQuestion
             (bool) preg_match('/\blow[ -]?risk\b/u', $q) => 'Low',
             (bool) preg_match('/\b(?:emergency|emergencies)\b/u', $q) => 'emergencies',
             (bool) preg_match('/\b(?:unassessed|without assessment)\b/u', $q) => 'Unassessed',
+            (bool) preg_match('/\b(?:missed|overdue|appointment|care gap)\b/u', $q) => 'care_gaps',
+            (bool) preg_match('/\b(?:past|expected delivery|edd|overdue delivery)\b/u', $q) => 'past_due',
             (bool) preg_match('/\bpregnan\w*\b|\bbuntis\b/u', $q) => 'open',
             default => null,
         };
@@ -80,6 +82,8 @@ class AnalyticsQuestion
         if ($patients && !$areas && in_array($metric, ['deaths', 'complications', 'registrations'], true)) {
             return null; // The queue contains current pregnancy records, not these event registries.
         }
+        $pureCount = (bool) preg_match('/\b(?:how many.*only|count.*only|total number only)\b/u', $q);
+        $count = $areas ? (bool) preg_match('/\b(?:how many|number of|count|ilan)\b/u', $q) : $pureCount;
         return [
             'entity' => $areas ? 'areas' : 'patients',
             'metric' => $metric,
