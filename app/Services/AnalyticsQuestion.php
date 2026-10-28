@@ -41,27 +41,36 @@ class AnalyticsQuestion
         if (preg_match('/\b(?:how (?:do|can|to|should)|what (?:is|are|causes)|explain|why|paano)\b/u', $q) && !preg_match('/\b(priority|priorities|review|list|show|which)\b/u', $q)) {
             return null;
         }
+        // How many entries were filed/registered in a period is a report count,
+        // not a request for the named records behind it.
+        if (preg_match('/\b(?:regist\w*|filed|enrol\w*|new pregnan\w*|were recorded|created in)\b/u', $q)
+            && ! preg_match('/\b(?:who|which women|names?|list)\b/u', $q)) {
+            return null;
+        }
         $areas = (bool) preg_match('/\b(?:barangays?|areas?|locations?|brgy|lugar)\b/u', $q);
         $women = (bool) preg_match('/\b(?:women|woman|mothers?|babae|buntis)\b/u', $q);
-        $patients = !$areas && ($women || (bool) preg_match('/\b(?:patients?|records?|priority|priorities|review|risk|critical|high[ -]?risk|medium[ -]?risk|low[ -]?risk|unassessed|emergency|emergencies|missed|overdue|appointment|past due|edd)\b/u', $q));
+        $patients = !$areas && ($women || (bool) preg_match('/\b(?:patients?|records?|pregnan\w*|expecting|buntis|priority|priorities|review|risk|critical|high[ -]?risk|medium[ -]?risk|low[ -]?risk|assess\w*|unassessed|emergency|emergencies|missed|overdue|appointment|follow[ -]?up|check ?ups?|past due|edd)\b/u', $q));
         if (!$areas && !$patients) {
             return null;
         }
         $patients = $patients || !$areas;
-        $count = false; // Never just count for clinical/record review questions — always show specific data (who it is).
+        // Only an explicit counting question collapses to a number; "which /
+        // who / list" questions always name the records behind the count.
+        $count = (bool) preg_match('/\b(?:how many|number of|count|ilan)\b/u', $q);
         $metric = match (true) {
-            (bool) preg_match('#\b(?:priority|priorities|review|urgent)\b#u', $q) => 'high_risk',
             (bool) preg_match('#\b(?:deaths?|died|mortality|namatay)\b#u', $q) => 'deaths',
             (bool) preg_match('#\bcomplications?\b#u', $q) => 'complications',
             (bool) preg_match('#\bregistrations?\b#u', $q) => 'registrations',
+            // "Who needs follow-up?" spans risk, care gaps and past-due records.
+            (bool) preg_match('#\b(?:priorit\w*|urgent|follow[ -]?up|attention|review|summar\w*|overview)\b#u', $q) => 'priority',
             (bool) preg_match('#\b(?:high[ -]?risk|at[ -]?risk|in[ -]?risk|risky|panganib)\b#u', $q) => 'high_risk',
             (bool) preg_match('#\bcritical\b#u', $q) => 'Critical',
             (bool) preg_match('#\bmedium[ -]?risk\b#u', $q) => 'Medium',
             (bool) preg_match('#\blow[ -]?risk\b#u', $q) => 'Low',
             (bool) preg_match('#\b(?:emergency|emergencies)\b#u', $q) => 'emergencies',
-            (bool) preg_match('#\b(?:unassessed|without assessment)\b#u', $q) => 'Unassessed',
-            (bool) preg_match('#\b(?:missed|overdue|appointment|care gap)\b#u', $q) => 'care_gaps',
+            (bool) preg_match('#\b(?:unassessed|without assess\w*|not (?:been )?assess\w*|no risk assessment)\b#u', $q) => 'Unassessed',
             (bool) preg_match('#\b(?:past|expected delivery|edd|overdue delivery)\b#u', $q) => 'past_due',
+            (bool) preg_match('#\b(?:missed|overdue|appointment|care gap)\b#u', $q) => 'care_gaps',
             default => 'open',
         };
         if ($metric === null) {
@@ -74,7 +83,7 @@ class AnalyticsQuestion
             'entity' => $areas ? 'areas' : 'patients',
             'metric' => $metric,
             'zero' => $metric !== 'Unassessed' && (bool) preg_match('/\b(?:no|without|zero|empty|walang|wala)\b/u', $q),
-            'count' => false,
+            'count' => $count,
             'female_only' => $women,
             // Patient listings are for staff follow-up, so always include recommendations and specific named results.
             'recommendations' => true,

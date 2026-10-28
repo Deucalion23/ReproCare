@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Log;
 
 class AIInsightService
 {
+    /** How many named records a listing answer shows before pointing to the queue. */
+    private const LISTING_LIMIT = 25;
+
     /** Memoized RHU catchment keys per RHU label (null key = city-wide). */
     private array $catchments = [];
 
@@ -195,7 +198,15 @@ class AIInsightService
 
     private function aiNotice(array $result, array $report): string
     {
-        return '';
+        $filters = $report['filters'] ?? [];
+        $dateRange = (!empty($filters['from']) && !empty($filters['to']))
+            ? ' for '.$filters['from'].' to '.$filters['to']
+            : '';
+        $scope = $report['scope_label'] ?? 'all areas';
+        $cached = $result['cached'] ?? false;
+        $reused = $cached ? ' (reused from cache)' : '';
+
+        return 'Draft answer based on the selected report: '.$scope.$dateRange.$reused.'. Verify figures against local charts.';
     }
 
     /**
@@ -365,9 +376,42 @@ class AIInsightService
     /** The filters driving this answer: area, period, and RHU or city-wide scope. */
     private function filterLabel(array $report): string
     {
-        $filters = $report['filters'];
+        $filters = $report['filters'] ?? [];
+        $range = (!empty($filters['from']) && !empty($filters['to']))
+            ? "{$filters['from']} to {$filters['to']}"
+            : null;
+        $label = implode(' · ', array_unique(array_filter([
+            $report['area_label'] ?? null,
+            $report['scope_label'] ?? null,
+        ])));
+        if ($range && !str_contains($label, $range)) {
+            $label = $label === '' ? $range : $label.' · '.$range;
+        }
 
-        return "{$report['area_label']}; {$filters['from']} to {$filters['to']}; ".($report['scope_label'] ?? 'City-wide · All RHUs');
+        return $label ?: 'Current selection';
+    }
+
+    /** True when a queue record carries a recorded reason for staff review. */
+    private function needsReview(array $entry): bool
+    {
+        return $this->reviewWeight($entry) > 0;
+    }
+
+    /** Recorded-review weight: emergencies and higher risk first, never a clinical score. */
+    private function reviewWeight(array $entry): int
+    {
+        $weight = !empty($entry['emergency']) ? 100 : 0;
+        $weight += match ($entry['risk'] ?? null) {
+            'Critical' => 50,
+            'High' => 40,
+            'Unassessed' => 20,
+            'Medium' => 5,
+            default => 0,
+        };
+        $weight += ($entry['care_gap_count'] ?? 0) > 0 ? 10 : 0;
+        $weight += !empty($entry['edd']) && Carbon::parse($entry['edd'])->lt(today()) ? 8 : 0;
+
+        return $weight;
     }
 
     /** Find explicit month+year references, e.g. "October 2026", "Oct 2026", "10/2026", "2026-10". */
@@ -609,21 +653,22 @@ class AIInsightService
 
     private function priorityFollowUp(array $report, string $scopeLabel): string
     {
-        $queue = collect($report['queue'] ?? [])->take(5);
+        $queue = collect($report['queue'] ?? [])->sortByDesc(fn ($entry) => $this->reviewWeight($entry))->take(5);
         if ($queue->isEmpty()) {
             return "Filters: {$scopeLabel}. Specific data: no open pregnancy records in this selection — no follow-up queue. "
                 . 'Confirm reporting completeness and maintain scheduled follow-up.';
         }
-        $lines = $queue->map(fn ($e) => "Pregnancy #{$e['pregnancy_id']} ({$e['area']}, recorded risk: {$e['risk']}"
-            . ($e['emergency'] ? ', EMERGENCY-marked' : '')
-            . ($e['edd'] ? ", EDD {$e['edd']}" : '')
-            . '): ' . implode(' ', array_slice($e['reasons'] ?? [], 0, 2)))->implode(' | ');
+        $lines = $queue->map(fn ($e) => ($e['name'] ?? 'Unnamed record').' - '.($e['area'] ?? 'Area unrecorded').', '
+            .(!empty($e['edd']) ? 'EDD '.Carbon::parse($e['edd'])->format('M d, Y') : 'EDD unrecorded')
+            . ' ('.($e['risk'] ?? 'Unassessed').'); To do: '.$this->patientFollowUp($e)
+            . (!empty($e['emergency']) ? ' EMERGENCY-marked record.' : '')
+            . (isset($e['pregnancy_id']) ? " (Pregnancy #{$e['pregnancy_id']})" : ''))->implode("\n• ");
 
         return "Filters: {$scopeLabel}. Specific data: {$report['totals']['open']} open record(s) — "
             . "{$report['totals']['high_risk']} High/Critical, {$report['totals']['emergency']} emergency-marked, "
             . "{$report['totals']['care_gaps']} with missed or overdue appointments, {$report['totals']['unassessed']} unassessed. "
-            . "Top priority records: {$lines}. "
-            . 'Recommended: contact the responsible clinicians to confirm review and referral status for emergency and High/Critical records first, '
+            . "\nRecords to review first:\n• {$lines}"
+            . "\nRecommended: contact the responsible clinicians to confirm review and referral status for emergency and High/Critical records first, "
             . 'ask the assigned BHW to verify attendance for missed appointments, and have a clinician complete the unassessed records.';
     }
 
@@ -714,6 +759,7 @@ class AIInsightService
             return $scope."\nIn short: {$t['open']} ongoing pregnancies need attention, {$t['high_risk']} of them high-risk."
                 ."\nSpecific data:\n• {$t['open']} open pregnancy record(s) now\n• {$t['high_risk']} High/Critical\n• {$t['emergency']} emergency-marked\n"
                 ."• {$t['care_gaps']} with missed or overdue appointments\n• {$t['past_due']} past the expected delivery date\n• {$t['unassessed']} unassessed. "
+                ."\nRecords to review first:\n• ".$this->namedRecords($report, 5)
                 ."\nRecommended:\n• ".collect($this->suggestions($report))->take(3)->map(fn ($s) => $s['evidence'].' '.$s['action'])->implode("\n• ");
         }
 
@@ -759,14 +805,15 @@ class AIInsightService
         return 'Yes, I can answer questions about this analytics report — but not any topic at all.'
             ."\nI can answer:"
             ."\n• Priorities — which records need review first"
+            ."\n• People — the name, barangay, EDD and recorded risk of each matching record, with its next step"
             ."\n• Areas — busiest barangay, highest high-risk area, most deaths"
             ."\n• Trends — monthly registration patterns"
             ."\n• Details — full per-barangay or at-risk listings"
             ."\n• Portal help — how to use ReproCare and approve records"
-            ."\nTry: \"Which barangay has the most high-risk pregnancies and what should we do?\""
+            ."\nTry: \"Which records need follow-up?\""
             ."\nI cannot answer:"
             ."\n• Medicines, dosages or individual treatment decisions"
-            ."\n• Individual patient identification"
+            ."\n• Records outside the selected area and date range"
             ."\n• Predictions about future pregnancies or outbreaks";
     }
 
@@ -802,33 +849,40 @@ class AIInsightService
                     'care_gaps' => ($entry['care_gap_count'] ?? 0) > 0,
                     'past_due' => !empty($entry['edd']) && Carbon::parse($entry['edd'])->lt(today()),
                     'emergencies' => !empty($entry['emergency']),
+                    'priority' => $this->needsReview($entry),
                     default => true,
                 };
-            })->sortBy([['area', 'asc'], ['name', 'asc']])->values();
-            if ($criteria['count']) {
-                return $scope."\n{$cases->count()} matching open pregnancy record(s)."
-                    ."\nUse the Pregnancy review queue to open an authorized record.";
-            }
+            })->when($metric === 'priority', fn ($rows) => $rows->sortByDesc(fn ($entry) => $this->reviewWeight($entry)),
+                fn ($rows) => $rows->sortBy([['area', 'asc'], ['name', 'asc']]))->values();
             if ($cases->isEmpty()) {
                 return $scope."\nNo matching open pregnancy records were found."
                     ."\nConfirm reporting completeness before treating this as an absence of need.";
             }
-            $lines = $cases->map(function ($entry) use ($criteria) {
+            if ($criteria['count']) {
+                return $scope."\n{$cases->count()} matching open pregnancy record(s)."
+                    ."\nUse the Pregnancy review queue to open an authorized record.";
+            }
+            // Names make the answer actionable, but a 48-name wall is not
+            // readable: show the most urgent records and point to the queue.
+            $shown = $cases->take(self::LISTING_LIMIT);
+            $lines = $shown->map(function ($entry) use ($criteria) {
                 $edd = !empty($entry['edd']) ? 'EDD '.Carbon::parse($entry['edd'])->format('M d, Y') : 'EDD unrecorded';
-                $line = "• {$entry['name']} - {$entry['area']}, {$edd} ({$entry['risk']})";
+                $line = '• '.($entry['name'] ?? 'Unnamed record').' - '.($entry['area'] ?? 'Area unrecorded')
+                    .", {$edd} (".($entry['risk'] ?? 'Unassessed').')';
                 return $criteria['recommendations'] ? $line.'; To do: '.$this->patientFollowUp($entry) : $line;
             });
             $title = $criteria['recommendations'] ? 'Matching women and recommended follow-up' : 'Matching women';
-            return $scope."\n{$title} (".$cases->count()."):\n".$lines->implode("\n")
+            $more = $cases->count() > $shown->count()
+                ? "\n".($cases->count() - $shown->count()).' more record(s) match — narrow by barangay or open the Pregnancy review queue for the rest.'
+                : '';
+            return $scope."\n{$title} (".$cases->count()."):\n".$lines->implode("\n").$more
                 ."\nFor authorized staff review only. Do not paste names into an external tool. Recommendations support staff review and do not replace clinician assessment.";
         }
 
+        // Area lines already carry their own counts, so a counting question
+        // still gets the per-barangay numbers rather than a bare total.
         $matches = $areas->filter(fn ($area) => $criteria['zero'] ? $this->areaMetricValue($area, $metric) === 0 : $this->areaMetricValue($area, $metric) > 0)
             ->sortBy('label')->sortByDesc(fn ($area) => $this->areaMetricValue($area, $metric))->values();
-        if ($criteria['count']) {
-            return $scope."\n{$matches->count()} barangay(s) match this request."
-                ."\nRecorded counts are not population risk rates.";
-        }
         if ($matches->isEmpty()) {
             return $scope."\nNo barangays match this request."
                 ."\nConfirm reporting completeness before treating zero recorded entries as an absence of need.";
@@ -847,6 +901,19 @@ class AIInsightService
             'emergencies' => 'emergency-marked record(s)',
             default => strtolower($metric).' record(s)',
         };
+    }
+
+    /** Named queue records (authorized staff detail) for a scannable review list. */
+    private function namedRecords(array $report, int $limit = 5): string
+    {
+        $queue = collect($report['queue'] ?? [])->sortByDesc(fn ($entry) => $this->reviewWeight($entry))->take($limit);
+        if ($queue->isEmpty()) {
+            return 'No open pregnancy records in this selection.';
+        }
+
+        return $queue->map(fn ($entry) => ($entry['name'] ?? 'Unnamed record').' - '.($entry['area'] ?? 'Area unrecorded').', '
+            .(!empty($entry['edd']) ? 'EDD '.Carbon::parse($entry['edd'])->format('M d, Y') : 'EDD unrecorded')
+            .' ('.($entry['risk'] ?? 'Unassessed').'); To do: '.$this->patientFollowUp($entry))->implode("\n• ");
     }
 
     private function patientFollowUp(array $entry): string

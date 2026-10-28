@@ -10,6 +10,9 @@
     <title>@yield('title', 'ReproCare — Care for every chapter')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/brand/favicon-logo.png?v=1') }}">
     <link rel="stylesheet" href="{{ asset('css/bootstrap-icons.css') }}">
+    <!-- Cross-origin render-blocking stylesheets: shake hands early so the font sheet downloads sooner. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
     @stack('styles')
     <link rel="stylesheet" href="{{ asset('css/public.css') }}?v={{ filemtime(public_path('css/public.css')) }}">

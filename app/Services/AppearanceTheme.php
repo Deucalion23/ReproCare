@@ -10,8 +10,9 @@ class AppearanceTheme
     public function current(): array
     {
         try {
-            // Avoid the legacy static Setting cache in long-running workers.
-            $saved = json_decode(Setting::where('key', 'appearance.theme')->value('value') ?? '{}', true);
+            // Reads go through Setting::get() so the in-request cache is reused
+            // instead of a raw settings-table query on every page load.
+            $saved = json_decode(Setting::get('appearance.theme') ?? '{}', true);
         } catch (\Throwable $e) {
             $saved = [];
         }

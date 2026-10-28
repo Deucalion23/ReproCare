@@ -43,39 +43,27 @@
             };
         };
 
-        const renderPatientCards = (text) => {
-            // Split by bullet and try to parse each patient item
-            const chunks = text.split(/•\s*/).filter(s => s.trim().length);
-            const items = chunks.map(parsePatientItem).filter(Boolean);
-            if (!items.length) return null;
+        const patientCard = (item) => {
+            const card = document.createElement('article');
+            card.className = 'an-patient-card';
 
-            const grid = document.createElement('div');
-            grid.className = 'an-patient-list';
+            const riskClass = item.risk.toLowerCase();
 
-            items.forEach(item => {
-                const card = document.createElement('article');
-                card.className = 'an-patient-card';
-
-                const riskClass = item.risk.toLowerCase();
-
-                card.innerHTML = `
-                    <div class="an-patient-info">
-                        <div class="an-patient-name">${escapeHtml(item.name)}</div>
-                        <div class="an-patient-meta">
-                            <span>${escapeHtml(item.barangay)}</span>
-                            <span>•</span>
-                            <span>EDD ${escapeHtml(item.edd)}</span>
-                        </div>
+            card.innerHTML = `
+                <div class="an-patient-info">
+                    <div class="an-patient-name">${escapeHtml(item.name)}</div>
+                    <div class="an-patient-meta">
+                        <span>${escapeHtml(item.barangay)}</span>
+                        <span>•</span>
+                        <span>EDD ${escapeHtml(item.edd)}</span>
                     </div>
-                    <div class="an-patient-actions">
-                        <span class="an-badge ${riskClass}">${escapeHtml(item.risk)}</span>
-                        <div class="an-patient-todo">${escapeHtml(item.todo)}</div>
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
-
-            return grid;
+                </div>
+                <div class="an-patient-actions">
+                    <span class="an-badge ${riskClass}">${escapeHtml(item.risk)}</span>
+                    <div class="an-patient-todo">${escapeHtml(item.todo)}</div>
+                </div>
+            `;
+            return card;
         };
 
         const BULLET_RE = /^[•\-*–—]\s+/;
@@ -159,19 +147,48 @@
             const body = document.createElement('div');
             body.className = 'an-answer-body';
 
-            // Try patient-card rendering first (local listing data with names)
-            const cards = renderPatientCards(htmlSafeText);
-            if (cards) {
-                body.appendChild(cards);
-                wrap.appendChild(body);
-                container.appendChild(wrap);
-                return;
-            }
-
-            // Fallback: line-based paragraphs, bullet lists and numbered lists
-            renderAnswerText(body, htmlSafeText);
+            // Named record lines become cards; every other line (scope, counts,
+            // headings, notes) still renders as normal structured text.
+            renderAnswerWithCards(body, htmlSafeText);
             wrap.appendChild(body);
             container.appendChild(wrap);
+        };
+
+        /** Mix patient cards for named record lines with structured text for the rest. */
+        const renderAnswerWithCards = (body, text) => {
+            let buffer = [];
+            let grid = null;
+            const flushText = () => {
+                if (!buffer.length) return;
+                renderAnswerText(body, buffer.join('\n'));
+                buffer = [];
+            };
+            const flushCards = () => {
+                if (!grid) return;
+                body.appendChild(grid);
+                grid = null;
+            };
+
+            text.split(/\r?\n/).forEach(rawLine => {
+                const line = rawLine.trim();
+                const item = line && BULLET_RE.test(line)
+                    ? parsePatientItem(line.replace(BULLET_RE, '').trim())
+                    : null;
+                if (item) {
+                    flushText();
+                    if (!grid) {
+                        grid = document.createElement('div');
+                        grid.className = 'an-patient-list';
+                    }
+                    grid.appendChild(patientCard(item));
+                    return;
+                }
+                flushCards();
+                buffer.push(rawLine);
+            });
+
+            flushCards();
+            flushText();
         };
 
         const sourceBadge = (source, model, cached) => {

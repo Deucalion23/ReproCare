@@ -41,6 +41,10 @@
     <meta name="apple-mobile-web-app-title" content="ReproCare">
     <link rel="apple-touch-icon" href="{{ asset('images/brand/apple-touch-icon.png') }}">
 
+    <!-- Cross-origin render-blocking stylesheets: shake hands early so they download sooner. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <!-- Google Fonts: Plus Jakarta Sans + Inter + Baloo 2 (logo wordmark) -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
     <!-- Bootstrap CSS -->

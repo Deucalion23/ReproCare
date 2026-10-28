@@ -9,6 +9,9 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+// CheckAnalyticsAI is auto-registered from app/Console/Commands (it defines its
+// own $signature), so no manual Artisan::command() registration is needed here.
+
 // All times use config('app.timezone') (Asia/Manila).
 Schedule::command('alerts:run --appointments')->dailyAt('07:00')->withoutOverlapping(30);
 Schedule::command('alerts:run --deliveries')->dailyAt('07:30')->withoutOverlapping(30);
