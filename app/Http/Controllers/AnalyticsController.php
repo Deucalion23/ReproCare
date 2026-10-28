@@ -24,7 +24,7 @@ class AnalyticsController extends Controller
         $rhuOptions = AnalyticsScope::RHUS;
         $mapData = app(AnalyticsMap::class)->build($report);
         // One chart dataset per RHU for the barangay switcher (RHU users: own RHU only).
-        $rhuAreaChart = $analytics->pregnantWomenByRhuArea($filters['rhu'] ?? null);
+        $rhuAreaChart = $analytics->pregnantWomenByRhuArea($report['queue'], $filters['rhu'] ?? null);
         $rhuAreaDefault = $filters['rhu'] ?? 'RHU 1';
         $queue = new LengthAwarePaginator(
             $report['queue']->forPage(max(1, $request->integer('page', 1)), 15)->values(),

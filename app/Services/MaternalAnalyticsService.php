@@ -56,9 +56,15 @@ class MaternalAnalyticsService
             $complications = $complications->filter(fn ($m) => in_array($scope->key($m->barangay), $catchment, true));
         }
 
-        $open->load(['healthRecords' => fn ($q) => $q
-            ->where('created_at', '<=', now())->orderByDesc('id')
-            ->select(['id', 'pregnancy_id', 'risk_level', 'is_emergency', 'created_at'])]);
+        $open->load(['latestHealthRecord' => fn ($q) => $q
+            ->where('health_records.created_at', '<=', now())
+            ->select([
+                'health_records.id',
+                'health_records.pregnancy_id',
+                'health_records.risk_level',
+                'health_records.is_emergency',
+                'health_records.created_at',
+            ])]);
         // Only appointments explicitly linked to this pregnancy belong to its queue entry.
         $checkups = Checkup::whereIn('pregnancy_id', $open->pluck('id'))
             ->whereDate('scheduled_date', '<', today())->whereIn('status', ['Missed', 'Scheduled'])
@@ -287,21 +293,14 @@ class MaternalAnalyticsService
      * Powers the "Pregnant women by barangay" chart with its RHU switcher.
      * Pass an RHU to build only that catchment (RHU-role scoping).
      */
-    public function pregnantWomenByRhuArea(?string $onlyRhu = null): array
+    public function pregnantWomenByRhuArea(Collection $queue, ?string $onlyRhu = null): array
     {
         $scope = app(AnalyticsScope::class);
-        $relations = ['woman:id,first_name,last_name,barangay', 'walkInPatient:id,first_name,last_name,barangay'];
-        $open = Pregnancy::with($relations)->whereNull('ended_at')->whereNull('delivery_date')
-            ->where(fn ($q) => $q->whereNull('outcome')->orWhere('outcome', ''))
-            ->where('created_at', '<=', now())->get();
-        // Keep the queue's definition of "open": known deceased patients are out.
-        $knownDeaths = MaternalDeath::whereDate('death_date', '<=', today())
-            ->get(['pregnancy_id', 'user_id', 'walk_in_patient_id']);
-        $deceasedPregnancies = array_fill_keys($knownDeaths->pluck('pregnancy_id')->filter()->all(), true);
-        $deceasedUsers = array_fill_keys($knownDeaths->pluck('user_id')->filter()->all(), true);
-        $deceasedWalkIns = array_fill_keys($knownDeaths->pluck('walk_in_patient_id')->filter()->all(), true);
-        $open = $open->reject(fn ($p) => isset($deceasedPregnancies[$p->id])
-            || isset($deceasedUsers[$p->user_id]) || isset($deceasedWalkIns[$p->walk_in_patient_id]));
+        // The report queue has already performed the canonical open-pregnancy
+        // and deceased-patient checks. Reusing it avoids a second full
+        // pregnancy query (plus its patient/death relation queries).
+        $barangays = Barangay::active()->get(['name', 'rhu_assignment'])
+            ->groupBy(fn (Barangay $barangay) => $barangay->rhu_assignment);
 
         $result = [];
         foreach (AnalyticsScope::RHUS as $rhu) {
@@ -310,13 +309,13 @@ class MaternalAnalyticsService
             }
             // Official catchment labels (first spelling wins when aliases collide).
             $labels = [];
-            Barangay::active()->forRhu($rhu)->pluck('name')->each(function ($name) use ($scope, &$labels) {
-                $key = $scope->key($name);
-                $labels[$key] ??= $name;
+            $barangays->get($rhu, collect())->each(function (Barangay $barangay) use ($scope, &$labels) {
+                $key = $scope->key($barangay->name);
+                $labels[$key] ??= $barangay->name;
             });
             $counts = [];
-            foreach ($open as $pregnancy) {
-                $key = $scope->key($this->pregnancyArea($pregnancy));
+            foreach ($queue as $entry) {
+                $key = $scope->key($entry['area_key'] ?? null);
                 if (array_key_exists($key, $labels)) {
                     $counts[$key] = ($counts[$key] ?? 0) + 1;
                 }
@@ -341,9 +340,6 @@ class MaternalAnalyticsService
             ->pluck('name');
 
         return $configuredAreas
-            ->merge(User::where('role', 'user')->pluck('barangay'))
-            ->merge(WalkInPatient::pluck('barangay'))
-            ->merge(MaternalDeath::pluck('barangay'))->merge(MaternalMorbidity::pluck('barangay'))
             ->map(fn ($value) => $this->area($value))->push(self::UNKNOWN_AREA)->unique()->sort()
             ->filter(fn ($key) => $catchment === null || in_array($scope->key($key), $catchment, true))
             ->mapWithKeys(fn ($key) => [$key => $this->areaLabel($key)])->all();
@@ -379,7 +375,7 @@ class MaternalAnalyticsService
 
     private function queueEntry(Pregnancy $pregnancy, Collection $gaps): array
     {
-        $latest = $pregnancy->healthRecords->first();
+        $latest = $pregnancy->latestHealthRecord;
         // Preserve the more serious stored flag for review; do not infer a diagnosis.
         $levels = collect([$pregnancy->risk_level, $latest?->risk_level])
             ->filter(fn ($level) => isset(self::RISK_ORDER[$level]) && $level !== 'Unassessed');

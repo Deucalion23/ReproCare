@@ -67,6 +67,12 @@ class Pregnancy extends Model
         return $this->hasMany(HealthRecord::class, 'pregnancy_id')->orderByDesc('created_at');
     }
 
+    /** The analytics queue needs only the current assessment, not the full history. */
+    public function latestHealthRecord()
+    {
+        return $this->hasOne(HealthRecord::class, 'pregnancy_id')->latestOfMany('created_at');
+    }
+
     public function maternalCareTargetClient()
     {
         return $this->hasOne(MaternalCareTargetClient::class, 'pregnancy_id');
