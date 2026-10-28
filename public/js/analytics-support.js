@@ -158,7 +158,6 @@
             container.appendChild(wrap);
         };
 
-<<<<<<< HEAD
         /** Mix patient cards for named record lines with structured text for the rest. */
         const renderAnswerWithCards = (body, text) => {
             let buffer = [];
@@ -198,11 +197,6 @@
 
         const sourceBadge = (source, model, cached) => {
             const label = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
-=======
-        const sourceBadge = (source, model, cached, combined = false) => {
-            const provider = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
-            const label = combined ? `Local data + ${provider}` : provider;
->>>>>>> 0212273aa4bef933fc8d71838b9307967d3966a4
             const span = document.createElement('span');
             span.className = `an-answer-source ${source}${cached ? ' cached' : ''}`;
             span.innerHTML = `<span class="dot"></span>${label}${model ? ' · ' + model : ''}${cached ? ' · cached' : ''}`;

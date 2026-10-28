@@ -941,22 +941,8 @@ class AIInsightService
                     'priority' => $this->needsReview($entry),
                     default => true,
                 };
-<<<<<<< HEAD
             })->when($metric === 'priority', fn ($rows) => $rows->sortByDesc(fn ($entry) => $this->reviewWeight($entry)),
                 fn ($rows) => $rows->sortBy([['area', 'asc'], ['name', 'asc']]))->values();
-=======
-            })->sortBy([['area', 'asc'], ['name', 'asc']])->values();
-            $questionFacts = [
-                'measure' => 'current open pregnancy records matching the requested local list',
-                'matching_records' => $cases->count(),
-                'period' => 'current queue at report generation time',
-                'limitations' => 'The list names stay local; this summary contains no patient names or identifiers.',
-            ];
-            if ($criteria['count']) {
-                return $scope."\n{$cases->count()} matching open pregnancy record(s)."
-                    ."\nUse the Pregnancy review queue to open an authorized record.";
-            }
->>>>>>> 0212273aa4bef933fc8d71838b9307967d3966a4
             if ($cases->isEmpty()) {
                 return $scope."\nNo matching open pregnancy records were found."
                     ."\nConfirm reporting completeness before treating this as an absence of need.";
@@ -982,24 +968,8 @@ class AIInsightService
                 ."\nFor authorized staff review only. Do not paste names into an external tool. Recommendations support staff review and do not replace clinician assessment.";
         }
 
-<<<<<<< HEAD
         // Area lines already carry their own counts, so a counting question
         // still gets the per-barangay numbers rather than a bare total.
-=======
-        if (($criteria['period_year'] ?? null) !== null) {
-            $year = (int) $criteria['period_year'];
-            $questionFacts = [
-                'period' => (string) $year,
-                'requested_measure' => $this->metricLabel($metric),
-                'available' => false,
-                'limitation' => 'The supplied area summary does not contain this measure for the requested historical year. Do not substitute current counts.',
-            ];
-
-            return ($report['area_label'] ?? 'All barangays').'; '.$year.'; '.($report['scope_label'] ?? 'City-wide · All RHUs').'.'
-                ."\nThis measure is not available by area for {$year} in the current local report data.";
-        }
-
->>>>>>> 0212273aa4bef933fc8d71838b9307967d3966a4
         $matches = $areas->filter(fn ($area) => $criteria['zero'] ? $this->areaMetricValue($area, $metric) === 0 : $this->areaMetricValue($area, $metric) > 0)
             ->sortBy('label')->sortByDesc(fn ($area) => $this->areaMetricValue($area, $metric))->values();
         if ($matches->isEmpty()) {

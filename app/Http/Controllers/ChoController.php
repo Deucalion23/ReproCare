@@ -128,6 +128,7 @@ class ChoController extends Controller
                 ]);
                 // updateOrCreate bypasses Setting::set(), so clear the read cache explicitly.
                 \App\Models\Setting::flushCache('appearance.theme');
+                \Illuminate\Support\Facades\Cache::forget('appearance.theme.current');
                 ActivityLog::log('update', 'CHO updated the city-wide default appearance mode');
             });
             return redirect()->to(route('cho.settings').'#appearance')

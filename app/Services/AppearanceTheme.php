@@ -3,32 +3,36 @@
 namespace App\Services;
 
 use App\Models\Setting;
+use Illuminate\Support\Facades\Cache;
 
 class AppearanceTheme
 {
     /** Read only this public setting; never serialize clinical or gateway settings. */
     public function current(): array
     {
-        try {
-            // Reads go through Setting::get() so the in-request cache is reused
-            // instead of a raw settings-table query on every page load.
-            $saved = json_decode(Setting::get('appearance.theme') ?? '{}', true);
-        } catch (\Throwable $e) {
-            $saved = [];
-        }
-        $defaults = config('appearance.defaults');
-        $theme = $defaults;
-        foreach (config('appearance.options') as $slot => $allowed) {
-            if (in_array($saved[$slot] ?? null, $allowed, true)) {
-                $theme[$slot] = $saved[$slot];
+        return Cache::remember('appearance.theme.current', 3600, function () {
+            try {
+                // Reads go through Setting::get() so the in-request cache is reused
+                // instead of a raw settings-table query on every page load.
+                $saved = json_decode(Setting::get('appearance.theme') ?? '{}', true);
+            } catch (\Throwable $e) {
+                $saved = [];
             }
-        }
-        if ($theme['primary'] === $theme['secondary']) {
-            $theme['secondary'] = $theme['primary'] === 'pink' ? 'purple' : 'pink';
-        }
-        $theme['mode'] = ($saved['mode'] ?? '') === 'dark' ? 'dark' : 'light';
-        $theme['revision'] = is_string($saved['revision'] ?? null) ? $saved['revision'] : 'default';
-        return $theme;
+            $defaults = config('appearance.defaults');
+            $theme = $defaults;
+            foreach (config('appearance.options') as $slot => $allowed) {
+                if (in_array($saved[$slot] ?? null, $allowed, true)) {
+                    $theme[$slot] = $saved[$slot];
+                }
+            }
+            if ($theme['primary'] === $theme['secondary']) {
+                $theme['secondary'] = $theme['primary'] === 'pink' ? 'purple' : 'pink';
+            }
+            $theme['mode'] = ($saved['mode'] ?? '') === 'dark' ? 'dark' : 'light';
+            $theme['revision'] = is_string($saved['revision'] ?? null) ? $saved['revision'] : 'default';
+
+            return $theme;
+        });
     }
 
     public function palette(): array
