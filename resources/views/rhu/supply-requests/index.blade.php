@@ -28,7 +28,7 @@
 
 <div class="card fade-in-card mb-3">
     <div class="card-body">
-        <form method="GET" class="row g-2 align-items-end">
+        <form method="GET" class="row g-2 align-items-end supply-request-filters">
             <div class="col-md-3">
                 <label class="form-label">Search</label>
                 <input type="text" name="search" class="form-control" placeholder="ID, item, date, status..." value="{{ $search ?? '' }}">
@@ -56,13 +56,30 @@
                 <label class="form-label">To</label>
                 <input type="date" name="date_to" class="form-control" value="{{ $dateTo ?? '' }}" max="{{ date('Y-m-d') }}">
             </div>
-            <div class="col-md-1 d-flex gap-1">
+            <div class="col-md-2 d-flex gap-2 supply-request-filter-actions">
                 <button class="btn btn-primary" type="submit">Go</button>
                 <a class="btn btn-outline-secondary" href="{{ route('rhu.supply-requests.index') }}">Clear</a>
             </div>
         </form>
     </div>
 </div>
+
+<style>
+    .supply-request-filter-actions .btn {
+        flex: 1 1 auto;
+        white-space: nowrap;
+    }
+
+    @media (max-width: 767.98px) {
+        .supply-request-filter-actions {
+            justify-content: flex-start;
+        }
+
+        .supply-request-filter-actions .btn {
+            flex: 0 0 auto;
+        }
+    }
+</style>
 
 <div class="card fade-in-card">
     <div class="card-body p-0">

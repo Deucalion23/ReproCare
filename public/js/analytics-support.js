@@ -134,14 +134,18 @@
         };
 
         /** Safely render untrusted AI text into structured DOM (no innerHTML). */
-        const renderAnswer = (container, htmlSafeText) => {
+        const renderAnswer = (container, htmlSafeText, source, combined = false) => {
             container.innerHTML = '';
             const wrap = document.createElement('div');
             wrap.className = 'an-answer-wrap';
 
             const header = document.createElement('div');
             header.className = 'an-answer-header';
-            header.innerHTML = '<i class="bi bi-robot" aria-hidden="true"></i>AI Answer';
+            header.innerHTML = source === 'rules'
+                ? '<i class="bi bi-database-check" aria-hidden="true"></i>Local report answer'
+                : combined
+                    ? '<i class="bi bi-stars" aria-hidden="true"></i>Local data + AI answer'
+                    : '<i class="bi bi-robot" aria-hidden="true"></i>AI answer';
             wrap.appendChild(header);
 
             const body = document.createElement('div');
@@ -154,6 +158,7 @@
             container.appendChild(wrap);
         };
 
+<<<<<<< HEAD
         /** Mix patient cards for named record lines with structured text for the rest. */
         const renderAnswerWithCards = (body, text) => {
             let buffer = [];
@@ -193,6 +198,11 @@
 
         const sourceBadge = (source, model, cached) => {
             const label = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
+=======
+        const sourceBadge = (source, model, cached, combined = false) => {
+            const provider = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
+            const label = combined ? `Local data + ${provider}` : provider;
+>>>>>>> 0212273aa4bef933fc8d71838b9307967d3966a4
             const span = document.createElement('span');
             span.className = `an-answer-source ${source}${cached ? ' cached' : ''}`;
             span.innerHTML = `<span class="dot"></span>${label}${model ? ' · ' + model : ''}${cached ? ' · cached' : ''}`;
@@ -241,9 +251,11 @@
                 const data = await response.json();
                 if (!response.ok) throw new Error(response.status === 422 ? Object.values(data.errors || {}).flat()[0] || 'Check your question and filters.' : 'The report could not be loaded. Please try again.');
                 if (typeof data.answer !== 'string') throw new Error('The assistant returned an incomplete response. Please try again.');
-                notice.textContent = '';
-                renderAnswer(answer, data.answer);
-                answer.appendChild(sourceBadge(data.source, data.model, data.cached));
+                notice.textContent = data.error_code && typeof data.notice === 'string'
+                    ? data.notice
+                    : '';
+                renderAnswer(answer, data.answer, data.source, data.combined);
+                answer.appendChild(sourceBadge(data.source, data.model, data.cached, data.combined));
                 const actions = document.createElement('div');
                 actions.className = 'an-answer-actions';
                 const copyBtn = document.createElement('button');
@@ -252,10 +264,12 @@
                 copyBtn.innerHTML = '<i class="bi bi-clipboard" aria-hidden="true"></i> Copy';
                 copyBtn.addEventListener('click', () => copyAnswer(data.answer));
                 actions.appendChild(copyBtn);
-                const verified = document.createElement('span');
-                verified.className = 'an-answer-verified';
-                verified.innerHTML = '<i class="bi bi-check2-circle" aria-hidden="true"></i> Verified counts';
-                actions.appendChild(verified);
+                if (data.combined) {
+                    const verified = document.createElement('span');
+                    verified.className = 'an-answer-verified';
+                    verified.innerHTML = '<i class="bi bi-check2-circle" aria-hidden="true"></i> Includes verified local data';
+                    actions.appendChild(verified);
+                }
                 const regenBtn = document.createElement('button');
                 regenBtn.className = 'an-action-btn';
                 regenBtn.innerHTML = '<i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Regenerate';
@@ -268,7 +282,7 @@
                 const ts = document.createElement('div');
                 ts.className = 'an-answer-timestamp';
                 answer.appendChild(ts);
-                if (data.source === 'groq' || data.source === 'openrouter') {
+                if (data.combined && (data.source === 'groq' || data.source === 'openrouter')) {
                     const lines = [data.topic || 'Report summary'];
                     if (Array.isArray(data.area_legend) && data.area_legend.length) {
                         lines.push(data.area_legend.map(area => `${area.alias}: ${area.label}`).join('; '));

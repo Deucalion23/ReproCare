@@ -96,9 +96,17 @@ class MidwifeController extends Controller
 
         if ($search) {
             $cleanSearch = ltrim($search, '#');
-            $registeredQuery->where(function($q) use ($search, $cleanSearch) {
-                $q->where('id', $cleanSearch)
-                  ->orWhere('first_name', 'like', '%' . $search . '%')
+            $numericIdSearch = ctype_digit((string) $cleanSearch);
+            $registeredQuery->where(function($q) use ($search, $cleanSearch, $numericIdSearch) {
+                // PostgreSQL cannot compare a bigint ID with a nonnumeric
+                // search term (for example, "maria"). Only include the ID
+                // condition when the search is a numeric ID.
+                if ($numericIdSearch) {
+                    $q->where('id', $cleanSearch);
+                }
+
+                $method = $numericIdSearch ? 'orWhere' : 'where';
+                $q->{$method}('first_name', 'like', '%' . $search . '%')
                   ->orWhere('middle_initial', 'like', '%' . $search . '%')
                   ->orWhere('last_name', 'like', '%' . $search . '%')
                   ->orWhere('contact_number', 'like', '%' . $search . '%')

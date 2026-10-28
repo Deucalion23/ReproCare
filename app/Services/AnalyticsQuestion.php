@@ -79,9 +79,17 @@ class AnalyticsQuestion
         if ($patients && !$areas && in_array($metric, ['deaths', 'complications', 'registrations'], true)) {
             return null; // The queue contains current pregnancy records, not these event registries.
         }
+        $periodYear = null;
+        if (preg_match('/\blast year\b/u', $q)) {
+            $periodYear = today()->subYear()->year;
+        } elseif (preg_match('/\b(?:in|during|for)\s+(20\d{2})\b/u', $q, $yearMatch)) {
+            $periodYear = (int) $yearMatch[1];
+        }
+
         return [
             'entity' => $areas ? 'areas' : 'patients',
             'metric' => $metric,
+            'period_year' => $periodYear,
             'zero' => $metric !== 'Unassessed' && (bool) preg_match('/\b(?:no|without|zero|empty|walang|wala)\b/u', $q),
             'count' => $count,
             'female_only' => $women,

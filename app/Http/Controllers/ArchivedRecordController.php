@@ -135,8 +135,10 @@ class ArchivedRecordController extends Controller
         $supplyRequests = SupplyRequest::onlyTrashed()
             ->with('requestedBy:id,first_name,last_name')
             ->when($search, function ($q) use ($search) {
-                $q->where('supply_name', 'like', "%{$search}%")
-                    ->orWhere('category', 'like', "%{$search}%");
+                $q->where(function ($searchQuery) use ($search) {
+                    $searchQuery->where('supply_name', 'like', "%{$search}%")
+                        ->orWhere('supply_category', 'like', "%{$search}%");
+                });
             })
             ->tap($applyDateRange)
             ->latest('deleted_at')
