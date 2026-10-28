@@ -52,7 +52,11 @@ class EnsureAccountActive
             return $next($request);
         }
 
-        $user = $user->fresh() ?? $user;
+        // The auth middleware has already loaded this user from the database
+        // for the current request. Refreshing it again made every navigation
+        // wait for a second remote database query. On the next request the
+        // guard loads the current account state again before this middleware
+        // runs, so status changes still take effect immediately.
         $status = $user->status ?? 'approved';
 
         if ($status === 'approved') {

@@ -34,6 +34,11 @@ services:
       # database, so set DB_CONNECTION and the matching DB_* values there.
       - key: CACHE_STORE
         value: file
+      # Signed, encrypted cookie sessions avoid a remote sessions-table read
+      # and write on every page navigation. User identity is still read from
+      # the database by Laravel's auth guard on each protected request.
+      - key: SESSION_DRIVER
+        value: cookie
       # APP_KEY is intentionally NOT in this file: set one stable value in
       # the dashboard (php artisan key:generate --show, paste the base64:...
       # string). The entrypoint auto-generates an ephemeral key if empty,
