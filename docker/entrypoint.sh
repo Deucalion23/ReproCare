@@ -112,10 +112,13 @@ if [ "${APP_ENV}" = "production" ] && [ "${SEED_TEST_SCENARIOS:-true}" = "true" 
     fi
 fi
 
-# Clear any cached config so runtime environment variables are active
+# Rebuild the configuration cache after .env has been synchronized with the
+# Render environment. Clearing it without rebuilding forced Laravel to parse
+# all configuration files on every request after each deploy.
 php artisan config:clear || true
 php artisan route:clear || true
 php artisan view:clear || true
+php artisan config:cache || echo "Warning: Could not cache configuration."
 
 echo "Starting Apache web server..."
 # Execute the main container command (apache2-foreground)

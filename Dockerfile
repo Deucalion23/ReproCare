@@ -50,8 +50,8 @@ RUN install-php-extensions \
     intl \
     opcache
 
-# Enable Apache mod_rewrite for Laravel routing
-RUN a2enmod rewrite
+# Enable routing plus long-lived caching for versioned static assets.
+RUN a2enmod rewrite expires headers
 
 # Configure Apache DocumentRoot to point to /public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \

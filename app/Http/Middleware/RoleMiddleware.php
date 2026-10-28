@@ -23,10 +23,10 @@ class RoleMiddleware
             return redirect()->route('login');
         }
 
-        // Refresh user from database to get latest role
-        $user = $user->fresh();
-
-        // Check if user has any of the required roles
+        // The auth guard has already loaded this user for the current request,
+        // and EnsureAccountActive separately verifies its active status.
+        // A second refresh here doubled remote database round trips on every
+        // staff-page navigation.
         if (empty($roles) || !in_array($user->role, $roles)) {
             abort(403, 'Unauthorized action.');
         }
