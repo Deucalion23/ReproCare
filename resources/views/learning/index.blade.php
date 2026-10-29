@@ -276,20 +276,20 @@
 {{-- ── YouTube Watch Modal ─────────────────────────────────────── --}}
 <div class="modal fade" id="ytWatchModal" tabindex="-1" aria-labelledby="ytWatchModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border-radius:24px; overflow:hidden; border:1px solid var(--border);">
-            <div class="modal-header border-0 pb-2">
+        <div class="modal-content" style="border-radius:24px; overflow:hidden; border:1px solid var(--border); background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-lg);">
+            <div class="modal-header border-0 pb-2" style="background:transparent;">
                 <div class="me-auto pe-3" style="min-width:0;">
-                    <span id="ytModalTopic" class="badge rounded-pill mb-2" style="background:var(--color-secondary-soft); color:var(--color-secondary-text); border:1px solid var(--color-secondary-soft); font-size:0.72rem; font-weight:700;"></span>
+                    <span id="ytModalTopic" class="badge rounded-pill mb-2" style="background:color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface)); background-color:color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface)); color:var(--color-secondary-text); border:1px solid color-mix(in srgb, var(--color-secondary) 25%, var(--color-border)); font-size:0.72rem; font-weight:700;"></span>
                     <h5 class="modal-title fw-800 mb-0" id="ytWatchModalLabel" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text);"></h5>
                 </div>
                 <button type="button" class="btn-close flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body pt-2">
+            <div class="modal-body pt-2" style="background:var(--color-surface); background-color:var(--color-surface);">
                 <div id="ytModalPlayer"></div>
-                <h6 class="fw-800 mt-3 mb-2 text-xs text-uppercase text-muted" style="letter-spacing:0.5px;">Key Teaching Points
+                <h6 class="fw-800 mt-3 mb-2 text-xs text-uppercase text-muted" style="letter-spacing:0.5px; color:var(--color-text-muted);">Key Teaching Points
                 </h6>
-                <ul id="ytModalPoints" class="mb-3 ps-3" style="font-size:0.9rem; color:var(--text); line-height:1.7;"></ul>
-                <a id="ytModalFull" href="#" class="btn btn-sm btn-outline-primary" style="border-radius:9999px;">
+                <ul id="ytModalPoints" class="mb-3 ps-3" style="font-size:0.9rem; color:var(--color-text); line-height:1.7;"></ul>
+                <a id="ytModalFull" href="#" class="btn btn-sm d-inline-flex align-items-center gap-1" style="border:none; border-radius:9999px; font-size:0.8rem; font-weight:700; background:#1E293B !important; background-color:#1E293B !important; color:#FFFFFF !important;">
                     <i class="bi bi-box-arrow-up-right me-1"></i> Open Full Learning Page
                 </a>
             </div>
