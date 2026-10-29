@@ -282,7 +282,10 @@
                     <span id="ytModalTopic" class="badge rounded-pill mb-2" style="background:color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface)); background-color:color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface)); color:var(--color-secondary-text); border:1px solid color-mix(in srgb, var(--color-secondary) 25%, var(--color-border)); font-size:0.72rem; font-weight:700;"></span>
                     <h5 class="modal-title fw-800 mb-0" id="ytWatchModalLabel" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text);"></h5>
                 </div>
-                <button type="button" class="btn-close flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close flex-shrink-0" data-bs-dismiss="modal" aria-label="Close"
+                    style="width:34px; height:34px; border-radius:9999px; background:#1E293B !important; color:#FFFFFF !important; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 18%, transparent); display:flex; align-items:center; justify-content:center; opacity:1 !important;">
+                    <span style="font-weight:900; font-size:1.1rem; line-height:1;">×</span>
+                </button>
             </div>
             <div class="modal-body pt-2" style="background:var(--color-surface); background-color:var(--color-surface);">
                 <div id="ytModalPlayer"></div>
