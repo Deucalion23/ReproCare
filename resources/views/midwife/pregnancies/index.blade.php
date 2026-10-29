@@ -154,8 +154,7 @@
         @endif
 
         @if($pregnancies->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-hover align-middle" style="font-size:0.9rem; min-width:960px;">
+            <table class="table table-hover align-middle" style="font-size:0.9rem; width:100%;">
                     <thead>
                         <tr style="color:var(--text-muted); font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px;">
                             <th style="padding:1rem; border:none;">Patient</th>
@@ -255,7 +254,6 @@
                         @endforeach
                     </tbody>
                 </table>
-            </div>
 
             {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-4">
