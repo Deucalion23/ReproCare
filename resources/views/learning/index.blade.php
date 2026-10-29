@@ -274,7 +274,7 @@
 @endif
 
 {{-- ── YouTube Watch Modal ─────────────────────────────────────── --}}
-<div class="modal fade" id="ytWatchModal" tabindex="-1" aria-labelledby="ytWatchModalLabel" aria-hidden="true">
+<div class="modal fade" id="ytWatchModal" tabindex="-1" aria-labelledby="ytWatchModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content" style="border-radius:20px; overflow:hidden; border:1px solid var(--border);">
             <div class="modal-header border-0 pb-2">
@@ -610,6 +610,10 @@
         }
         .learn-media-grid .yt-watch-btn.rounded-circle { width:42px !important; height:42px !important; }
     }
+
+    /* ── Learning watch modal: no darkened backdrop ── */
+    .modal-backdrop { display:none !important; }
+    body.modal-open { padding-right:0 !important; overflow-y:auto !important; }
 </style>
 @endpush
 
