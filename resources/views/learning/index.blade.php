@@ -30,13 +30,13 @@
 @section($learningSection)
 
 {{-- Header Banner (compact — no dead space when no staff actions) --}}
-<div class="card mb-4 learn-hero" style="border:none; border-radius:18px; background:color-mix(in srgb, var(--color-text) 7%, var(--color-surface)); box-shadow:var(--wp-shadow-sm);">
+<div class="card mb-4 learn-hero" style="border:none; border-radius:24px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent); position:relative; overflow:hidden;">
     <div class="card-body learn-hero-body d-flex align-items-center gap-3 p-3 p-md-4">
         <div class="learn-hero-icon" aria-hidden="true">
             <i class="bi bi-mortarboard-fill"></i>
         </div>
         <div class="flex-grow-1" style="min-width:0;">
-            <h2 class="fw-800 mb-1" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text); letter-spacing:-0.5px; font-size:1.4rem; line-height:1.2;">
+            <h2 class="fw-800 mb-1" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text); letter-spacing:-0.02em; margin-bottom:0.15rem; font-size:1.4rem; line-height:1.2;">
                 Learning Materials
             </h2>
             <p class="mb-0" style="font-size:0.88rem; color:var(--color-text-muted); font-weight:500; line-height:1.5;">
@@ -49,7 +49,7 @@
     @if($learningUser?->isRhu() || $learningUser?->isCho())
         @php $manageBase = $learningUser->isCho() ? 'cho.learning' : 'rhu.learning'; @endphp
         <div class="d-flex gap-2 flex-shrink-0 flex-wrap">
-            <a href="{{ route($manageBase . '.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:10px; font-weight:600;">
+            <a href="{{ route($manageBase . '.create') }}" class="btn btn-primary d-inline-flex align-items-center gap-1.5 shadow-sm" style="border-radius:9999px; font-weight:700;">
                 <i class="bi bi-plus-lg"></i> Add New Video / Material
             </a>
             @if(empty($manageBase))
@@ -63,7 +63,7 @@
 </div>
 
 {{-- Filter Toolbar (desktop grid / mobile bottom-sheet style) --}}
-<div class="card mb-4 learn-filter-card" style="border:none; border-radius:20px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
+<div class="card mb-4 learn-filter-card" style="border:none; border-radius:24px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
     <div class="card-body p-3 p-md-4">
         {{-- Mobile-only header: clearly different entry point from desktop --}}
         <div class="learn-mobile-head">
@@ -120,15 +120,15 @@
             $isVideo = $material->isPlayableVideo();
             $ytId = $material->youtube_id;
             $badgeStyle = match($material->category) {
-                'warning-signs' => 'background:var(--color-peach-soft); background-color:var(--color-peach-soft); color:var(--color-warning-text);',
+                'warning-signs' => 'background:var(--color-danger-soft); background-color:var(--color-danger-soft); color:var(--color-danger-text);',
                 'nutrition' => 'background:var(--color-success-soft); background-color:var(--color-success-soft); color:var(--color-success-text);',
-                'family-planning' => 'background:var(--color-peach-soft); background-color:var(--color-peach-soft); color:var(--color-warning-text);',
+                'family-planning' => 'background:color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface)); background-color:color-mix(in srgb, var(--color-secondary) 12%, var(--color-surface)); color:var(--color-secondary-text);',
                 default => 'background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text);',
             };
         @endphp
         <div class="col-md-6 col-xl-4">
             <div class="card h-100 video-media-card position-relative"
-                 style="border:none; border-radius:20px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm); overflow:hidden; transition:transform 0.2s ease, box-shadow 0.2s ease;">
+                 style="border:none; border-radius:24px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm); overflow:hidden; transition:transform 0.22s ease, box-shadow 0.22s ease;" onmouseover="this.style.boxShadow='var(--wp-shadow-md)'; this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='var(--wp-shadow-sm)'; this.style.transform='translateY(0)'">
                 
                 {{-- Media Thumbnail with Video Overlay --}}
                 <div class="position-relative overflow-hidden bg-dark" style="height:200px;">
@@ -151,7 +151,7 @@
                             };
                         @endphp
                         <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-white text-center px-3"
-                             style="background:linear-gradient(135deg, #4C1D95, #8B5CF6);">
+                             style="background:linear-gradient(135deg, #D48E85, #6CA57A);">
                             <i class="bi {{ $coverIcon }}" style="font-size:2.4rem; opacity:0.85;"></i>
                             <div class="fw-bold mt-2" style="font-size:0.85rem; line-height:1.35;">{{ \Illuminate\Support\Str::limit($material->title, 60) }}</div>
                         </div>
@@ -208,7 +208,7 @@
                         </small>
                         <div class="d-flex gap-1">
                             @if($ytId)
-                                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1 yt-watch-btn" style="border:none; border-radius:999px; font-size:0.8rem; font-weight:800; background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid);"
+                                <button type="button" class="btn btn-sm d-inline-flex align-items-center gap-1 yt-watch-btn" style="border:none; border-radius:9999px; font-size:0.8rem; font-weight:700; background:#1E293B !important; background-color:#1E293B !important; color:#FFFFFF !important;"
                                     data-bs-toggle="modal" data-bs-target="#ytWatchModal"
                                     data-yt="{{ $ytId }}"
                                     data-title="{{ e($material->title) }}"
@@ -218,7 +218,7 @@
                                     <i class="bi bi-play-fill"></i> Watch Video
                                 </button>
                             @else
-                                <a href="{{ route('learning.show', $material->id) }}" class="btn btn-sm d-inline-flex align-items-center gap-1" style="border:none; border-radius:999px; font-size:0.8rem; font-weight:800; background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid);">
+                                <a href="{{ route('learning.show', $material->id) }}" class="btn btn-sm d-inline-flex align-items-center gap-1" style="border:none; border-radius:9999px; font-size:0.8rem; font-weight:700; background:#1E293B !important; background-color:#1E293B !important; color:#FFFFFF !important;">
                                     <i class="bi {{ $isVideo ? 'bi-play-fill' : 'bi-eye-fill' }}"></i> {{ $isVideo ? 'Play Video' : 'View Guide' }}
                                 </a>
                             @endif
@@ -247,16 +247,16 @@
         </div>
     @empty
         <div class="col-12 text-center py-5">
-            <div class="card shadow-sm border p-5" style="border-radius:16px; background:var(--bg-card);">
+            <div class="card border-0 p-5" style="border:none; border-radius:24px; background:var(--color-surface); background-color:var(--color-surface); box-shadow:var(--wp-shadow-sm);">
                 <i class="bi bi-camera-video text-muted mb-3" style="font-size:2.5rem;"></i>
-                <h5 class="fw-700 text-dark">No Media Found</h5>
+                <h5 class="fw-800 text-dark">No Media Found</h5>
                 <p class="text-muted text-xs mb-3">No learning materials match your active search or filter category.</p>
                 <div class="d-flex justify-content-center gap-2 flex-wrap">
-                    <a href="{{ $indexRoute }}" class="btn btn-sm btn-outline-primary" style="border-radius:10px;">
+                    <a href="{{ $indexRoute }}" class="btn btn-sm btn-outline-primary" style="border-radius:9999px; font-weight:700;">
                         Reset Filter
                     </a>
                     @if(!empty($manageBase))
-                        <a href="{{ route($manageBase . '.create') }}" class="btn btn-sm btn-primary" style="border-radius:10px; font-weight:700;">
+                        <a href="{{ route($manageBase . '.create') }}" class="btn btn-sm btn-primary" style="border-radius:9999px; font-weight:700; background:#1E293B !important; border-color:#1E293B !important; color:#FFFFFF !important;">
                             <i class="bi bi-plus-circle me-1"></i> Add First Material
                         </a>
                     @endif
@@ -276,7 +276,7 @@
 {{-- ── YouTube Watch Modal ─────────────────────────────────────── --}}
 <div class="modal fade" id="ytWatchModal" tabindex="-1" aria-labelledby="ytWatchModalLabel" aria-hidden="true" data-bs-backdrop="false" data-bs-keyboard="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content" style="border-radius:20px; overflow:hidden; border:1px solid var(--border);">
+        <div class="modal-content" style="border-radius:24px; overflow:hidden; border:1px solid var(--border);">
             <div class="modal-header border-0 pb-2">
                 <div class="me-auto pe-3" style="min-width:0;">
                     <span id="ytModalTopic" class="badge rounded-pill mb-2" style="background:var(--color-secondary-soft); color:var(--color-secondary-text); border:1px solid var(--color-secondary-soft); font-size:0.72rem; font-weight:700;"></span>
@@ -289,7 +289,7 @@
                 <h6 class="fw-800 mt-3 mb-2 text-xs text-uppercase text-muted" style="letter-spacing:0.5px;">Key Teaching Points
                 </h6>
                 <ul id="ytModalPoints" class="mb-3 ps-3" style="font-size:0.9rem; color:var(--text); line-height:1.7;"></ul>
-                <a id="ytModalFull" href="#" class="btn btn-sm btn-outline-primary" style="border-radius:10px;">
+                <a id="ytModalFull" href="#" class="btn btn-sm btn-outline-primary" style="border-radius:9999px;">
                     <i class="bi bi-box-arrow-up-right me-1"></i> Open Full Learning Page
                 </a>
             </div>
@@ -466,7 +466,7 @@
     .learn-btn-clear:hover { background:var(--color-border) !important; color:var(--color-text) !important; }
 
     /* Thumbnails must touch card edges (no white inset gap) */
-    .video-media-card > .position-relative.overflow-hidden { border-radius:20px 20px 0 0 !important; margin:0 !important; }
+    .video-media-card > .position-relative.overflow-hidden { border-radius:24px 24px 0 0 !important; margin:0 !important; }
 
     /* Mobile header is desktop-hidden by design */
     .learn-mobile-head { display:none; }
@@ -475,7 +475,7 @@
         /* ── MOBILE filter = different pattern from desktop ──
            Compact sheet: header row + big search + duo selects + full-width CTA + swipe chips.
            Desktop stays a 4-column labeled grid; mobile is a thumb-first stacked sheet. */
-        .learn-filter-card { border-radius:18px !important; }
+        .learn-filter-card { border-radius:24px !important; }
         .learn-filter-card > .card-body { padding:0.9rem !important; }
 
         .learn-mobile-head {
@@ -540,7 +540,7 @@
     }
     @media (max-width: 575.98px) {
         /* Phones: stack the hero vertically so nothing squeezes or overflows. */
-        .learn-hero { border-radius:16px !important; }
+        .learn-hero { border-radius:24px !important; }
         .learn-hero-body {
             flex-direction:column !important;
             align-items:flex-start !important;
