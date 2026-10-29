@@ -76,7 +76,7 @@
                 &nbsp;require your review and follow-up consultation.
             </div>
         </div>
-        <a href="{{ route('midwife.pregnancies.index') }}" class="btn-hero-secondary flex-shrink-0">
+        <a href="{{ route('midwife.pregnancies.index', ['risk_level' => 'High']) }}" class="btn-hero-secondary flex-shrink-0">
             View High Risk <i class="bi bi-arrow-right ms-1"></i>
         </a>
     </div>
