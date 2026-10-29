@@ -154,30 +154,30 @@
         @endif
 
         @if($pregnancies->count() > 0)
-            <table class="table table-hover align-middle" style="font-size:0.9rem; width:100%;">
+            <table class="table table-hover align-middle" style="font-size:0.85rem; width:100%;">
                     <thead>
-                        <tr style="color:var(--text-muted); font-weight:600; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.5px;">
-                            <th style="padding:1rem; border:none;">Patient</th>
-                            <th style="padding:1rem; border:none;">Gestational Age</th>
-                            <th style="padding:1rem; border:none;">Trimester</th>
-                            <th style="padding:1rem; border:none;">LMP</th>
-                            <th style="padding:1rem; border:none;">EDD</th>
-                            <th style="padding:1rem; border:none;">Status</th>
-                            <th style="padding:1rem; border:none;">Risk</th>
-                            <th style="padding:1rem; border:none; text-align:right;">Actions</th>
+                        <tr style="color:var(--text-muted); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">
+                            <th style="padding:0.6rem 0.75rem; border:none;">Patient</th>
+                            <th style="padding:0.6rem 0.75rem; border:none;">Gestational Age</th>
+                            <th style="padding:0.6rem 0.75rem; border:none;">Trimester</th>
+                            <th style="padding:0.6rem 0.75rem; border:none;">LMP</th>
+                            <th style="padding:0.6rem 0.75rem; border:none;">EDD</th>
+                            <th style="padding:0.6rem 0.75rem; border:none;">Status</th>
+                            <th style="padding:0.6rem 0.75rem; border:none;">Risk</th>
+                            <th style="padding:0.6rem 0.75rem; border:none; text-align:right;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($pregnancies as $pregnancy)
                             <tr style="border-bottom:1px solid var(--border-color);">
-                                <td style="padding:1rem;">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--primary),var(--accent-violet));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--color-on-solid);flex-shrink:0;">
+                                <td style="padding:0.6rem 0.75rem;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--primary),var(--accent-violet));display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--color-on-solid);flex-shrink:0;">
                                             {{ strtoupper(substr($pregnancy->patient_name, 0, 1)) }}
                                         </div>
                                         <div>
-                                            <div style="font-weight:600; color:var(--text);">{{ $pregnancy->patient_name }}</div>
-                                            <small style="color:var(--text-muted); display:block; max-width:230px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                                            <div style="font-weight:600; color:var(--text); font-size:0.85rem;">{{ $pregnancy->patient_name }}</div>
+                                            <small style="color:var(--text-muted); display:block; max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
                                                 @if($pregnancy->user_id && $pregnancy->woman)
                                                     {{ $pregnancy->woman->email }}
                                                 @elseif($pregnancy->walk_in_patient_id)
@@ -187,10 +187,10 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td style="padding:1rem;">
+                                <td style="padding:0.6rem 0.75rem;">
                                     <div style="font-weight:600; color:var(--text); white-space:nowrap;">{{ $pregnancy->formatted_aog }}</div>
                                 </td>
-                                <td style="padding:1rem;">
+                                <td style="padding:0.6rem 0.75rem;">
                                     @if($pregnancy->trimester)
                                         <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:color-mix(in srgb, var(--color-info) 10%, transparent); color:var(--info); border-radius:20px; font-weight:500; font-size:0.85rem; white-space:nowrap;">
                                             <i class="bi bi-calendar-week"></i>
@@ -200,12 +200,12 @@
                                         <span style="color:var(--text-muted);">N/A</span>
                                     @endif
                                 </td>
-                                <td style="padding:1rem;">
+                                <td style="padding:0.6rem 0.75rem;">
                                     <div style="font-weight:500; color:var(--text); white-space:nowrap;">
                                         {{ \Carbon\Carbon::parse($pregnancy->lmp)->format('M j, Y') }}
                                     </div>
                                 </td>
-                                <td style="padding:1rem;">
+                                <td style="padding:0.6rem 0.75rem;">
                                     <div style="font-weight:500; color:var(--text); white-space:nowrap;">
                                         {{ \Carbon\Carbon::parse($pregnancy->lmp)->addDays(280)->format('M j, Y') }}
                                     </div>
@@ -213,12 +213,12 @@
                                         <small style="color:var(--text-muted);">{{ $pregnancy->days_until_due }} days left</small>
                                     @endif
                                 </td>
-                                <td style="padding:1rem;">
+                                <td style="padding:0.6rem 0.75rem;">
                                     <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:{{ $pregnancy->status === 'completed' ? 'color-mix(in srgb, var(--color-surface-soft) 10%, transparent)' : 'color-mix(in srgb, var(--color-success-text) 10%, transparent)' }}; color:{{ $pregnancy->status === 'completed' ? 'var(--text-muted)' : 'var(--success)' }}; border-radius:20px; font-weight:500; font-size:0.85rem;">
                                         {{ ucfirst($pregnancy->status ?? 'Unknown') }}
                                     </div>
                                 </td>
-                                <td style="padding:1rem;">
+                                <td style="padding:0.6rem 0.75rem;">
                                     @php $rLevel = $pregnancy->risk_level ?? 'Low'; @endphp
                                     @if($rLevel === 'High')
                                         <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background:var(--color-danger-soft); border:1px solid var(--color-secondary-soft); color:var(--color-secondary-text);">
@@ -234,7 +234,7 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td style="padding:1rem; text-align:right;">
+                                <td style="padding:0.6rem 0.75rem; text-align:right;">
                                     <div class="d-flex gap-2 justify-content-end">
                                         <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}" 
                                            class="btn btn-sm btn-outline-primary" 
