@@ -1023,7 +1023,7 @@
         <div class="d-flex align-items-center" style="gap:0.125rem;">
             <span aria-hidden="true" style="width:2rem; height:2rem; display:flex; align-items:center; justify-content:center; overflow:visible; flex:0 0 2rem; transform:translateY(-1.5px);"><img src="{{ asset('images/brand/reprocare-logo.png?v=5') }}" alt="" style="width:100%; height:100%; max-width:100%; object-fit:contain; display:block;"></span>
             <div style="margin-left:-0.2rem; min-width:0;">
-                <h6 class="offcanvas-title fw-800 text-dark mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem;" id="womenMobileDrawerLabel">Repro<span style="color:#9B64B9;">Care</span></h6>
+                <h6 class="offcanvas-title fw-800 mb-0 d-flex align-items-center" style="min-height:2rem; line-height:1; padding-bottom:1px; font-size:0.92rem; color:var(--color:text);" id="womenMobileDrawerLabel">Repro<span style="color:#9B64B9;">Care</span></h6>
             </div>
         </div>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -1038,46 +1038,46 @@
                  style="width:44px; height:44px; object-fit:cover; border:2px solid var(--nav-rose);"
                  onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
             <div class="flex-grow-1">
-                <div class="fw-700 text-dark" style="font-size:0.95rem;">{{ $currentUser->name }}</div>
+                <div class="fw-700" style="font-size:0.95rem; color:var(--color:text);">{{ $currentUser->name }}</div>
                 <div class="text-muted" style="font-size:0.76rem;">{{ $currentUser->email }}</div>
             </div>
         </div>
 
         {{-- Mobile Nav Links List --}}
         <div class="d-flex flex-column gap-1 mb-4">
-            <a href="{{ route('user.dashboard') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.dashboard') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.dashboard') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.dashboard') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)">
                 <i class="bi bi-grid-fill text-primary"></i> Dashboard
             </a>
-            <a href="{{ route('user.pregnancies.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.pregnancies.*') ? 'bg-light text-primary' : '' }}" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
+            <a href="{{ route('user.pregnancies.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.pregnancies.*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-heart-pulse-fill text-danger"></i> My Pregnancy Journey
                 @if($isLimited)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.menstruation.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.menstruation.*') ? 'bg-light text-primary' : '' }}" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
+            <a href="{{ route('user.menstruation.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.menstruation.*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-calendar2-heart-fill text-danger"></i> Cycle &amp; Menstruation
                 @if($isLimited)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.checkups') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.checkups*') ? 'bg-light text-primary' : '' }}" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
+            <a href="{{ route('user.checkups') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.checkups*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-clipboard2-pulse-fill text-info"></i> Clinic Checkups
                 @if($isLimited)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.health-records') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.health-records*') ? 'bg-light text-primary' : '' }}" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
+            <a href="{{ route('user.health-records') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.health-records*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-file-earmark-medical-fill text-warning"></i> Health Records
                 @if($isLimited)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
             </a>
-            <a href="{{ route('user.messages.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.messages.*') ? 'bg-light text-primary' : '' }}" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
+            <a href="{{ route('user.messages.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.messages.*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)" @if($isLimited) title="Unlocks after RHU approval of your account" @endif>
                 <i class="bi bi-chat-heart-fill text-primary"></i> Messages &amp; Care Team
                 @if($isLimited)<i class="bi bi-lock-fill ms-auto text-muted" style="font-size:0.8rem;" aria-hidden="true"></i>@endif
                 @if($unreadMessages > 0)
                     <span class="badge bg-danger rounded-pill ms-auto">{{ $unreadMessages }}</span>
                 @endif
             </a>
-            <a href="{{ route('learning.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('learning.*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('learning.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('learning.*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)">
                 <i class="bi bi-mortarboard-fill text-success"></i> Learning &amp; Guides
             </a>
-            <a href="{{ route('forum.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('forum.*') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('forum.index') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('forum.*') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)">
                 <i class="bi bi-chat-quote-fill text-secondary"></i> Mothers Community
             </a>
-            <a href="{{ route('user.settings') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none text-dark fw-600 {{ request()->routeIs('user.settings') ? 'bg-light text-primary' : '' }}">
+            <a href="{{ route('user.settings') }}" class="d-flex align-items-center gap-3 p-2.5 rounded-3 text-decoration-none fw-600 {{ request()->routeIs('user.settings') ? 'bg-light text-primary' : '' }}" style="color:var(--color:text)">
                 <i class="bi bi-gear-fill text-primary"></i> Settings &amp; Profile
             </a>
         </div>

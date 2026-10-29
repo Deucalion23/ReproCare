@@ -203,18 +203,18 @@
         text-decoration:none;
         font-size:0.85rem;
         font-weight:700;
-        color:#000 !important;
+        color:var(--color-text) !important;
         box-shadow:var(--wp-shadow-sm);
         transition:all 0.2s ease;
         white-space:nowrap;
     }
-    .action-pill > span:last-child { color:#000 !important; }
+    .action-pill > span:last-child { color:var(--color-text) !important; }
     .action-pill:hover {
         transform:translateY(-2px);
         box-shadow:var(--wp-shadow-md);
-        color:#000 !important;
+        color:var(--color-text) !important;
     }
-    .action-pill:hover > span:last-child { color:#000 !important; }
+    .action-pill:hover > span:last-child { color:var(--color-text) !important; }
     .action-pill-icon {
         width:28px;
         height:28px;
@@ -1134,7 +1134,7 @@
     ═══════════════════════════════════════════════ --}}
 <div class="mb-4">
     <div class="d-flex align-items-center justify-content-between mb-3">
-        <h5 class="fw-800 text-dark mb-0" style="font-family:'Plus Jakarta Sans', sans-serif;">
+        <h5 class="fw-800 mb-0" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color:text);">
             Quick Health Actions
         </h5>
         <span class="text-muted" style="font-size:0.82rem;">1-tap essential maternal tools</span>
@@ -1177,7 +1177,7 @@
                         <span class="badge" style="background:var(--color-surface-soft); color:var(--color-text); font-weight:700;">Active Pregnancy</span>
                         <span class="text-muted pregnancy-recorded" style="font-size:0.8rem;">Recorded by RHU 1 Clinician</span>
                     </div>
-                    <h5 class="fw-800 text-dark mb-0 pregnancy-title" style="font-family:'Plus Jakarta Sans', sans-serif;">
+                    <h5 class="fw-800 mb-0 pregnancy-title" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color:text);">
                         Your Baby's Journey &bull; Week {{ $activePregnancy->aog_weeks }}
                     </h5>
                 </div>
@@ -1223,7 +1223,7 @@
                 @endphp
                 <div>
                     <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1 pregnancy-trim-row">
-                        <span class="fw-700 text-dark pregnancy-trim-label" style="font-size:0.88rem;">{{ $trimester }}</span>
+                        <span class="fw-700 pregnancy-trim-label" style="font-size:0.88rem; color:var(--color:text);">{{ $trimester }}</span>
                         <span class="fw-800 pregnancy-trim-pct" style="color:var(--color-text); font-size:0.9rem;">Week {{ $weeks }} of 40 ({{ $pct }}%)</span>
                     </div>
                     <div style="height:12px; background:var(--color-surface-soft); border-radius:9999px; overflow:hidden;">
@@ -1237,7 +1237,7 @@
         {{-- Recent Maternal Activity & Checkups Timeline --}}
         <div class="card mb-4 recent-activity-card">
             <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap recent-activity-head">
-                <h5 class="fw-800 text-dark mb-0 recent-activity-title" style="font-family:'Plus Jakarta Sans', sans-serif;">Recent Health Activity
+                <h5 class="fw-800 mb-0 recent-activity-title" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color:text);">Recent Health Activity
                 </h5>
                 <a href="{{ route('user.checkups') }}" class="btn btn-sm btn-link text-decoration-none fw-700 recent-activity-link" style="color:var(--color-secondary-text);">
                     View Checkups &rarr;
@@ -1257,7 +1257,7 @@
                                     <i class="bi bi-hospital"></i>
                                 </div>
                                 <div class="timeline-content">
-                                    <div class="fw-700 text-dark timeline-title" style="font-size:0.92rem;">
+                                    <div class="fw-700 timeline-title" style="font-size:0.92rem; color:var(--color:text);">
                                         Prenatal Consultation with {{ $c->midwife->name ?? 'Clinical Midwife' }}
                                     </div>
                                     <div class="timeline-meta" style="font-size:0.82rem; color:var(--wp-text-soft);">
@@ -1275,7 +1275,7 @@
                                     <i class="bi bi-droplet-fill"></i>
                                 </div>
                                 <div class="timeline-content">
-                                    <div class="fw-700 text-dark timeline-title" style="font-size:0.92rem;">Period Logged</div>
+                                    <div class="fw-700 timeline-title" style="font-size:0.92rem; color:var(--color:text);">Period Logged</div>
                                     <div class="timeline-meta" style="font-size:0.82rem; color:var(--wp-text-soft);">
                                         {{ $r->period_start_date->format('M d') }} –
                                         {{ $r->period_end_date ? $r->period_end_date->format('M d') : 'Present' }}
@@ -1290,7 +1290,7 @@
                         <div class="recent-activity-empty-icon" style="width:56px; height:56px; border-radius:50%; background:var(--wp-cream); border:1px solid var(--wp-border); display:flex; align-items:center; justify-content:center; margin:0 auto 0.75rem; font-size:1.5rem; color:var(--wp-text-soft);">
                             <i class="bi bi-clipboard2-heart"></i>
                         </div>
-                        <h6 class="fw-700 text-dark mb-1 recent-activity-empty-title">No recorded activity yet</h6>
+                        <h6 class="fw-700 mb-1 recent-activity-empty-title" style="color:var(--color:text);">No recorded activity yet</h6>
                         <p class="text-muted mb-0 recent-activity-empty-text" style="font-size:0.85rem;">Your prenatal visits, symptoms, and cycle entries will appear here.</p>
                     </div>
                 @endif
@@ -1307,7 +1307,7 @@
             <div class="card-header">
                 <div class="d-flex align-items-center gap-2">
                     <span style="font-size:1.2rem;">💡</span>
-                    <h5 class="fw-800 text-dark mb-0" style="font-family:'Plus Jakarta Sans', sans-serif;">
+                    <h5 class="fw-800 mb-0" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color:text);">
                         Today's Maternal Tip
                     </h5>
                 </div>
@@ -1316,7 +1316,7 @@
                 <div style="width:64px; height:64px; border-radius:20px; background:{{ $todayTip['bg'] }}; color:{{ $todayTip['color'] }}; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:1.75rem; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent);">
                     <i class="bi bi-{{ $todayTip['icon'] }}"></i>
                 </div>
-                <h6 class="fw-800 text-dark mb-2" style="font-family:'Plus Jakarta Sans', sans-serif;">
+                <h6 class="fw-800 mb-2" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color:text);">
                     {{ $todayTip['title'] }}
                 </h6>
                 <p style="font-size:0.88rem; color:var(--wp-text-soft); line-height:1.6; margin-bottom:0;">
@@ -1332,7 +1332,7 @@
         @if($recentForumPosts->count() > 0)
         <div class="card mb-4 community-card">
             <div class="card-header d-flex justify-content-between align-items-center gap-2 flex-wrap community-head">
-                <h5 class="fw-800 text-dark mb-0 community-title" style="font-family:'Plus Jakarta Sans', sans-serif;">Mothers Community
+                <h5 class="fw-800 mb-0 community-title" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color:text);">Mothers Community
                 </h5>
                 <a href="{{ route('forum.index') }}" class="btn btn-sm btn-link text-decoration-none fw-700 text-nowrap community-link" style="color:var(--color-secondary-text); font-size:0.82rem; white-space:nowrap; flex-shrink:0;">
                     View All &rarr;
@@ -1358,7 +1358,7 @@
                                     <span class="community-avatar-fallback" style="display:none;">{{ $postInitial }}</span>
                                 </span>
                                 <span class="community-meta">
-                                    <span class="fw-700 text-dark community-name">{{ $postDisplayName }}</span>
+                                    <span class="fw-700 community-name" style="color:var(--color:text);">{{ $postDisplayName }}</span>
                                     <small class="text-muted community-time">{{ $post->created_at->diffForHumans() }}</small>
                                 </span>
                             </div>

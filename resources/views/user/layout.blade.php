@@ -545,7 +545,7 @@
                         <i class="bi bi-telephone-fill"></i>
                     </div>
                     <div>
-                        <h5 class="modal-title fw-800 text-dark mb-0" id="careEmergencyModalLabel">Health Center &amp; Emergency Support</h5>
+                        <h5 class="modal-title fw-800 mb-0" id="careEmergencyModalLabel" style="color:var(--color:text);">Health Center &amp; Emergency Support</h5>
                         <small class="text-muted" style="font-size:0.78rem;">Direct contacts for San Carlos City maternal health care</small>
                     </div>
                 </div>
@@ -559,7 +559,7 @@
 
                 <div class="emergency-hotline-card">
                     <div>
-                        <div class="fw-700 text-dark" style="font-size:0.9rem;">National Emergency Hotline</div>
+                        <div class="fw-700" style="font-size:0.9rem; color:var(--color:text);">National Emergency Hotline</div>
                         <small class="text-muted">24/7 Philippines Emergency Response</small>
                     </div>
                     <a href="tel:911" class="emergency-hotline-num" style="color:var(--color-danger-text); font-size:1.3rem;">
