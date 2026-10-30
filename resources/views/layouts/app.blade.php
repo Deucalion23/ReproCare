@@ -1137,7 +1137,7 @@
             border-color:var(--primary);
             box-shadow:0 0 0 2px var(--focus-ring);
         }
-        .form-check-label { color:var(--text); font-size:0.875rem; }
+        .form-check-label { color:var(--text); font-size:0.875rem; cursor:pointer; }
 
         /* Bootstrap's float + negative margin leaves the enlarged box touching
            the label text, so lay plain check rows out with flex and an explicit
@@ -1148,6 +1148,7 @@
             align-items:center;
             gap:0.6rem;
             padding-left:0;
+            cursor:pointer;
         }
         .form-check:not(.form-switch):not(.form-check-inline) .form-check-input {
             float:none;
@@ -1156,6 +1157,8 @@
         }
         .form-check:not(.form-switch):not(.form-check-inline) .form-check-label {
             margin-bottom:0;
+            flex:1 1 auto;
+            user-select:none;
         }
 
         /* Custom RC Switch (for settings) */
@@ -2411,6 +2414,7 @@
             display:flex;
             gap:0.8rem;
             align-items:start;
+            cursor:pointer;
             padding:0.85rem 0.9rem;
             border-radius:14px;
             transition:background var(--transition-fast);
