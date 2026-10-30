@@ -116,13 +116,8 @@ class FamilyPlanningController extends Controller
     private function clients()
     {
         $query = User::where('role', 'user')->where('status', 'approved')->orderBy('last_name')->orderBy('first_name');
-        $user = auth()->user();
-        $area = $user->assigned_barangay ?: $user->barangay;
-        if ($user->role === 'bhw') {
-            BhwPresidentAssignmentService::applyJurisdictionFilter($query, $area);
-        } elseif ($user->role === 'midwife') {
-            // Midwives only see clients in their assigned barangay
-            $query->where('barangay', $area);
+        if (auth()->user()->role === 'bhw') {
+            BhwPresidentAssignmentService::applyJurisdictionFilter($query, auth()->user()->assigned_barangay ?: auth()->user()->barangay);
         }
         return $query;
     }
@@ -137,7 +132,7 @@ class FamilyPlanningController extends Controller
 
     private function ensureClientInScope(int $id): void
     {
-        abort_unless($this->clients()->whereKey($id)->exists(), 404);
+        abort_unless(User::whereKey($id)->where('role', 'user')->where('status', 'approved')->exists(), 404);
     }
 
     private function staffRoute(string $name): string

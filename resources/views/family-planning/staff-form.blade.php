@@ -33,8 +33,8 @@
                             <!-- Client (locked to the record being reviewed) -->
                             <div class="col-md-6">
                                 <label class="form-label small text-muted">Client</label>
-                                <input type="text" class="form-control" value="{{ $record->client->name }} — {{ $record->client->barangay }}" readonly>
-                                <input type="hidden" name="user_id" value="{{ $record->user_id }}">
+                                <input type="text" class="form-control" value="{{ $record->client ? $record->client->name . ' — ' . $record->client->barangay : 'Select client below' }}" readonly>
+                                <input type="hidden" name="user_id" value="{{ old('user_id', $record->user_id) ?? '' }}">
                             </div>
                             <!-- Status (from her request) -->
                             <div class="col-md-6">
