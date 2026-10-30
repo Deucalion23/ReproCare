@@ -410,17 +410,13 @@ class TestScenarioAccountsSeeder extends Seeder
                 'purok_id' => $mother->purok_id, 'status' => 'active',
             ]
         );
-        // The date cast stores a time component, so firstOrCreate on the raw
-        // Y-m-d value never matches and would duplicate rows on every re-run.
-        $checkupDate = $newborn->birth_date->copy()->addDay()->toDateString();
-        if (!ChildCheckup::where('child_id', $child->id)->whereDate('checkup_date', $checkupDate)->exists()) {
-            ChildCheckup::create([
-                'child_id' => $child->id,
-                'checkup_date' => $checkupDate,
+        ChildCheckup::firstOrCreate(
+            ['child_id' => $child->id, 'checkup_date' => $newborn->birth_date->copy()->addDay()->toDateString()],
+            [
                 'weight' => $newborn->birth_weight_kg, 'height' => 49,
                 'notes' => '[TEST] Newborn growth check', 'conducted_by_id' => $midwife->id,
-            ]);
-        }
+            ]
+        );
     }
 
     private function staffScenarios(array $staff): void

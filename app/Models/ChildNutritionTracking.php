@@ -10,9 +10,6 @@ class ChildNutritionTracking extends Model
 {
     use HasFactory;
 
-    // The normalization migration created a singular table name.
-    protected $table = 'child_nutrition_tracking';
-
     protected $fillable = [
         'child_care_target_client_id',
         'month_range',

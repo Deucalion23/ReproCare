@@ -110,7 +110,6 @@ class Pregnancy extends Model
         'lmp' => 'date',
         'edd' => 'date',
         'ended_at' => 'date',
-        'delivery_date' => 'date',
         'is_high_risk' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
