@@ -27,6 +27,9 @@
             <div class="page-hero-title">Add Maternal Care Record</div>
             <p class="page-hero-subtitle">Enroll a mother in the target-client list.</p>
         </div>
+        <a href="{{ route('midwife.maternal-care-target-clients.index') }}" class="btn-hero-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 </div>
     <div class="mctl-create-header">

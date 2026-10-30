@@ -3,6 +3,9 @@
 @section('title', 'Log Birth - ReproCare')
 
 @section('bhw-content')
+<div class="mb-2">
+    @include('includes.back-button', ['backUrl' => route('bhw.postpartum.show-mother', $mother->id), 'backLabel' => 'Back to Postpartum'])
+</div>
 <div class="page-hero">
     <div class="page-hero-title">Log Birth</div>
     <p class="page-hero-subtitle mb-0">Record the newborn for {{ $mother->name }}{{ $pregnancy?->delivery_date ? ' · delivered ' . $pregnancy->delivery_date->format('M j, Y') : '' }}. An immunization schedule is generated automatically.</p>

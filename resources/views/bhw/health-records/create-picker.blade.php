@@ -8,6 +8,9 @@
             <div class="page-hero-title">Choose Patient</div>
             <p class="page-hero-subtitle">Select enrolled vs walk-in to start a record.</p>
         </div>
+        <a href="{{ route('bhw.health-records.index') }}" class="btn-hero-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 </div>
     <h2 class="page-title">Add Health Record</h2>

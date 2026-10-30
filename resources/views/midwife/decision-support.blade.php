@@ -1,6 +1,9 @@
 @extends('midwife.layout')
 @section('title', 'Decision Support | ReproCare')
 @section('midwife-content')
+<div class="mb-2">
+    @include('includes.back-button', ['backUrl' => route('midwife.dashboard'), 'backLabel' => 'Back to Dashboard'])
+</div>
 <div class="page-hero mb-4">
     <h1 class="page-hero-title">Decision Support</h1>
     <p class="page-hero-subtitle">Choose a patient to review recorded risks and suggested follow-up.</p>

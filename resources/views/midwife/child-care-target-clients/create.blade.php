@@ -27,6 +27,9 @@
             <div class="page-hero-title">Add Child Care Record</div>
             <p class="page-hero-subtitle">Enroll a 0-12 mo child in the target-client list.</p>
         </div>
+        <a href="{{ route('midwife.child-care-target-clients.index') }}" class="btn-hero-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 </div>
     <div class="cctl-create-header">

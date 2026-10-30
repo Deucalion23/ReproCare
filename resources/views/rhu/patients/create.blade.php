@@ -4,6 +4,9 @@
 
 @section('rhu-content')
 <div class="py-4">
+    <div class="mb-2">
+        @include('includes.back-button', ['backUrl' => route('rhu.women.index'), 'backLabel' => 'Back to Women'])
+    </div>
     <div class="page-hero fade-in-card mb-4">
         <div style="position:relative;z-index:1;">
             <div>

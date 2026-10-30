@@ -3,6 +3,9 @@
 @section('title', 'Request Family Planning Counseling - ReproCare')
 
 @section('user-content')
+<div class="mb-2">
+    @include('includes.back-button', ['backUrl' => route('user.family-planning.index'), 'backLabel' => 'Back to Family Planning'])
+</div>
 <div class="page-hero fade-in-card"><div class="page-hero-title">Request private counseling</div><p class="page-hero-subtitle mb-0">You can change your mind. A health worker will explain choices, benefits, and possible side effects.</p></div>
 <div class="card mt-3"><div class="card-body p-4">
 @if($errors->any()) <div class="alert alert-danger">@foreach($errors->all() as $error)<div>{{ $error }}</div>@endforeach</div>@endif

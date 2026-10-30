@@ -3,6 +3,9 @@
 @section('title', 'Log Postpartum Visit - ReproCare')
 
 @section('bhw-content')
+<div class="mb-2">
+    @include('includes.back-button', ['backUrl' => route('bhw.postpartum.show-mother', $mother->id), 'backLabel' => 'Back to Postpartum'])
+</div>
 <div class="page-hero">
     <div class="page-hero-title">Log Postpartum Visit</div>
     <p class="page-hero-subtitle mb-0">House-to-house maternal check for {{ $mother->name }} — vitals, infection screen, mood screen &amp; breastfeeding support.</p>
