@@ -41,7 +41,8 @@ class FamilyPlanningController extends Controller
         $this->applyBhwScope($query);
         $records = $query->paginate(20);
         $dueCount = (clone $query)->whereNotNull('next_follow_up')->whereDate('next_follow_up', '<=', today())->count();
-        return view('family-planning.staff-index', compact('records', 'dueCount'));
+        $pendingCount = (clone $query)->where('status', 'requested')->count();
+        return view('family-planning.staff-index', compact('records', 'dueCount', 'pendingCount'));
     }
 
     public function staffCreate()
