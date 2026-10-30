@@ -10,6 +10,9 @@ class MaternalPostpartumCare extends Model
 {
     use HasFactory;
 
+    // The normalization migration created a singular table name.
+    protected $table = 'maternal_postpartum_care';
+
     protected $fillable = [
         'maternal_care_target_client_id',
         'iron_month',
