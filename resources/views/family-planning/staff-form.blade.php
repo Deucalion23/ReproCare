@@ -24,9 +24,10 @@
         <!-- ===== SECTION 1: THE WOMAN'S REQUEST (read-only, what she asked for) ===== -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card border-0 bg-light">
-                    <div class="card-header bg-transparent fw-bold text-dark py-2">
-                        <i class="bi bi-chat-heart-fill text-primary me-2"></i>The Woman's Request
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary-soft text-primary fw-bold py-3 rounded-top">
+                        <i class="bi bi-chat-heart-fill me-2"></i>The Woman's Request
+                        <span class="float-end small opacity-75">{{ $record->exists ? 'Read-only — entered by client' : '' }}</span>
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
@@ -76,9 +77,9 @@
         <!-- ===== SECTION 2: MIDWIFE'S SERVICE RECORD (editable, what you provide) ===== -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card border-0">
-                    <div class="card-header bg-transparent fw-bold text-dark py-2">
-                        <i class="bi bi-person-check-fill text-success me-2"></i>Midwife's Service Record
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success-soft text-success fw-bold py-3 rounded-top">
+                        <i class="bi bi-person-check-fill me-2"></i>Midwife's Service Record
                     </div>
                     <div class="card-body">
                         <div class="alert alert-info small">
@@ -156,12 +157,12 @@
         <!-- ===== SECTION 3: POSTPARTUM FAMILY-PLANNING PLAN (optional) ===== -->
         <div class="row mb-4">
             <div class="col-12">
-                <div class="card border-0">
-                    <div class="card-header bg-transparent fw-bold text-dark py-2">
-                        <i class="bi bi-heart-pulse-fill text-danger me-2"></i>Postpartum Family-Planning Plan (Optional)
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-danger-soft text-danger fw-bold py-3 rounded-top">
+                        <i class="bi bi-heart-pulse-fill me-2"></i>Postpartum Family-Planning Plan (Optional)
                     </div>
                     <div class="card-body">
-                        <div class="form-check">
+                        <div class="form-check mb-3">
                             <input class="form-check-input" type="checkbox" name="is_postpartum_plan" value="1" id="postpartumPlan"
                                 @checked(old('is_postpartum_plan', $record->is_postpartum_plan))
                                 onchange="togglePostpartumFields()">
