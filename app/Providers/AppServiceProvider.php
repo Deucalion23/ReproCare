@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\ProductionTestScenarioProvisioner;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Support\Facades\Event;
@@ -29,6 +30,12 @@ class AppServiceProvider extends ServiceProvider
 
         if (app()->environment('production') || env('RENDER') || (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')) {
             URL::forceScheme('https');
+        }
+
+        // Render normally seeds these during container startup. If that hook
+        // was skipped, retry safely on the first production web request.
+        if (!app()->runningInConsole()) {
+            app()->booted(fn () => app(ProductionTestScenarioProvisioner::class)->ensure());
         }
     }
 }
