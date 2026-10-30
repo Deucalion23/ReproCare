@@ -34,6 +34,8 @@ class RhuBulkTestSeeder extends Seeder
     private const PASSWORD = 'TestReproCare2026!';
 
     // ── RHU definitions ───────────────────────────────────────────────────────
+    // Barangay names MUST match the `barangays` table (used by AnalyticsScope)
+    // so patients appear in RHU/CHO dashboards and directory counts.
     private const RHUS = [
         1 => [
             'label'     => 'RHU 1',
@@ -41,19 +43,19 @@ class RhuBulkTestSeeder extends Seeder
         ],
         2 => [
             'label'     => 'RHU 2',
-            'barangays' => ['Abanon', 'Alitaya', 'Amampeque', 'Anando', 'Anonang Norte'],
+            'barangays' => ['Abanon', 'Anando', 'Bolosan', 'Guelew', 'Tebag'],
         ],
         3 => [
             'label'     => 'RHU 3',
-            'barangays' => ['Basing', 'Bilanganay', 'Bobon', 'Bocboc', 'Bued'],
+            'barangays' => ['Bocboc', 'Balococ', 'Bani', 'Salinap', 'Tayambani'],
         ],
         4 => [
             'label'     => 'RHU 4',
-            'barangays' => ['Calaocan', 'Caoayan', 'Cobol', 'Coliling', 'Comillas Norte'],
+            'barangays' => ['Cobol', 'Coliling', 'Ilang', 'Longos', 'Turac'],
         ],
         5 => [
             'label'     => 'RHU 5',
-            'barangays' => ['Dalumpinas Oeste', 'Doyong', 'Gadang', 'Guelew', 'Gueset'],
+            'barangays' => ['Doyong', 'Cruz', 'Manzon', 'Parayao', 'Rizal Ave'],
         ],
     ];
 
