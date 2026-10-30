@@ -30,11 +30,22 @@
                     </div>
                     <div class="card-body">
                         <div class="row g-3">
-                            <!-- Client (locked to the record being reviewed) -->
+                            <!-- Client: dropdown when creating new, locked text when reviewing existing -->
                             <div class="col-md-6">
                                 <label class="form-label small text-muted">Client</label>
-                                <input type="text" class="form-control" value="{{ $record->client ? $record->client->name . ' — ' . $record->client->barangay : 'Select client below' }}" readonly>
-                                <input type="hidden" name="user_id" value="{{ old('user_id', $record->user_id) ?? '' }}">
+                                @if($record->exists)
+                                    <input type="text" class="form-control" value="{{ $record->client->name }} — {{ $record->client->barangay }}" readonly>
+                                    <input type="hidden" name="user_id" value="{{ $record->user_id }}">
+                                @else
+                                    <select name="user_id" class="form-select" required>
+                                        <option value="">Select client below</option>
+                                        @foreach($clients as $client)
+                                            <option value="{{ $client->id }}" @selected(old('user_id') == $client->id)>
+                                                {{ $client->name }} — {{ $client->barangay }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                @endif
                             </div>
                             <!-- Status (from her request) -->
                             <div class="col-md-6">
