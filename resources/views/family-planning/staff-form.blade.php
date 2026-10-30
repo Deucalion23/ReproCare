@@ -1,6 +1,16 @@
 @extends(auth()->user()->role === 'midwife' ? 'midwife.layout' : 'bhw.layout')
 @section(auth()->user()->role === 'midwife' ? 'midwife-content' : 'bhw-content')
 @php($base = auth()->user()->role === 'midwife' ? 'midwife.family-planning' : 'bhw.family-planning')
+
+@push('styles')
+<style>
+    /* Bootstrap's negative float margin leaves the box touching the label text. */
+    .fp-check { padding-left:0; display:flex; align-items:flex-start; gap:0.65rem; }
+    .fp-check .form-check-input { float:none; margin:0; margin-top:0.2rem; flex:0 0 auto; }
+    .fp-check .form-check-label { margin:0; }
+</style>
+@endpush
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-1">{{ $record->exists ? 'Review family-planning record' : 'Family-planning service record' }}</h1>
@@ -144,7 +154,7 @@
                             </div>
 
                             <!-- Informed choice -->
-                            <div class="col-12 form-check ms-1">
+                            <div class="col-12 form-check fp-check ms-1">
                                 <input class="form-check-input" type="checkbox" name="informed_choice_confirmed" value="1" id="choice" @checked(old('informed_choice_confirmed', $record->informed_choice_confirmed))>
                                 <label class="form-check-label fw-bold" for="choice">Client received informed-choice counseling and may accept, decline, or change methods.</label>
                             </div>
@@ -162,11 +172,10 @@
                         <i class="bi bi-heart-pulse-fill me-2"></i>Postpartum Family-Planning Plan (Optional)
                     </div>
                     <div class="card-body">
-                        <div class="form-check mb-3 d-flex align-items-start">
+                        <div class="form-check fp-check mb-3">
                             <input class="form-check-input" type="checkbox" name="is_postpartum_plan" value="1" id="postpartumPlan"
                                 @checked(old('is_postpartum_plan', $record->is_postpartum_plan))
-                                onchange="togglePostpartumFields()"
-                                style="margin-top: 0.15rem; margin-right: 0.75rem;">
+                                onchange="togglePostpartumFields()">
                             <label class="form-check-label fw-bold" for="postpartumPlan">Create a postpartum family-planning plan</label>
                         </div>
                         <p class="small text-muted mb-3">
