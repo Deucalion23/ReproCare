@@ -107,7 +107,7 @@ class FamilyPlanningController extends Controller
         $isPlan = $request->boolean('is_postpartum_plan');
         $data['is_postpartum_plan'] = $isPlan;
         $data['postpartum_start_timing'] = $isPlan ? ($data['postpartum_start_timing'] ?? 'undecided') : null;
-        $currentPregnancyId = Pregnancy::where('user_id', $data['user_id'])->whereNull('ended_at')->latest('lmp')->value('id');
+        $currentPregnancyId = Pregnancy::where('user_id', $data['user_id'] ?? ($existing?->user_id ?? null))->whereNull('ended_at')->latest('lmp')->value('id');
         // An existing plan must remain connected after delivery, when there
         // is no longer an open pregnancy record to find.
         $data['pregnancy_id'] = $isPlan ? ($currentPregnancyId ?: $existing?->pregnancy_id) : null;
