@@ -493,11 +493,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('midwife.decision-support') ? 'active' : '' }}" href="{{ route('midwife.decision-support') }}">
-                    <i class="bi bi-clipboard2-check"></i><span>Decision Support</span>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('midwife.pregnancies*') ? 'active' : '' }}"
                    href="{{ route('midwife.pregnancies.index') }}">
                     <i class="bi bi-heart-fill"></i>
