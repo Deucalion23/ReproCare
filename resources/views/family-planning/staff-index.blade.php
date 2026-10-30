@@ -1,6 +1,7 @@
 @extends(auth()->user()->role === 'midwife' ? 'midwife.layout' : 'bhw.layout')
 @section(auth()->user()->role === 'midwife' ? 'midwife-content' : 'bhw-content')
 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4"><div><h1 class="h3 mb-1">Family Planning</h1><p class="text-muted mb-0">Private counseling, resupply, and follow-up tracking.</p></div><a class="btn btn-primary" href="{{ route(auth()->user()->role === 'midwife' ? 'midwife.family-planning.create' : 'bhw.family-planning.create') }}"><i class="bi bi-plus-lg me-1"></i> Add service record</a></div>
+@if(session('success'))<div class="alert alert-success"><i class="bi bi-check-circle me-2"></i>{{ session('success') }}</div>@endif
 @if($pendingCount)<div class="alert alert-info"><i class="bi bi-chat-heart me-2"></i>{{ $pendingCount }} counseling request(s) awaiting your review.</div>@endif
 @if($dueCount)<div class="alert alert-warning"><i class="bi bi-calendar-x me-2"></i>{{ $dueCount }} client(s) have a follow-up due or overdue.</div>@endif
 <div class="card"><div class="table-responsive"><table class="table mb-0"><thead><tr><th>Client</th><th>Preference / method</th><th>Status</th><th>Follow-up</th><th></th></tr></thead><tbody>

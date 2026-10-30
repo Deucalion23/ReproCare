@@ -13,5 +13,5 @@
     <p class="small text-muted mb-2">When checked, this record is linked to the selected client's current pregnancy and appears in postpartum tracking after delivery.</p>
     <label class="form-label">Planned start timing</label><select name="postpartum_start_timing" class="form-select"><option value="undecided" @selected(old('postpartum_start_timing', $record->postpartum_start_timing) === 'undecided')>Undecided</option><option value="immediately_after_delivery" @selected(old('postpartum_start_timing', $record->postpartum_start_timing) === 'immediately_after_delivery')>Immediately after delivery, if appropriate</option><option value="before_discharge" @selected(old('postpartum_start_timing', $record->postpartum_start_timing) === 'before_discharge')>Before leaving the facility</option><option value="six_week_visit" @selected(old('postpartum_start_timing', $record->postpartum_start_timing) === 'six_week_visit')>At 6-week postpartum visit</option></select>
 </div>
-<button class="btn btn-primary mt-4">Save service record</button></form></div></div>
+<button type="submit" class="btn btn-primary mt-4" id="saveBtn">Save service record</button></form></div></div>
 @endsection
