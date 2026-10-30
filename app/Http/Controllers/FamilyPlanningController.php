@@ -73,7 +73,8 @@ class FamilyPlanningController extends Controller
     {
         $this->ensureClientInScope($record->user_id);
         $data = $this->validated($request, true);
-        $this->ensureClientInScope((int) $data['user_id']);
+        // Lock the client: never allow changing user_id on an existing record
+        unset($data['user_id']);
         $data['informed_choice_confirmed'] = $request->boolean('informed_choice_confirmed');
         $this->attachPostpartumPlan($data, $request, $record);
         $record->update($data);
@@ -115,8 +116,13 @@ class FamilyPlanningController extends Controller
     private function clients()
     {
         $query = User::where('role', 'user')->where('status', 'approved')->orderBy('last_name')->orderBy('first_name');
-        if (auth()->user()->role === 'bhw') {
-            BhwPresidentAssignmentService::applyJurisdictionFilter($query, auth()->user()->assigned_barangay ?: auth()->user()->barangay);
+        $user = auth()->user();
+        $area = $user->assigned_barangay ?: $user->barangay;
+        if ($user->role === 'bhw') {
+            BhwPresidentAssignmentService::applyJurisdictionFilter($query, $area);
+        } elseif ($user->role === 'midwife') {
+            // Midwives only see clients in their assigned barangay
+            $query->where('barangay', $area);
         }
         return $query;
     }
