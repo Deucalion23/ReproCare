@@ -1139,6 +1139,25 @@
         }
         .form-check-label { color:var(--text); font-size:0.875rem; }
 
+        /* Bootstrap's float + negative margin leaves the enlarged box touching
+           the label text, so lay plain check rows out with flex and an explicit
+           gap, centering the text against the box. Switches and inline groups
+           keep Bootstrap's own layout. */
+        .form-check:not(.form-switch):not(.form-check-inline) {
+            display:flex;
+            align-items:center;
+            gap:0.6rem;
+            padding-left:0;
+        }
+        .form-check:not(.form-switch):not(.form-check-inline) .form-check-input {
+            float:none;
+            margin:0;
+            flex:0 0 auto;
+        }
+        .form-check:not(.form-switch):not(.form-check-inline) .form-check-label {
+            margin-bottom:0;
+        }
+
         /* Custom RC Switch (for settings) */
         .rc-switch { display:inline-flex; align-items:center; gap:0.6rem; cursor:pointer; }
         .rc-switch input { display:none; }
