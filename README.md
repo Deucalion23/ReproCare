@@ -51,6 +51,21 @@ After running seeders, use these credentials to log in:
 | Patient | ana@reprocare.com | password |
 | Patient | grace@reprocare.com | password |
 
+## Deployed Test Scenarios
+
+The deployed demo automatically creates 100 fictional accounts when its database
+does not yet contain them. They are safe to use for end-to-end testing and do
+not use real patient information.
+
+| Accounts | Purpose |
+|------|---------|
+| `reprocare-test-001`–`012@example.test` | CHO, RHU, midwife, BHW president, and BHW workflows |
+| `reprocare-test-013`–`100@example.test` | Women in registration, cycle-tracking, pregnancy, high-risk, referral, postpartum, and newborn-care situations |
+
+All scenario accounts use the password `TestAccount123!`. See
+[the full test-scenario guide](docs/TEST_SCENARIO_ACCOUNTS.md) for each account
+range and the available workflow states.
+
 ## Project Structure
 
 ```
