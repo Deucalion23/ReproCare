@@ -162,10 +162,11 @@
                         <i class="bi bi-heart-pulse-fill me-2"></i>Postpartum Family-Planning Plan (Optional)
                     </div>
                     <div class="card-body">
-                        <div class="form-check mb-3">
+                        <div class="form-check mb-3 d-flex align-items-start">
                             <input class="form-check-input" type="checkbox" name="is_postpartum_plan" value="1" id="postpartumPlan"
                                 @checked(old('is_postpartum_plan', $record->is_postpartum_plan))
-                                onchange="togglePostpartumFields()">
+                                onchange="togglePostpartumFields()"
+                                style="margin-top: 0.15rem; margin-right: 0.75rem;">
                             <label class="form-check-label fw-bold" for="postpartumPlan">Create a postpartum family-planning plan</label>
                         </div>
                         <p class="small text-muted mb-3">
