@@ -22,9 +22,9 @@
     .wd-wrap .card-header > .d-flex { gap:0.5rem; }
     .wd-tabs .nav-link { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text-muted) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
     .wd-tabs .nav-link.active { background:var(--color-primary) !important; background-color:var(--color-primary) !important; color:#ffffff !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
-    .wd-search { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-input-border) !important; border-radius:10px !important; overflow:hidden; max-width:320px; min-height:36px; }
+    .wd-search { display:flex; align-items:stretch; box-sizing:border-box; background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-input-border) !important; border-radius:10px !important; overflow:hidden; max-width:320px; min-height:36px; }
     .wd-search:focus-within { border-color:var(--color-primary) !important; box-shadow:0 0 0 0.18rem color-mix(in srgb, var(--color-primary) 16%, transparent); }
-    .wd-search .form-control { min-width:0; background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; font-size:0.82rem; padding-left:0.9rem !important; }
+    .wd-search .form-control { flex:1 1 auto; min-width:0; width:auto; background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; outline:0 !important; font-size:0.82rem; padding-left:0.9rem !important; }
     .wd-search .btn { flex:0 0 2.5rem; border:0 !important; border-left:1px solid var(--color-input-border) !important; border-radius:0 !important; background:transparent !important; color:var(--color-text-muted) !important; width:2.5rem; }
     .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
     .wd-filters .wd-field { display:flex; flex-direction:column; gap:0.25rem; }
@@ -194,7 +194,7 @@
             <form method="GET" action="{{ route($womenRoute) }}" class="wd-filters">
             <div class="wd-field wd-search-field">
                 <label for="wd-search">Search</label>
-                <div class="input-group input-group-sm wd-search">
+                <div class="wd-search">
                     <input type="search" id="wd-search" name="search" class="form-control" value="{{ $search }}"
                            placeholder="Name, contact, email, purok...">
                     <button class="btn" type="submit" title="Search">
