@@ -55,13 +55,20 @@
         .wd-wrap .table th, .wd-wrap .table td { padding:0.5rem; }
     }
     /* Force table to fit screen without scroll */
-    .wd-wrap .table-responsive { overflow:visible; }
-    .wd-wrap .table { font-size:0.78rem; min-width:100%; table-layout:auto; }
-    .wd-wrap .table th, .wd-wrap .table td { padding:0.35rem 0.5rem; white-space:nowrap; }
-    .wd-wrap .table td .wd-sub { font-size:0.7rem; }
-    .wd-wrap .table td .wd-name { font-size:0.8rem; }
-    .wd-wrap .table td .wd-pill { font-size:0.65rem; padding:0.15em 0.5em; }
-    .wd-wrap .table .btn { padding:0.25rem 0.6rem; font-size:0.7rem; }
+    .wd-wrap .table-responsive { overflow:visible !important; }
+    .wd-wrap { overflow:hidden; }
+    .wd-wrap .table { font-size:0.7rem !important; min-width:100%; table-layout:auto; line-height:1.1; }
+    .wd-wrap .table th, .wd-wrap .table td { padding:0.2rem 0.3rem !important; white-space:nowrap; }
+    .wd-wrap .table tbody tr { height:28px !important; }
+    .wd-wrap .table td .wd-sub { font-size:0.65rem; line-height:1.1; }
+    .wd-wrap .table td .wd-name { font-size:0.78rem; line-height:1.1; }
+    .wd-wrap .table td .wd-pill { font-size:0.6rem; padding:0.1em 0.35em; }
+    .wd-wrap .table .btn { padding:0.15rem 0.45rem !important; font-size:0.65rem !important; }
+    .wd-wrap .card-header { padding-top:0.4rem !important; padding-bottom:0.4rem !important; }
+    .wd-wrap .card-body { padding:0 !important; }
+    .wd-wrap .table-responsive { border:none; }
+    .wd-wrap .p-3 { padding:0.3rem !important; }
+    .wd-wrap .py-2 { padding-top:0.2rem !important; padding-bottom:0.2rem !important; }
 </style>
 @endpush
 

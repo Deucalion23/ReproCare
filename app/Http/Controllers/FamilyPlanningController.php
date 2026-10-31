@@ -116,23 +116,29 @@ class FamilyPlanningController extends Controller
     private function clients()
     {
         $query = User::where('role', 'user')->where('status', 'approved')->orderBy('last_name')->orderBy('first_name');
-        if (auth()->user()->role === 'bhw') {
-            BhwPresidentAssignmentService::applyJurisdictionFilter($query, auth()->user()->assigned_barangay ?: auth()->user()->barangay);
+        $scope = auth()->user()->assigned_barangay ?: auth()->user()->barangay;
+        if ($scope) {
+            BhwPresidentAssignmentService::applyJurisdictionFilter($query, $scope);
         }
         return $query;
     }
 
     private function applyBhwScope($query): void
     {
-        if (auth()->user()->role === 'bhw') {
-            $area = auth()->user()->assigned_barangay ?: auth()->user()->barangay;
-            $query->whereHas('client', fn ($q) => BhwPresidentAssignmentService::applyJurisdictionFilter($q, $area));
+        $scope = auth()->user()->assigned_barangay ?: auth()->user()->barangay;
+        if ($scope) {
+            $query->whereHas('client', fn ($q) => BhwPresidentAssignmentService::applyJurisdictionFilter($q, $scope));
         }
     }
 
     private function ensureClientInScope(int $id): void
     {
-        abort_unless(User::whereKey($id)->where('role', 'user')->where('status', 'approved')->exists(), 404);
+        $clientQuery = User::where('id', $id)->where('role', 'user')->where('status', 'approved');
+        $scope = auth()->user()->assigned_barangay ?: auth()->user()->barangay;
+        if ($scope) {
+            BhwPresidentAssignmentService::applyJurisdictionFilter($clientQuery, $scope);
+        }
+        abort_unless($clientQuery->exists(), 404);
     }
 
     private function staffRoute(string $name): string
