@@ -22,9 +22,10 @@
     .wd-wrap .card-header > .d-flex { gap:0.5rem; }
     .wd-tabs .nav-link { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text-muted) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
     .wd-tabs .nav-link.active { background:var(--color-primary) !important; background-color:var(--color-primary) !important; color:#ffffff !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
-    .wd-search { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; border-radius:999px !important; overflow:hidden; max-width:320px; }
-    .wd-search .form-control { background:transparent !important; border:none !important; box-shadow:none !important; font-size:0.82rem; padding-left:0.9rem !important; }
-    .wd-search .btn { border:none !important; background:transparent !important; color:var(--color-text-muted) !important; width:2.2rem; }
+    .wd-search { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-input-border) !important; border-radius:10px !important; overflow:hidden; max-width:320px; min-height:36px; }
+    .wd-search:focus-within { border-color:var(--color-primary) !important; box-shadow:0 0 0 0.18rem color-mix(in srgb, var(--color-primary) 16%, transparent); }
+    .wd-search .form-control { min-width:0; background:transparent !important; border:0 !important; border-radius:0 !important; box-shadow:none !important; font-size:0.82rem; padding-left:0.9rem !important; }
+    .wd-search .btn { flex:0 0 2.5rem; border:0 !important; border-left:1px solid var(--color-input-border) !important; border-radius:0 !important; background:transparent !important; color:var(--color-text-muted) !important; width:2.5rem; }
     .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
     .wd-filters .wd-field { display:flex; flex-direction:column; gap:0.25rem; }
     .wd-filters label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
