@@ -342,6 +342,11 @@
                     @if($averageCycle)
                         <small class="cycle-hero-meta">
                             <i class="bi bi-arrow-repeat me-1"></i> Average cycle: {{ $averageCycle }} days
+                            @if($predictionDetail['cycles_used'] > 0)
+                                · based on {{ $predictionDetail['cycles_used'] }} completed cycle{{ $predictionDetail['cycles_used'] === 1 ? '' : 's' }}
+                            @else
+                                · standard estimate until a full cycle is logged
+                            @endif
                         </small>
                     @endif
                     @php
@@ -367,7 +372,7 @@
                     @elseif($regularity === 'somewhat_irregular')
                         <div class="mt-2" style="background:var(--color-primary-soft); border-radius:12px; padding:0.6rem 0.9rem; font-size:0.8rem; color:var(--color-primary-text); font-weight:600;">
                             <i class="bi bi-info-circle-fill me-1"></i>
-                            Slightly irregular cycle — prediction may shift by a few days.
+                            Slightly irregular cycle — your last {{ $predictionDetail['cycles_used'] }} cycles ranged {{ $predictionDetail['shortest_cycle'] }}–{{ $predictionDetail['longest_cycle'] }} days, so the next period may shift by a few days. Strength improves as logged cycles become more consistent, not just more numerous.
                         </div>
                     @endif
                 @else

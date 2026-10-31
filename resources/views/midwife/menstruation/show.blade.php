@@ -116,7 +116,7 @@
                         <a href="{{ route('midwife.menstruation.edit', $record->id) }}" class="btn btn-warning">
                             <i class="bi bi-pencil"></i> Edit Record
                         </a>
-                        <x-archive-form :action="route('midwife.menstruation.destroy', $record->id)" label="Archive Record" title="Archive record (retained for audit)" btnClass="btn btn-warning text-white" icon="bi bi-archive" confirmText="Archive this menstruation record? It will be retained for audit." />
+                        <x-archive-form :action="route('midwife.menstruation.destroy', $record->id)" label="Delete Record" title="Delete record (retained for audit)" btnClass="btn btn-warning text-white" icon="bi bi-trash3" confirmText="Delete this cycle record? It will be removed from active lists and retained for audit." />
                     </div>
                 </div>
             </div>

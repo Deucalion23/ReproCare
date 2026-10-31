@@ -167,6 +167,27 @@ class CyclePredictionTest extends AutomationTestCase
         $this->assertStringContainsString('Oct 3 – Oct 4', $html);
     }
 
+    public function test_moderate_history_explains_which_cycles_limit_the_strength(): void
+    {
+        $user = $this->patient();
+        // Four tight 28-day gaps plus one 22-day and one 34-day gap keep the
+        // prediction at Level 2 — the page must say why instead of only
+        // showing a bare level to a patient who has logged many records.
+        $this->history($user->id, [
+            '2026-02-19', '2026-03-19', '2026-04-16', '2026-05-14',
+            '2026-06-11', '2026-07-03', '2026-08-06',
+        ]);
+
+        $html = $this->actingAs($user)
+            ->get(route('user.menstruation.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('Moderate prediction (Level 2 of 4)', $html);
+        $this->assertStringContainsString('based on 6 completed cycles', $html);
+        $this->assertStringContainsString('your last 6 cycles ranged 22–34 days', $html);
+    }
+
     public function test_stale_history_is_advanced_instead_of_showing_past_dates(): void
     {
         $user = $this->patient();
