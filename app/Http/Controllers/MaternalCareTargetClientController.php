@@ -9,6 +9,8 @@ use App\Models\Woman;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class MaternalCareTargetClientController extends Controller
@@ -35,10 +37,9 @@ class MaternalCareTargetClientController extends Controller
                 });
             })
             ->orderBy(
-                Woman::select('pregnancies.created_at')
-                    ->join('pregnancies', 'pregnancies.user_id', '=', 'users.id')
+                Pregnancy::select('created_at')
                     ->whereColumn('pregnancies.user_id', 'users.id')
-                    ->oldest('pregnancies.created_at')
+                    ->oldest('created_at')
                     ->limit(1)
             )
             ->paginate(12)
@@ -97,10 +98,9 @@ class MaternalCareTargetClientController extends Controller
                 });
             })
             ->orderBy(
-                Woman::select('pregnancies.created_at')
-                    ->join('pregnancies', 'pregnancies.user_id', '=', 'users.id')
+                Pregnancy::select('created_at')
                     ->whereColumn('pregnancies.user_id', 'users.id')
-                    ->oldest('pregnancies.created_at')
+                    ->oldest('created_at')
                     ->limit(1)
             )
             ->get()
@@ -393,15 +393,23 @@ class MaternalCareTargetClientController extends Controller
         $selectedPurok = \App\Models\Purok::find($validated['purok_id'] ?? null);
         $barangay = $selectedPurok?->barangay;
 
+        // `users.email`/`users.password` are NOT NULL and the woman global scope
+        // only matches role=user, so the account has to be created fully formed.
+        $slug = Str::slug($validated['first_name'] . ' ' . $validated['last_name']) ?: 'maternal-client';
+
         // Create the woman first
-        $woman = Woman::create([
+        $woman = Woman::forceCreate([
             'first_name' => $validated['first_name'],
             'middle_initial' => $validated['middle_initial'],
             'last_name' => $validated['last_name'],
             'date_of_birth' => $validated['date_of_birth'],
+            'contact_number' => $validated['contact_number'] ?? null,
             'address' => $validated['address'],
             'barangay' => $barangay,
             'purok_id' => $validated['purok_id'],
+            'email' => $slug . '.' . now()->format('YmdHis') . '.' . Str::lower(Str::random(4)) . '@target-client.local',
+            'password' => Hash::make(Str::random(32)),
+            'role' => 'user',
             'status' => 'approved',
         ]);
 
@@ -442,6 +450,7 @@ class MaternalCareTargetClientController extends Controller
         MaternalCareTargetClient::create([
             'user_id' => $woman->id,
             'pregnancy_id' => $pregnancyId,
+            'recorded_by_id' => auth()->id(),
             'date_of_registration' => $validated['date_of_registration'],
             'family_serial_no' => $validated['family_serial_no'],
             'gravida' => $validated['gravida'],

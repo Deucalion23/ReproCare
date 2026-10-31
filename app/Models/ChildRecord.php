@@ -20,6 +20,7 @@ class ChildRecord extends Model
         'mother_id',
         'pregnancy_id',
         'first_name',
+        'middle_initial',
         'last_name',
         'date_of_birth',
         'gender',
@@ -28,6 +29,7 @@ class ChildRecord extends Model
         'apgar_score',
         'delivery_type',
         'complications',
+        'barangay',
         'purok_id',
         'status',
     ];
@@ -65,6 +67,8 @@ class ChildRecord extends Model
 
     public function getFullNameAttribute(): string
     {
-        return trim($this->last_name . ', ' . $this->first_name);
+        $middle = $this->middle_initial ? ' ' . rtrim($this->middle_initial, '.') . '.' : '';
+
+        return trim($this->last_name . ', ' . $this->first_name . $middle);
     }
 }
