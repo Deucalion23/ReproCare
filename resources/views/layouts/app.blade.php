@@ -267,10 +267,12 @@
         }
 
         /* Profile-photo lockdown (ALL portals, ALL breakpoints): avatars must
-           always render as undistorted 1:1 squares/circles. Each rule below
-           keeps its own declared width while aspect-ratio re-squares the
-           height — defeating any fluid-media or flex rule that would stretch
-           photos into ovals on narrow screens. */
+           always render as undistorted 1:1 squares/circles. Never force
+           height:auto here — an auto-height flex item in a default
+           align-items:stretch row (comment rows, author lockups) gets pulled to
+           the bubble's height and border-radius:50% turns it into an egg. The
+           per-page rules supply the real square size; aspect-ratio only catches
+           avatars that were left height-less. */
         .rc-avatar, .rc-contact img, .rc-peer-avatar img, .nav-avatar,
         img.composer-user-avatar, img.author-avatar, img.comment-avatar,
         img.create-author-avatar, img.preg-avatar, img.profile-avatar,
@@ -280,14 +282,6 @@
             aspect-ratio:1 / 1;
             object-fit:cover;
             flex-shrink:0;
-        }
-        .rc-avatar, .rc-contact img, .rc-peer-avatar img, .nav-avatar,
-        img.composer-user-avatar, img.author-avatar, img.comment-avatar,
-        img.create-author-avatar, img.preg-avatar, img.profile-avatar,
-        img.profile-show-avatar, img.profile-view-avatar, img.user-profile-avatar,
-        img.women-profile-avatar, img.avatar-upload-preview,
-        .sidebar-footer-avatar {
-            height:auto;
         }
 
         /* Dropdown */

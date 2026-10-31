@@ -561,7 +561,12 @@
         .page-hero .d-flex.justify-content-between { align-items:stretch !important; flex-direction:column; gap:0.75rem; }
         .page-hero .btn, .main-content .btn-primary, .main-content .btn-outline-primary { width:100%; }
         .main-content .table-responsive, .main-content .card .table-responsive { overflow-x:auto !important; -webkit-overflow-scrolling:touch; }
-        .main-content img, .main-content video, .main-content canvas { max-width:100%; height:auto; }
+        /* Fluid media, but never on the fixed-size avatars: height:auto there
+           outranks a page's `height:34px` and lets a stretch flex row pull the
+           box into an ellipse. */
+        .main-content img, .main-content video, .main-content canvas { max-width:100%; }
+        .main-content video, .main-content canvas,
+        .main-content img:not([class*="avatar"]) { height:auto; }
     }
     @media (max-width: 480px) {
         .page-hero-title, .page-title, h1.page-title { font-size:1.3rem !important; }

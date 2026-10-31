@@ -363,6 +363,9 @@
     }
     .comment-item {
         display:flex;
+        /* flex-start also blocks the default align-items:stretch, which would
+           otherwise elongate a height-less avatar into an ellipse. */
+        align-items:flex-start;
         gap:0.75rem;
         margin-bottom:0.95rem;
     }
