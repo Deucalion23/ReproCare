@@ -10,25 +10,38 @@ use Illuminate\Validation\Rule;
 
 class ChildCareTargetClientController extends Controller
 {
-    public function index(Request $request)
-    {
-        $tab = $request->get('tab', 'page-1');
-        $search = trim((string) $request->get('search', ''));
+    /**
+     * `users.name` is an accessor assembled from the name columns, so an eager
+     * load has to select the real columns — `mother:id,name,...` makes Postgres
+     * (and SQLite) fail the whole listing with "column name does not exist".
+     */
+    private const MOTHER_WITH = 'mother:id,first_name,middle_initial,last_name,address,barangay';
 
-        $children = ChildRecord::query()
-            ->with(['mother:id,name,address,barangay', 'targetClient', 'purok:id,name'])
+    private function filteredChildren(string $search)
+    {
+        return ChildRecord::query()
+            ->with([self::MOTHER_WITH, 'targetClient', 'purok:id,name'])
             ->when($search !== '', function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->where('first_name', 'like', '%' . $search . '%')
                         ->orWhere('last_name', 'like', '%' . $search . '%')
                         ->orWhere('barangay', 'like', '%' . $search . '%')
                         ->orWhereHas('mother', function ($mother) use ($search) {
-                            $mother->where('name', 'like', '%' . $search . '%')
+                            $mother->where('first_name', 'like', '%' . $search . '%')
+                                ->orWhere('last_name', 'like', '%' . $search . '%')
                                 ->orWhere('address', 'like', '%' . $search . '%');
                         });
                 });
             })
-            ->orderByDesc('date_of_birth')
+            ->orderByDesc('date_of_birth');
+    }
+
+    public function index(Request $request)
+    {
+        $tab = $request->get('tab', 'page-1');
+        $search = trim((string) $request->get('search', ''));
+
+        $children = $this->filteredChildren($search)
             ->paginate(12)
             ->withQueryString();
 
@@ -60,20 +73,7 @@ class ChildCareTargetClientController extends Controller
         $tab = $request->get('tab', 'page-1');
         $search = trim((string) $request->get('search', ''));
 
-        $children = ChildRecord::query()
-            ->with(['mother:id,name,address,barangay', 'targetClient', 'purok:id,name'])
-            ->when($search !== '', function ($query) use ($search) {
-                $query->where(function ($inner) use ($search) {
-                    $inner->where('first_name', 'like', '%' . $search . '%')
-                        ->orWhere('last_name', 'like', '%' . $search . '%')
-                        ->orWhere('barangay', 'like', '%' . $search . '%')
-                        ->orWhereHas('mother', function ($mother) use ($search) {
-                            $mother->where('name', 'like', '%' . $search . '%')
-                                ->orWhere('address', 'like', '%' . $search . '%');
-                        });
-                });
-            })
-            ->orderByDesc('date_of_birth')
+        $children = $this->filteredChildren($search)
             ->get()
             ->values();
 
@@ -105,7 +105,7 @@ class ChildCareTargetClientController extends Controller
 
     public function edit(ChildRecord $child)
     {
-        $child->load(['mother:id,name,address,barangay', 'targetClient', 'purok:id,name']);
+        $child->load([self::MOTHER_WITH, 'targetClient', 'purok:id,name']);
 
         return view('midwife.child-care-target-clients.edit', [
             'child' => $child,
@@ -298,15 +298,35 @@ class ChildCareTargetClientController extends Controller
             'remarks' => ['nullable', 'string', 'max:1000'],
         ]);
 
-        // Create or find the mother
-        $mother = \App\Models\User::where('role', 'user')->firstOrCreate(
-            ['name' => $validated['mother_name']],
-            [
+        // Find or create the mother's account. The form captures one free-text
+        // name ("Last, First, Middle") and users have no `name` column, so the
+        // match runs on the columns the User::name accessor is built from.
+        [$last, $first, $middle] = array_pad(
+            array_map('trim', explode(',', (string) $validated['mother_name'], 3)),
+            3,
+            ''
+        );
+
+        $mother = \App\Models\User::query()
+            ->where('role', 'user')
+            ->whereRaw('LOWER(first_name) = ?', [mb_strtolower($first)])
+            ->whereRaw('LOWER(last_name) = ?', [mb_strtolower($last)])
+            ->first();
+
+        if (! $mother) {
+            $slug = \Illuminate\Support\Str::slug($first . ' ' . $last) ?: 'mother';
+            $mother = \App\Models\User::create([
+                'first_name' => $first ?: $validated['mother_name'],
+                'middle_initial' => $middle,
+                'last_name' => $last,
+                'email' => $slug . '.' . now()->format('YmdHis') . '@childcare.local',
+                'password' => \Illuminate\Support\Facades\Hash::make(\Illuminate\Support\Str::random(32)),
                 'address' => $validated['mother_address'],
                 'barangay' => $validated['mother_barangay'] ?? $validated['barangay'],
+                'role' => 'user',
                 'status' => 'approved',
-            ]
-        );
+            ]);
+        }
 
         // Create the child record
         $child = ChildRecord::create([
