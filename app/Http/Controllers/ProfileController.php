@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barangay;
+use App\Models\Notification;
 use App\Models\User;
 use App\Models\Purok;
 use Illuminate\Http\Request;
@@ -259,7 +261,22 @@ class ProfileController extends Controller
             $updateData['pref_checkup_reminders'] = $request->boolean('pref_checkup_reminders');
         }
 
+        // A new barangay invalidates any purok tied to the old one.
+        if (!empty($updateData['barangay']) && $updateData['barangay'] !== $user->barangay
+            && empty($updateData['purok_id'])) {
+            $updateData['purok_id'] = null;
+        }
+
+        $previousBarangay = $user->barangay;
+
         $user->update($updateData);
+
+        // Moving a woman to another barangay moves her RHU catchment too.
+        if (($user->role ?? null) === 'user'
+            && !empty($updateData['barangay'])
+            && $updateData['barangay'] !== $previousBarangay) {
+            $this->alertRhuOfBarangayChange($user, $previousBarangay, $updateData['barangay']);
+        }
 
         // Redirect to previous page or role settings page (profile lives in Settings)
         $redirectTo = $request->input('redirect_to', url()->previous());
@@ -270,6 +287,62 @@ class ProfileController extends Controller
         }
 
         return redirect($redirectTo)->with('success', 'Profile updated successfully.');
+    }
+
+    /**
+     * Notify the RHU desk when a woman's barangay changes. The new barangay's
+     * RHU takes over her record; the previous one is told she moved out so no
+     * catchment keeps a stale roster. Same-RHU moves still raise a heads-up.
+     */
+    private function alertRhuOfBarangayChange(User $patient, ?string $from, string $to): void
+    {
+        $newRhu = Barangay::rhuFor($to);
+        $oldRhu = Barangay::rhuFor($from);
+        $sameRhu = $newRhu !== null && $newRhu === $oldRhu;
+
+        $recipients = User::query()
+            ->where('role', 'rhu')
+            ->where('status', 'approved')
+            ->when($newRhu || $oldRhu, fn ($query) => $query->whereIn(
+                'rhu_assignment',
+                array_values(array_unique(array_filter([$newRhu, $oldRhu])))
+            ))
+            ->get(['id', 'rhu_assignment']);
+
+        // Unmapped legacy barangay names still need to reach an RHU desk.
+        if ($recipients->isEmpty()) {
+            $recipients = User::query()->where('role', 'rhu')->where('status', 'approved')
+                ->get(['id', 'rhu_assignment']);
+        }
+
+        $movement = $from ? "from {$from} to {$to}" : "to {$to} (previously unrecorded)";
+
+        foreach ($recipients as $rhu) {
+            $inNewCatchment = $newRhu !== null && $rhu->rhu_assignment === $newRhu;
+
+            $title = match (true) {
+                $sameRhu => 'Patient address changed – ' . $patient->name,
+                $inNewCatchment => 'Patient moved into your catchment – ' . $patient->name,
+                default => 'Patient moved out of your catchment – ' . $patient->name,
+            };
+
+            $detail = match (true) {
+                $sameRhu => " She remains within {$newRhu}.",
+                $inNewCatchment => " Her record now falls under {$newRhu}.",
+                default => ' Her record no longer falls under your barangay roster.',
+            };
+
+            Notification::create([
+                'user_id' => $rhu->id,
+                'subject_user_id' => $patient->id,
+                'category' => 'address_change',
+                'title' => $title,
+                'message' => "{$patient->name} changed her recorded barangay {$movement}.{$detail}",
+                'type' => 'warning',
+                'action_url' => route('rhu.women.index', ['search' => $patient->email]),
+                'is_read' => false,
+            ]);
+        }
     }
 
     /**

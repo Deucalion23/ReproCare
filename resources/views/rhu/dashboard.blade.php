@@ -84,6 +84,47 @@
     </div>
 </div>
 
+@if($addressAlerts->isNotEmpty())
+<div class="card fade-in-card mb-4" id="addressChangeAlerts"
+     style="border:1px solid var(--color-border); border-left:4px solid var(--color-warning); border-radius:16px; overflow:hidden;">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2"
+         style="background:color-mix(in srgb, var(--color-warning) 9%, var(--color-surface)); border-bottom:1px solid var(--color-border);">
+        <h5 class="mb-0 fw-700" style="font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem;">
+            <i class="bi bi-geo-alt-fill me-1" style="color:var(--color-warning-text);"></i>
+            Patient Address Changes
+            <span class="badge rounded-pill ms-1" style="background:var(--color-warning-soft); color:var(--color-warning-text); border:1px solid var(--color-warning);">{{ $addressAlerts->count() }}</span>
+        </h5>
+        <button type="button" class="btn btn-sm btn-outline-secondary" onclick="dismissAllAddressAlerts()">
+            <i class="bi bi-check2-all me-1"></i> Mark all read
+        </button>
+    </div>
+    <div class="card-body p-0" id="addressAlertList">
+        @foreach($addressAlerts as $alert)
+        <div class="d-flex align-items-start gap-3 px-3 py-3" data-alert-id="{{ $alert->id }}" style="border-bottom:1px solid var(--color-border);">
+            <div class="flex-shrink-0" style="width:36px;height:36px;border-radius:11px;background:var(--color-warning-soft);color:var(--color-warning-text);display:flex;align-items:center;justify-content:center;">
+                <i class="bi bi-house-door-fill"></i>
+            </div>
+            <div class="flex-grow-1" style="min-width:0;">
+                <div style="font-weight:700; font-size:0.86rem; color:var(--color-text);">{{ $alert->title }}</div>
+                <div style="font-size:0.79rem; color:var(--color-text-muted);">{{ $alert->message }}</div>
+                <div style="font-size:0.72rem; color:var(--color-text-muted); margin-top:2px;">
+                    <i class="bi bi-clock me-1"></i>{{ $alert->created_at->diffForHumans() }}
+                </div>
+            </div>
+            <div class="d-flex align-items-center gap-1 flex-shrink-0">
+                <a href="{{ $alert->action_url }}" class="btn btn-sm btn-primary" onclick="markAddressAlertRead({{ $alert->id }})">
+                    <i class="bi bi-arrow-right-circle me-1"></i> Open
+                </a>
+                <button type="button" class="btn btn-sm btn-light border" title="Mark as read" onclick="dismissAddressAlert({{ $alert->id }})">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+        </div>
+        @endforeach
+    </div>
+</div>
+@endif
+
 <div class="row g-4">
     {{-- Left column --}}
     <div class="col-lg-8">
@@ -299,6 +340,31 @@
 
 @push('scripts')
 <script>
+const ADDRESS_ALERT_CSRF = '{{ csrf_token() }}';
+function markAddressAlertRead(id) {
+    fetch('/api/notifications/' + id + '/read', {
+        method: 'POST',
+        headers: { 'X-CSRF-TOKEN': ADDRESS_ALERT_CSRF, 'Accept': 'application/json' },
+    }).catch(function () {});
+}
+function removeAddressAlertRow(id) {
+    var row = document.querySelector('[data-alert-id="' + id + '"]');
+    if (row) row.remove();
+    var card = document.getElementById('addressChangeAlerts');
+    if (card && !card.querySelector('[data-alert-id]')) card.remove();
+}
+function dismissAddressAlert(id) {
+    markAddressAlertRead(id);
+    removeAddressAlertRow(id);
+}
+function dismissAllAddressAlerts() {
+    document.querySelectorAll('#addressAlertList [data-alert-id]').forEach(function (row) {
+        markAddressAlertRead(row.getAttribute('data-alert-id'));
+        row.remove();
+    });
+    var card = document.getElementById('addressChangeAlerts');
+    if (card) card.remove();
+}
 function animateStatNumbers() {
     const statNumbers = document.querySelectorAll('.stat-number');
     statNumbers.forEach(stat => {

@@ -13,6 +13,7 @@ use App\Models\MaternalDeath;
 use App\Models\MaternalMorbidity;
 use App\Models\WalkInPatient;
 use App\Models\ActivityLog;
+use App\Models\Notification;
 use App\Models\Purok;
 use App\Services\RiskAnalysisService;
 use App\Services\WomenDirectoryService;
@@ -78,10 +79,20 @@ class RhuController extends Controller
             ->limit(5)
             ->get();
 
+        // Women who edited their address and now belong to a different
+        // barangay (or moved within this RHU's catchment).
+        $addressAlerts = Notification::where('user_id', $rhuUser->id)
+            ->where('category', 'address_change')
+            ->where('is_read', false)
+            ->latest()
+            ->limit(6)
+            ->get();
+
         return view('rhu.dashboard', array_merge($stats, compact(
             'recentDeaths',
             'recentMorbidities',
-            'recentSupplyRequests'
+            'recentSupplyRequests',
+            'addressAlerts'
         )));
     }
 

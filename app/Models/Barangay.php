@@ -69,4 +69,45 @@ class Barangay extends Model
 
         return $merged;
     }
+
+    /**
+     * The complete 86-barangay San Carlos City list, independent of how many
+     * rows the current deployment has seeded (RHU 1-only installs included).
+     */
+    public static function cityWideNames(): array
+    {
+        $names = array_merge(...array_values(self::RHU_CATCHMENTS));
+        foreach (static::allNames() as $name) {
+            if (!in_array($name, $names, true)) {
+                $names[] = $name;
+            }
+        }
+        $names = array_values(array_unique($names));
+        sort($names, SORT_STRING | SORT_FLAG_CASE);
+
+        return $names;
+    }
+
+    /** Which RHU catchment a barangay name belongs to, if mapped. */
+    public static function rhuFor(?string $name): ?string
+    {
+        if (!$name) {
+            return null;
+        }
+        try {
+            $assigned = static::where('name', $name)->value('rhu_assignment');
+            if ($assigned) {
+                return $assigned;
+            }
+        } catch (\Throwable $e) {
+        }
+
+        foreach (self::RHU_CATCHMENTS as $rhu => $barangays) {
+            if (in_array($name, $barangays, true)) {
+                return $rhu;
+            }
+        }
+
+        return null;
+    }
 }

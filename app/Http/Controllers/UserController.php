@@ -483,7 +483,7 @@ class UserController extends Controller
     public function settings()
     {
         $user = Auth::user();
-        $barangays = \App\Models\Barangay::allNames();
+        $barangays = \App\Models\Barangay::cityWideNames();
         return view('user.settings', compact('user', 'barangays'));
     }
 
