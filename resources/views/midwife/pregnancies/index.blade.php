@@ -2,6 +2,32 @@
 
 @section('title', 'Pregnancies - ReproCare')
 
+@push('styles')
+<style>
+    .pregnancy-records-card .card-body { padding:1rem !important; }
+    .pregnancy-records-table { width:100%; table-layout:fixed; font-size:0.78rem !important; }
+    .pregnancy-records-table th,
+    .pregnancy-records-table td { padding:0.55rem 0.4rem !important; overflow:hidden; vertical-align:middle; }
+    .pregnancy-records-table th { font-size:0.68rem; white-space:nowrap; }
+    .pregnancy-records-table td:first-child .d-flex,
+    .pregnancy-records-table td:first-child .d-flex > div:last-child { min-width:0; }
+    .pregnancy-records-table td:first-child small { max-width:100% !important; }
+    .pregnancy-records-table .pregnancy-trimester,
+    .pregnancy-records-table .pregnancy-status { gap:0.3rem !important; padding:0.3rem 0.5rem !important; font-size:0.76rem !important; }
+    .pregnancy-records-table .badge { padding:0.3rem 0.5rem !important; font-size:0.72rem !important; white-space:nowrap; }
+    .pregnancy-records-table .pregnancy-actions { gap:0.35rem !important; flex-wrap:nowrap; }
+    .pregnancy-records-table .pregnancy-actions .btn { padding:0.35rem 0.45rem !important; }
+    @media (max-width: 1199.98px) {
+        .pregnancy-records-table { font-size:0.72rem !important; }
+        .pregnancy-records-table th,
+        .pregnancy-records-table td { padding:0.45rem 0.3rem !important; }
+        .pregnancy-records-table td:first-child small { display:none !important; }
+        .pregnancy-records-table .pregnancy-trimester,
+        .pregnancy-records-table .pregnancy-status { padding:0.25rem 0.4rem !important; font-size:0.7rem !important; }
+    }
+</style>
+@endpush
+
 @section('midwife-content')
 
 {{-- ═══════════════════════════════
@@ -137,7 +163,7 @@
 {{-- ═══════════════════════════════
      PREGNANCY RECORDS TABLE
 ═══════════════════════════════ --}}
-<div class="card fade-in-card" style="border:none; background:var(--bg-card);">
+<div class="card fade-in-card pregnancy-records-card" style="border:none; background:var(--bg-card);">
     <div class="card-header d-flex justify-content-between align-items-center" 
          style="background:transparent; border-bottom:1px solid var(--border-color); padding:1rem 1.5rem;">
         <h5 class="mb-0 fw-700" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--text);">Pregnancy Records
@@ -154,7 +180,11 @@
         @endif
 
         @if($pregnancies->count() > 0)
-            <table class="table table-hover align-middle" style="font-size:0.85rem; width:100%;">
+            <table class="table table-hover align-middle pregnancy-records-table">
+                    <colgroup>
+                        <col style="width:25%"><col style="width:14%"><col style="width:14%"><col style="width:10%">
+                        <col style="width:11%"><col style="width:9%"><col style="width:11%"><col style="width:6%">
+                    </colgroup>
                     <thead>
                         <tr style="color:var(--text-muted); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">
                             <th style="padding:0.6rem 0.75rem; border:none;">Patient</th>
@@ -192,7 +222,7 @@
                                 </td>
                                 <td style="padding:0.6rem 0.75rem;">
                                     @if($pregnancy->trimester)
-                                        <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:color-mix(in srgb, var(--color-info) 10%, transparent); color:var(--info); border-radius:20px; font-weight:500; font-size:0.85rem; white-space:nowrap;">
+                                        <div class="pregnancy-trimester" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:color-mix(in srgb, var(--color-info) 10%, transparent); color:var(--info); border-radius:20px; font-weight:500; font-size:0.85rem; white-space:nowrap;">
                                             <i class="bi bi-calendar-week"></i>
                                             {{ $pregnancy->trimester_name }}
                                         </div>
@@ -214,7 +244,7 @@
                                     @endif
                                 </td>
                                 <td style="padding:0.6rem 0.75rem;">
-                                    <div style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:{{ $pregnancy->status === 'completed' ? 'color-mix(in srgb, var(--color-surface-soft) 10%, transparent)' : 'color-mix(in srgb, var(--color-success-text) 10%, transparent)' }}; color:{{ $pregnancy->status === 'completed' ? 'var(--text-muted)' : 'var(--success)' }}; border-radius:20px; font-weight:500; font-size:0.85rem;">
+                                    <div class="pregnancy-status" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.35rem 0.75rem; background:{{ $pregnancy->status === 'completed' ? 'color-mix(in srgb, var(--color-surface-soft) 10%, transparent)' : 'color-mix(in srgb, var(--color-success-text) 10%, transparent)' }}; color:{{ $pregnancy->status === 'completed' ? 'var(--text-muted)' : 'var(--success)' }}; border-radius:20px; font-weight:500; font-size:0.85rem;">
                                         {{ ucfirst($pregnancy->status ?? 'Unknown') }}
                                     </div>
                                 </td>
@@ -235,7 +265,7 @@
                                     @endif
                                 </td>
                                 <td style="padding:0.6rem 0.75rem; text-align:right;">
-                                    <div class="d-flex gap-2 justify-content-end">
+                                    <div class="d-flex gap-2 justify-content-end pregnancy-actions">
                                         <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}" 
                                            class="btn btn-sm btn-outline-primary" 
                                            style="border-radius:8px; padding:0.4rem 0.6rem;"
