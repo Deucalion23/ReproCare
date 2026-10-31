@@ -39,10 +39,11 @@ class CyclePredictionTest extends AutomationTestCase
         $detail = $service->getPredictionDetail($user->id);
         $this->assertSame('irregular', $detail['regularity']);
         $this->assertSame('low', $detail['confidence']);
-        $this->assertSame('2026-08-24', $detail['next_earliest']->toDateString());
-        $this->assertSame('2026-09-17', $detail['next_latest']->toDateString());
+        $this->assertNull($detail['probability']);
+        $this->assertSame('2026-08-25', $detail['next_earliest']->toDateString());
+        $this->assertSame('2026-09-16', $detail['next_latest']->toDateString());
         $predictions = $service->predictFuturePeriods($user->id);
-        $this->assertSame(48, (int) $predictions[1]['period_start_earliest']->diffInDays($predictions[1]['period_start_latest']));
+        $this->assertSame(44, (int) $predictions[1]['period_start_earliest']->diffInDays($predictions[1]['period_start_latest']));
         $this->assertNull($predictions[0]['ovulation']);
         $this->assertNull($predictions[0]['fertile_start']);
         $calendar = $service->getCalendarData($user->id, 2026, 8);
@@ -162,9 +163,9 @@ class CyclePredictionTest extends AutomationTestCase
             ->assertOk()
             ->getContent();
 
-        // 2026-09-15 is day 14 of a 32-day average cycle.
+        // 2026-09-15 is day 14 of a 32-day recency-weighted cycle.
         $this->assertStringContainsString('<div class="day-num">14</div>', $html);
-        $this->assertStringContainsString('Oct 3 – Oct 4', $html);
+        $this->assertStringContainsString('Oct 3 – Oct 5', $html);
     }
 
     public function test_moderate_history_explains_which_cycles_limit_the_strength(): void
@@ -178,6 +179,15 @@ class CyclePredictionTest extends AutomationTestCase
             '2026-06-11', '2026-07-03', '2026-08-06',
         ]);
 
+        $detail = (new CyclePredictionService())->getPredictionDetail($user->id);
+        $this->assertSame(6, $detail['cycles_used']);
+        $this->assertSame(28, $detail['average_cycle']);
+        // Recency weighting: newest 34 and 22 weigh most, giving a ~68% band
+        // of 23–33 days instead of the raw 22–34 observation range.
+        $this->assertSame(23, $detail['window_low_days']);
+        $this->assertSame(33, $detail['window_high_days']);
+        $this->assertSame(68, $detail['probability']);
+
         $html = $this->actingAs($user)
             ->get(route('user.menstruation.index'))
             ->assertOk()
@@ -186,6 +196,43 @@ class CyclePredictionTest extends AutomationTestCase
         $this->assertStringContainsString('Moderate prediction (Level 2 of 4)', $html);
         $this->assertStringContainsString('based on 6 completed cycles', $html);
         $this->assertStringContainsString('your last 6 cycles ranged 22–34 days', $html);
+        $this->assertStringContainsString('about 2 in 3 starts fall inside this window', $html);
+    }
+
+    public function test_backtest_checks_past_predictions_against_actual_starts(): void
+    {
+        $user = $this->patient();
+        $this->history($user->id, [
+            '2026-02-19', '2026-03-19', '2026-04-16', '2026-05-14',
+            '2026-06-11', '2026-07-03', '2026-08-06',
+        ]);
+
+        // The three most recent starts all had at least three prior gaps;
+        // only the 28-day run (Jun 11) landed inside its predicted window.
+        $result = (new CyclePredictionService())->backtestWindow($user->id);
+
+        $this->assertSame(3, $result['checked']);
+        $this->assertSame(1, $result['hits']);
+        $this->assertSame(33, $result['rate']);
+    }
+
+    public function test_statistics_page_reports_the_prediction_check(): void
+    {
+        $user = $this->patient();
+        $this->history($user->id, [
+            '2026-02-19', '2026-03-19', '2026-04-16', '2026-05-14',
+            '2026-06-11', '2026-07-03', '2026-08-06',
+        ]);
+
+        $html = $this->actingAs($user)
+            ->get(route('user.menstruation.statistics'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString(
+            'Your period started inside the predicted window 1 of 3 times (33%).',
+            $html
+        );
     }
 
     public function test_stale_history_is_advanced_instead_of_showing_past_dates(): void

@@ -115,6 +115,26 @@
         </div>
     </div>
 
+    <!-- Prediction Check -->
+    <div class="card mb-4">
+        <div class="card-body d-flex align-items-start gap-3">
+            <div style="width:44px; height:44px; border-radius:12px; background:var(--color-primary-soft); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <i class="bi bi-bullseye" style="color:var(--color-primary-text); font-size:1.2rem;"></i>
+            </div>
+            <div>
+                <div style="font-weight:600; color:var(--text);">How accurate have your predictions been?</div>
+                <div style="font-size:0.82rem; color:var(--text-muted);">
+                    @if($backtest['checked'] > 0)
+                        Your period started inside the predicted window {{ $backtest['hits'] }} of {{ $backtest['checked'] }} time{{ $backtest['checked'] === 1 ? '' : 's' }} ({{ $backtest['rate'] }}%).
+                    @else
+                        Log at least four periods so the app can check its own past predictions.
+                    @endif
+                    Newer cycles carry more weight than older ones, so an unusual month does not skew the estimate for long.
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Report Banner -->
     <div class="card mb-4" style="background:linear-gradient(135deg, color-mix(in srgb, var(--color-success) 15%, transparent), color-mix(in srgb, var(--color-success-text) 8%, transparent)); border-color:color-mix(in srgb, var(--color-success) 30%, transparent);">
         <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">

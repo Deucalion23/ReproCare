@@ -16,7 +16,11 @@ class PeriodNotificationService
 
         foreach ($users as $user) {
             $detail = $prediction->getPredictionDetail($user->id);
-            $next = $detail['next_earliest'];
+
+            // Anchor the 3/1/0-day reminder on the most likely start, not the
+            // window's earliest date — otherwise a wide window's first days
+            // pass without any nudge while the period is still expected.
+            $next = $detail['next_predicted'];
             if (!$next) continue;
             $days = (int) today()->diffInDays($next, false);
             if (!in_array($days, [3, 1, 0], true)) continue;

@@ -27,28 +27,96 @@ class CyclePredictionService
      */
     public function predictNextPeriod(int $userId): ?Carbon
     {
-        $cycles = $this->getRecentCycles($userId, 6);
+        $history = $this->analyzeHistory($userId, 6);
 
-        if ($cycles->isEmpty()) {
+        if ($history['cycles']->isEmpty()) {
             return null;
         }
 
-        $averageCycle = $this->saneAverage($cycles);
-        $lengths = $cycles->pluck('cycle_length')->filter()->values();
-        $shortest = $lengths->isNotEmpty() ? (int) $lengths->min() : $averageCycle;
-        $longest = $lengths->isNotEmpty() ? (int) $lengths->max() : $averageCycle;
-
-        return $this->projectedStart($cycles->first()->period_start_date, $averageCycle, $shortest, $longest);
+        return $this->projectedStart(
+            $history['cycles']->first()->period_start_date,
+            $history['average'],
+            $history['band_low'],
+            $history['band_high']
+        );
     }
 
     /**
-     * Average of plausible start-to-start intervals, clamped to a sane range.
+     * One recency-weighted read of the plausible start-to-start intervals.
+     * Every surface (summary, calendar, reminders, exports) must use this so
+     * a single history cannot produce two different windows.
+     *
+     * @return array<string,mixed>
      */
-    private function saneAverage($cycles): int
+    private function analyzeHistory(int $userId, int $limit = 6): array
     {
-        $average = $this->calculateAverageCycleLength($cycles);
+        $cycles = $this->getRecentCycles($userId, $limit);
+        $lengths = $cycles->pluck('cycle_length')->filter()->values()->all();
 
-        return max(self::MIN_PLAUSIBLE_CYCLE, min(self::MAX_PLAUSIBLE_CYCLE, $average));
+        return array_merge(['cycles' => $cycles, 'lengths' => $lengths], $this->summarizeLengths($lengths));
+    }
+
+    /**
+     * Recency-weighted interval statistics.
+     *
+     * Newer gaps carry more weight so a prediction recovers from a one-off
+     * long or short cycle instead of being anchored by it for six cycles.
+     * The window is a ~68% prediction interval (mean ± 1 SD, inflated for
+     * the uncertainty of estimating the mean), not the observed min–max.
+     *
+     * @param array<int,int> $lengths newest interval first
+     * @return array{count:int,average:int,shortest:int,longest:int,spread:int,weighted_sd:float,band_low:int,band_high:int,probability:?int}
+     */
+    private function summarizeLengths(array $lengths): array
+    {
+        if ($lengths === []) {
+            return [
+                'count' => 0,
+                'average' => self::DEFAULT_CYCLE_LENGTH,
+                'shortest' => self::DEFAULT_CYCLE_LENGTH,
+                'longest' => self::DEFAULT_CYCLE_LENGTH,
+                'spread' => 0,
+                'weighted_sd' => 0.0,
+                'band_low' => self::DEFAULT_CYCLE_LENGTH,
+                'band_high' => self::DEFAULT_CYCLE_LENGTH,
+                'probability' => null,
+            ];
+        }
+
+        $count = count($lengths);
+        $totalWeight = $count * ($count + 1) / 2;
+        $weightedSum = 0;
+
+        foreach ($lengths as $index => $length) {
+            // Newest interval gets weight n, the oldest gets 1.
+            $weightedSum += $length * ($count - $index);
+        }
+
+        $average = (int) round($weightedSum / $totalWeight);
+        $average = max(self::MIN_PLAUSIBLE_CYCLE, min(self::MAX_PLAUSIBLE_CYCLE, $average));
+
+        $variance = 0.0;
+        foreach ($lengths as $index => $length) {
+            $variance += ($count - $index) * pow($length - $average, 2);
+        }
+
+        $sd = sqrt($variance / $totalWeight);
+        $margin = $sd * sqrt(1 + 1 / $count);
+
+        $low = max(self::MIN_PLAUSIBLE_CYCLE, (int) floor($average - $margin));
+        $high = min(self::MAX_PLAUSIBLE_CYCLE, (int) ceil($average + $margin));
+
+        return [
+            'count' => $count,
+            'average' => $average,
+            'shortest' => min($lengths),
+            'longest' => max($lengths),
+            'spread' => max($lengths) - min($lengths),
+            'weighted_sd' => $sd,
+            'band_low' => min($low, $average),
+            'band_high' => max($high, $average),
+            'probability' => $count >= 3 && $sd > 0 ? 68 : null,
+        ];
     }
 
     /**
@@ -58,24 +126,91 @@ class CyclePredictionService
      *
      * @return array{0:int,1:bool} cycles ahead (1-based) and whether history is stale
      */
-    private function projectionWindow(Carbon $lastPeriod, int $average, int $shortest, int $longest): array
+    private function projectionWindow(Carbon $lastPeriod, int $average, int $bandLow, int $bandHigh): array
     {
         $cyclesAhead = 1;
-        $latest = $lastPeriod->copy()->addDays($longest);
 
-        while ($latest->lt(today()) && $cyclesAhead < self::MAX_CYCLES_AHEAD) {
+        while (
+            $cyclesAhead < self::MAX_CYCLES_AHEAD
+            && $lastPeriod->copy()->addDays($cyclesAhead * $bandHigh)->lt(today())
+        ) {
             $cyclesAhead++;
-            $latest->addDays($average);
         }
 
         return [$cyclesAhead, $cyclesAhead > 1];
     }
 
-    private function projectedStart(Carbon $lastPeriod, int $average, int $shortest, int $longest): Carbon
+    private function projectedStart(Carbon $lastPeriod, int $average, int $bandLow, int $bandHigh): Carbon
     {
-        [$cyclesAhead] = $this->projectionWindow($lastPeriod, $average, $shortest, $longest);
+        [$cyclesAhead] = $this->projectionWindow($lastPeriod, $average, $bandLow, $bandHigh);
 
         return $lastPeriod->copy()->addDays($cyclesAhead * $average);
+    }
+
+    /**
+     * Leave-one-out accuracy check against the patient's own logged starts.
+     * Read-only: for each start with at least three prior gaps, compare the
+     * actual start with the window the app would have shown at that time.
+     *
+     * @return array{checked:int,hits:int,rate:?int}
+     */
+    public function backtestWindow(int $userId, int $maxCycles = 12): array
+    {
+        $cycles = Cycle::where('user_id', $userId)
+            ->whereDate('period_start_date', '<=', today())
+            ->orderBy('period_start_date', 'desc')
+            ->orderByDesc('id')
+            ->take($maxCycles + 1)
+            ->get();
+
+        $gaps = [];
+        foreach ($cycles as $index => $cycle) {
+            $previous = $cycles->get($index + 1);
+            if (!$previous) {
+                break;
+            }
+            $gap = (int) $previous->period_start_date->diffInDays($cycle->period_start_date);
+            $gaps[$index] = $gap >= self::MIN_PLAUSIBLE_CYCLE && $gap <= self::MAX_PLAUSIBLE_CYCLE
+                ? $gap
+                : null;
+        }
+
+        $checked = 0;
+        $hits = 0;
+
+        foreach ($cycles as $index => $cycle) {
+            $anchor = $cycles->get($index + 1);
+            if (!$anchor) {
+                break;
+            }
+
+            // Gaps known when this cycle's predecessor was logged.
+            $priors = [];
+            for ($j = $index + 1; $j < count($gaps) && count($priors) < 6; $j++) {
+                if ($gaps[$j] !== null) {
+                    $priors[] = $gaps[$j];
+                }
+            }
+
+            if (count($priors) < 3) {
+                continue;
+            }
+
+            $stats = $this->summarizeLengths($priors);
+            $earliest = $anchor->period_start_date->copy()->addDays($stats['band_low']);
+            $latest = $anchor->period_start_date->copy()->addDays($stats['band_high']);
+
+            $checked++;
+            if ($cycle->period_start_date->gte($earliest) && $cycle->period_start_date->lte($latest)) {
+                $hits++;
+            }
+        }
+
+        return [
+            'checked' => $checked,
+            'hits' => $hits,
+            'rate' => $checked > 0 ? (int) round($hits / $checked * 100) : null,
+        ];
     }
 
     /**
@@ -97,9 +232,10 @@ class CyclePredictionService
         $averageCycle = $detail['average_cycle'];
         $averagePeriod = max(1, $this->getAveragePeriodLength($userId));
 
-        // Irregular-aware range: shortest/longest observed cycle bounds the window.
-        $shortest = $detail['shortest_cycle'];
-        $longest = $detail['longest_cycle'];
+        // Same recency-weighted band the summary uses, so the calendar and the
+        // hero can never show different windows for the same history.
+        $bandLow = $detail['window_low_days'];
+        $bandHigh = $detail['window_high_days'];
         $regularity = $detail['regularity'];
         $confidence = $detail['confidence'];
         $strengthLevel = $detail['strength_level'];
@@ -108,7 +244,7 @@ class CyclePredictionService
         // Start from the same window the summary shows (already advanced past
         // stale history), then accumulate uncertainty for later cycles.
         $anchor = $cycles->first()->period_start_date;
-        [$cyclesAhead] = $this->projectionWindow($anchor, $averageCycle, $shortest, $longest);
+        [$cyclesAhead] = $this->projectionWindow($anchor, $averageCycle, $bandLow, $bandHigh);
 
         $predictions = [];
 
@@ -117,8 +253,8 @@ class CyclePredictionService
             $start = $anchor->copy()->addDays($periodsAhead * $averageCycle);
             $end = $start->copy()->addDays($averagePeriod - 1);
 
-            $earliest = $anchor->copy()->addDays($periodsAhead * $shortest);
-            $latest = $anchor->copy()->addDays($periodsAhead * $longest);
+            $earliest = $anchor->copy()->addDays($periodsAhead * $bandLow);
+            $latest = $anchor->copy()->addDays($periodsAhead * $bandHigh);
 
             // Ovulation count-back is unreliable for irregular or very short
             // cycles, so hide it instead of showing a physiologically
@@ -163,23 +299,24 @@ class CyclePredictionService
      */
     public function getPredictionDetail(int $userId): array
     {
-        $cycles = $this->getRecentCycles($userId, 6);
-        $lengths = $cycles->pluck('cycle_length')->filter()->values();
-
-        $average = $this->saneAverage($cycles);
-        $shortest = $lengths->isNotEmpty() ? (int) $lengths->min() : $average;
-        $longest = $lengths->isNotEmpty() ? (int) $lengths->max() : $average;
+        $history = $this->analyzeHistory($userId, 6);
+        $cycles = $history['cycles'];
         $regularity = $this->getCycleRegularity($userId);
-        $spread = $longest - $shortest;
 
         $confidence = match (true) {
-            $lengths->count() < 3 => 'low',
+            $history['count'] < 3 => 'low',
             $regularity === 'regular' => 'high',
             $regularity === 'somewhat_irregular' => 'medium',
             default => 'low',
         };
 
-        $strength = $this->getStrengthLevel($lengths->count(), $regularity, $spread);
+        $strength = $this->getStrengthLevel($history['count'], $regularity, $history['spread']);
+
+        // A 68% band is only honest once there are enough gaps to estimate
+        // variability, and not for fully irregular cycles with heavy tails.
+        $probability = in_array($regularity, ['regular', 'somewhat_irregular'], true)
+            ? $history['probability']
+            : null;
 
         $lastCycle = $cycles->first();
         $next = null;
@@ -190,33 +327,29 @@ class CyclePredictionService
         if ($lastCycle) {
             [$cyclesAhead, $isStale] = $this->projectionWindow(
                 $lastCycle->period_start_date,
-                $average,
-                $shortest,
-                $longest
+                $history['average'],
+                $history['band_low'],
+                $history['band_high']
             );
             $base = $lastCycle->period_start_date->copy();
-            $next = $base->copy()->addDays($cyclesAhead * $average);
-
-            if ($lengths->count() >= 2) {
-                $earliest = $base->copy()->addDays($cyclesAhead * $shortest);
-                $latest = $base->copy()->addDays($cyclesAhead * $longest);
-            } else {
-                // A single completed interval cannot justify a range.
-                $earliest = $next->copy();
-                $latest = $next->copy();
-            }
+            $next = $base->copy()->addDays($cyclesAhead * $history['average']);
+            $earliest = $base->copy()->addDays($cyclesAhead * $history['band_low']);
+            $latest = $base->copy()->addDays($cyclesAhead * $history['band_high']);
         }
 
         return [
-            'average_cycle' => $average,
-            'shortest_cycle' => $shortest,
-            'longest_cycle' => $longest,
-            'spread_days' => $spread,
+            'average_cycle' => $history['average'],
+            'shortest_cycle' => $history['shortest'],
+            'longest_cycle' => $history['longest'],
+            'spread_days' => $history['spread'],
+            'window_low_days' => $history['band_low'],
+            'window_high_days' => $history['band_high'],
+            'probability' => $probability,
             'regularity' => $regularity,
             'confidence' => $confidence,
             'strength_level' => $strength['level'],
             'strength_label' => $strength['label'],
-            'cycles_used' => $lengths->count(),
+            'cycles_used' => $history['count'],
             'last_period_date' => $lastCycle?->period_start_date?->copy(),
             'is_stale' => $isStale,
             'next_predicted' => $next,
@@ -226,7 +359,7 @@ class CyclePredictionService
     }
 
     /**
-     * Calculate average cycle length from cycle history
+     * Recency-weighted average cycle length, same number the window uses.
      *
      * @param int $userId
      * @param int $maxCycles
@@ -240,13 +373,9 @@ class CyclePredictionService
             return null;
         }
 
-        $cycleLengths = $cycles->pluck('cycle_length')->filter();
+        $lengths = $cycles->pluck('cycle_length')->filter()->values()->all();
 
-        if ($cycleLengths->isEmpty()) {
-            return self::DEFAULT_CYCLE_LENGTH;
-        }
-
-        return (int) round($cycleLengths->avg());
+        return $this->summarizeLengths($lengths)['average'];
     }
 
     /**
@@ -392,13 +521,14 @@ class CyclePredictionService
 
         // Get predictions for future periods
         $predictions = $this->predictFuturePeriods($userId, 3);
+        $detail = $this->getPredictionDetail($userId);
 
         // Add current cycle ovulation and fertile window if cycle exists in this month
         $currentCyclePrediction = null;
         if ($cycles->isNotEmpty()) {
             $lastCycle = $cycles->last();
-            $averageCycle = $this->getAverageCycleLength($userId);
-            if ($averageCycle && $averageCycle >= self::MIN_OVULATION_CYCLE && $lastCycle->period_end_date && $this->getCycleRegularity($userId) === 'regular') {
+            $averageCycle = $detail['average_cycle'];
+            if ($averageCycle >= self::MIN_OVULATION_CYCLE && $lastCycle->period_end_date && $detail['regularity'] === 'regular') {
                 // Simple ovulation calculation (14 days before next period)
                 $ovulation = $lastCycle->period_start_date->copy()->addDays($averageCycle - 14);
                 $fertileWindowStart = $ovulation->copy()->subDays(5);
@@ -422,10 +552,10 @@ class CyclePredictionService
             'predictions' => $predictions,
             'current_cycle_prediction' => $currentCyclePrediction,
             'calendar_days' => $calendarDays,
-            'average_cycle_length' => $this->getAverageCycleLength($userId),
+            'average_cycle_length' => $detail['average_cycle'],
             'average_period_length' => $this->getAveragePeriodLength($userId),
-            'regularity' => $this->getCycleRegularity($userId),
-            'prediction_detail' => $this->getPredictionDetail($userId),
+            'regularity' => $detail['regularity'],
+            'prediction_detail' => $detail,
         ];
     }
 
@@ -593,25 +723,6 @@ class CyclePredictionService
             $cycle->cycle_length = $plausible ? $length : null;
         }
         return $cycles->take($limit);
-    }
-
-    /**
-     * Calculate average from cycle collection
-     *
-     * @param \Illuminate\Database\Eloquent\Collection $cycles
-     * @return int
-     */
-    private function calculateAverageCycleLength($cycles): int
-    {
-        $validCycles = $cycles->filter(function ($cycle) {
-            return $cycle->cycle_length !== null;
-        });
-
-        if ($validCycles->isEmpty()) {
-            return self::DEFAULT_CYCLE_LENGTH;
-        }
-
-        return (int) round($validCycles->avg('cycle_length'));
     }
 
     /**

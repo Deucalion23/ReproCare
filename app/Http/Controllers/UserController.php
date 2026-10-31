@@ -311,10 +311,12 @@ class UserController extends Controller
 
         // Use Cycle model for predictions
         $nextPeriod = Cycle::predictNextPeriod(Auth::id());
-        $averageCycle = Cycle::getAverageCycleLength(Auth::id());
         $averagePeriod = Cycle::getAveragePeriodLength(Auth::id());
-
         $predictionDetail = app(CyclePredictionService::class)->getPredictionDetail(Auth::id());
+
+        // The ring and the window must use the same recency-weighted average.
+        $averageCycle = $predictionDetail['average_cycle'];
+
         return view('user.menstruation.index', compact('records', 'latestCycle', 'nextPeriod', 'averageCycle', 'averagePeriod', 'predictionDetail', 'activePregnancy'));
     }
 
@@ -539,13 +541,17 @@ class UserController extends Controller
 
         // Timeline display: oldest range first.
         $cycleHistory = array_reverse($cycleHistory);
-        
+
+        // Leave-one-out check of the window shown against logged starts.
+        $backtest = app(CyclePredictionService::class)->backtestWindow($userId);
+
         return view('user.menstruation.statistics', compact(
             'records',
             'averageCycle',
             'averagePeriod',
             'cycleHistory',
-            'cycleLengths'
+            'cycleLengths',
+            'backtest'
         ));
     }
 
@@ -690,6 +696,8 @@ class UserController extends Controller
             'regularity' => $detail['regularity'],
             'next_earliest' => $detail['next_earliest']?->toDateString(),
             'next_latest' => $detail['next_latest']?->toDateString(),
+            'window_probability' => $detail['probability'],
+            'last_period_date' => $detail['last_period_date']?->toDateString(),
         ]);
     }
 

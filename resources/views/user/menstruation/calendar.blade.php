@@ -536,6 +536,14 @@
                                 @endif
                             </div>
                         </div>
+                        @if(!$prediction['period_start_earliest']->equalTo($prediction['period_start_latest']))
+                        <div class="mb-2">
+                            <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:0.25rem;">Most likely start</div>
+                            <div style="font-size:0.875rem;color:var(--color-warning-text);font-weight:600;">
+                                <i class="bi bi-bullseye me-1"></i>{{ $prediction['period_start']->format('M d, Y') }}
+                            </div>
+                        </div>
+                        @endif
                         @if(isset($prediction['ovulation']))
                         <div class="mb-2">
                             <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:0.25rem;">Ovulation</div>

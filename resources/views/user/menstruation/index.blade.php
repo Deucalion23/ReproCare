@@ -329,6 +329,9 @@
                     </h2>
                     <p class="cycle-hero-sub">
                         Estimated next-period start window · {{ $predictionDetail['strength_label'] }} prediction (Level {{ $predictionDetail['strength_level'] }} of 4).
+                        @if($predictionDetail['probability'])
+                            Most likely {{ $predictionDetail['next_predicted']->format('M j') }} — about 2 in 3 starts fall inside this window.
+                        @endif
                         @if($predictionDetail['is_stale'])
                             Your last logged period was {{ $predictionDetail['last_period_date']->format('M j, Y') }}; log any missed periods to refresh this estimate.
                         @endif
