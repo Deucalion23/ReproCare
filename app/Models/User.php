@@ -753,8 +753,7 @@ class User extends Authenticatable implements MustVerifyEmail
             }
         }
 
-        // Return default avatar: BHW and BHW Presidents share one badge
-        // (lavender silhouette on white with slim black border),
+        // Return default avatar: BHW and BHW Presidents share one badge,
         // everyone else falls back by gender.
         if (in_array($this->role, ['bhw', 'bhw_president'], true)) {
             return self::versionedAvatar('avatar-bhw-president.svg');

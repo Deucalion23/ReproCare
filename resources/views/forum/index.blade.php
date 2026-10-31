@@ -25,7 +25,7 @@
         'midwife' => 'Midwife',
         'bhw' => 'Barangay Health Worker',
         'bhw_president' => 'BHW President',
-        default => 'Community Member',
+        default => null,
     };
 @endphp
 
@@ -500,9 +500,11 @@
             </p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <span class="badge forum-role-badge">
-                <i class="bi bi-person-badge me-1"></i> {{ $forumRoleLabel }}
-            </span>
+            @if($forumRoleLabel)
+                <span class="badge forum-role-badge">
+                    <i class="bi bi-person-badge me-1"></i> {{ $forumRoleLabel }}
+                </span>
+            @endif
             @if($isLimited)
                 <span class="badge rounded-pill px-3 py-2" style="border:1px solid var(--color-border); background:var(--color-surface-soft); color:var(--color-text-muted); font-size:0.75rem;" title="Posting unlocks after RHU approval of your account">
                     <i class="bi bi-lock-fill me-1"></i> Read-only
