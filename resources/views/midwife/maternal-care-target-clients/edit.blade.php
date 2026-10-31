@@ -383,7 +383,7 @@
                 </div>
                 <div>
                     <label class="form-label">Delivery Time</label>
-                    <input type="time" name="delivery_time" value="{{ old('delivery_time', $profile?->delivery_time) }}" class="form-control">
+                    <input type="time" name="delivery_time" value="{{ old('delivery_time', optional($profile?->delivery_time)->format('H:i')) }}" class="form-control">
                 </div>
             </div>
         </div>

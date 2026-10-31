@@ -278,6 +278,10 @@
         return $value ? \Illuminate\Support\Carbon::parse($value)->format('m/d/Y') : '-';
     };
 
+    $formatTime = function ($value) {
+        return $value ? \Illuminate\Support\Carbon::parse($value)->format('H:i') : '-';
+    };
+
     $ageGroup = function ($age, $min, $max) {
         return is_numeric($age) && $age >= $min && $age <= $max ? $age : '';
     };
@@ -664,7 +668,7 @@
                                     <td>{{ $profile?->birth_attendant_code ?? '-' }}</td>
                                     <td>{{ $profile?->delivery_remarks ?? '-' }}</td>
                                     <td>{{ $formatDate($profile?->delivery_date) }}</td>
-                                    <td>{{ $profile?->delivery_time ?? '-' }}</td>
+                                    <td>{{ $formatTime($profile?->delivery_time) }}</td>
                                     <td>{{ $formatDate($profile?->postpartum_within_24_hours_date) }}</td>
                                     <td>{{ $formatDate($profile?->postpartum_within_7_days_date) }}</td>
                                     <td>{{ $profile?->postpartum_iron_first_month ?? '-' }}</td>
