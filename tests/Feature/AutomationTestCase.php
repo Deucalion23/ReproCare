@@ -62,6 +62,11 @@ abstract class AutomationTestCase extends TestCase
         Schema::create('cycles', function (Blueprint $t) {
             $t->id(); $t->unsignedBigInteger('user_id'); $t->date('period_start_date');
             $t->date('period_end_date')->nullable(); $t->integer('cycle_length')->nullable();
+            $t->string('flow_intensity')->default('medium');
+            $t->unsignedTinyInteger('pain_score')->nullable();
+            $t->unsignedTinyInteger('missed_school_work_days')->nullable();
+            $t->boolean('irregular_bleeding')->default(false);
+            $t->boolean('severe_symptoms')->default(false);
             $t->text('notes')->nullable(); $t->timestamps(); $t->softDeletes();
         });
         Schema::create('health_records', function (Blueprint $t) {

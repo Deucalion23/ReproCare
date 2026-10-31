@@ -101,6 +101,27 @@ class CyclePredictionTest extends AutomationTestCase
         $this->assertCount(0, (new PeriodNotificationService())->checkAndNotify());
     }
 
+    public function test_archived_period_dates_can_be_logged_again(): void
+    {
+        $user = $this->patient();
+        // Archived rows keep blocking the unique rule unless it excludes
+        // soft-deleted records — so a typo'd date could never be re-logged.
+        DB::table('cycles')->insert([
+            'user_id' => $user->id,
+            'period_start_date' => '2026-09-01',
+            'deleted_at' => now(),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        $this->actingAs($user)
+            ->post(route('user.menstruation.store'), ['start_date' => '2026-09-01'])
+            ->assertSessionHasNoErrors()
+            ->assertRedirect(route('user.menstruation.index'));
+
+        $this->assertSame(1, Cycle::whereDate('period_start_date', '2026-09-01')->count());
+    }
+
     public function test_irregular_calendar_page_renders_range_and_confidence(): void
     {
         $user = $this->patient();
@@ -108,7 +129,7 @@ class CyclePredictionTest extends AutomationTestCase
         $this->actingAs($user);
         $html = (new \App\Http\Controllers\UserController())->menstruationCalendar()->render();
         $this->assertStringContainsString('Estimated period start window', $html);
-        $this->assertStringContainsString('Low confidence', $html);
+        $this->assertStringContainsString('Weak prediction (Level 1/4)', $html);
         $this->assertStringNotContainsString('Ovulation Est. (day)', $html);
     }
 }

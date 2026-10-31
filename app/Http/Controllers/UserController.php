@@ -13,6 +13,7 @@ use App\Services\MaternalRiskService;
 use App\Services\RiskAnalysisService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 use Carbon\Carbon;
 
 class UserController extends Controller
@@ -325,7 +326,11 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,NULL,id,user_id,'.Auth::id(),
+            'start_date' => [
+                'required', 'date', 'before_or_equal:today',
+                Rule::unique('cycles', 'period_start_date')
+                    ->where(fn ($query) => $query->where('user_id', Auth::id())->whereNull('deleted_at')),
+            ],
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
             'pain_score' => 'nullable|integer|min:0|max:10',
             'missed_school_work_days' => 'nullable|integer|min:0|max:31',
@@ -614,7 +619,11 @@ class UserController extends Controller
         }
 
         $validated = $request->validate([
-            'period_start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,NULL,id,user_id,'.Auth::id(),
+            'period_start_date' => [
+                'required', 'date', 'before_or_equal:today',
+                Rule::unique('cycles', 'period_start_date')
+                    ->where(fn ($query) => $query->where('user_id', Auth::id())->whereNull('deleted_at')),
+            ],
             'period_end_date' => 'nullable|date|after_or_equal:period_start_date|before_or_equal:today',
             'notes' => 'nullable|string',
         ], ['period_start_date.unique' => 'That period start date is already logged.']);

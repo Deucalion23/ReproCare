@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cycle;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MenstruationController extends Controller
 {
@@ -55,7 +56,11 @@ class MenstruationController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,NULL,id,user_id,'.$request->user_id,
+            'start_date' => [
+                'required', 'date', 'before_or_equal:today',
+                Rule::unique('cycles', 'period_start_date')
+                    ->where(fn ($query) => $query->where('user_id', $request->user_id)->whereNull('deleted_at')),
+            ],
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
             'notes' => 'nullable|string|max:1000',
         ], ['start_date.unique' => 'That period start date is already logged for this patient.']);
@@ -94,7 +99,12 @@ class MenstruationController extends Controller
 
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'start_date' => 'required|date|before_or_equal:today|unique:cycles,period_start_date,'.$record->id.',id,user_id,'.$request->user_id,
+            'start_date' => [
+                'required', 'date', 'before_or_equal:today',
+                Rule::unique('cycles', 'period_start_date')
+                    ->ignore($record->id)
+                    ->where(fn ($query) => $query->where('user_id', $request->user_id)->whereNull('deleted_at')),
+            ],
             'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today',
             'notes' => 'nullable|string|max:1000',
         ], ['start_date.unique' => 'That period start date is already logged for this patient.']);
