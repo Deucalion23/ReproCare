@@ -22,9 +22,11 @@
     .wd-wrap .card-header > .d-flex { gap:0.5rem; }
     .wd-tabs .nav-link { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text-muted) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
     .wd-tabs .nav-link.active { background:var(--color-primary) !important; background-color:var(--color-primary) !important; color:#ffffff !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
-    .wd-search { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; border-radius:999px !important; overflow:hidden; max-width:320px; }
-    .wd-search .form-control { background:transparent !important; border:none !important; box-shadow:none !important; font-size:0.82rem; padding-left:0.9rem !important; }
-    .wd-search .btn { border:none !important; background:transparent !important; color:var(--color-text-muted) !important; width:2.2rem; }
+    .wd-search { position:relative; box-sizing:border-box; background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-input-border) !important; border-radius:10px !important; max-width:320px; min-height:36px; }
+    .wd-search:focus-within { border-color:var(--color-primary) !important; box-shadow:none !important; }
+    .wd-search .form-control { display:block; min-width:0; width:100%; min-height:34px; background:transparent !important; border:0 !important; border-radius:10px !important; box-shadow:none !important; outline:0 !important; font-size:0.82rem; padding:0.375rem 2.75rem 0.375rem 0.9rem !important; }
+    .wd-search .btn { position:absolute; top:0; right:0; bottom:0; display:grid; place-items:center; border:0 !important; border-radius:0 10px 10px 0 !important; background:transparent !important; box-shadow:none !important; outline:0 !important; color:var(--color-text-muted) !important; width:2.5rem; padding:0; }
+    .wd-search .btn:hover, .wd-search .btn:focus-visible { color:var(--color-primary-text) !important; background:transparent !important; box-shadow:none !important; outline:0 !important; }
     .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
     .wd-filters .wd-field { display:flex; flex-direction:column; gap:0.25rem; }
     .wd-filters label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
@@ -193,7 +195,7 @@
             <form method="GET" action="{{ route($womenRoute) }}" class="wd-filters">
             <div class="wd-field wd-search-field">
                 <label for="wd-search">Search</label>
-                <div class="input-group input-group-sm wd-search">
+                <div class="wd-search">
                     <input type="search" id="wd-search" name="search" class="form-control" value="{{ $search }}"
                            placeholder="Name, contact, email, purok...">
                     <button class="btn" type="submit" title="Search">

@@ -23,6 +23,25 @@
     .record-summary .summary-item { min-height:54px; padding:0.35rem 0.65rem; border-right:1px solid var(--color-border); }
     .record-summary .summary-item:last-child { border-right:0; }
     .summary-value { font-size:0.76rem; font-weight:700; line-height:1.3; }
+    .profile-grid { display:grid; grid-template-columns:repeat(12, minmax(0, 1fr)); gap:0.9rem 1.25rem; }
+    .profile-field { min-width:0; }
+    .profile-field .profile-value { font-size:0.78rem; line-height:1.45; overflow-wrap:anywhere; }
+    .profile-email { grid-column:span 6; }
+    .profile-contact, .profile-status { grid-column:span 3; }
+    .profile-birth, .profile-gender, .profile-barangay, .profile-partner { grid-column:span 3; }
+    .profile-address, .profile-emergency { grid-column:span 6; }
+    .record-tabs { display:flex; gap:0.45rem; overflow-x:auto; padding:0.35rem; margin:0 0 0.75rem; background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:12px; scrollbar-width:thin; }
+    .record-tab { flex:0 0 auto; border:0; border-radius:8px; padding:0.45rem 0.75rem; background:transparent; color:var(--color-text-muted); font-size:0.74rem; font-weight:800; white-space:nowrap; }
+    .record-tab:hover, .record-tab:focus-visible { color:var(--color-primary-text); background:var(--color-surface); outline:none; }
+    .record-tab.is-active { color:var(--color-primary-text); background:var(--color-surface); box-shadow:0 1px 4px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent); }
+    [data-record-panel][hidden] { display:none !important; }
+    @media (max-width: 991.98px) {
+        .profile-email, .profile-contact, .profile-status, .profile-birth, .profile-gender, .profile-barangay, .profile-partner, .profile-address, .profile-emergency { grid-column:span 6; }
+    }
+    @media (max-width: 575.98px) {
+        .profile-grid { grid-template-columns:1fr; gap:0.8rem; }
+        .profile-email, .profile-contact, .profile-status, .profile-birth, .profile-gender, .profile-barangay, .profile-partner, .profile-address, .profile-emergency { grid-column:span 1; }
+    }
     @media (max-width: 767.98px) { .record-summary .summary-item { border-right:0; border-bottom:1px solid var(--color-border); } .record-summary .summary-item:last-child { border-bottom:0; } }
 </style>
 @endpush
@@ -55,7 +74,15 @@
     </div>
 </div>
 
+<nav class="record-tabs" aria-label="Patient record sections" role="tablist">
+    <button type="button" class="record-tab is-active" role="tab" aria-selected="true" data-record-tab="overview"><i class="bi bi-grid-1x2 me-1"></i>Overview</button>
+    <button type="button" class="record-tab" role="tab" aria-selected="false" data-record-tab="profile"><i class="bi bi-person-vcard me-1"></i>Profile &amp; contact</button>
+    <button type="button" class="record-tab" role="tab" aria-selected="false" data-record-tab="pregnancies"><i class="bi bi-heart-pulse me-1"></i>Pregnancies</button>
+    <button type="button" class="record-tab" role="tab" aria-selected="false" data-record-tab="care"><i class="bi bi-clipboard2-pulse me-1"></i>Care history</button>
+</nav>
+
 {{-- A screenshot-friendly clinical overview; full histories remain below. --}}
+<section data-record-panel="overview" role="tabpanel">
 <div class="card fade-in-card rec-card record-summary">
     <div class="card-header">Care at a Glance</div>
     <div class="card-body p-0">
@@ -90,27 +117,29 @@
         </div>
     </div>
 </div>
+</section>
 
 {{-- Profile --}}
+<section data-record-panel="profile" role="tabpanel" hidden>
 <div class="card fade-in-card rec-card mb-2">
     <div class="card-header">Profile &amp; Contact</div>
     <div class="card-body">
-        <div class="row g-1" style="font-size:0.75rem;">
-            <div class="col-6 col-md-4"><div class="rec-label">Email</div><div>{{ $woman->email }}</div></div>
-            <div class="col-6 col-md-2"><div class="rec-label">Contact</div><div>{{ $woman->display_contact_number }}</div></div>
-            <div class="col-6 col-md-2"><div class="rec-label">Status</div><div><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
-            <div class="col-6 col-md-4"><div class="rec-label">Birth / Age</div><div>{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' · ' . $woman->age . ' y/o' : 'N/A' }}</div></div>
-            <div class="col-6 col-md-2"><div class="rec-label">Gender</div><div>{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
-            <div class="col-6 col-md-3"><div class="rec-label">Barangay</div><div>{{ $woman->display_barangay }}</div></div>
-            <div class="col-6 col-md-3"><div class="rec-label">Partner</div><div>{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
-            <div class="col-md-6"><div class="rec-label">Address</div><div>{{ $woman->display_address }}</div></div>
-            <div class="col-md-6"><div class="rec-label">Emergency contacts</div>
+        <div class="profile-grid">
+            <div class="profile-field profile-email"><div class="rec-label">Email</div><div class="profile-value">{{ $woman->email }}</div></div>
+            <div class="profile-field profile-contact"><div class="rec-label">Contact</div><div class="profile-value">{{ $woman->display_contact_number }}</div></div>
+            <div class="profile-field profile-status"><div class="rec-label">Status</div><div class="profile-value"><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
+            <div class="profile-field profile-birth"><div class="rec-label">Birth / Age</div><div class="profile-value">{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' · ' . $woman->age . ' y/o' : 'N/A' }}</div></div>
+            <div class="profile-field profile-gender"><div class="rec-label">Gender</div><div class="profile-value">{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
+            <div class="profile-field profile-barangay"><div class="rec-label">Barangay</div><div class="profile-value">{{ $woman->display_barangay }}</div></div>
+            <div class="profile-field profile-partner"><div class="rec-label">Partner</div><div class="profile-value">{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
+            <div class="profile-field profile-address"><div class="rec-label">Address</div><div class="profile-value">{{ $woman->display_address }}</div></div>
+            <div class="profile-field profile-emergency"><div class="rec-label">Emergency contacts</div><div class="profile-value">
                 @forelse($woman->emergencyContacts as $contact)
                     <div>{{ $contact->name }} ({{ $contact->relationship }}) · {{ $contact->contact_number }}</div>
                 @empty
                     <div class="text-muted">None recorded.</div>
                 @endforelse
-            </div>
+            </div></div>
         </div>
     </div>
 </div>
@@ -145,8 +174,10 @@
     </div>
 </div>
 @endif
+</section>
 
 {{-- Pregnancies --}}
+<section data-record-panel="pregnancies" role="tabpanel" hidden>
 <div class="card fade-in-card rec-card rec-table mb-2">
     <div class="card-header">Pregnancies ({{ $pregnancies->count() }})</div>
     <div class="table-responsive">
@@ -167,8 +198,10 @@
         </table>
     </div>
 </div>
+</section>
 
 {{-- Checkups --}}
+<section data-record-panel="care" role="tabpanel" hidden>
 <div class="card fade-in-card rec-card rec-table mb-2">
     <div class="card-header">Checkups ({{ $checkups->count() }})</div>
     <div class="table-responsive">
@@ -211,6 +244,7 @@
         </table>
     </div>
 </div>
+</section>
 @endsection
 
 @push('scripts')
@@ -225,5 +259,22 @@
         form.appendChild(input);
         return confirm('Archive this patient record? Sessions will be revoked immediately. It stays restorable from Archived Records.');
     }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('[data-record-tab]');
+        const panels = document.querySelectorAll('[data-record-panel]');
+        const selectTab = (section) => {
+            const selected = [...tabs].some(tab => tab.dataset.recordTab === section) ? section : 'overview';
+            tabs.forEach(tab => {
+                const active = tab.dataset.recordTab === selected;
+                tab.classList.toggle('is-active', active);
+                tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            panels.forEach(panel => panel.hidden = panel.dataset.recordPanel !== selected);
+            if (history.replaceState) history.replaceState(null, '', `${location.pathname}${location.search}#${selected}`);
+        };
+        tabs.forEach(tab => tab.addEventListener('click', () => selectTab(tab.dataset.recordTab)));
+        selectTab(location.hash.replace('#', ''));
+    });
 </script>
 @endpush
