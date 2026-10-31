@@ -5,18 +5,19 @@
 @push('styles')
 <style>
     .pregnancy-records-card .card-body { padding:1rem !important; }
-    .pregnancy-records-table { width:100%; table-layout:fixed; font-size:0.78rem !important; }
+    .pregnancy-records-table { width:100%; table-layout:fixed; font-size:0.72rem !important; }
     .pregnancy-records-table th,
-    .pregnancy-records-table td { padding:0.55rem 0.4rem !important; overflow:hidden; vertical-align:middle; }
-    .pregnancy-records-table th { font-size:0.68rem; white-space:nowrap; }
+    .pregnancy-records-table td { padding:0.45rem 0.3rem !important; overflow:hidden; vertical-align:middle; }
+    .pregnancy-records-table th { font-size:0.64rem; white-space:nowrap; }
     .pregnancy-records-table td:first-child .d-flex,
     .pregnancy-records-table td:first-child .d-flex > div:last-child { min-width:0; }
+    .pregnancy-records-table td:first-child div[style*="font-size"] { font-size:0.78rem !important; }
     .pregnancy-records-table td:first-child small { max-width:100% !important; }
     .pregnancy-records-table .pregnancy-trimester,
-    .pregnancy-records-table .pregnancy-status { gap:0.3rem !important; padding:0.3rem 0.5rem !important; font-size:0.76rem !important; }
-    .pregnancy-records-table .badge { padding:0.3rem 0.5rem !important; font-size:0.72rem !important; white-space:nowrap; }
+    .pregnancy-records-table .pregnancy-status { gap:0.25rem !important; padding:0.25rem 0.4rem !important; font-size:0.7rem !important; }
+    .pregnancy-records-table .badge { padding:0.22rem 0.38rem !important; font-size:0.66rem !important; white-space:nowrap; }
     .pregnancy-records-table .pregnancy-actions { gap:0.35rem !important; flex-wrap:nowrap; }
-    .pregnancy-records-table .pregnancy-actions .btn { flex:0 0 32px; width:32px; height:32px; display:inline-grid; place-items:center; padding:0 !important; }
+    .pregnancy-records-table .pregnancy-actions .btn { flex:0 0 28px; width:28px; height:28px; display:inline-grid; place-items:center; padding:0 !important; }
     @media (max-width: 1199.98px) {
         .pregnancy-records-table { font-size:0.72rem !important; }
         .pregnancy-records-table th,
