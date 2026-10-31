@@ -47,6 +47,54 @@
         font-size:0.78rem; font-weight:600; max-width:160px;
         overflow:hidden; text-overflow:ellipsis; white-space:nowrap; display:inline-block;
     }
+    .checkup-alert {
+        border:1px solid var(--color-border); border-left:4px solid var(--color-warning);
+        border-radius:16px; background:var(--color-surface); overflow:hidden; margin-bottom:1rem;
+    }
+    .checkup-alert.is-danger { border-left-color:var(--color-danger); }
+    .checkup-alert-head {
+        display:flex; align-items:center; gap:0.85rem;
+        padding:0.85rem 1.1rem; cursor:pointer; user-select:none;
+        background:color-mix(in srgb, var(--color-warning) 9%, var(--color-surface));
+        transition:background 0.15s ease;
+    }
+    .checkup-alert.is-danger .checkup-alert-head {
+        background:color-mix(in srgb, var(--color-danger) 9%, var(--color-surface));
+    }
+    .checkup-alert-head:hover { background:color-mix(in srgb, var(--color-warning) 15%, var(--color-surface)); }
+    .checkup-alert.is-danger .checkup-alert-head:hover { background:color-mix(in srgb, var(--color-danger) 15%, var(--color-surface)); }
+    .checkup-alert-icon {
+        width:36px; height:36px; border-radius:11px; flex-shrink:0;
+        display:flex; align-items:center; justify-content:center; font-size:1rem;
+        background:var(--color-warning-soft); color:var(--color-warning-text);
+    }
+    .checkup-alert.is-danger .checkup-alert-icon { background:var(--color-danger-soft); color:var(--color-danger-text); }
+    .checkup-alert-title { font-size:0.88rem; font-weight:800; color:var(--color-text); line-height:1.3; }
+    .checkup-alert-sub { font-size:0.75rem; color:var(--color-text-muted); }
+    .checkup-alert-count {
+        font-size:0.72rem; font-weight:800; padding:0.18em 0.6em; border-radius:999px; flex-shrink:0;
+        background:var(--color-warning-soft); color:var(--color-warning-text); border:1px solid var(--color-warning);
+    }
+    .checkup-alert.is-danger .checkup-alert-count {
+        background:var(--color-danger-soft); color:var(--color-danger-text); border-color:var(--color-danger);
+    }
+    .checkup-alert-chevron { color:var(--color-text-muted); font-size:0.8rem; flex-shrink:0; transition:transform 0.2s ease; }
+    .checkup-alert-head[aria-expanded="true"] .checkup-alert-chevron { transform:rotate(180deg); }
+    .checkup-alert-body { padding:0.15rem 1.1rem 0.35rem; max-height:320px; overflow-y:auto; }
+    .checkup-alert-row {
+        display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;
+        padding:0.55rem 0.15rem; border-bottom:1px solid var(--color-border);
+    }
+    .checkup-alert-row:last-of-type { border-bottom:none; }
+    .checkup-alert-patient { display:flex; align-items:center; gap:0.6rem; flex:1 1 180px; min-width:0; }
+    .checkup-alert-name { font-weight:700; font-size:0.83rem; color:var(--color-text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .checkup-alert-meta { font-size:0.72rem; color:var(--color-text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .checkup-alert-date { font-size:0.8rem; font-weight:700; white-space:nowrap; margin-left:auto; text-align:right; }
+    .checkup-alert-date.is-warning { color:var(--color-warning-text); }
+    .checkup-alert-date.is-danger { color:var(--color-danger-text); }
+    .checkup-alert-action { flex-shrink:0; }
+    .checkup-alert-foot { padding:0.5rem 0.15rem 0.35rem; }
+    .checkup-alert-foot a { font-size:0.77rem; font-weight:700; text-decoration:none; }
 </style>
 @endpush
 
@@ -168,149 +216,123 @@
 
 {{-- ── Rescheduled Checkups Alert Section ── --}}
 @php
-    $rescheduledCheckups = \App\Models\Checkup::with('user')
+    $rescheduledTotal = $stats['rescheduled'];
+    $rescheduledCheckups = \App\Models\Checkup::with(['woman', 'walkInPatient'])
         ->where('status', 'Rescheduled')
         ->orderBy('scheduled_date', 'desc')
-        ->take(5)
+        ->take(20)
         ->get();
+    $rescheduledExpanded = $rescheduledCheckups->count() <= 3;
 @endphp
-@if($rescheduledCheckups->count() > 0)
-<div class="alert alert-warning alert-dismissible fade show fade-in-card mb-4" style="border-left:4px solid var(--warning);">
-    <div class="d-flex align-items-start gap-3">
-        <div class="flex-shrink-0">
-            <i class="bi bi-arrow-repeat fs-4"></i>
+@if($rescheduledTotal > 0)
+<div class="checkup-alert fade-in-card">
+    <div class="checkup-alert-head" role="button" data-bs-toggle="collapse" data-bs-target="#rescheduledCheckupsPanel"
+         aria-expanded="{{ $rescheduledExpanded ? 'true' : 'false' }}" aria-controls="rescheduledCheckupsPanel">
+        <div class="checkup-alert-icon"><i class="bi bi-arrow-repeat"></i></div>
+        <div style="flex:1 1 auto; min-width:0;">
+            <div class="checkup-alert-title">{{ $rescheduledTotal }} Rescheduled Checkup{{ $rescheduledTotal === 1 ? '' : 's' }} Pending</div>
+            <div class="checkup-alert-sub">Confirm the new schedule with {{ $rescheduledTotal === 1 ? 'this patient' : 'these patients' }}.</div>
         </div>
-        <div class="flex-grow-1">
-            <h6 class="alert-heading mb-2">{{ $rescheduledCheckups->count() }} Rescheduled Checkup{{ $rescheduledCheckups->count() > 1 ? 's' : '' }} Pending
-            </h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-borderless mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width:30%;">Patient</th>
-                            <th style="width:25%;">New Scheduled Date</th>
-                            <th style="width:25%;">Purpose</th>
-                            <th style="width:20%;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($rescheduledCheckups as $rescheduled)
-                        @php
-                            $dateDisplay = '';
-                            if($rescheduled->scheduled_date) {
-                                if(is_string($rescheduled->scheduled_date)) {
-                                    $dateDisplay = \Carbon\Carbon::parse($rescheduled->scheduled_date)->format('M j, Y');
-                                } else {
-                                    $dateDisplay = $rescheduled->scheduled_date->format('M j, Y');
-                                }
-                            }
-                        @endphp
-                        <tr>
-                            <td>
-                                <div style="font-weight:600;">{{ $rescheduled->user->name ?? 'Unknown' }}</div>
-                                <div style="font-size:0.75rem;color:var(--text-muted);">{{ $rescheduled->user->email ?? '' }}</div>
-                            </td>
-                            <td>
-                                <span style="color:var(--warning);font-weight:600;">{{ $dateDisplay }}</span>
-                            </td>
-                            <td>
-                                <span style="font-size:0.8rem;">{{ Str::limit($rescheduled->purpose ?? 'No purpose', 20) }}</span>
-                            </td>
-                            <td>
-                                <a href="{{ route('midwife.checkups.show', $rescheduled->id) }}" class="btn btn-sm btn-outline-info">
-                                    <i class="bi bi-eye"></i> View
-                                </a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <span class="checkup-alert-count">{{ $rescheduledTotal }}</span>
+        <i class="bi bi-chevron-down checkup-alert-chevron"></i>
+    </div>
+    <div class="collapse {{ $rescheduledExpanded ? 'show' : '' }}" id="rescheduledCheckupsPanel">
+        <div class="checkup-alert-body">
+            @foreach($rescheduledCheckups as $rescheduled)
+            @php
+                $dateDisplay = $rescheduled->scheduled_date
+                    ? (\is_string($rescheduled->scheduled_date)
+                        ? \Carbon\Carbon::parse($rescheduled->scheduled_date)
+                        : $rescheduled->scheduled_date)->format('M j, Y')
+                    : '—';
+            @endphp
+            <div class="checkup-alert-row">
+                <div class="checkup-alert-patient">
+                    <div class="patient-avatar">{{ strtoupper(substr($rescheduled->patient_name, 0, 1)) }}</div>
+                    <div style="min-width:0;">
+                        <div class="checkup-alert-name">{{ $rescheduled->patient_name }}</div>
+                        <div class="checkup-alert-meta">{{ Str::limit($rescheduled->purpose ?? 'No purpose', 34) }}</div>
+                    </div>
+                </div>
+                <div class="checkup-alert-date is-warning">
+                    {{ $dateDisplay }}
+                </div>
+                <div class="checkup-alert-action">
+                    <a href="{{ route('midwife.checkups.show', $rescheduled->id) }}" class="btn btn-sm btn-outline-info">
+                        <i class="bi bi-eye"></i> View
+                    </a>
+                </div>
             </div>
-            @if($stats['rescheduled'] > 5)
-            <div class="mt-2">
-                <a href="{{ route('midwife.checkups.index') }}?status=rescheduled" class="text-decoration-none">
-                    <small>View all {{ $stats['rescheduled'] }} rescheduled checkups →</small>
+            @endforeach
+            <div class="checkup-alert-foot">
+                <a href="{{ route('midwife.checkups.index') }}?status=rescheduled">
+                    View all {{ $rescheduledTotal }} rescheduled checkup{{ $rescheduledTotal === 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
-            @endif
         </div>
-        <button type="button" class="btn-close flex-shrink-0" data-bs-dismiss="alert"></button>
     </div>
 </div>
 @endif
 
 {{-- ── Missed Checkups Alert Section ── --}}
 @php
-    $missedCheckups = \App\Models\Checkup::with('user')
+    $missedTotal = $stats['missed'];
+    $missedCheckups = \App\Models\Checkup::with(['woman', 'walkInPatient'])
         ->where('status', 'Missed')
         ->orderBy('scheduled_date', 'desc')
-        ->take(5)
+        ->take(20)
         ->get();
+    $missedExpanded = $missedCheckups->count() <= 3;
 @endphp
-@if($missedCheckups->count() > 0)
-<div class="alert alert-danger alert-dismissible fade show fade-in-card mb-4" style="border-left:4px solid var(--danger);">
-    <div class="d-flex align-items-start gap-3">
-        <div class="flex-shrink-0">
-            <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+@if($missedTotal > 0)
+<div class="checkup-alert is-danger fade-in-card">
+    <div class="checkup-alert-head" role="button" data-bs-toggle="collapse" data-bs-target="#missedCheckupsPanel"
+         aria-expanded="{{ $missedExpanded ? 'true' : 'false' }}" aria-controls="missedCheckupsPanel">
+        <div class="checkup-alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+        <div style="flex:1 1 auto; min-width:0;">
+            <div class="checkup-alert-title">{{ $missedTotal }} Missed Checkup{{ $missedTotal === 1 ? '' : 's' }} Require Attention</div>
+            <div class="checkup-alert-sub">Reschedule or follow up on {{ $missedTotal === 1 ? 'this visit' : 'these visits' }}.</div>
         </div>
-        <div class="flex-grow-1">
-            <h6 class="alert-heading mb-2">{{ $missedCheckups->count() }} Missed Checkup{{ $missedCheckups->count() > 1 ? 's' : '' }} Require Attention
-            </h6>
-            <div class="table-responsive">
-                <table class="table table-sm table-borderless mb-0">
-                    <thead>
-                        <tr>
-                            <th style="width:30%;">Patient</th>
-                            <th style="width:25%;">Scheduled Date</th>
-                            <th style="width:25%;">Purpose</th>
-                            <th style="width:20%;">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($missedCheckups as $missed)
-                        @php
-                            $dateDisplay = '';
-                            if($missed->scheduled_date) {
-                                if(is_string($missed->scheduled_date)) {
-                                    $dateDisplay = \Carbon\Carbon::parse($missed->scheduled_date)->format('M j, Y');
-                                } else {
-                                    $dateDisplay = $missed->scheduled_date->format('M j, Y');
-                                }
-                            }
-                        @endphp
-                        <tr>
-                            <td>
-                                <div style="font-weight:600;">{{ $missed->user->name ?? 'Unknown' }}</div>
-                                <div style="font-size:0.75rem;color:var(--text-muted);">{{ $missed->user->email ?? '' }}</div>
-                            </td>
-                            <td>
-                                <span style="color:var(--danger);font-weight:600;">{{ $dateDisplay }}</span>
-                            </td>
-                            <td>
-                                <span style="font-size:0.8rem;">{{ Str::limit($missed->purpose ?? 'No purpose', 20) }}</span>
-                            </td>
-                            <td>
-                                <form action="{{ route('midwife.checkups.schedule', $missed->id) }}" method="POST" class="d-inline">
-                                    @csrf
-                                    <button class="btn btn-sm btn-outline-warning" title="Reschedule">
-                                        <i class="bi bi-calendar-event me-1"></i> Reschedule
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+        <span class="checkup-alert-count">{{ $missedTotal }}</span>
+        <i class="bi bi-chevron-down checkup-alert-chevron"></i>
+    </div>
+    <div class="collapse {{ $missedExpanded ? 'show' : '' }}" id="missedCheckupsPanel">
+        <div class="checkup-alert-body">
+            @foreach($missedCheckups as $missed)
+            @php
+                $dateDisplay = $missed->scheduled_date
+                    ? (\is_string($missed->scheduled_date)
+                        ? \Carbon\Carbon::parse($missed->scheduled_date)
+                        : $missed->scheduled_date)->format('M j, Y')
+                    : '—';
+            @endphp
+            <div class="checkup-alert-row">
+                <div class="checkup-alert-patient">
+                    <div class="patient-avatar">{{ strtoupper(substr($missed->patient_name, 0, 1)) }}</div>
+                    <div style="min-width:0;">
+                        <div class="checkup-alert-name">{{ $missed->patient_name }}</div>
+                        <div class="checkup-alert-meta">{{ Str::limit($missed->purpose ?? 'No purpose', 34) }}</div>
+                    </div>
+                </div>
+                <div class="checkup-alert-date is-danger">
+                    {{ $dateDisplay }}
+                </div>
+                <div class="checkup-alert-action">
+                    <form action="{{ route('midwife.checkups.schedule', $missed->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button class="btn btn-sm btn-outline-warning" title="Reschedule">
+                            <i class="bi bi-calendar-event me-1"></i> Reschedule
+                        </button>
+                    </form>
+                </div>
             </div>
-            @if($stats['missed'] > 5)
-            <div class="mt-2">
-                <a href="{{ route('midwife.checkups.index') }}?status=missed" class="text-decoration-none">
-                    <small>View all {{ $stats['missed'] }} missed checkups →</small>
+            @endforeach
+            <div class="checkup-alert-foot">
+                <a href="{{ route('midwife.checkups.index') }}?status=missed">
+                    View all {{ $missedTotal }} missed checkup{{ $missedTotal === 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i>
                 </a>
             </div>
-            @endif
         </div>
-        <button type="button" class="btn-close flex-shrink-0" data-bs-dismiss="alert"></button>
     </div>
 </div>
 @endif
