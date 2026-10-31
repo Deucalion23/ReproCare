@@ -213,6 +213,11 @@
             <h1 class="page-title">Menstrual Cycle</h1>
             <p class="page-subtitle">Track, predict, and understand your cycle</p>
         </div>
+        @if(!$activePregnancy && $records->count() > 0)
+            <a href="{{ route('user.menstruation.create') }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg me-1"></i> Log Period
+            </a>
+        @endif
     </div>
 
     @if(session('success'))
