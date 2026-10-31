@@ -304,6 +304,7 @@ class UserController extends Controller
         // History is oldest-first, so the current cycle must be fetched
         // separately instead of relying on $records->first().
         $latestCycle = Auth::user()->cycles()
+            ->whereDate('period_start_date', '<=', today())
             ->orderByDesc('period_start_date')
             ->orderByDesc('id')
             ->first();
