@@ -21,9 +21,19 @@
         .pregnancy-records-table { font-size:0.72rem !important; }
         .pregnancy-records-table th,
         .pregnancy-records-table td { padding:0.45rem 0.3rem !important; }
+        .pregnancy-records-table th:nth-child(4),
+        .pregnancy-records-table td:nth-child(4),
+        .pregnancy-records-table col:nth-child(4) { display:none; }
         .pregnancy-records-table td:first-child small { display:none !important; }
         .pregnancy-records-table .pregnancy-trimester,
         .pregnancy-records-table .pregnancy-status { padding:0.25rem 0.4rem !important; font-size:0.7rem !important; }
+    }
+    @media (max-width: 767.98px) {
+        .pregnancy-records-card .card-body { padding:0.75rem !important; }
+        .pregnancy-records-table th:nth-child(2),
+        .pregnancy-records-table td:nth-child(2),
+        .pregnancy-records-table col:nth-child(2) { display:none; }
+        .pregnancy-records-table .pregnancy-actions { justify-content:flex-start !important; }
     }
 </style>
 @endpush
