@@ -236,7 +236,7 @@
     @endif
 
     @php
-        $recentConcern = $records->first(fn ($record) => $record->severe_symptoms || $record->irregular_bleeding || ($record->pain_score ?? 0) >= 7 || ($record->missed_school_work_days ?? 0) > 0);
+        $recentConcern = $latestCycle && ($latestCycle->severe_symptoms || $latestCycle->irregular_bleeding || ($latestCycle->pain_score ?? 0) >= 7 || ($latestCycle->missed_school_work_days ?? 0) > 0);
     @endphp
     @if($recentConcern)
         <div class="alert alert-warning mb-4" role="alert">
@@ -250,23 +250,18 @@
         <div class="cycle-hero-content cycle-hero-layout">
             <!-- Cycle Ring -->
             @php
-                $cycleDays = 28; // Default
+                $cycleDays = $averageCycle ?: 28;
                 $currentDay = 1;
                 $isOverdue = false;
-                if ($records->count() > 0) {
-                    $lastPeriod = $records->first();
-                    if ($averageCycle) $cycleDays = round($averageCycle);
-                    
-                    // Calculate current day of cycle
-                    $currentDay = (int) $lastPeriod->period_start_date->diffInDays(today(), false) + 1;
-                    
-                    // Check if cycle is overdue
+                if ($latestCycle) {
+                    // Cycle day is measured from the newest logged period, even
+                    // though the history list itself is ordered oldest-first.
+                    $currentDay = max(1, (int) $latestCycle->period_start_date->diffInDays(today(), false) + 1);
+
                     if ($currentDay > $cycleDays) {
                         $currentDay = $cycleDays;
-                        $isOverdue = $predictionDetail['next_latest'] && today()->gt($predictionDetail['next_latest']);
+                        $isOverdue = true;
                     }
-                    
-                    $currentDay = max(1, min($currentDay, $cycleDays));
                 }
                 $progress = min($currentDay / $cycleDays, 1) * 100;
 
@@ -276,10 +271,12 @@
                 $phaseBg = 'rgba(139,92,246,0.15)';
                 $phaseIcon = 'bi-stars';
 
-                if ($records->count() > 0) {
-                    if ($predictionDetail['regularity'] !== 'regular') {
+                if ($latestCycle) {
+                    if ($predictionDetail['is_stale']) {
+                        $phase = 'Awaiting log'; $phaseColor = 'var(--color-text-muted)'; $phaseBg = 'var(--color-surface-soft)'; $phaseIcon = 'bi-clock-history';
+                    } elseif ($predictionDetail['regularity'] !== 'regular') {
                         $phase = 'Uncertain';
-                    } elseif ($currentDay <= ($records->first()->period_length ?? 5)) {
+                    } elseif ($currentDay <= ($latestCycle->period_length ?? 5)) {
                         $phase = 'Menstrual'; $phaseColor = 'var(--color-danger-text)'; $phaseBg = 'var(--color-danger-soft)'; $phaseIcon = 'bi-droplet-fill';
                     } elseif ($currentDay < $cycleDays - 14) {
                         $phase = 'Follicular'; $phaseColor = 'var(--color-primary-text)'; $phaseBg = 'var(--color-primary-soft)'; $phaseIcon = 'bi-stars';
@@ -291,7 +288,7 @@
                 }
             @endphp
 
-            @if($records->count() > 0)
+            @if($latestCycle)
             <div class="cycle-left">
                 <div class="cycle-ring" style="--progress:{{ $progress }}%;">
                     <div class="cycle-ring-inner">
@@ -299,7 +296,7 @@
                         <div class="day-label">of {{ $cycleDays }} days</div>
                         @if($isOverdue)
                         <div class="cycle-overdue-pill">
-                            <i class="bi bi-exclamation-circle"></i> Overdue
+                            <i class="bi bi-exclamation-circle"></i> {{ $predictionDetail['is_stale'] ? 'Awaiting log' : 'Overdue' }}
                         </div>
                         @endif
                     </div>
@@ -316,20 +313,24 @@
             @endif
 
             <div class="flex-grow-1 cycle-right">
-                @if($records->count() > 0)
+                @if($latestCycle)
                     <div class="cycle-phase-badge" style="background:{{ $phaseBg }}; color:{{ $phaseColor }};">
-                        <i class="bi {{ $phaseIcon }}"></i> {{ $phase }} phase (estimate)
+                        <i class="bi {{ $phaseIcon }}"></i> {{ $phase }}{{ $predictionDetail['is_stale'] ? '' : ' phase (estimate)' }}
                     </div>
                 @endif
 
                 @if($nextPeriod)
                     <h2 class="cycle-hero-title">
-                        {{ $predictionDetail['next_earliest']->format('M j') }} – {{ $predictionDetail['next_latest']->format('M j') }}
+                        @if($predictionDetail['next_earliest']->equalTo($predictionDetail['next_latest']))
+                            {{ $predictionDetail['next_earliest']->format('M j') }}
+                        @else
+                            {{ $predictionDetail['next_earliest']->format('M j') }} – {{ $predictionDetail['next_latest']->format('M j') }}
+                        @endif
                     </h2>
                     <p class="cycle-hero-sub">
                         Estimated next-period start window · {{ $predictionDetail['strength_label'] }} prediction (Level {{ $predictionDetail['strength_level'] }} of 4).
-                        @if(today()->gt($predictionDetail['next_latest']))
-                            This estimate has passed. Log any unrecorded period; discuss persistent changes with your health worker.
+                        @if($predictionDetail['is_stale'])
+                            Your last logged period was {{ $predictionDetail['last_period_date']->format('M j, Y') }}; log any missed periods to refresh this estimate.
                         @endif
                     </p>
                     <div class="cycle-strength level-{{ $predictionDetail['strength_level'] }}" role="img" aria-label="Prediction strength: {{ $predictionDetail['strength_label'] }}, level {{ $predictionDetail['strength_level'] }} of 4">
@@ -440,8 +441,8 @@
                                         <form action="{{ route('user.menstruation.destroy', $record->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="period-del-btn" onclick="return confirm('Archive this record? It will be kept in your history archive.')" title="Archive record">
-                                                <i class="bi bi-archive"></i>
+                                            <button type="submit" class="period-del-btn" onclick="return confirm('Delete this record? It will be removed from your history and retained in the archive.')" title="Delete record" aria-label="Delete period record">
+                                                <i class="bi bi-trash3"></i>
                                             </button>
                                         </form>
                                     </div>

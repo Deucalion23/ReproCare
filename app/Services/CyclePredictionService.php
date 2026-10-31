@@ -7,6 +7,18 @@ use Carbon\Carbon;
 
 class CyclePredictionService
 {
+    /** Start-to-start gaps outside this range are missing history, not cycles. */
+    private const MIN_PLAUSIBLE_CYCLE = 15;
+    private const MAX_PLAUSIBLE_CYCLE = 90;
+
+    /** Ovulation counting back 14 days is only meaningful for longer cycles. */
+    private const MIN_OVULATION_CYCLE = 21;
+
+    private const DEFAULT_CYCLE_LENGTH = 28;
+
+    /** Safety cap when advancing a stale history to the current cycle. */
+    private const MAX_CYCLES_AHEAD = 36;
+
     /**
      * Predict the next period date based on cycle history
      *
@@ -21,10 +33,49 @@ class CyclePredictionService
             return null;
         }
 
-        $averageCycle = $this->calculateAverageCycleLength($cycles);
-        $lastCycle = $cycles->first();
+        $averageCycle = $this->saneAverage($cycles);
+        $lengths = $cycles->pluck('cycle_length')->filter()->values();
+        $shortest = $lengths->isNotEmpty() ? (int) $lengths->min() : $averageCycle;
+        $longest = $lengths->isNotEmpty() ? (int) $lengths->max() : $averageCycle;
 
-        return $lastCycle->period_start_date->copy()->addDays($averageCycle);
+        return $this->projectedStart($cycles->first()->period_start_date, $averageCycle, $shortest, $longest);
+    }
+
+    /**
+     * Average of plausible start-to-start intervals, clamped to a sane range.
+     */
+    private function saneAverage($cycles): int
+    {
+        $average = $this->calculateAverageCycleLength($cycles);
+
+        return max(self::MIN_PLAUSIBLE_CYCLE, min(self::MAX_PLAUSIBLE_CYCLE, $average));
+    }
+
+    /**
+     * How many cycles ahead the next usable window is (1 = current window).
+     * The window is advanced by whole cycles only once its latest possible
+     * end has passed, so a stale log never renders a window in the past.
+     *
+     * @return array{0:int,1:bool} cycles ahead (1-based) and whether history is stale
+     */
+    private function projectionWindow(Carbon $lastPeriod, int $average, int $shortest, int $longest): array
+    {
+        $cyclesAhead = 1;
+        $latest = $lastPeriod->copy()->addDays($longest);
+
+        while ($latest->lt(today()) && $cyclesAhead < self::MAX_CYCLES_AHEAD) {
+            $cyclesAhead++;
+            $latest->addDays($average);
+        }
+
+        return [$cyclesAhead, $cyclesAhead > 1];
+    }
+
+    private function projectedStart(Carbon $lastPeriod, int $average, int $shortest, int $longest): Carbon
+    {
+        [$cyclesAhead] = $this->projectionWindow($lastPeriod, $average, $shortest, $longest);
+
+        return $lastPeriod->copy()->addDays($cyclesAhead * $average);
     }
 
     /**
@@ -42,41 +93,40 @@ class CyclePredictionService
             return [];
         }
 
-        $averageCycle = $this->calculateAverageCycleLength($cycles);
-        $averagePeriod = $this->getAveragePeriodLength($userId);
-        $nextPeriod = $this->predictNextPeriod($userId);
-
-        if (!$nextPeriod) {
-            return [];
-        }
+        $detail = $this->getPredictionDetail($userId);
+        $averageCycle = $detail['average_cycle'];
+        $averagePeriod = max(1, $this->getAveragePeriodLength($userId));
 
         // Irregular-aware range: shortest/longest observed cycle bounds the window.
-        $detail = $this->getPredictionDetail($userId);
-        $shortest = $detail['shortest_cycle'] ?? $averageCycle;
-        $longest = $detail['longest_cycle'] ?? $averageCycle;
-        $regularity = $detail['regularity'] ?? 'insufficient_data';
-        $confidence = $detail['confidence'] ?? 'low';
-        $strengthLevel = $detail['strength_level'] ?? 1;
-        $strengthLabel = $detail['strength_label'] ?? 'Weak';
+        $shortest = $detail['shortest_cycle'];
+        $longest = $detail['longest_cycle'];
+        $regularity = $detail['regularity'];
+        $confidence = $detail['confidence'];
+        $strengthLevel = $detail['strength_level'];
+        $strengthLabel = $detail['strength_label'];
+
+        // Start from the same window the summary shows (already advanced past
+        // stale history), then accumulate uncertainty for later cycles.
+        $anchor = $cycles->first()->period_start_date;
+        [$cyclesAhead] = $this->projectionWindow($anchor, $averageCycle, $shortest, $longest);
 
         $predictions = [];
 
         for ($i = 0; $i < $count; $i++) {
-            $start = $nextPeriod->copy()->addDays($i * $averageCycle);
+            $periodsAhead = $cyclesAhead + $i;
+            $start = $anchor->copy()->addDays($periodsAhead * $averageCycle);
             $end = $start->copy()->addDays($averagePeriod - 1);
 
-            // Prediction window widens for irregular cycles (shortest..longest).
-            // For cycle #1 the window is anchored on the last period; later
-            // cycles accumulate uncertainty (+/- spread per cycle).
-            $earliest = $cycles->first()->period_start_date->copy()->addDays(($i + 1) * $shortest);
-            $latest = $cycles->first()->period_start_date->copy()->addDays(($i + 1) * $longest);
+            $earliest = $anchor->copy()->addDays($periodsAhead * $shortest);
+            $latest = $anchor->copy()->addDays($periodsAhead * $longest);
 
-            // Ovulation estimate (avg - 14) is unreliable when irregular, so
-            // expose it with confidence and widen the fertile window instead
-            // of pretending precision.
-            $ovulation = $start->copy()->addDays($averageCycle - 14);
-            $fertileWindowStart = $ovulation->copy()->subDays($regularity === 'irregular' ? 7 : 5);
-            $fertileWindowEnd = $ovulation->copy()->addDays($regularity === 'irregular' ? 2 : 1);
+            // Ovulation count-back is unreliable for irregular or very short
+            // cycles, so hide it instead of showing a physiologically
+            // impossible day.
+            $fertilityReliable = $regularity === 'regular' && $averageCycle >= self::MIN_OVULATION_CYCLE;
+            $ovulation = $fertilityReliable ? $start->copy()->addDays($averageCycle - 14) : null;
+            $fertileWindowStart = $ovulation?->copy()->subDays(5);
+            $fertileWindowEnd = $ovulation?->copy()->addDays(1);
 
             $predictions[] = [
                 'period_start' => $start,
@@ -84,9 +134,9 @@ class CyclePredictionService
                 'period_start_earliest' => $earliest,
                 'period_start_latest' => $latest,
                 'cycle_number' => $i + 1,
-                'ovulation' => $regularity === 'regular' ? $ovulation : null,
-                'fertile_start' => $regularity === 'regular' ? $fertileWindowStart : null,
-                'fertile_end' => $regularity === 'regular' ? $fertileWindowEnd : null,
+                'ovulation' => $ovulation,
+                'fertile_start' => $fertileWindowStart,
+                'fertile_end' => $fertileWindowEnd,
                 'regularity' => $regularity,
                 'confidence' => $confidence,
                 'strength_level' => $strengthLevel,
@@ -116,7 +166,7 @@ class CyclePredictionService
         $cycles = $this->getRecentCycles($userId, 6);
         $lengths = $cycles->pluck('cycle_length')->filter()->values();
 
-        $average = $this->calculateAverageCycleLength($cycles);
+        $average = $this->saneAverage($cycles);
         $shortest = $lengths->isNotEmpty() ? (int) $lengths->min() : $average;
         $longest = $lengths->isNotEmpty() ? (int) $lengths->max() : $average;
         $regularity = $this->getCycleRegularity($userId);
@@ -131,8 +181,31 @@ class CyclePredictionService
 
         $strength = $this->getStrengthLevel($lengths->count(), $regularity, $spread);
 
-        $next = $this->predictNextPeriod($userId);
         $lastCycle = $cycles->first();
+        $next = null;
+        $earliest = null;
+        $latest = null;
+        $isStale = false;
+
+        if ($lastCycle) {
+            [$cyclesAhead, $isStale] = $this->projectionWindow(
+                $lastCycle->period_start_date,
+                $average,
+                $shortest,
+                $longest
+            );
+            $base = $lastCycle->period_start_date->copy();
+            $next = $base->copy()->addDays($cyclesAhead * $average);
+
+            if ($lengths->count() >= 2) {
+                $earliest = $base->copy()->addDays($cyclesAhead * $shortest);
+                $latest = $base->copy()->addDays($cyclesAhead * $longest);
+            } else {
+                // A single completed interval cannot justify a range.
+                $earliest = $next->copy();
+                $latest = $next->copy();
+            }
+        }
 
         return [
             'average_cycle' => $average,
@@ -144,13 +217,11 @@ class CyclePredictionService
             'strength_level' => $strength['level'],
             'strength_label' => $strength['label'],
             'cycles_used' => $lengths->count(),
-            'next_predicted' => $next?->copy(),
-            'next_earliest' => ($lastCycle && $lengths->count() >= 2)
-                ? $lastCycle->period_start_date->copy()->addDays($shortest)
-                : $next?->copy(),
-            'next_latest' => ($lastCycle && $lengths->count() >= 2)
-                ? $lastCycle->period_start_date->copy()->addDays($longest)
-                : $next?->copy(),
+            'last_period_date' => $lastCycle?->period_start_date?->copy(),
+            'is_stale' => $isStale,
+            'next_predicted' => $next,
+            'next_earliest' => $earliest,
+            'next_latest' => $latest,
         ];
     }
 
@@ -172,7 +243,7 @@ class CyclePredictionService
         $cycleLengths = $cycles->pluck('cycle_length')->filter();
 
         if ($cycleLengths->isEmpty()) {
-            return 28; // Default
+            return self::DEFAULT_CYCLE_LENGTH;
         }
 
         return (int) round($cycleLengths->avg());
@@ -278,8 +349,8 @@ class CyclePredictionService
             'total_cycles_recorded' => Cycle::where('user_id', $userId)->count(),
             'average_cycle_length' => $this->getAverageCycleLength($userId),
             'average_period_length' => $this->getAveragePeriodLength($userId),
-            'shortest_cycle' => $cycles->min('cycle_length') ?? $detail['shortest_cycle'],
-            'longest_cycle' => $cycles->max('cycle_length') ?? $detail['longest_cycle'],
+            'shortest_cycle' => $detail['shortest_cycle'],
+            'longest_cycle' => $detail['longest_cycle'],
             'regularity' => $detail['regularity'],
             'confidence' => $detail['confidence'],
             'strength_level' => $detail['strength_level'],
@@ -327,7 +398,7 @@ class CyclePredictionService
         if ($cycles->isNotEmpty()) {
             $lastCycle = $cycles->last();
             $averageCycle = $this->getAverageCycleLength($userId);
-            if ($averageCycle && $lastCycle->period_end_date && $this->getCycleRegularity($userId) === 'regular') {
+            if ($averageCycle && $averageCycle >= self::MIN_OVULATION_CYCLE && $lastCycle->period_end_date && $this->getCycleRegularity($userId) === 'regular') {
                 // Simple ovulation calculation (14 days before next period)
                 $ovulation = $lastCycle->period_start_date->copy()->addDays($averageCycle - 14);
                 $fertileWindowStart = $ovulation->copy()->subDays(5);
@@ -516,7 +587,10 @@ class CyclePredictionService
         foreach ($cycles as $index => $cycle) {
             $previous = $cycles->get($index + 1);
             $length = $previous ? (int) $previous->period_start_date->diffInDays($cycle->period_start_date) : null;
-            $cycle->cycle_length = $length > 0 ? $length : null;
+            $plausible = $length !== null
+                && $length >= self::MIN_PLAUSIBLE_CYCLE
+                && $length <= self::MAX_PLAUSIBLE_CYCLE;
+            $cycle->cycle_length = $plausible ? $length : null;
         }
         return $cycles->take($limit);
     }
@@ -534,7 +608,7 @@ class CyclePredictionService
         });
 
         if ($validCycles->isEmpty()) {
-            return 28; // Default cycle length
+            return self::DEFAULT_CYCLE_LENGTH;
         }
 
         return (int) round($validCycles->avg('cycle_length'));

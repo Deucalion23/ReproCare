@@ -36,7 +36,7 @@
                                         <div class="d-flex gap-1 tbl-actions">
                                             <a href="{{ route('midwife.menstruation.show', $record->id) }}" class="btn btn-sm btn-view" title="View"><i class="bi bi-eye"></i></a>
                                             <a href="{{ route('midwife.menstruation.edit', $record->id) }}" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
-                                            <x-archive-form :action="route('midwife.menstruation.destroy', $record->id)" label="" title="Archive record (retained for audit)" btnClass="btn btn-sm btn-warning text-white" icon="bi bi-archive" confirmText="Archive this cycle record? It will be retained for audit." />
+                                            <x-archive-form :action="route('midwife.menstruation.destroy', $record->id)" label="" title="Delete record (retained for audit)" btnClass="btn btn-sm btn-warning text-white" icon="bi bi-trash3" confirmText="Delete this cycle record? It will be removed from active lists and retained for audit." />
                                         </div>
                                     </td>
                                 </tr>

@@ -149,4 +149,85 @@ class CyclePredictionTest extends AutomationTestCase
         $this->assertStringContainsString('Weak prediction (Level 1/4)', $html);
         $this->assertStringNotContainsString('Ovulation Est. (day)', $html);
     }
+
+    public function test_cycle_day_and_window_come_from_the_newest_record(): void
+    {
+        $user = $this->patient();
+        // History itself is listed oldest-first, but the hero ring and the
+        // prediction must still be measured from the latest period.
+        $this->history($user->id, ['2026-07-01', '2026-08-01', '2026-09-02']);
+
+        $html = $this->actingAs($user)
+            ->get(route('user.menstruation.index'))
+            ->assertOk()
+            ->getContent();
+
+        // 2026-09-15 is day 14 of a 32-day average cycle.
+        $this->assertStringContainsString('<div class="day-num">14</div>', $html);
+        $this->assertStringContainsString('Oct 3 – Oct 4', $html);
+    }
+
+    public function test_stale_history_is_advanced_instead_of_showing_past_dates(): void
+    {
+        $user = $this->patient();
+        // Last log is over three average cycles old at the test date.
+        $this->history($user->id, ['2026-05-01', '2026-05-29']);
+
+        $detail = (new CyclePredictionService())->getPredictionDetail($user->id);
+
+        $this->assertTrue($detail['is_stale']);
+        $this->assertSame('2026-05-29', $detail['last_period_date']->toDateString());
+        $this->assertSame('2026-09-18', $detail['next_predicted']->toDateString());
+        $this->assertSame('2026-09-18', $detail['next_earliest']->toDateString());
+        $this->assertFalse($detail['next_latest']->lt(today()));
+
+        $predictions = (new CyclePredictionService())->predictFuturePeriods($user->id);
+        $this->assertSame('2026-09-18', $predictions[0]['period_start']->toDateString());
+        $this->assertFalse($predictions[0]['period_start_earliest']->lt(today()->subDay()));
+    }
+
+    public function test_implausible_intervals_are_excluded_from_predictions(): void
+    {
+        $user = $this->patient();
+        // A 2-day "cycle" is a duplicate/typo, not an interval.
+        $this->history($user->id, ['2026-06-01', '2026-06-29', '2026-07-27', '2026-08-24', '2026-08-26']);
+
+        $detail = (new CyclePredictionService())->getPredictionDetail($user->id);
+        $this->assertSame(28, $detail['average_cycle']);
+        $this->assertSame(28, $detail['shortest_cycle']);
+        $this->assertSame(28, $detail['longest_cycle']);
+
+        // A very long gap usually means missing logs, not a 181-day cycle.
+        $gappy = $this->patient();
+        $this->history($gappy->id, ['2026-03-01', '2026-08-29']);
+        $this->assertSame(28, (new CyclePredictionService())->getPredictionDetail($gappy->id)['average_cycle']);
+    }
+
+    public function test_short_cycles_do_not_show_an_ovulation_day(): void
+    {
+        $user = $this->patient();
+        $this->history($user->id, ['2026-07-01', '2026-07-18', '2026-08-04', '2026-08-21']);
+
+        $service = new CyclePredictionService();
+        $detail = $service->getPredictionDetail($user->id);
+        $this->assertSame(17, $detail['average_cycle']);
+
+        $predictions = $service->predictFuturePeriods($user->id);
+        $this->assertNull($predictions[0]['ovulation']);
+        $this->assertNull($predictions[0]['fertile_start']);
+        $this->assertNull($predictions[0]['fertile_end']);
+    }
+
+    public function test_patient_can_delete_a_period_record(): void
+    {
+        $user = $this->patient();
+        $this->history($user->id, ['2026-08-01', '2026-09-01']);
+        $record = Cycle::whereDate('period_start_date', '2026-09-01')->firstOrFail();
+
+        $this->actingAs($user)
+            ->delete(route('user.menstruation.destroy', $record->id))
+            ->assertRedirect(route('user.menstruation.index'));
+
+        $this->assertSoftDeleted('cycles', ['id' => $record->id]);
+    }
 }

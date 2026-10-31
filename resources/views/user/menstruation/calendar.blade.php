@@ -529,7 +529,11 @@
                             <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:0.25rem;">Estimated period start window</div>
                             <div style="font-size:0.875rem;color:var(--color-danger-text);font-weight:600;">
                                 <i class="bi bi-droplet-fill me-1"></i>
-                                {{ $prediction['period_start_earliest']->format('M d') }} – {{ $prediction['period_start_latest']->format('M d, Y') }}
+                                @if($prediction['period_start_earliest']->equalTo($prediction['period_start_latest']))
+                                    {{ $prediction['period_start_earliest']->format('M d, Y') }}
+                                @else
+                                    {{ $prediction['period_start_earliest']->format('M d') }} – {{ $prediction['period_start_latest']->format('M d, Y') }}
+                                @endif
                             </div>
                         </div>
                         @if(isset($prediction['ovulation']))

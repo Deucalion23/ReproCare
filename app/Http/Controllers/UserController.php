@@ -301,13 +301,20 @@ class UserController extends Controller
             ->orderBy('period_start_date', 'asc')
             ->paginate(10);
 
+        // History is oldest-first, so the current cycle must be fetched
+        // separately instead of relying on $records->first().
+        $latestCycle = Auth::user()->cycles()
+            ->orderByDesc('period_start_date')
+            ->orderByDesc('id')
+            ->first();
+
         // Use Cycle model for predictions
         $nextPeriod = Cycle::predictNextPeriod(Auth::id());
         $averageCycle = Cycle::getAverageCycleLength(Auth::id());
         $averagePeriod = Cycle::getAveragePeriodLength(Auth::id());
 
         $predictionDetail = app(CyclePredictionService::class)->getPredictionDetail(Auth::id());
-        return view('user.menstruation.index', compact('records', 'nextPeriod', 'averageCycle', 'averagePeriod', 'predictionDetail', 'activePregnancy'));
+        return view('user.menstruation.index', compact('records', 'latestCycle', 'nextPeriod', 'averageCycle', 'averagePeriod', 'predictionDetail', 'activePregnancy'));
     }
 
     public function createMenstruationRecord()
