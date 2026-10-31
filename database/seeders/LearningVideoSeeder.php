@@ -49,6 +49,22 @@ class LearningVideoSeeder extends Seeder
                 'category' => 'postpartum',
                 'sort_order' => 8,
             ],
+            [
+                'title' => '7 Methods To Dry Up Breast Milk (Medical Centric)',
+                'content' => 'For mothers who need to stop producing milk — after loss, when returning to work, or on medical advice: gradual weaning, cold compresses and cabbage leaves, avoiding stimulation, pain relief, and when to call a doctor.',
+                'video_url' => 'https://www.youtube.com/watch?v=2_D7iXEtwwk',
+                'youtube_id' => '2_D7iXEtwwk',
+                'category' => 'breastfeeding',
+                'sort_order' => 7,
+            ],
+            [
+                'title' => 'Breastfeeding: Anatomy and Physiology (Osmosis)',
+                'content' => 'Osmosis explains how lactation works: mammary gland structure, prolactin and oxytocin, the milk let-down reflex, colostrum versus mature milk, and common clinical issues such as engorgement and mastitis.',
+                'video_url' => 'https://www.youtube.com/watch?v=T0R33e_P_2Y',
+                'youtube_id' => 'T0R33e_P_2Y',
+                'category' => 'breastfeeding',
+                'sort_order' => 6,
+            ],
             // ── Nutrition & diet in pregnancy ─────────────────────────────
             [
                 'title' => 'Nutrition During Pregnancy (Stanford Health Education)',
