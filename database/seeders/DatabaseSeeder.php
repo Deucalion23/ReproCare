@@ -38,6 +38,9 @@ class DatabaseSeeder extends Seeder
         $this->call(MariaClaraPregnancySeeder::class);
         $this->call(HighRiskPregnancySeeder::class);
 
+        // Curated community forum feed (also clears legacy "[TEST]" posts)
+        $this->call(CommunityForumSeeder::class);
+
         $this->command->info('Database seeded successfully!');
         $this->command->info('Login credentials:');
         $this->command->info('Midwife: midwife@reprocare.com');

@@ -5,9 +5,6 @@ namespace Database\Seeders;
 use App\Models\Checkup;
 use App\Models\Cycle;
 use App\Models\FamilyPlanningRecord;
-use App\Models\ForumComment;
-use App\Models\ForumLike;
-use App\Models\ForumPost;
 use App\Models\HealthRecord;
 use App\Models\LearningMaterial;
 use App\Models\Pregnancy;
@@ -178,8 +175,7 @@ class DigitalSolutionTestSeeder extends Seeder
         }
 
         // ─── Cross-scenario fixtures ───────────────────────────────────
-        // Forum activity — ensure posts + comments exist from multiple women
-        $this->seedForumActivity($createdPatients, $midwife);
+        // Forum content is owned by CommunityForumSeeder.
 
         // ─── Summary ──────────────────────────────────────────────────
         $this->command?->info('');
@@ -500,67 +496,5 @@ class DigitalSolutionTestSeeder extends Seeder
                 'status'         => 'Scheduled',
             ]
         );
-    }
-
-    // ── Forum Posts & Comments ─────────────────────────────────────────
-
-    private function seedForumActivity(array $patients, User $midwife): void
-    {
-        $forumUser = $patients['forum_active'] ?? null;
-        $cycleUser = $patients['regular_cycle'] ?? null;
-        $fpUser    = $patients['family_planning'] ?? null;
-
-        if (!$forumUser) return;
-
-        // Post 1: General reproductive health discussion
-        $post1Content = "[TEST] Tips for Managing Menstrual Cramps\n\nHello everyone! I've been dealing with severe menstrual cramps and wanted to share some things that helped me. Hot compress and light exercise have been game changers. What works for you?";
-        $post1 = ForumPost::firstOrCreate(
-            ['user_id' => $forumUser->id, 'content' => $post1Content],
-            ['status' => 'active']
-        );
-
-        if ($cycleUser) {
-            ForumComment::firstOrCreate(
-                ['post_id' => $post1->id, 'user_id' => $cycleUser->id],
-                ['content' => '[TEST] I track my cycles in ReproCare and noticed my cramps are worse during heavy flow days. Ginger tea helps me a lot!']
-            );
-        }
-        if ($fpUser) {
-            ForumComment::firstOrCreate(
-                ['post_id' => $post1->id, 'user_id' => $fpUser->id],
-                ['content' => '[TEST] Since I started my contraceptive pills, my cramps have actually gotten lighter. Talk to your midwife about it!']
-            );
-            if (!ForumLike::where('post_id', $post1->id)->where('user_id', $fpUser->id)->exists()) {
-                $like = new ForumLike(['post_id' => $post1->id, 'user_id' => $fpUser->id]);
-                if (Schema::hasColumn('forum_likes', 'user_id_old__deprecated')) {
-                    $like->setAttribute('user_id_old__deprecated', $fpUser->id);
-                }
-                $like->save();
-            }
-        }
-
-        // Post 2: Pregnancy discussion
-        $pregnantUser = $patients['early_pregnancy'] ?? null;
-        if ($pregnantUser) {
-            $post2Content = "[TEST] First Pregnancy — What to Expect?\n\nI just found out I'm pregnant for the first time! I'm about 10 weeks along. Any advice from experienced moms? What should I prepare for my first prenatal checkup?";
-            $post2 = ForumPost::firstOrCreate(
-                ['user_id' => $pregnantUser->id, 'content' => $post2Content],
-                ['status' => 'active']
-            );
-
-            ForumComment::firstOrCreate(
-                ['post_id' => $post2->id, 'user_id' => $forumUser->id],
-                ['content' => '[TEST] Congratulations! Make sure to take your folic acid and keep track of your checkup schedule. The midwife will guide you through everything.']
-            );
-        }
-
-        // Post 3: Family planning discussion
-        if ($fpUser) {
-            $post3Content = "[TEST] My Experience Switching Contraceptive Methods\n\nI recently switched from injectable to pills. For anyone considering a switch, I'd recommend discussing with your BHW or midwife first. They recorded everything in the system so my history is tracked.";
-            ForumPost::firstOrCreate(
-                ['user_id' => $fpUser->id, 'content' => $post3Content],
-                ['status' => 'active']
-            );
-        }
     }
 }

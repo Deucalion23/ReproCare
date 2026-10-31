@@ -5,9 +5,6 @@ namespace Database\Seeders;
 use App\Models\Checkup;
 use App\Models\Cycle;
 use App\Models\FamilyPlanningRecord;
-use App\Models\ForumComment;
-use App\Models\ForumLike;
-use App\Models\ForumPost;
 use App\Models\HealthRecord;
 use App\Models\Pregnancy;
 use App\Models\Purok;
@@ -203,9 +200,6 @@ class RhuBulkTestSeeder extends Seeder
                     $createdPatients[$scenario] = $user;
                 }
             }
-
-            // Forum cross-linking using representative patients
-            $this->seedForumActivity($createdPatients, $midwife, $rhuNum);
 
             $this->command?->info("   ✓ {$rhuLabel}: staff + 50 patients done.");
         }
@@ -477,65 +471,6 @@ class RhuBulkTestSeeder extends Seeder
                     'scheduled_time'  => '09:00',
                     'status'          => $status,
                 ]
-            );
-        }
-    }
-
-    // ── Forum posts, comments, likes ─────────────────────────────────────────
-    private function seedForumActivity(array $patients, User $midwife, int $rhuNum): void
-    {
-        // Use early_pregnancy or analytics users as forum contributors
-        $poster   = $patients['early_pregnancy']   ?? $patients['analytics_data'] ?? null;
-        $commenter = $patients['regular_cycle']     ?? $patients['mid_pregnancy']  ?? null;
-        $liker    = $patients['family_planning']    ?? null;
-
-        if (!$poster) return;
-
-        // Post 1: pregnancy discussion
-        $post1 = ForumPost::firstOrCreate(
-            [
-                'user_id' => $poster->id,
-                'content' => "[TEST][RHU{$rhuNum}] First Trimester Tips — What helped me manage morning sickness?\n\nHello everyone! I'm in my first trimester and morning sickness has been tough. Ginger tea and small frequent meals helped. What works for you?",
-            ],
-            ['status' => 'active']
-        );
-
-        if ($commenter) {
-            ForumComment::firstOrCreate(
-                ['post_id' => $post1->id, 'user_id' => $commenter->id],
-                ['content' => "[TEST][RHU{$rhuNum}] I track everything in ReproCare and my midwife adjusted my care plan based on my records. Hang in there!"]
-            );
-        }
-
-        if ($liker) {
-            if (!ForumLike::where('post_id', $post1->id)->where('user_id', $liker->id)->exists()) {
-                $like = new ForumLike(['post_id' => $post1->id, 'user_id' => $liker->id]);
-                if (Schema::hasColumn('forum_likes', 'user_id_old__deprecated')) {
-                    $like->setAttribute('user_id_old__deprecated', $liker->id);
-                }
-                $like->save();
-            }
-        }
-
-        // Post 2: family planning discussion
-        if ($liker) {
-            ForumPost::firstOrCreate(
-                [
-                    'user_id' => $liker->id,
-                    'content' => "[TEST][RHU{$rhuNum}] Switching Contraceptive Methods — My experience\n\nI recently switched from injectable to pills. The BHW recorded everything in the system, so my history is always accessible. Highly recommend keeping your records updated!",
-                ],
-                ['status' => 'active']
-            );
-        }
-
-        // Post 3: general health
-        if ($commenter) {
-            ForumPost::firstOrCreate(
-                [
-                    'user_id' => $commenter->id,
-                    'content' => "[TEST][RHU{$rhuNum}] Menstrual Cycle Tracking Tips\n\nBeen using the ReproCare cycle tracker for 5 months now. My midwife can see my full history and it's made our checkups so much faster. Anyone else finding it useful?",
-                ],
-                ['status' => 'active']
             );
         }
     }

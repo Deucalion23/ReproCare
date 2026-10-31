@@ -8,9 +8,6 @@ use App\Models\ChildCheckup;
 use App\Models\ChildRecord;
 use App\Models\Cycle;
 use App\Models\EmergencyContact;
-use App\Models\ForumComment;
-use App\Models\ForumLike;
-use App\Models\ForumPost;
 use App\Models\HealthRecord;
 use App\Models\MaternalCareTargetClient;
 use App\Models\Message;
@@ -115,24 +112,9 @@ class TestScenarioAccountsSeeder extends Seeder
 
             $this->staffScenarios($staff);
 
-            // These fixtures provide a visible forum thread and inbox/reply
-            // without creating extra accounts or sending real messages.
+            // Forum content is owned by CommunityForumSeeder so the deployed
+            // feed stays realistic instead of showing tagged test fixtures.
             $author = $patients[8]; // approved, regular-cycle patient
-            $post = ForumPost::firstOrCreate(
-                ['user_id' => $author->id, 'content' => '[TEST] How do you track cycle changes?'],
-                ['status' => 'active']
-            );
-            ForumComment::firstOrCreate(
-                ['post_id' => $post->id, 'user_id' => $patients[16]->id],
-                ['content' => '[TEST] I log the dates and compare each month.']
-            );
-            if (!ForumLike::where('post_id', $post->id)->where('user_id', $patients[17]->id)->exists()) {
-                $like = new ForumLike(['post_id' => $post->id, 'user_id' => $patients[17]->id]);
-                if (Schema::hasColumn('forum_likes', 'user_id_old__deprecated')) {
-                    $like->setAttribute('user_id_old__deprecated', $patients[17]->id);
-                }
-                $like->save();
-            }
             $inbox = $this->message(
                 ['sender_id' => $author->id, 'receiver_id' => $staff['midwife'][8 % 3]->id,
                     'subject' => '[TEST] Appointment question'],

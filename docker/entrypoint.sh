@@ -112,6 +112,26 @@ if [ "${APP_ENV}" = "production" ] && [ "${SEED_FIFTY_TEST_WOMEN:-true}" = "true
     fi
 fi
 
+# Community forum content is curated by CommunityForumSeeder, which also removes
+# the legacy "[TEST]" fixtures. Run it when the feed is empty or still tagged,
+# so already-seeded databases get refreshed without re-seeding everything else.
+if [ "${SKIP_SEED}" != "true" ]; then
+    FORUM_CURATED_COUNT=$(php artisan tinker --execute="echo DB::table('forum_posts')->where('content', 'not like', '%[TEST]%')->count();" 2>/dev/null | tr -cd '0-9')
+    FORUM_TAGGED_COUNT=$(php artisan tinker --execute="echo DB::table('forum_posts')->where('content', 'like', '%[TEST]%')->count();" 2>/dev/null | tr -cd '0-9')
+    if [ -z "${FORUM_CURATED_COUNT}" ]; then
+        FORUM_CURATED_COUNT="0"
+    fi
+    if [ -z "${FORUM_TAGGED_COUNT}" ]; then
+        FORUM_TAGGED_COUNT="0"
+    fi
+    if [ "${FORUM_CURATED_COUNT}" = "0" ] || [ "${FORUM_TAGGED_COUNT}" != "0" ]; then
+        echo "Refreshing community forum content (curated: ${FORUM_CURATED_COUNT}, tagged: ${FORUM_TAGGED_COUNT})..."
+        php artisan db:seed --class=CommunityForumSeeder --force || echo "Warning: Community forum seeding failed."
+    else
+        echo "Community forum already curated (${FORUM_CURATED_COUNT} posts), skipping."
+    fi
+fi
+
 # Rebuild the configuration cache after .env has been synchronized with the
 # Render environment. Clearing it without rebuilding forced Laravel to parse
 # all configuration files on every request after each deploy.
