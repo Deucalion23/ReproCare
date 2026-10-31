@@ -18,6 +18,10 @@
     .pregnancy-records-table .badge { padding:0.22rem 0.38rem !important; font-size:0.66rem !important; white-space:nowrap; }
     .pregnancy-records-table .pregnancy-actions { gap:0.35rem !important; flex-wrap:nowrap; }
     .pregnancy-records-table .pregnancy-actions .btn { flex:0 0 28px; width:28px; height:28px; display:inline-grid; place-items:center; padding:0 !important; }
+    .pregnancy-records-table th:nth-child(7),
+    .pregnancy-records-table td:nth-child(7) { padding-right:0.75rem !important; }
+    .pregnancy-records-table th:last-child,
+    .pregnancy-records-table td:last-child { padding-left:0.75rem !important; overflow:visible; }
     @media (max-width: 1199.98px) {
         .pregnancy-records-table { font-size:0.72rem !important; }
         .pregnancy-records-table th,
@@ -193,8 +197,8 @@
         @if($pregnancies->count() > 0)
             <table class="table table-hover align-middle pregnancy-records-table">
                     <colgroup>
-                        <col style="width:24%"><col style="width:14%"><col style="width:14%"><col style="width:10%">
-                        <col style="width:11%"><col style="width:9%"><col style="width:10%"><col style="width:8%">
+                        <col style="width:24%"><col style="width:13%"><col style="width:13%"><col style="width:9%">
+                        <col style="width:11%"><col style="width:8%"><col style="width:12%"><col style="width:10%">
                     </colgroup>
                     <thead>
                         <tr style="color:var(--text-muted); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">
