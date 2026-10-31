@@ -41,12 +41,21 @@
                                 @else
                                     <select name="user_id" class="form-select" required>
                                         <option value="">Select client below</option>
-                                        @foreach($clients as $client)
-                                            <option value="{{ $client->id }}" @selected(old('user_id') == $client->id)>
-                                                {{ $client->name }} — {{ $client->barangay }}
-                                            </option>
-                                        @endforeach
+                                        @if(count($clients) === 0)
+                                            <option value="" disabled>No approved women found. Register a patient first.</option>
+                                        @else
+                                            @foreach($clients as $client)
+                                                <option value="{{ $client->id }}" @selected(old('user_id') == $client->id)>
+                                                    {{ $client->name }} — {{ $client->barangay }}
+                                                </option>
+                                            @endforeach
+                                        @endif
                                     </select>
+                                    @if(count($clients) === 0)
+                                        <div class="form-text text-warning">
+                                            To add test data women, run: <code class="text-dark">php artisan db:seed --class=Rhu1PregnantWomenSeeder</code>
+                                        </div>
+                                    @endif
                                 @endif
                             </div>
                             <!-- Status (from her request) -->

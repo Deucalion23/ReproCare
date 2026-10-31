@@ -54,6 +54,14 @@
         .wd-wrap .table { font-size:0.78rem; }
         .wd-wrap .table th, .wd-wrap .table td { padding:0.5rem; }
     }
+    /* Force table to fit screen without scroll */
+    .wd-wrap .table-responsive { overflow:visible; }
+    .wd-wrap .table { font-size:0.78rem; min-width:100%; table-layout:auto; }
+    .wd-wrap .table th, .wd-wrap .table td { padding:0.35rem 0.5rem; white-space:nowrap; }
+    .wd-wrap .table td .wd-sub { font-size:0.7rem; }
+    .wd-wrap .table td .wd-name { font-size:0.8rem; }
+    .wd-wrap .table td .wd-pill { font-size:0.65rem; padding:0.15em 0.5em; }
+    .wd-wrap .table .btn { padding:0.25rem 0.6rem; font-size:0.7rem; }
 </style>
 @endpush
 
@@ -263,8 +271,8 @@
             @endif
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
+        <div class="table-responsive" style="overflow:visible;">
+            <table class="table table-hover align-middle mb-0" style="font-size:0.78rem;">
                 <thead>
                     <tr>
                         <th class="px-3 py-3">Woman</th>
