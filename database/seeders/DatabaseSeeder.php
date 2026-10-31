@@ -41,6 +41,10 @@ class DatabaseSeeder extends Seeder
         // Curated community forum feed (also clears legacy "[TEST]" posts)
         $this->call(CommunityForumSeeder::class);
 
+        // Family-planning caseload: counseling requests, active methods,
+        // overdue resupply, referrals and postpartum plans
+        $this->call(FamilyPlanningSeeder::class);
+
         $this->command->info('Database seeded successfully!');
         $this->command->info('Login credentials:');
         $this->command->info('Midwife: midwife@reprocare.com');

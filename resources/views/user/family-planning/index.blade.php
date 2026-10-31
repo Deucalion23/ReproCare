@@ -14,7 +14,7 @@
 <div class="card mt-3"><div class="card-header fw-bold">My counseling and service requests</div><div class="card-body p-0">
 @forelse($records as $record)
 <div class="p-3 border-bottom">
-    <div class="d-flex justify-content-between gap-2"><strong>{{ $record->preferred_method ? ucfirst(str_replace('_', ' ', $record->preferred_method)) : 'Counseling request' }}</strong><span class="badge text-bg-{{ $record->status === 'active' ? 'success' : ($record->status === 'referred' ? 'warning' : 'secondary') }}">{{ ucfirst($record->status) }}</span></div>
+    <div class="d-flex justify-content-between gap-2"><strong>{{ $record->preferred_method ? \App\Models\FamilyPlanningRecord::methodLabel($record->preferred_method) : 'Counseling request' }}</strong><span class="badge text-bg-{{ $record->status === 'active' ? 'success' : ($record->status === 'referred' ? 'warning' : 'secondary') }}">{{ ucfirst($record->status) }}</span></div>
     <small class="text-muted">{{ $record->created_at->format('M j, Y') }}@if($record->next_follow_up) · Follow-up: {{ $record->next_follow_up->format('M j, Y') }}@endif</small>
 </div>
 @empty <div class="p-4 text-center text-muted">No family-planning request yet. You may request a private counseling session anytime.</div> @endforelse

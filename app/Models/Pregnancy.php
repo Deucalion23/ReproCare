@@ -109,6 +109,7 @@ class Pregnancy extends Model
     protected $casts = [
         'lmp' => 'date',
         'edd' => 'date',
+        'delivery_date' => 'date',
         'ended_at' => 'date',
         'is_high_risk' => 'boolean',
         'created_at' => 'datetime',

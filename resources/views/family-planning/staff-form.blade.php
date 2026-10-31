@@ -65,7 +65,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small text-muted">Method she wants to discuss</label>
-                            <input type="text" class="form-control" value="{{ $record->preferred_method ? ucfirst(str_replace('_', ' ', $record->preferred_method)) : 'Not stated' }}" readonly>
+                            <input type="text" class="form-control" value="{{ \App\Models\FamilyPlanningRecord::methodLabel($record->preferred_method) }}" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small text-muted">Pregnancy intention</label>
@@ -106,7 +106,7 @@
                                 <option value="">Select method given</option>
                                 @foreach(['condom','pill','injectable','implant','iud','natural_method','other'] as $method)
                                     <option value="{{ $method }}" @selected(old('method_given', $record->method_given) === $method)>
-                                        {{ ucfirst(str_replace('_', ' ', $method)) }}
+                                        {{ \App\Models\FamilyPlanningRecord::methodLabel($method) }}
                                     </option>
                                 @endforeach
                             </select>

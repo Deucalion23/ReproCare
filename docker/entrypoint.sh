@@ -132,6 +132,24 @@ if [ "${SKIP_SEED}" != "true" ]; then
     fi
 fi
 
+# Family planning needs its own caseload: without it the midwife/BHW list and
+# the client picker are empty, because the RHU demo account's jurisdiction
+# (Poblacion) had no registered women. The seeder is idempotent (it keys on the
+# note text) and also drops the "[TEST]" fixtures, so it is safe to top up a
+# database that already holds a few hand-entered records.
+if [ "${SKIP_SEED}" != "true" ]; then
+    FP_CURATED_COUNT=$(php artisan tinker --execute="echo DB::table('family_planning_records')->where('notes', 'not like', '%[TEST]%')->count();" 2>/dev/null | tr -cd '0-9')
+    if [ -z "${FP_CURATED_COUNT}" ]; then
+        FP_CURATED_COUNT="0"
+    fi
+    if [ "${FP_CURATED_COUNT}" -lt 40 ]; then
+        echo "Seeding family-planning caseload (curated records: ${FP_CURATED_COUNT})..."
+        php artisan db:seed --class=FamilyPlanningSeeder --force || echo "Warning: Family planning seeding failed."
+    else
+        echo "Family planning already curated (${FP_CURATED_COUNT} records), skipping."
+    fi
+fi
+
 # Rebuild the configuration cache after .env has been synchronized with the
 # Render environment. Clearing it without rebuilding forced Laravel to parse
 # all configuration files on every request after each deploy.

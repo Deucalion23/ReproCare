@@ -66,7 +66,7 @@
 
     <div class="card mt-3"><div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div><h6 class="fw-bold mb-1">Postpartum Family-Planning Plan</h6>
-        @if($postpartumPlan)<p class="text-muted mb-0">{{ $postpartumPlan->preferred_method ? 'Preferred method: ' . ucfirst(str_replace('_', ' ', $postpartumPlan->preferred_method)) . '. ' : '' }}Start: {{ ucfirst(str_replace('_', ' ', $postpartumPlan->postpartum_start_timing ?? 'undecided')) }}.</p>
+        @if($postpartumPlan)<p class="text-muted mb-0">{{ $postpartumPlan->preferred_method ? 'Preferred method: ' . \App\Models\FamilyPlanningRecord::methodLabel($postpartumPlan->preferred_method) . '. ' : '' }}Start: {{ ucfirst(str_replace('_', ' ', $postpartumPlan->postpartum_start_timing ?? 'undecided')) }}.</p>
         @else <p class="text-muted mb-0">Plan your preferred method for after delivery with your care team.</p>@endif</div>
         <a href="{{ $postpartumPlan ? route('user.family-planning.index') : route('user.family-planning.create') }}" class="btn btn-outline-primary btn-sm">{{ $postpartumPlan ? 'View plan' : 'Create plan' }}</a>
     </div></div>

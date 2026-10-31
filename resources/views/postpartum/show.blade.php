@@ -35,7 +35,7 @@
     @if($postpartumPlans->isNotEmpty())
     <div class="col-12"><div class="card"><div class="card-header"><h5 class="mb-0">Postpartum Family-Planning Plan</h5></div><div class="card-body">
         @foreach($postpartumPlans as $plan)
-            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap {{ !$loop->last ? 'border-bottom pb-3 mb-3' : '' }}"><div><strong>{{ $plan->method_given ? ucfirst(str_replace('_', ' ', $plan->method_given)) : ucfirst(str_replace('_', ' ', $plan->preferred_method ?? 'Counseling requested')) }}</strong><small class="text-muted d-block">Planned start: {{ ucfirst(str_replace('_', ' ', $plan->postpartum_start_timing ?? 'undecided')) }} · Status: {{ ucfirst($plan->status) }}</small></div><a class="btn btn-sm btn-outline-primary" href="{{ route($routeBase === 'midwife.postpartum' ? 'midwife.family-planning.edit' : 'bhw.family-planning.edit', $plan) }}">Review plan</a></div>
+            <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap {{ !$loop->last ? 'border-bottom pb-3 mb-3' : '' }}"><div><strong>{{ $plan->method_given ? \App\Models\FamilyPlanningRecord::methodLabel($plan->method_given) : ($plan->preferred_method ? \App\Models\FamilyPlanningRecord::methodLabel($plan->preferred_method) : 'Counseling requested') }}</strong><small class="text-muted d-block">Planned start: {{ ucfirst(str_replace('_', ' ', $plan->postpartum_start_timing ?? 'undecided')) }} · Status: {{ ucfirst($plan->status) }}</small></div><a class="btn btn-sm btn-outline-primary" href="{{ route($routeBase === 'midwife.postpartum' ? 'midwife.family-planning.edit' : 'bhw.family-planning.edit', $plan) }}">Review plan</a></div>
         @endforeach
     </div></div></div>
     @endif
