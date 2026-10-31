@@ -33,6 +33,11 @@
     .risk-Low { background:var(--color-success-soft); color:var(--color-success-text); }
     .risk-Unassessed { background:var(--color-surface-soft); color:var(--color-text-muted); }
     .rec-img { width:100%; max-height:240px; object-fit:contain; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft); }
+    .record-tabs { display:flex; gap:0.45rem; overflow-x:auto; padding:0.35rem; margin:0 0 1rem; background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:12px; scrollbar-width:thin; }
+    .record-tab { flex:0 0 auto; border:0; border-radius:8px; padding:0.45rem 0.75rem; background:transparent; color:var(--color-text-muted); font-size:0.74rem; font-weight:800; white-space:nowrap; }
+    .record-tab:hover, .record-tab:focus-visible { color:var(--color-primary-text); background:var(--color-surface); outline:none; }
+    .record-tab.is-active { color:var(--color-primary-text); background:var(--color-surface); box-shadow:0 1px 4px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent); }
+    [data-record-panel][hidden] { display:none !important; }
     @media (max-width: 767.98px) {
         .rec-card > .card-body { padding:0.35rem 1rem 1rem; }
         .rec-table table { font-size:0.78rem; }
@@ -62,6 +67,13 @@
     </div>
 </div>
 
+<nav class="record-tabs" aria-label="Patient record sections" role="tablist">
+    <button type="button" class="record-tab is-active" role="tab" aria-selected="true" data-record-tab="profile"><i class="bi bi-person-vcard me-1"></i>Profile &amp; contact</button>
+    <button type="button" class="record-tab" role="tab" aria-selected="false" data-record-tab="pregnancies"><i class="bi bi-heart-pulse me-1"></i>Pregnancies</button>
+    <button type="button" class="record-tab" role="tab" aria-selected="false" data-record-tab="care"><i class="bi bi-clipboard2-pulse me-1"></i>Care history</button>
+</nav>
+
+<section data-record-panel="profile" role="tabpanel">
 <div class="card fade-in-card mb-4 rec-card">
     <div class="card-header fw-bold">Profile &amp; Contact</div>
     <div class="card-body">
@@ -171,7 +183,9 @@
         </div>
     </div>
 @endif
+</section>
 
+<section data-record-panel="pregnancies" role="tabpanel" hidden>
 <div class="card fade-in-card mb-4 rec-card rec-table">
     <div class="card-header fw-bold">Pregnancies ({{ $pregnancies->count() }})</div>
     <div class="table-responsive">
@@ -198,7 +212,9 @@
         </table>
     </div>
 </div>
+</section>
 
+<section data-record-panel="care" role="tabpanel" hidden>
 <div class="card fade-in-card mb-4 rec-card rec-table">
     <div class="card-header fw-bold">Checkups ({{ $checkups->count() }})</div>
     <div class="table-responsive">
@@ -270,5 +286,27 @@
         </div>
     </div>
 @endif
+</section>
 
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const tabs = document.querySelectorAll('[data-record-tab]');
+        const panels = document.querySelectorAll('[data-record-panel]');
+        const selectTab = (section) => {
+            const selected = [...tabs].some(tab => tab.dataset.recordTab === section) ? section : 'profile';
+            tabs.forEach(tab => {
+                const active = tab.dataset.recordTab === selected;
+                tab.classList.toggle('is-active', active);
+                tab.setAttribute('aria-selected', active ? 'true' : 'false');
+            });
+            panels.forEach(panel => panel.hidden = panel.dataset.recordPanel !== selected);
+            if (history.replaceState) history.replaceState(null, '', `${location.pathname}${location.search}#${selected}`);
+        };
+        tabs.forEach(tab => tab.addEventListener('click', () => selectTab(tab.dataset.recordTab)));
+        selectTab(location.hash.replace('#', ''));
+    });
+</script>
+@endpush
