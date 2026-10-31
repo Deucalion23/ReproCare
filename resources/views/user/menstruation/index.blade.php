@@ -389,7 +389,7 @@
         <div class="card-header d-flex justify-content-between align-items-center" style="border:none;">
             <h5 class="mb-0 fw-800" style="font-family:'Plus Jakarta Sans',sans-serif;color:var(--color-text);">Period History</h5>
             <span class="badge history-count">
-                {{ $records->count() }} records
+                {{ $records->total() }} records
             </span>
         </div>
         <div class="card-body p-0">
@@ -460,6 +460,9 @@
                 </div>
             @endif
         </div>
+        @if($records->hasPages())
+            <div class="card-footer bg-transparent">{{ $records->links('pagination::bootstrap-5') }}</div>
+        @endif
     </div>
 
 </div>

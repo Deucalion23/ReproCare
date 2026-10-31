@@ -465,7 +465,7 @@ class BhwController extends Controller
         $woman = User::where('role', 'user')->findOrFail($id);
         $this->abortUnlessOwnBarangay($woman->barangay);
         $records = $woman->cycles()
-            ->orderBy('period_start_date', 'desc')
+            ->orderBy('period_start_date', 'asc')
             ->get();
 
         // Get statistics using Cycle model
@@ -480,7 +480,7 @@ class BhwController extends Controller
         $woman = User::where('role', 'user')->findOrFail($id);
         $this->abortUnlessOwnBarangay($woman->barangay);
         $records = $woman->cycles()
-            ->orderBy('period_start_date', 'desc')
+            ->orderBy('period_start_date', 'asc')
             ->get();
 
         // Get statistics
@@ -510,7 +510,7 @@ class BhwController extends Controller
         $woman = User::where('role', 'user')->findOrFail($id);
         $this->abortUnlessOwnBarangay($woman->barangay);
         $records = $woman->cycles()
-            ->orderBy('period_start_date', 'desc')
+            ->orderBy('period_start_date', 'asc')
             ->get();
 
         $averageCycle = \App\Models\Cycle::getAverageCycleLength($id);

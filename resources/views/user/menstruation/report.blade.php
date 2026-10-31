@@ -61,7 +61,7 @@
                     $previousDate = $record->period_start_date;
                 @endphp
                 <tr>
-                    <td>{{ $records->count() - $index }}</td>
+                    <td>{{ $index + 1 }}</td>
                     <td>{{ $record->period_start_date->format('M d, Y') }}</td>
                     <td>{{ $record->period_end_date ? $record->period_end_date->format('M d, Y') : 'Ongoing' }}</td>
                     <td>{{ $record->period_length ? $record->period_length . ' day' . ($record->period_length != 1 ? 's' : '') : '-' }}</td>

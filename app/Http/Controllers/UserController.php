@@ -298,7 +298,7 @@ class UserController extends Controller
     {
         $activePregnancy = Auth::user()->pregnancyBlockingMenstrualLogging();
         $records = Auth::user()->cycles()
-            ->orderBy('period_start_date', 'desc')
+            ->orderBy('period_start_date', 'asc')
             ->paginate(10);
 
         // Use Cycle model for predictions
@@ -528,6 +528,9 @@ class UserController extends Controller
                 'is_normal' => $isNormal,
             ];
         }
+
+        // Timeline display: oldest range first.
+        $cycleHistory = array_reverse($cycleHistory);
         
         return view('user.menstruation.statistics', compact(
             'records',
@@ -550,11 +553,13 @@ class UserController extends Controller
         $userId = Auth::id();
         $user = Auth::user();
         
-        // Get period records
+        // Get period records (latest six, displayed oldest → newest)
         $records = Cycle::where('user_id', $userId)
             ->orderBy('period_start_date', 'desc')
             ->take(6)
-            ->get();
+            ->get()
+            ->reverse()
+            ->values();
         
         // Get statistics using Cycle model
         $averageCycle = Cycle::getAverageCycleLength($userId);

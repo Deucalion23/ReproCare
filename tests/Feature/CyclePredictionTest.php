@@ -122,6 +122,23 @@ class CyclePredictionTest extends AutomationTestCase
         $this->assertSame(1, Cycle::whereDate('period_start_date', '2026-09-01')->count());
     }
 
+    public function test_patient_period_history_is_listed_chronologically(): void
+    {
+        $user = $this->patient();
+        $this->history($user->id, ['2026-07-01', '2026-08-01', '2026-09-01']);
+
+        $html = $this->actingAs($user)
+            ->get(route('user.menstruation.index'))
+            ->assertOk()
+            ->getContent();
+
+        $july = strpos($html, 'Jul 01');
+        $september = strpos($html, 'Sep 01');
+        $this->assertNotFalse($july);
+        $this->assertNotFalse($september);
+        $this->assertLessThan($september, $july);
+    }
+
     public function test_irregular_calendar_page_renders_range_and_confidence(): void
     {
         $user = $this->patient();

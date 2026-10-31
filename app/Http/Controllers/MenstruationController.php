@@ -144,7 +144,7 @@ class MenstruationController extends Controller
     {
         $woman = User::where('role', 'user')->findOrFail($userId);
         $records = $woman->cycles()
-            ->orderBy('period_start_date', 'desc')
+            ->orderBy('period_start_date', 'asc')
             ->get();
 
         return view('midwife.menstruation.woman', compact('woman', 'records'));
