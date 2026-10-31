@@ -16,7 +16,7 @@
     .pregnancy-records-table .pregnancy-status { gap:0.3rem !important; padding:0.3rem 0.5rem !important; font-size:0.76rem !important; }
     .pregnancy-records-table .badge { padding:0.3rem 0.5rem !important; font-size:0.72rem !important; white-space:nowrap; }
     .pregnancy-records-table .pregnancy-actions { gap:0.35rem !important; flex-wrap:nowrap; }
-    .pregnancy-records-table .pregnancy-actions .btn { padding:0.35rem 0.45rem !important; }
+    .pregnancy-records-table .pregnancy-actions .btn { flex:0 0 32px; width:32px; height:32px; display:inline-grid; place-items:center; padding:0 !important; }
     @media (max-width: 1199.98px) {
         .pregnancy-records-table { font-size:0.72rem !important; }
         .pregnancy-records-table th,
@@ -182,8 +182,8 @@
         @if($pregnancies->count() > 0)
             <table class="table table-hover align-middle pregnancy-records-table">
                     <colgroup>
-                        <col style="width:25%"><col style="width:14%"><col style="width:14%"><col style="width:10%">
-                        <col style="width:11%"><col style="width:9%"><col style="width:11%"><col style="width:6%">
+                        <col style="width:24%"><col style="width:14%"><col style="width:14%"><col style="width:10%">
+                        <col style="width:11%"><col style="width:9%"><col style="width:10%"><col style="width:8%">
                     </colgroup>
                     <thead>
                         <tr style="color:var(--text-muted); font-weight:600; font-size:0.75rem; text-transform:uppercase; letter-spacing:0.5px;">
