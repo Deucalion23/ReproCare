@@ -98,17 +98,17 @@ if [ "${SKIP_SEED}" != "true" ]; then
     fi
 fi
 
-# The 100 fictional scenario accounts are opt-in from the normal Laravel
-# DatabaseSeeder, but requested for the deployed Render demo. Check the
+# The 62 fictional scenario accounts (50 women plus 12 staff) are separate
+# from the normal Laravel DatabaseSeeder. Check the
 # persistent database, not the container filesystem: the check survives
 # redeploys/free-tier wakeups and avoids repeating the larger scenario seed.
-if [ "${APP_ENV}" = "production" ] && [ "${SEED_TEST_SCENARIOS:-true}" = "true" ]; then
+if [ "${APP_ENV}" = "production" ] && [ "${SEED_FIFTY_TEST_WOMEN:-true}" = "true" ]; then
     TEST_COUNT=$(php artisan tinker --execute="echo DB::table('users')->where('email', 'like', 'reprocare-test-%@example.test')->count();" 2>/dev/null | tr -cd '0-9')
-    if [ "${TEST_COUNT}" != "100" ]; then
-        echo "Seeding deployed test scenario accounts (found: ${TEST_COUNT:-0}/100)..."
+    if [ "${TEST_COUNT}" != "62" ]; then
+        echo "Seeding deployed test scenario accounts (found: ${TEST_COUNT:-0}/62)..."
         php artisan db:seed --class=TestScenarioAccountsSeeder --force || echo "Warning: Test scenario seeding failed. Check database migrations and logs."
     else
-        echo "Test scenario accounts already present (100), skipping seed."
+        echo "Test scenario accounts already present (62), skipping seed."
     fi
 fi
 

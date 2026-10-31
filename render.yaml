@@ -25,7 +25,7 @@ services:
         value: production
       - key: APP_DEBUG
         value: false
-      - key: SEED_TEST_SCENARIOS
+      - key: SEED_FIFTY_TEST_WOMEN
         value: true
       - key: LOG_CHANNEL
         value: stderr
