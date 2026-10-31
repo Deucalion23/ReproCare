@@ -64,7 +64,7 @@ class LearningController extends Controller
             $query->where('category', $request->category);
         }
         
-        $materials = $query->latest()->paginate(12)->withQueryString();
+        $materials = $query->orderByDesc('sort_order')->latest()->paginate(12)->withQueryString();
         return view('learning.index', compact('materials'));
     }
 
@@ -294,7 +294,7 @@ class LearningController extends Controller
 
     public function videos()
     {
-        $materials = LearningMaterial::videos()->latest()->paginate(12);
+        $materials = LearningMaterial::videos()->orderByDesc('sort_order')->latest()->paginate(12);
         return view('learning.index', compact('materials'));
     }
 

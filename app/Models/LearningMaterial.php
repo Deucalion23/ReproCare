@@ -23,6 +23,7 @@ class LearningMaterial extends Model
         'youtube_id',
         'quiz_data',
         'week_number',
+        'sort_order',
     ];
 
     protected static function booted(): void

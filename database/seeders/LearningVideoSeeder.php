@@ -6,15 +6,49 @@ use App\Models\LearningMaterial;
 use Illuminate\Database\Seeder;
 
 /**
- * Curated YouTube health-education videos (nutrition, family planning,
- * teenage pregnancy, breastfeeding). Reruns are safe: keyed by video_url.
- * youtube_id is auto-extracted by LearningMaterial::booted() on save.
+ * Curated YouTube health-education videos (featured picks, nutrition, family
+ * planning, teenage pregnancy, breastfeeding). Reruns are safe: keyed by
+ * video_url. youtube_id is auto-extracted by LearningMaterial::booted() on save.
+ * sort_order > 0 pins a video to the front of the Learning Materials list.
  */
 class LearningVideoSeeder extends Seeder
 {
     public function run(): void
     {
         $videos = [
+            // ── Featured (pinned to the front of Learning Materials) ──────
+            [
+                'title' => 'Pregnancy is Insane (Kurzgesagt)',
+                'content' => 'Kurzgesagt\'s animated tour of the biology of pregnancy: how one cell builds a whole human, what the placenta and umbilical cord do, how organs shift to make room, and why the mother\'s body changes so dramatically.',
+                'video_url' => 'https://www.youtube.com/watch?v=Zpq1GbPqhy4',
+                'youtube_id' => 'Zpq1GbPqhy4',
+                'category' => 'prenatal-care',
+                'sort_order' => 100,
+            ],
+            [
+                'title' => 'Understanding Warning Signs in Pregnancy (Medical Aid Films)',
+                'content' => 'Community health film for mothers and families: danger signs to act on quickly — severe headache, blurred vision, swelling, bleeding, fever, reduced baby movement — and why reaching a clinic fast saves lives.',
+                'video_url' => 'https://www.youtube.com/watch?v=swhPa4DS9vs',
+                'youtube_id' => 'swhPa4DS9vs',
+                'category' => 'warning-signs',
+                'sort_order' => 10,
+            ],
+            [
+                'title' => 'Pregnancy 101 | National Geographic',
+                'content' => 'National Geographic follows conception to birth: fertilization, implantation, trimester-by-trimester growth, and the changes a woman\'s body goes through along the way.',
+                'video_url' => 'https://www.youtube.com/watch?v=XEfnq4Q4bfk',
+                'youtube_id' => 'XEfnq4Q4bfk',
+                'category' => 'prenatal-care',
+                'sort_order' => 9,
+            ],
+            [
+                'title' => 'Mental Health Support for New Mothers (Stanford Health Education)',
+                'content' => 'Stanford Center for Health Education on emotional wellbeing after birth: baby blues versus postpartum depression and anxiety, the warning signs to watch for, and where mothers can get support.',
+                'video_url' => 'https://www.youtube.com/watch?v=mDpBgpMPI0Y',
+                'youtube_id' => 'mDpBgpMPI0Y',
+                'category' => 'postpartum',
+                'sort_order' => 8,
+            ],
             // ── Nutrition & diet in pregnancy ─────────────────────────────
             [
                 'title' => 'Nutrition During Pregnancy (Stanford Health Education)',
@@ -113,6 +147,7 @@ class LearningVideoSeeder extends Seeder
                     'content' => $video['content'],
                     'material_type' => 'video',
                     'category' => $video['category'],
+                    'sort_order' => $video['sort_order'] ?? 0,
                 ]
             );
         }
