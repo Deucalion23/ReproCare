@@ -901,9 +901,18 @@ function setupSettingsBrgyDropdown() {
         if (emptyState) emptyState.style.display = count === 0 ? 'block' : 'none';
     }
 
+    // The input is pre-filled with the current barangay, so filtering on it
+    // would leave a single "match" and look like there is only one choice.
+    // Opening reveals every barangay; typing narrows the list from there.
+    function revealAll() {
+        filterList('');
+        const selected = document.querySelector('#settingBrgyScroll .brgy-option-item.selected');
+        if (selected) selected.scrollIntoView({ block: 'nearest' });
+    }
+
     input.addEventListener('focus', function() {
         openDropdown();
-        filterList(this.value);
+        revealAll();
     });
 
     input.addEventListener('input', function() {
@@ -917,7 +926,7 @@ function setupSettingsBrgyDropdown() {
             closeDropdown();
         } else {
             openDropdown();
-            filterList(input.value);
+            revealAll();
         }
     });
 
