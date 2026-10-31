@@ -4,18 +4,36 @@
 
 @push('styles')
 <style>
-    .rec-card { border:none !important; border-radius:20px !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent) !important; overflow:hidden; }
-    .rec-card .card-header { border:none !important; background:transparent !important; font-weight:800; }
-    .rec-table table thead th { border:none !important; background:transparent !important; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-text-muted) !important; }
-    .rec-table table tbody td { border:none !important; }
-    .rec-label { font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); margin-bottom:2px; }
-    .status-pill { font-size:0.72rem; font-weight:800; padding:0.25em 0.8em; border-radius:999px; }
+    .rec-card { border:none !important; border-radius:16px !important; box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent) !important; overflow:hidden; margin-bottom:0.65rem !important; }
+    .rec-card .card-header { border:none !important; background:transparent !important; font-weight:800; font-size:0.75rem; padding:0.45rem 1rem !important; }
+    .rec-card .card-body { padding:0.55rem 1rem !important; }
+    .rec-table .card-body { padding:0 !important; }
+    .rec-table table { font-size:0.7rem !important; margin-bottom:0 !important; }
+    .rec-table table thead th { border:none !important; background:transparent !important; font-size:0.62rem !important; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted) !important; padding:0.35rem 0.5rem !important; }
+    .rec-table table tbody td { border:none !important; padding:0.35rem 0.5rem !important; font-size:0.7rem; }
+    .rec-label { font-size:0.65rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--color-text-muted); margin-bottom:2px; line-height:1; }
+    .status-pill { font-size:0.65rem; font-weight:800; padding:0.15em 0.5em; border-radius:999px; line-height:1; }
     .status-approved { background:var(--color-success-soft); color:var(--color-success-text); }
     .status-other { background:var(--color-surface-soft); color:var(--color-text-muted); }
+    .page-hero { padding:1rem 1.25rem !important; margin-bottom:0.75rem !important; }
+    .page-hero-title { font-size:1.2rem !important; margin-bottom:0.2rem !important; }
+    .page-hero-subtitle { font-size:0.78rem !important; margin:0 !important; }
+    .id-img { width:100%; max-height:120px; object-fit:contain; border-radius:10px; border:1px solid var(--color-border); background:var(--color-surface-soft); }
+    .text-muted { font-size:0.75rem !important; }
+    .record-summary .summary-item { min-height:54px; padding:0.35rem 0.65rem; border-right:1px solid var(--color-border); }
+    .record-summary .summary-item:last-child { border-right:0; }
+    .summary-value { font-size:0.76rem; font-weight:700; line-height:1.3; }
+    @media (max-width: 767.98px) { .record-summary .summary-item { border-right:0; border-bottom:1px solid var(--color-border); } .record-summary .summary-item:last-child { border-bottom:0; } }
 </style>
 @endpush
 
 @section('cho-content')
+
+@php
+    $latestPregnancy = $pregnancies->first();
+    $latestCheckup = $checkups->first();
+    $latestHealthRecord = $healthRecords->first();
+@endphp
 
 <div class="page-hero fade-in-card mb-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -27,30 +45,66 @@
             @if(($woman->status ?? '') !== 'archived')
                 <form method="POST" action="{{ route('cho.patients.archive', $woman->id) }}" onsubmit="return choPromptArchiveReason(this);">
                     @csrf
-                    <button type="submit" class="btn btn-outline-warning btn-sm">
+                    <button type="submit" class="btn btn-outline-warning btn-sm" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
                         <i class="bi bi-archive me-1"></i> Archive
                     </button>
                 </form>
             @endif
-            <a href="{{ route('cho.patients.index') }}" class="btn btn-outline-primary btn-sm">Back to directory</a>
+            <a href="{{ route('cho.patients.index') }}" class="btn btn-outline-primary btn-sm" style="padding:0.3rem 0.7rem;font-size:0.75rem;">Back to directory</a>
+        </div>
+    </div>
+</div>
+
+{{-- A screenshot-friendly clinical overview; full histories remain below. --}}
+<div class="card fade-in-card rec-card record-summary">
+    <div class="card-header">Care at a Glance</div>
+    <div class="card-body p-0">
+        <div class="row g-0">
+            <div class="col-md-4 summary-item">
+                <div class="rec-label">Latest pregnancy</div>
+                @if($latestPregnancy)
+                    <div class="summary-value">{{ $latestPregnancy->risk_level ?? 'Unassessed' }} risk · {{ $latestPregnancy->ended_at ? 'Ended' : 'Active' }}</div>
+                    <div class="text-muted">LMP {{ $latestPregnancy->lmp?->format('M d, Y') ?? 'N/A' }} · EDD {{ $latestPregnancy->edd?->format('M d, Y') ?? 'N/A' }}</div>
+                @else
+                    <div class="summary-value">No pregnancy record</div>
+                @endif
+            </div>
+            <div class="col-md-4 summary-item">
+                <div class="rec-label">Latest checkup</div>
+                @if($latestCheckup)
+                    <div class="summary-value">{{ $latestCheckup->scheduled_date?->format('M d, Y') ?? 'Date not set' }} · {{ $latestCheckup->status }}</div>
+                    <div class="text-muted">{{ $latestCheckup->midwife?->name ?? 'No midwife assigned' }}</div>
+                @else
+                    <div class="summary-value">No checkup scheduled</div>
+                @endif
+            </div>
+            <div class="col-md-4 summary-item">
+                <div class="rec-label">Latest vital signs</div>
+                @if($latestHealthRecord)
+                    <div class="summary-value">BP {{ $latestHealthRecord->bp ?? 'N/A' }} · {{ $latestHealthRecord->weight ?? 'N/A' }} kg</div>
+                    <div class="text-muted">{{ $latestHealthRecord->created_at?->format('M d, Y') ?? 'Date not recorded' }}</div>
+                @else
+                    <div class="summary-value">No health record</div>
+                @endif
+            </div>
         </div>
     </div>
 </div>
 
 {{-- Profile --}}
-<div class="card fade-in-card mb-4 rec-card">
+<div class="card fade-in-card rec-card mb-2">
     <div class="card-header">Profile &amp; Contact</div>
     <div class="card-body">
-        <div class="row g-3" style="font-size:0.875rem;">
-            <div class="col-md-4"><div class="rec-label">Email</div><div>{{ $woman->email }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Contact number</div><div>{{ $woman->display_contact_number }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Status</div><div><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
-            <div class="col-md-4"><div class="rec-label">Date of birth</div><div>{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' (' . $woman->age . ' y/o)' : 'N/A' }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Gender</div><div>{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Barangay</div><div>{{ $woman->display_barangay }}</div></div>
-            <div class="col-md-8"><div class="rec-label">Address</div><div>{{ $woman->display_address }}</div></div>
-            <div class="col-md-4"><div class="rec-label">Partner</div><div>{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
-            <div class="col-md-12"><div class="rec-label">Emergency contacts</div>
+        <div class="row g-1" style="font-size:0.75rem;">
+            <div class="col-6 col-md-4"><div class="rec-label">Email</div><div>{{ $woman->email }}</div></div>
+            <div class="col-6 col-md-2"><div class="rec-label">Contact</div><div>{{ $woman->display_contact_number }}</div></div>
+            <div class="col-6 col-md-2"><div class="rec-label">Status</div><div><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
+            <div class="col-6 col-md-4"><div class="rec-label">Birth / Age</div><div>{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' · ' . $woman->age . ' y/o' : 'N/A' }}</div></div>
+            <div class="col-6 col-md-2"><div class="rec-label">Gender</div><div>{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
+            <div class="col-6 col-md-3"><div class="rec-label">Barangay</div><div>{{ $woman->display_barangay }}</div></div>
+            <div class="col-6 col-md-3"><div class="rec-label">Partner</div><div>{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
+            <div class="col-md-6"><div class="rec-label">Address</div><div>{{ $woman->display_address }}</div></div>
+            <div class="col-md-6"><div class="rec-label">Emergency contacts</div>
                 @forelse($woman->emergencyContacts as $contact)
                     <div>{{ $contact->name }} ({{ $contact->relationship }}) · {{ $contact->contact_number }}</div>
                 @empty
@@ -62,43 +116,41 @@
 </div>
 
 {{-- Valid ID (captured/uploaded at signup; DB copy survives deploys) --}}
-<div class="card fade-in-card mb-4 rec-card">
+@if($woman->hasIdImages())
+<div class="card fade-in-card rec-card mb-2">
     <div class="card-header">Valid ID Documents</div>
     <div class="card-body">
-        @if($woman->hasIdImages())
-        <div class="row g-3">
-            <div class="col-md-6">
-                <div class="rec-label mb-2">Front of ID</div>
+        <div class="row g-2">
+            <div class="col-12 col-md-6">
+                <div class="rec-label mb-1">Front of ID</div>
                 @if($woman->id_image_front_url)
                     <a href="{{ $woman->id_image_front_url }}" target="_blank" rel="noopener" title="Open full-size front of ID">
-                        <img src="{{ $woman->id_image_front_url }}" alt="Front of valid ID for {{ $woman->first_name }} {{ $woman->last_name }}" style="width:100%; max-height:280px; object-fit:contain; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft);">
+                        <img src="{{ $woman->id_image_front_url }}" alt="Front of valid ID" class="id-img">
                     </a>
                 @else
-                    <div class="text-muted" style="font-size:0.85rem;">Front not on file.</div>
+                    <div class="text-muted">Front not on file.</div>
                 @endif
             </div>
-            <div class="col-md-6">
-                <div class="rec-label mb-2">Back of ID</div>
+            <div class="col-12 col-md-6">
+                <div class="rec-label mb-1">Back of ID</div>
                 @if($woman->id_image_back_url)
                     <a href="{{ $woman->id_image_back_url }}" target="_blank" rel="noopener" title="Open full-size back of ID">
-                        <img src="{{ $woman->id_image_back_url }}" alt="Back of valid ID for {{ $woman->first_name }} {{ $woman->last_name }}" style="width:100%; max-height:280px; object-fit:contain; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft);">
+                        <img src="{{ $woman->id_image_back_url }}" alt="Back of valid ID" class="id-img">
                     </a>
                 @else
-                    <div class="text-muted" style="font-size:0.85rem;">Back not on file.</div>
+                    <div class="text-muted">Back not on file.</div>
                 @endif
             </div>
         </div>
-        @else
-        <div class="text-muted" style="font-size:0.875rem;">No valid ID on file for this patient.</div>
-        @endif
     </div>
 </div>
+@endif
 
 {{-- Pregnancies --}}
-<div class="card fade-in-card mb-4 rec-card rec-table">
+<div class="card fade-in-card rec-card rec-table mb-2">
     <div class="card-header">Pregnancies ({{ $pregnancies->count() }})</div>
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light"><tr><th class="px-3 py-3">LMP</th><th class="py-3">EDD</th><th class="py-3">Risk</th><th class="py-3">Outcome / Status</th></tr></thead>
             <tbody>
                 @forelse($pregnancies as $pregnancy)
@@ -117,10 +169,10 @@
 </div>
 
 {{-- Checkups --}}
-<div class="card fade-in-card mb-4 rec-card rec-table">
+<div class="card fade-in-card rec-card rec-table mb-2">
     <div class="card-header">Checkups ({{ $checkups->count() }})</div>
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light"><tr><th class="px-3 py-3">Date</th><th class="py-3">Purpose</th><th class="py-3">Midwife</th><th class="py-3">Status</th></tr></thead>
             <tbody>
                 @forelse($checkups as $checkup)
@@ -139,10 +191,10 @@
 </div>
 
 {{-- Health records --}}
-<div class="card fade-in-card mb-4 rec-card rec-table">
+<div class="card fade-in-card rec-card rec-table mb-2">
     <div class="card-header">Recent Health Records (latest {{ $healthRecords->count() }})</div>
     <div class="table-responsive">
-        <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
+        <table class="table table-hover align-middle mb-0">
             <thead class="table-light"><tr><th class="px-3 py-3">Recorded</th><th class="py-3">BP</th><th class="py-3">Weight</th><th class="py-3">Recorded by</th></tr></thead>
             <tbody>
                 @forelse($healthRecords as $record)
