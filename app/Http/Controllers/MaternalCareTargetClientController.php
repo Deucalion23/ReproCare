@@ -194,9 +194,61 @@ class MaternalCareTargetClientController extends Controller
             'gtpal_preterm' => ['nullable', 'integer', 'min:0'],
             'gtpal_abortions' => ['nullable', 'integer', 'min:0'],
             'gtpal_living_children' => ['nullable', 'integer', 'min:0'],
+            'prenatal_first_trimester_date' => ['nullable', 'date'],
+            'prenatal_second_trimester_date' => ['nullable', 'date'],
+            'prenatal_second_trimester_date_1' => ['nullable', 'date'],
+            'prenatal_second_trimester_date_2' => ['nullable', 'date'],
+            'prenatal_third_trimester_date' => ['nullable', 'date'],
+            'prenatal_third_trimester_date_1' => ['nullable', 'date'],
+            'prenatal_third_trimester_date_2' => ['nullable', 'date'],
+            'prenatal_third_trimester_date_3' => ['nullable', 'date'],
+            'prenatal_third_trimester_date_4' => ['nullable', 'date'],
+            'prenatal_third_trimester_date_5' => ['nullable', 'date'],
+            'td1_date' => ['nullable', 'date'],
+            'td2_date' => ['nullable', 'date'],
+            'td3_date' => ['nullable', 'date'],
+            'td4_date' => ['nullable', 'date'],
+            'td5_date' => ['nullable', 'date'],
+            'iron_folic_first_visit_date' => ['nullable', 'date'],
+            'iron_folic_first_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'iron_folic_second_visit_date' => ['nullable', 'date'],
+            'iron_folic_second_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'iron_folic_third_visit_date' => ['nullable', 'date'],
+            'iron_folic_third_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'iron_folic_fourth_visit_date' => ['nullable', 'date'],
+            'iron_folic_fourth_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'calcium_second_visit_date' => ['nullable', 'date'],
+            'calcium_second_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'calcium_third_visit_date' => ['nullable', 'date'],
+            'calcium_third_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'calcium_fourth_visit_date' => ['nullable', 'date'],
+            'calcium_fourth_visit_tablets' => ['nullable', 'integer', 'min:0'],
+            'iodine_date' => ['nullable', 'date'],
+            'iodine_capsules_given' => ['nullable', 'integer', 'min:0'],
+            'syphilis_screening_date' => ['nullable', 'date'],
+            'syphilis_screening_result' => ['nullable', Rule::in(['positive', 'negative'])],
+            'hepatitis_b_screening_date' => ['nullable', 'date'],
+            'hepatitis_b_screening_result' => ['nullable', Rule::in(['positive', 'negative'])],
+            'hiv_screening_date' => ['nullable', 'date'],
+            'gestational_diabetes_screening_date' => ['nullable', 'date'],
+            'gestational_diabetes_result' => ['nullable', Rule::in(['positive', 'negative'])],
+            'cbc_screening_date' => ['nullable', 'date'],
+            'cbc_anemia_status' => ['nullable', Rule::in(['with_anemia', 'without_anemia'])],
+            'cbc_given_iron' => ['nullable', 'boolean'],
+            'postpartum_within_24_hours_date' => ['nullable', 'date'],
+            'postpartum_within_7_days_date' => ['nullable', 'date'],
+            'postpartum_iron_first_month' => ['nullable', 'string', 'max:255'],
+            'postpartum_iron_second_month' => ['nullable', 'string', 'max:255'],
+            'postpartum_iron_third_month' => ['nullable', 'string', 'max:255'],
+            'vitamin_a_date' => ['nullable', 'date'],
+            'postpartum_remarks' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $validated['fim_status'] = $request->boolean('fim_status');
+
+        if ($request->filled('cbc_given_iron')) {
+            $validated['cbc_given_iron'] = $request->boolean('cbc_given_iron');
+        }
 
         // Convert health_conditions string to array if needed
         if (!empty($validated['health_conditions']) && is_string($validated['health_conditions'])) {
@@ -262,8 +314,12 @@ class MaternalCareTargetClientController extends Controller
         ];
 
         $first = $profile?->prenatal_first_trimester_date ?? ($auto[1][0] ?? null);
-        $second = $profile?->prenatal_second_trimester_date ?? ($auto[2][0] ?? null);
-        $third = $profile?->prenatal_third_trimester_date ?? ($auto[3][0] ?? null);
+        $second = $profile?->prenatal_second_trimester_date_1
+            ?? $profile?->prenatal_second_trimester_date
+            ?? ($auto[2][0] ?? null);
+        $third = $profile?->prenatal_third_trimester_date_1
+            ?? $profile?->prenatal_third_trimester_date
+            ?? ($auto[3][0] ?? null);
 
         return [
             'first' => $first,
@@ -271,8 +327,17 @@ class MaternalCareTargetClientController extends Controller
             'third' => $third,
             'visits' => [
                 'first' => [$first],
-                'second' => [$second, ($auto[2][1] ?? null)],
-                'third' => [$third, ($auto[3][1] ?? null), ($auto[3][2] ?? null), ($auto[3][3] ?? null), ($auto[3][4] ?? null)],
+                'second' => [
+                    $second,
+                    $profile?->prenatal_second_trimester_date_2 ?? ($auto[2][1] ?? null),
+                ],
+                'third' => [
+                    $third,
+                    $profile?->prenatal_third_trimester_date_2 ?? ($auto[3][1] ?? null),
+                    $profile?->prenatal_third_trimester_date_3 ?? ($auto[3][2] ?? null),
+                    $profile?->prenatal_third_trimester_date_4 ?? ($auto[3][3] ?? null),
+                    $profile?->prenatal_third_trimester_date_5 ?? ($auto[3][4] ?? null),
+                ],
             ],
         ];
     }

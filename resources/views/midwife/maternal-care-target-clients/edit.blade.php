@@ -111,6 +111,100 @@
         </div>
 
         <div class="mctl-panel">
+            <div class="mctl-section-title">Pre-natal Check-ups</div>
+            <div class="mctl-grid">
+                @foreach ([
+                    'prenatal_first_trimester_date' => '1st Trimester Date',
+                    'prenatal_second_trimester_date_1' => '2nd Trimester Date 1',
+                    'prenatal_second_trimester_date_2' => '2nd Trimester Date 2',
+                    'prenatal_third_trimester_date_1' => '3rd Trimester Date 1',
+                    'prenatal_third_trimester_date_2' => '3rd Trimester Date 2',
+                    'prenatal_third_trimester_date_3' => '3rd Trimester Date 3',
+                    'prenatal_third_trimester_date_4' => '3rd Trimester Date 4',
+                    'prenatal_third_trimester_date_5' => '3rd Trimester Date 5',
+                ] as $field => $label)
+                    <div>
+                        <label class="form-label">{{ $label }}</label>
+                        <input type="date" name="{{ $field }}" value="{{ old($field, optional(data_get($profile, $field))->format('Y-m-d')) }}" class="form-control">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="mctl-panel">
+            <div class="mctl-section-title">Immunization (Td/TT)</div>
+            <div class="mctl-grid">
+                @foreach ([
+                    'td1_date' => 'Td1 / TT1 Date',
+                    'td2_date' => 'Td2 / TT2 Date',
+                    'td3_date' => 'Td3 / TT3 Date',
+                    'td4_date' => 'Td4 / TT4 Date',
+                    'td5_date' => 'Td5 / TT5 Date',
+                ] as $field => $label)
+                    <div>
+                        <label class="form-label">{{ $label }}</label>
+                        <input type="date" name="{{ $field }}" value="{{ old($field, optional(data_get($profile, $field))->format('Y-m-d')) }}" class="form-control">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="mctl-panel">
+            <div class="mctl-section-title">Iron with Folic Acid</div>
+            <div class="mctl-grid">
+                @foreach ([
+                    'first' => '1st',
+                    'second' => '2nd',
+                    'third' => '3rd',
+                    'fourth' => '4th',
+                ] as $slot => $slotLabel)
+                    <div>
+                        <label class="form-label">{{ $slotLabel }} Visit Date</label>
+                        <input type="date" name="iron_folic_{{ $slot }}_visit_date" value="{{ old("iron_folic_{$slot}_visit_date", optional(data_get($profile, "iron_folic_{$slot}_visit_date"))->format('Y-m-d')) }}" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">{{ $slotLabel }} Visit Tablets</label>
+                        <input type="number" min="0" name="iron_folic_{{ $slot }}_visit_tablets" value="{{ old("iron_folic_{$slot}_visit_tablets", data_get($profile, "iron_folic_{$slot}_visit_tablets")) }}" class="form-control">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="mctl-panel">
+            <div class="mctl-section-title">Calcium Carbonate</div>
+            <div class="mctl-grid">
+                @foreach ([
+                    'second' => '2nd',
+                    'third' => '3rd',
+                    'fourth' => '4th',
+                ] as $slot => $slotLabel)
+                    <div>
+                        <label class="form-label">{{ $slotLabel }} Visit Date</label>
+                        <input type="date" name="calcium_{{ $slot }}_visit_date" value="{{ old("calcium_{$slot}_visit_date", optional(data_get($profile, "calcium_{$slot}_visit_date"))->format('Y-m-d')) }}" class="form-control">
+                    </div>
+                    <div>
+                        <label class="form-label">{{ $slotLabel }} Visit Tablets</label>
+                        <input type="number" min="0" name="calcium_{{ $slot }}_visit_tablets" value="{{ old("calcium_{$slot}_visit_tablets", data_get($profile, "calcium_{$slot}_visit_tablets")) }}" class="form-control">
+                    </div>
+                @endforeach
+            </div>
+        </div>
+
+        <div class="mctl-panel">
+            <div class="mctl-section-title">Iodine Capsules</div>
+            <div class="mctl-grid">
+                <div>
+                    <label class="form-label">Date Given</label>
+                    <input type="date" name="iodine_date" value="{{ old('iodine_date', optional($profile?->iodine_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Capsules Given</label>
+                    <input type="number" min="0" name="iodine_capsules_given" value="{{ old('iodine_capsules_given', $profile?->iodine_capsules_given) }}" class="form-control">
+                </div>
+            </div>
+        </div>
+
+        <div class="mctl-panel">
             <div class="mctl-section-title">GTPAL Information</div>
             <div class="mctl-grid">
                 <div>
@@ -161,6 +255,72 @@
                         <input class="form-check-input" type="checkbox" id="fim_status" name="fim_status" value="1" {{ old('fim_status', $profile?->fim_status) ? 'checked' : '' }}>
                         <label class="form-check-label" for="fim_status">FIM Status Complete</label>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mctl-panel">
+            <div class="mctl-section-title">Laboratory Screening</div>
+            <div class="mctl-grid">
+                <div>
+                    <label class="form-label">Syphilis Screening Date</label>
+                    <input type="date" name="syphilis_screening_date" value="{{ old('syphilis_screening_date', optional($profile?->syphilis_screening_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Syphilis Result</label>
+                    <select name="syphilis_screening_result" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="positive" {{ old('syphilis_screening_result', $profile?->syphilis_screening_result) === 'positive' ? 'selected' : '' }}>Positive</option>
+                        <option value="negative" {{ old('syphilis_screening_result', $profile?->syphilis_screening_result) === 'negative' ? 'selected' : '' }}>Negative</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Hepatitis B Screening Date</label>
+                    <input type="date" name="hepatitis_b_screening_date" value="{{ old('hepatitis_b_screening_date', optional($profile?->hepatitis_b_screening_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Hepatitis B Result</label>
+                    <select name="hepatitis_b_screening_result" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="positive" {{ old('hepatitis_b_screening_result', $profile?->hepatitis_b_screening_result) === 'positive' ? 'selected' : '' }}>Positive</option>
+                        <option value="negative" {{ old('hepatitis_b_screening_result', $profile?->hepatitis_b_screening_result) === 'negative' ? 'selected' : '' }}>Negative</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">HIV Screening Date</label>
+                    <input type="date" name="hiv_screening_date" value="{{ old('hiv_screening_date', optional($profile?->hiv_screening_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Gestational Diabetes Date</label>
+                    <input type="date" name="gestational_diabetes_screening_date" value="{{ old('gestational_diabetes_screening_date', optional($profile?->gestational_diabetes_screening_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Gestational Diabetes Result</label>
+                    <select name="gestational_diabetes_result" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="positive" {{ old('gestational_diabetes_result', $profile?->gestational_diabetes_result) === 'positive' ? 'selected' : '' }}>Positive</option>
+                        <option value="negative" {{ old('gestational_diabetes_result', $profile?->gestational_diabetes_result) === 'negative' ? 'selected' : '' }}>Negative</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">CBC Screening Date</label>
+                    <input type="date" name="cbc_screening_date" value="{{ old('cbc_screening_date', optional($profile?->cbc_screening_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">CBC Anemia Status</label>
+                    <select name="cbc_anemia_status" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="with_anemia" {{ old('cbc_anemia_status', $profile?->cbc_anemia_status) === 'with_anemia' ? 'selected' : '' }}>With Anemia (+)</option>
+                        <option value="without_anemia" {{ old('cbc_anemia_status', $profile?->cbc_anemia_status) === 'without_anemia' ? 'selected' : '' }}>Without Anemia (-)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Given Iron?</label>
+                    <select name="cbc_given_iron" class="form-select">
+                        <option value="">Select...</option>
+                        <option value="1" {{ old('cbc_given_iron', $profile?->cbc_given_iron) == 1 ? 'selected' : '' }}>Yes</option>
+                        <option value="0" {{ old('cbc_given_iron', $profile?->cbc_given_iron) == 0 && $profile?->cbc_given_iron !== null ? 'selected' : '' }}>No</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -258,6 +418,40 @@
                 <div>
                     <label class="form-label">Delivery Remarks</label>
                     <textarea name="delivery_remarks" class="form-control" rows="2">{{ old('delivery_remarks', $profile?->delivery_remarks) }}</textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="mctl-panel">
+            <div class="mctl-section-title">Postpartum</div>
+            <div class="mctl-grid">
+                <div>
+                    <label class="form-label">Within 24 Hours Date</label>
+                    <input type="date" name="postpartum_within_24_hours_date" value="{{ old('postpartum_within_24_hours_date', optional($profile?->postpartum_within_24_hours_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Within 7 Days Date</label>
+                    <input type="date" name="postpartum_within_7_days_date" value="{{ old('postpartum_within_7_days_date', optional($profile?->postpartum_within_7_days_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Iron 1st Month</label>
+                    <input type="text" name="postpartum_iron_first_month" value="{{ old('postpartum_iron_first_month', $profile?->postpartum_iron_first_month) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Iron 2nd Month</label>
+                    <input type="text" name="postpartum_iron_second_month" value="{{ old('postpartum_iron_second_month', $profile?->postpartum_iron_second_month) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Iron 3rd Month</label>
+                    <input type="text" name="postpartum_iron_third_month" value="{{ old('postpartum_iron_third_month', $profile?->postpartum_iron_third_month) }}" class="form-control">
+                </div>
+                <div>
+                    <label class="form-label">Vitamin A Date</label>
+                    <input type="date" name="vitamin_a_date" value="{{ old('vitamin_a_date', optional($profile?->vitamin_a_date)->format('Y-m-d')) }}" class="form-control">
+                </div>
+                <div style="grid-column:1 / -1;">
+                    <label class="form-label">Postpartum Remarks</label>
+                    <input type="text" name="postpartum_remarks" value="{{ old('postpartum_remarks', $profile?->postpartum_remarks) }}" class="form-control">
                 </div>
             </div>
         </div>
