@@ -548,6 +548,30 @@
         gap:0.75rem;
     }
 
+    /* ── Inline indicators: compact count pills ──
+       Page-level counters (requests to review, follow-ups due) read as
+       chrome, not as messages that need dismissing, so they sit side by side
+       in one slim row instead of stacking full-width alert bars. */
+    .main-content .rc-indicator-row { display:flex; flex-wrap:wrap; align-items:center; gap:0.5rem; margin-bottom:1rem; }
+    .main-content .rc-indicator {
+        display:inline-flex;
+        align-items:center;
+        gap:0.4rem;
+        padding:0.26rem 0.7rem;
+        border-radius:999px;
+        border:1px solid var(--color-border);
+        background:var(--color-surface-soft);
+        color:var(--color-text-muted);
+        font-size:0.78rem;
+        font-weight:700;
+        line-height:1.4;
+        white-space:nowrap;
+    }
+    .main-content .rc-indicator i { font-size:0.82rem; line-height:1; }
+    .main-content .rc-indicator.ind-info { background:var(--color-info-soft); color:var(--color-info-text); border-color:transparent; }
+    .main-content .rc-indicator.ind-warning { background:var(--color-warning-soft); color:var(--color-warning-text); border-color:transparent; }
+    .main-content .rc-indicator.ind-success { background:var(--color-secondary-soft); color:var(--color-secondary-text); border-color:transparent; }
+
     /* ── Forum post action rows stay inline on phones ──
        (The global mobile .btn-primary/.btn-outline-primary width:100% rule
        below would stretch the "Read More" pill across the whole row and
