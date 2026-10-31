@@ -87,10 +87,10 @@ class TestScenarioAccountsSeeder extends Seeder
             }
 
             $patients = [];
-            for ($i = 0; $i < 88; $i++) {
+            for ($i = 0; $i < 50; $i++) {
                 $number = $i + 13;
-                $scenario = self::SCENARIOS[intdiv($i, 8)];
-                $variant = $i % 8;
+                $scenario = self::SCENARIOS[intdiv($i * count(self::SCENARIOS), 50)];
+                $variant = $i % 5;
                 $location = $i % 3;
                 $email = sprintf('reprocare-test-%03d@example.test', $number);
                 $existing = User::withTrashed()->where('email', $email)->exists();
@@ -145,8 +145,8 @@ class TestScenarioAccountsSeeder extends Seeder
             );
         });
 
-        $this->command?->info("Test scenario accounts: {$created} created; 100 available (12 staff, 88 patients).");
-        $this->command?->line('Email: reprocare-test-001@example.test through reprocare-test-100@example.test');
+        $this->command?->info("Test scenario accounts: {$created} created; 62 available (12 staff, 50 women).");
+        $this->command?->line('Email: reprocare-test-001@example.test through reprocare-test-062@example.test');
         $this->command?->line('Shared password: TestAccount123!');
     }
 
@@ -165,16 +165,16 @@ class TestScenarioAccountsSeeder extends Seeder
         $status = 'approved';
         if ($scenario === 'onboarding') {
             $status = match ($variant) {
-                0, 1 => 'pending',
-                2 => 'rejected',
-                3 => 'suspended',
+                0 => 'pending',
+                1 => 'rejected',
+                2 => 'suspended',
                 default => 'approved',
             };
         }
 
         // 100 unique, deterministic name pairs from a shuffled index space.
         $nameIndex = ($number * 73 + 19) % 400;
-        $first = $firstNames[intdiv($nameIndex, 20)];
+        $first = 'Test ' . $firstNames[intdiv($nameIndex, 20)];
         $last = $lastNames[$nameIndex % 20];
         $attributes = [
             'first_name' => $first,
@@ -183,15 +183,15 @@ class TestScenarioAccountsSeeder extends Seeder
             'password' => $password,
             'role' => $role,
             'status' => $status,
-            'is_profile_complete' => $scenario !== 'onboarding' || $variant !== 5,
+            'is_profile_complete' => $scenario !== 'onboarding' || $variant !== 4,
             'date_of_birth' => today()->subYears($scenario === 'high_risk' ? 39 : 19 + $number % 21)->subDays($number % 300),
             'gender' => 'female',
-            'contact_number' => $scenario === 'onboarding' && $variant === 5 ? null : sprintf('09%09d', 700000000 + $number),
+            'contact_number' => null,
             'address' => "House {$number}, Purok 1, {$barangay}, San Carlos City",
             'barangay' => $barangay,
             'purok_id' => $puroks[$location]->id,
             'rhu_assignment' => $rhu,
-            'sms_opt_out' => $role === 'user' && $number % 7 === 0,
+            'sms_opt_out' => $role === 'user',
         ];
         if (in_array($role, ['bhw', 'bhw_president', 'midwife'], true)) {
             $attributes['assigned_barangay'] = $barangay;
@@ -203,7 +203,7 @@ class TestScenarioAccountsSeeder extends Seeder
         $account = User::create(['email' => $email] + $attributes);
         // email_verified_at is guarded on User, so fill() would silently
         // discard it and leave every otherwise-ready patient unverified.
-        if ($scenario !== 'onboarding' || $variant !== 4) {
+        if ($scenario !== 'onboarding' || $variant !== 3) {
             $account->forceFill(['email_verified_at' => now()])->save();
         }
         $created++;
@@ -219,7 +219,7 @@ class TestScenarioAccountsSeeder extends Seeder
 
         EmergencyContact::create([
             'user_id' => $patient->id, 'name' => 'Test Partner ' . $patient->id,
-            'relationship' => 'Partner', 'contact_number' => sprintf('09%09d', 800000000 + $patient->id),
+            'relationship' => 'Partner', 'contact_number' => '0000000000',
             'contact_order' => 1, 'is_primary' => true,
         ]);
 
