@@ -80,6 +80,21 @@
 
     /* Barangay combobox dropdown in settings */
     .brgy-combobox-wrap { position:relative; }
+    .brgy-combobox-wrap .brgy-combobox-input { padding-left:2.6rem; padding-right:3rem; height:46px; }
+    .brgy-combobox-icon {
+        position:absolute; left:1rem; top:50%; transform:translateY(-50%);
+        color:var(--primary-light); font-size:0.95rem; pointer-events:none;
+    }
+    .brgy-combobox-toggle {
+        position:absolute; right:0.4rem; top:50%; transform:translateY(-50%);
+        width:34px; height:34px; padding:0; border:0; border-radius:9px;
+        display:inline-flex; align-items:center; justify-content:center;
+        background:transparent; color:var(--text-muted); cursor:pointer;
+        transition:background 0.15s ease, color 0.15s ease;
+    }
+    .brgy-combobox-toggle:hover { background:var(--primary-subtle); color:var(--primary-light); }
+    .brgy-combobox-toggle i { transition:transform 0.2s ease; }
+    .brgy-combobox-wrap.open .brgy-combobox-toggle i { transform:rotate(180deg); }
     .brgy-dropdown-list {
         position:absolute; top:calc(100% + 4px); left:0; right:0;
         background:var(--bg-card); border:1px solid var(--border);
@@ -419,17 +434,15 @@
                                 {{-- Searchable & Scrollable Barangay dropdown --}}
                                 <div class="col-12">
                                     <label class="form-label">Barangay in San Carlos City <span class="text-danger">*</span></label>
-                                    <div class="brgy-combobox-wrap position-relative">
-                                        <div class="input-group">
-                                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-geo-alt text-primary"></i></span>
-                                            <input type="text" id="settingBrgyInput" name="barangay" class="form-control border-start-0"
-                                                   value="{{ old('barangay', auth()->user()->barangay) }}"
-                                                   placeholder="Type to search or scroll to pick from all {{ count($barangays ?? []) }} San Carlos City barangays..."
-                                                   autocomplete="off" required>
-                                            <button type="button" class="btn btn-outline-secondary" id="settingBrgyToggle" title="Click to view all barangays">
-                                                <i class="bi bi-chevron-down" id="settingBrgyArrow"></i>
-                                            </button>
-                                        </div>
+                                    <div class="brgy-combobox-wrap">
+                                        <i class="bi bi-geo-alt brgy-combobox-icon" aria-hidden="true"></i>
+                                        <input type="text" id="settingBrgyInput" name="barangay" class="form-control brgy-combobox-input"
+                                               value="{{ old('barangay', auth()->user()->barangay) }}"
+                                               placeholder="Type to search or scroll to pick from all {{ count($barangays ?? []) }} San Carlos City barangays..."
+                                               autocomplete="off" required>
+                                        <button type="button" class="brgy-combobox-toggle" id="settingBrgyToggle" aria-label="Show all barangays" title="Show all barangays">
+                                            <i class="bi bi-chevron-down" id="settingBrgyArrow"></i>
+                                        </button>
                                         <div class="brgy-dropdown-list" id="settingBrgyList" style="display:none;">
                                             <div class="brgy-list-header">
                                                 <span><i class="bi bi-pin-map-fill me-1"></i> San Carlos City Barangays</span>
@@ -876,13 +889,16 @@ function setupSettingsBrgyDropdown() {
     const emptyState = document.getElementById('settingBrgyEmpty');
 
     if (!input || !dropdown) return;
+    const comboboxWrap = input.closest('.brgy-combobox-wrap');
 
     function openDropdown() {
         dropdown.style.display = 'flex';
+        comboboxWrap?.classList.add('open');
     }
 
     function closeDropdown() {
         dropdown.style.display = 'none';
+        comboboxWrap?.classList.remove('open');
     }
 
     function filterList(query) {
