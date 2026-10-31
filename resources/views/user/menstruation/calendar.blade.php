@@ -382,8 +382,8 @@
             <div class="stat-lbl">Cycle variation (days)</div>
         </div>
         <div class="cycle-stat-pill">
-            <div class="stat-val" style="color:var(--color-secondary-text);">{{ ucfirst($predictionDetail['confidence']) }}</div>
-            <div class="stat-lbl">Prediction confidence</div>
+            <div class="stat-val" style="color:var(--color-secondary-text);">{{ $predictionDetail['strength_label'] }}</div>
+            <div class="stat-lbl">Prediction strength · Level {{ $predictionDetail['strength_level'] }}/4</div>
         </div>
     </div>
     @endif
@@ -498,7 +498,7 @@
         <i class="bi bi-info-circle-fill flex-shrink-0" style="font-size:1.1rem;"></i>
         <span>
             <strong>Getting Started —</strong>
-            Log your periods to build a history. Predictions have low confidence until at least three cycle intervals are available.
+            Log your periods to build a history. Predictions strengthen as you log; Level 4 (Strong) needs at least three cycle intervals with little variation (3 days or less).
         </span>
         <a href="{{ route('user.menstruation.create') }}" class="btn btn-sm btn-primary ms-auto">Log Now</a>
     </div>
@@ -540,7 +540,7 @@
                             </div>
                         </div>
                         @endif
-                        <p class="small text-muted mt-2 mb-0">{{ ucfirst($prediction['confidence']) }} confidence. {{ $prediction['note'] }}</p>
+                        <p class="small text-muted mt-2 mb-0">{{ $prediction['strength_label'] }} prediction (Level {{ $prediction['strength_level'] }}/4). {{ $prediction['note'] }}</p>
                         @if(isset($prediction['fertile_start']) && isset($prediction['fertile_end']))
                         <div>
                             <div style="font-size:0.7rem;text-transform:uppercase;letter-spacing:0.8px;color:var(--text-muted);margin-bottom:0.25rem;">Fertile Window</div>

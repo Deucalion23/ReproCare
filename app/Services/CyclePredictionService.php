@@ -56,6 +56,8 @@ class CyclePredictionService
         $longest = $detail['longest_cycle'] ?? $averageCycle;
         $regularity = $detail['regularity'] ?? 'insufficient_data';
         $confidence = $detail['confidence'] ?? 'low';
+        $strengthLevel = $detail['strength_level'] ?? 1;
+        $strengthLabel = $detail['strength_label'] ?? 'Weak';
 
         $predictions = [];
 
@@ -87,6 +89,8 @@ class CyclePredictionService
                 'fertile_end' => $regularity === 'regular' ? $fertileWindowEnd : null,
                 'regularity' => $regularity,
                 'confidence' => $confidence,
+                'strength_level' => $strengthLevel,
+                'strength_label' => $strengthLabel,
                 'note' => $regularity === 'irregular'
                     ? 'Irregular cycle detected — treat dates as a range, not an exact day. Log consistently and consult your midwife if variation persists.'
                     : ($regularity === 'somewhat_irregular'
@@ -125,6 +129,8 @@ class CyclePredictionService
             default => 'low',
         };
 
+        $strength = $this->getStrengthLevel($lengths->count(), $regularity, $spread);
+
         $next = $this->predictNextPeriod($userId);
         $lastCycle = $cycles->first();
 
@@ -135,6 +141,8 @@ class CyclePredictionService
             'spread_days' => $spread,
             'regularity' => $regularity,
             'confidence' => $confidence,
+            'strength_level' => $strength['level'],
+            'strength_label' => $strength['label'],
             'cycles_used' => $lengths->count(),
             'next_predicted' => $next?->copy(),
             'next_earliest' => ($lastCycle && $lengths->count() >= 2)
@@ -197,6 +205,32 @@ class CyclePredictionService
     }
 
     /**
+     * Four-level prediction strength.
+     *
+     * Level 4 (Strong) requires at least three completed intervals with a
+     * tight spread (≤3 days) — regularity alone is not enough evidence.
+     * Level 3 (High): 3+ regular intervals with wider spread; Level 2
+     * (Moderate): 3+ slightly irregular intervals; Level 1 (Weak):
+     * limited or irregular history.
+     *
+     * @return array{level:int,label:string}
+     */
+    private function getStrengthLevel(int $intervalCount, string $regularity, int $spread): array
+    {
+        $level = match (true) {
+            $intervalCount >= 3 && $regularity === 'regular' && $spread <= 3 => 4,
+            $intervalCount >= 3 && $regularity === 'regular' => 3,
+            $intervalCount >= 3 && $regularity === 'somewhat_irregular' => 2,
+            default => 1,
+        };
+
+        return [
+            'level' => $level,
+            'label' => [1 => 'Weak', 2 => 'Moderate', 3 => 'High', 4 => 'Strong'][$level],
+        ];
+    }
+
+    /**
      * Get cycle regularity status
      *
      * @param int $userId
@@ -248,6 +282,8 @@ class CyclePredictionService
             'longest_cycle' => $cycles->max('cycle_length') ?? $detail['longest_cycle'],
             'regularity' => $detail['regularity'],
             'confidence' => $detail['confidence'],
+            'strength_level' => $detail['strength_level'],
+            'strength_label' => $detail['strength_label'],
             'next_predicted_period' => $nextPeriod?->format('Y-m-d'),
             'next_earliest' => $detail['next_earliest']?->format('Y-m-d'),
             'next_latest' => $detail['next_latest']?->format('Y-m-d'),

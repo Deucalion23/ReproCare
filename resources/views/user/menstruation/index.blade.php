@@ -144,6 +144,13 @@
 .cycle-hero-sub { color:var(--color-text-muted); font-size:0.9rem; margin-bottom:1rem; }
 .cycle-hero-sub strong { color:var(--color-secondary-text); }
 .cycle-hero-meta { color:var(--color-text-muted); font-size:0.82rem; }
+.cycle-strength { display:inline-flex; align-items:center; gap:5px; margin:0 0 0.75rem; }
+.cycle-strength-seg { width:16px; height:6px; border-radius:999px; background:var(--color-surface-soft); border:1px solid var(--color-border); }
+.cycle-strength.level-4 .cycle-strength-seg.on { background:var(--color-success-text); border-color:var(--color-success-text); }
+.cycle-strength.level-3 .cycle-strength-seg.on { background:var(--color-secondary); border-color:var(--color-secondary); }
+.cycle-strength.level-2 .cycle-strength-seg.on { background:var(--color-warning-text); border-color:var(--color-warning-text); }
+.cycle-strength.level-1 .cycle-strength-seg.on { background:var(--color-danger-text); border-color:var(--color-danger-text); }
+.cycle-strength-label { font-size:0.72rem; font-weight:800; color:var(--color-text-muted); margin-left:4px; letter-spacing:0.02em; }
 
 .cycle-tabs { display:inline-flex; align-items:center; gap:4px; background:var(--color-surface-soft); border:1px solid var(--color-border); border-radius:999px; padding:4px; }
 .cycle-nav-btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; border:none; border-radius:999px; font-size:0.82rem; font-weight:800; padding:0.55rem 1.35rem; text-decoration:none; transition:all 0.2s ease; white-space:nowrap; }
@@ -315,11 +322,17 @@
                         {{ $predictionDetail['next_earliest']->format('M j') }} – {{ $predictionDetail['next_latest']->format('M j') }}
                     </h2>
                     <p class="cycle-hero-sub">
-                        Estimated next-period start window · {{ ucfirst($predictionDetail['confidence']) }} confidence.
+                        Estimated next-period start window · {{ $predictionDetail['strength_label'] }} prediction (Level {{ $predictionDetail['strength_level'] }} of 4).
                         @if(today()->gt($predictionDetail['next_latest']))
                             This estimate has passed. Log any unrecorded period; discuss persistent changes with your health worker.
                         @endif
                     </p>
+                    <div class="cycle-strength level-{{ $predictionDetail['strength_level'] }}" role="img" aria-label="Prediction strength: {{ $predictionDetail['strength_label'] }}, level {{ $predictionDetail['strength_level'] }} of 4">
+                        @for($i = 1; $i <= 4; $i++)
+                            <span class="cycle-strength-seg {{ $i <= $predictionDetail['strength_level'] ? 'on' : '' }}"></span>
+                        @endfor
+                        <span class="cycle-strength-label">Level {{ $predictionDetail['strength_level'] }} · {{ $predictionDetail['strength_label'] }}</span>
+                    </div>
                     @if($averageCycle)
                         <small class="cycle-hero-meta">
                             <i class="bi bi-arrow-repeat me-1"></i> Average cycle: {{ $averageCycle }} days

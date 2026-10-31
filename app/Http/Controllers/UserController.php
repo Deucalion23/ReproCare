@@ -663,6 +663,8 @@ class UserController extends Controller
             'average_period_length' => $averagePeriod,
             'recent_cycles' => $cycles,
             'confidence' => $detail['confidence'],
+            'strength_level' => $detail['strength_level'],
+            'strength_label' => $detail['strength_label'],
             'regularity' => $detail['regularity'],
             'next_earliest' => $detail['next_earliest']?->toDateString(),
             'next_latest' => $detail['next_latest']?->toDateString(),
