@@ -123,7 +123,6 @@
     .create-post-header p { margin:0.3rem 0 0; font-size:0.85rem; color:var(--color-text-muted); }
     .create-author-box { background:var(--color-bg); background-color:var(--color-bg); border:none; border-radius:14px; }
     .create-author-avatar { width:40px; height:40px; border-radius:50%; background:var(--color-surface-strong); background-color:var(--color-surface-strong); display:flex; align-items:center; justify-content:center; font-size:1rem; font-weight:800; color:var(--color-on-solid); flex-shrink:0; }
-    .create-author-role { color:var(--color-secondary-text); font-weight:800; }
     .create-label { font-weight:800; font-size:0.86rem; color:var(--color-text); }
     .create-label i { color:var(--color-secondary-text); }
     .create-label span { color:var(--color-text-muted); font-weight:600; font-size:0.8rem; }
@@ -198,12 +197,6 @@
                 </div>
                 <div>
                     <div style="font-weight:800; font-size:0.9rem; color:var(--color-text);">{{ $forumUser->name }}</div>
-                    <div style="font-size:0.75rem; color:var(--color-text-muted);">
-                        Posting as
-                        <span class="create-author-role">
-                            {{ $forumUser->role === 'midwife' ? 'Midwife' : ($forumUser->role === 'bhw' ? 'BHW' : 'Patient') }}
-                        </span>
-                    </div>
                 </div>
             </div>
 

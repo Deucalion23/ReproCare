@@ -47,4 +47,23 @@ class ForumUnifyTest extends AutomationTestCase
             $this->assertSame('forum.create', (new ForumController())->create()->getName(), $role);
         }
     }
+
+    public function test_forum_never_labels_the_viewer_with_their_role(): void
+    {
+        foreach (['user', 'midwife', 'bhw', 'bhw_president', 'rhu', 'cho'] as $role) {
+            $index = $this->actingAs($this->patient(['role' => $role]))
+                ->get(route('forum.index'))
+                ->assertOk()
+                ->getContent();
+
+            $this->assertStringNotContainsString('forum-role-badge', $index, $role);
+
+            $create = $this->actingAs($this->patient(['role' => $role]))
+                ->get(route('forum.create'))
+                ->assertOk()
+                ->getContent();
+
+            $this->assertStringNotContainsString('Posting as', $create, $role);
+        }
+    }
 }

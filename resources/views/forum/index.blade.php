@@ -21,12 +21,6 @@
         default => 'user-content',
     };
     $recentPosts = \App\Models\ForumPost::active()->latest()->take(5)->get();
-    $forumRoleLabel = match($forumUser?->role) {
-        'midwife' => 'Midwife',
-        'bhw' => 'Barangay Health Worker',
-        'bhw_president' => 'BHW President',
-        default => null,
-    };
 @endphp
 
 @extends($forumLayout)
@@ -81,7 +75,6 @@
         line-height:1.5;
         opacity:1;
     }
-    .forum-role-badge { background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text); border:none; padding:0.5rem 0.9rem; border-radius:999px; font-weight:800; font-size:0.76rem; }
     .forum-composer-btn { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; border:none !important; border-radius:999px !important; padding:0.6rem 1.3rem !important; font-weight:800 !important; color:var(--color-on-solid) !important; box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); }
     .forum-composer-btn:hover { background:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; transform:translateY(-1px); }
 
@@ -444,7 +437,6 @@
         }
         .forum-hero-title { font-size:1rem !important; gap:0.4rem !important; margin-bottom:0.15rem !important; }
         .forum-hero-sub { font-size:0.74rem !important; line-height:1.4 !important; }
-        .forum-role-badge { display:none !important; }
         .forum-composer-btn { display:none !important; }
 
         /* Phones: tighter composer + post cards, smaller text throughout. */
@@ -503,11 +495,6 @@
             </p>
         </div>
         <div class="d-flex align-items-center gap-2">
-            @if($forumRoleLabel)
-                <span class="badge forum-role-badge">
-                    <i class="bi bi-person-badge me-1"></i> {{ $forumRoleLabel }}
-                </span>
-            @endif
             @if($isLimited)
                 <span class="badge rounded-pill px-3 py-2" style="border:1px solid var(--color-border); background:var(--color-surface-soft); color:var(--color-text-muted); font-size:0.75rem;" title="Posting unlocks after RHU approval of your account">
                     <i class="bi bi-lock-fill me-1"></i> Read-only

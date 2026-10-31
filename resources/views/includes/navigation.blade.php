@@ -194,7 +194,6 @@
                         <div class="fw-700 text-truncate" style="max-width:110px; font-size:0.84rem; color:var(--text);">
                             {{ $currentUser->first_name }}
                         </div>
-                        <small class="text-muted" style="font-size:0.7rem;">{{ ucfirst($currentRole) }}</small>
                     </div>
                 </a>
 
