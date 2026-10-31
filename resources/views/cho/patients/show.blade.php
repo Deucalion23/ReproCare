@@ -23,6 +23,20 @@
     .record-summary .summary-item { min-height:54px; padding:0.35rem 0.65rem; border-right:1px solid var(--color-border); }
     .record-summary .summary-item:last-child { border-right:0; }
     .summary-value { font-size:0.76rem; font-weight:700; line-height:1.3; }
+    .profile-grid { display:grid; grid-template-columns:repeat(12, minmax(0, 1fr)); gap:0.9rem 1.25rem; }
+    .profile-field { min-width:0; }
+    .profile-field .profile-value { font-size:0.78rem; line-height:1.45; overflow-wrap:anywhere; }
+    .profile-email { grid-column:span 6; }
+    .profile-contact, .profile-status { grid-column:span 3; }
+    .profile-birth, .profile-gender, .profile-barangay, .profile-partner { grid-column:span 3; }
+    .profile-address, .profile-emergency { grid-column:span 6; }
+    @media (max-width: 991.98px) {
+        .profile-email, .profile-contact, .profile-status, .profile-birth, .profile-gender, .profile-barangay, .profile-partner, .profile-address, .profile-emergency { grid-column:span 6; }
+    }
+    @media (max-width: 575.98px) {
+        .profile-grid { grid-template-columns:1fr; gap:0.8rem; }
+        .profile-email, .profile-contact, .profile-status, .profile-birth, .profile-gender, .profile-barangay, .profile-partner, .profile-address, .profile-emergency { grid-column:span 1; }
+    }
     @media (max-width: 767.98px) { .record-summary .summary-item { border-right:0; border-bottom:1px solid var(--color-border); } .record-summary .summary-item:last-child { border-bottom:0; } }
 </style>
 @endpush
@@ -95,22 +109,22 @@
 <div class="card fade-in-card rec-card mb-2">
     <div class="card-header">Profile &amp; Contact</div>
     <div class="card-body">
-        <div class="row g-1" style="font-size:0.75rem;">
-            <div class="col-6 col-md-4"><div class="rec-label">Email</div><div>{{ $woman->email }}</div></div>
-            <div class="col-6 col-md-2"><div class="rec-label">Contact</div><div>{{ $woman->display_contact_number }}</div></div>
-            <div class="col-6 col-md-2"><div class="rec-label">Status</div><div><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
-            <div class="col-6 col-md-4"><div class="rec-label">Birth / Age</div><div>{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' · ' . $woman->age . ' y/o' : 'N/A' }}</div></div>
-            <div class="col-6 col-md-2"><div class="rec-label">Gender</div><div>{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
-            <div class="col-6 col-md-3"><div class="rec-label">Barangay</div><div>{{ $woman->display_barangay }}</div></div>
-            <div class="col-6 col-md-3"><div class="rec-label">Partner</div><div>{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
-            <div class="col-md-6"><div class="rec-label">Address</div><div>{{ $woman->display_address }}</div></div>
-            <div class="col-md-6"><div class="rec-label">Emergency contacts</div>
+        <div class="profile-grid">
+            <div class="profile-field profile-email"><div class="rec-label">Email</div><div class="profile-value">{{ $woman->email }}</div></div>
+            <div class="profile-field profile-contact"><div class="rec-label">Contact</div><div class="profile-value">{{ $woman->display_contact_number }}</div></div>
+            <div class="profile-field profile-status"><div class="rec-label">Status</div><div class="profile-value"><span class="status-pill {{ ($woman->status ?? 'approved') === 'approved' ? 'status-approved' : 'status-other' }}">{{ ucfirst($woman->status ?? 'approved') }}</span></div></div>
+            <div class="profile-field profile-birth"><div class="rec-label">Birth / Age</div><div class="profile-value">{{ $woman->date_of_birth ? $woman->date_of_birth->format('M d, Y') . ' · ' . $woman->age . ' y/o' : 'N/A' }}</div></div>
+            <div class="profile-field profile-gender"><div class="rec-label">Gender</div><div class="profile-value">{{ $woman->gender ? ucfirst($woman->gender) : 'N/A' }}</div></div>
+            <div class="profile-field profile-barangay"><div class="rec-label">Barangay</div><div class="profile-value">{{ $woman->display_barangay }}</div></div>
+            <div class="profile-field profile-partner"><div class="rec-label">Partner</div><div class="profile-value">{{ $woman->partner_name ?? 'N/A' }}{{ $woman->partner_contact ? ' · ' . $woman->partner_contact : '' }}</div></div>
+            <div class="profile-field profile-address"><div class="rec-label">Address</div><div class="profile-value">{{ $woman->display_address }}</div></div>
+            <div class="profile-field profile-emergency"><div class="rec-label">Emergency contacts</div><div class="profile-value">
                 @forelse($woman->emergencyContacts as $contact)
                     <div>{{ $contact->name }} ({{ $contact->relationship }}) · {{ $contact->contact_number }}</div>
                 @empty
                     <div class="text-muted">None recorded.</div>
                 @endforelse
-            </div>
+            </div></div>
         </div>
     </div>
 </div>
