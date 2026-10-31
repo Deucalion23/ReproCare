@@ -146,7 +146,7 @@
 
                             <!-- Informed choice -->
                             <div class="col-12 form-check ms-1">
-                                <input class="form-check-input" type="checkbox" name="informed_choice_confirmed" value="1" id="choice" @checked(old('informed_choice_confirmed', $record->informed_choice_confirmed))>
+                                <input class="form-check-input me-2" type="checkbox" name="informed_choice_confirmed" value="1" id="choice" @checked(old('informed_choice_confirmed', $record->informed_choice_confirmed))>
                                 <label class="form-check-label fw-bold" for="choice">Client received informed-choice counseling and may accept, decline, or change methods.</label>
                             </div>
                         </div>
@@ -164,7 +164,7 @@
                     </div>
                     <div class="card-body">
                         <div class="form-check mb-3">
-                            <input class="form-check-input" type="checkbox" name="is_postpartum_plan" value="1" id="postpartumPlan"
+                            <input class="form-check-input me-2" type="checkbox" name="is_postpartum_plan" value="1" id="postpartumPlan"
                                 @checked(old('is_postpartum_plan', $record->is_postpartum_plan))
                                 onchange="togglePostpartumFields()">
                             <label class="form-check-label fw-bold" for="postpartumPlan">Create a postpartum family-planning plan</label>
