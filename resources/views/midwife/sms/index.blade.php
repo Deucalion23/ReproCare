@@ -26,8 +26,8 @@
     .rc-panel-head h3 i { color:var(--color-secondary-text); }
     .rc-search { position:relative; margin-top:.8rem; }
     .rc-search i { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--color-text-muted); }
-    .rc-search input, .rc-search select { width:100%; padding:.62rem 1rem .62rem 2.5rem; border-radius:999px; border:none; background:var(--color-surface-soft); background-color:var(--color-surface-soft); font-size:.84rem; color:var(--color-text); outline:none; }
-    .rc-search input:focus { border:none; background:var(--color-surface); background-color:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
+    .rc-search input, .rc-search select { width:100%; padding:.62rem 1rem .62rem 2.5rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-soft); background-color:var(--color-surface-soft); font-size:.84rem; color:var(--color-text); outline:none; }
+    .rc-search input:focus { border-color:var(--color-primary); background:var(--color-surface); background-color:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
     .rc-filter-row { display:flex; gap:.5rem; margin-top:.6rem; }
     .rc-filter-row select { border:none; border-radius:12px; font-size:.78rem; font-weight:600; padding:.5rem .6rem; background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text); flex:1; }
     .rc-conv-list { padding:.7rem; overflow-y:auto; flex:1; max-height:600px; display:flex; flex-direction:column; gap:.3rem; }

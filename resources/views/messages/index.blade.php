@@ -31,8 +31,8 @@
     .rc-count { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); border:none; color:var(--color-secondary-text); border-radius:999px; font-size:.72rem; font-weight:800; padding:.25rem .75rem; }
     .rc-search { position:relative; }
     .rc-search i { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-size:.88rem; }
-    .rc-search input { width:100%; padding:.65rem 1rem .65rem 2.5rem; border-radius:999px; border:none; background:var(--color-surface-soft); background-color:var(--color-surface-soft); font-size:.86rem; color:var(--color-text); outline:none; transition:all .2s; }
-    .rc-search input:focus { border:none; background:var(--color-surface); background-color:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
+    .rc-search input { width:100%; padding:.65rem 1rem .65rem 2.5rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-soft); background-color:var(--color-surface-soft); font-size:.86rem; color:var(--color-text); outline:none; transition:all .2s; }
+    .rc-search input:focus { border-color:var(--color-primary); background:var(--color-surface); background-color:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
 
     .rc-chat-list { list-style:none; margin:0; padding:.7rem; overflow-y:auto; flex:1; max-height:620px; display:flex; flex-direction:column; gap:.3rem; }
     .rc-chat-item { display:flex; align-items:center; gap:.8rem; padding:.8rem; border-radius:14px; text-decoration:none; color:inherit; border:none; transition:all .18s; }

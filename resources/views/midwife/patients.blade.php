@@ -37,7 +37,7 @@
     .women-sub { color:var(--color-text-muted); font-size:0.8rem; }
     .women-type-badge {
         display:inline-flex; align-items:center; gap:0.35rem; padding:0.32rem 0.75rem;
-        border-radius:999px; font-size:0.72rem; font-weight:800; border:none;
+        border-radius:999px; font-size:0.72rem; font-weight:800; border:1px solid var(--color-border);
     }
     .women-type-badge.registered { background:var(--color-success-soft); background-color:var(--color-success-soft); color:var(--color-success-text); }
     .women-type-badge.walk-in { background:var(--color-peach-soft); background-color:var(--color-peach-soft); color:var(--color-warning-text); }
@@ -114,24 +114,24 @@
     if (!empty($pregnancyStatus) && $pregnancyStatus !== 'all') $secActiveCount++;
 @endphp
 
-<div class="card fade-in-card filter-toolbar-card my-4" style="border:none; border-radius:24px; box-shadow:var(--wp-shadow-sm); overflow:visible !important; position:relative !important; z-index:20 !important;">
-    <div class="card-body p-3 p-md-4" style="overflow:visible !important; border:none;">
+<div class="card fade-in-card filter-toolbar-card my-4" style="border:1px solid var(--color-border); border-radius:24px; box-shadow:var(--wp-shadow-sm); overflow:visible !important; position:relative !important; z-index:20 !important;">
+    <div class="card-body p-3 p-md-4" style="overflow:visible !important; border:1px solid var(--color-border);">
         {{-- Scope Nav Pills --}}
-        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-3" style="border:none;">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3 pb-3" style="border:1px solid var(--color-border);">
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <a href="{{ route('midwife.patients', array_merge(request()->except(['page']), ['filter' => 'all'])) }}" 
                    class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5"
-                   style="border:none; {{ request('filter', 'all') === 'all' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
+                   style="border:1px solid var(--color-border); {{ request('filter', 'all') === 'all' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
                     <i class="bi bi-people-fill"></i> All Women ({{ $patients->total() }})
                 </a>
                 <a href="{{ route('midwife.patients', array_merge(request()->except(['page']), ['filter' => 'registered'])) }}" 
                    class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5"
-                   style="border:none; {{ request('filter') === 'registered' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
+                   style="border:1px solid var(--color-border); {{ request('filter') === 'registered' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
                     <i class="bi bi-person-check-fill"></i> Enrolled ({{ $registeredCount }})
                 </a>
                 <a href="{{ route('midwife.patients', array_merge(request()->except(['page']), ['filter' => 'unregistered'])) }}" 
                    class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5"
-                   style="border:none; {{ request('filter') === 'unregistered' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
+                   style="border:1px solid var(--color-border); {{ request('filter') === 'unregistered' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
                     <i class="bi bi-person-badge-fill"></i> Unlinked ({{ $unregisteredCount }})
                 </a>
             </div>
@@ -153,12 +153,12 @@
                        placeholder="Search name, ID, contact..." 
                        class="form-control" 
                        autocomplete="off"
-                       style="height:44px; border-radius:12px; border:none; background:var(--color-surface-soft); background-color:var(--color-surface-soft); padding-left:2.6rem; font-size:0.9rem;">
+                       style="height:44px; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft); background-color:var(--color-surface-soft); padding-left:2.6rem; font-size:0.9rem;">
             </div>
 
             {{-- 2. Barangay Dropdown (directly visible) --}}
             <div style="min-width:200px; max-width:260px;" class="flex-grow-1 flex-md-grow-0">
-                <select name="barangay" class="form-select" style="height:44px; border-radius:12px; border:none; background-color:var(--color-surface-soft); font-size:0.9rem;" onchange="this.form.submit()">
+                <select name="barangay" class="form-select" style="height:44px; border-radius:12px; border:1px solid var(--color-border); background-color:var(--color-surface-soft); font-size:0.9rem;" onchange="this.form.submit()">
                     <option value="">All Barangays</option>
                     @php
                         $bList = !empty($barangays) ? $barangays : \App\Http\Controllers\AuthController::getSanCarlosBarangays();
@@ -178,7 +178,7 @@
                         data-bs-display="static"
                         data-bs-auto-close="outside" 
                         aria-expanded="false"
-                        style="height:44px; border-radius:12px; border:none; background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text); font-weight:700; padding:0 1.15rem;">
+                        style="height:44px; border-radius:12px; border:1px solid var(--color-border); background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text); font-weight:700; padding:0 1.15rem;">
                     <i class="bi bi-sliders"></i>
                     <span>Filters{{ $secActiveCount > 0 ? ' (' . $secActiveCount . ')' : '' }}</span>
                     @if($secActiveCount > 0)
@@ -189,7 +189,7 @@
                 {{-- Floating Dropdown/Popover Panel anchored directly beneath trigger button (right-0 top-full mt-2) --}}
                 <div class="dropdown-menu dropdown-menu-end shadow-xl p-3.5 filter-popover-panel" 
                      id="secondaryFiltersPanel"
-                     style="position:absolute !important; right:0 !important; top:100% !important; margin-top:0.5rem !important; min-width:min(320px, calc(100vw - 32px)) !important; width:340px !important; max-width:calc(100vw - 32px) !important; border-radius:1rem !important; border:none; background:var(--color-surface); box-shadow:0 20px 25px -5px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent), 0 8px 10px -6px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent), 0 20px 45px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 18%, transparent) !important; z-index:50 !important;">
+                     style="position:absolute !important; right:0 !important; top:100% !important; margin-top:0.5rem !important; min-width:min(320px, calc(100vw - 32px)) !important; width:340px !important; max-width:calc(100vw - 32px) !important; border-radius:1rem !important; border:1px solid var(--color-border); background:var(--color-surface); box-shadow:0 20px 25px -5px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent), 0 8px 10px -6px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent), 0 20px 45px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 18%, transparent) !important; z-index:50 !important;">
                     
                     <div class="d-flex align-items-center justify-content-between pb-2 mb-3 border-bottom" style="border-color:var(--color-border) !important;">
                         <h6 class="mb-0 fw-bold" style="font-family:'Plus Jakarta Sans', sans-serif; color:var(--color-text); font-size:0.95rem;">Secondary Filters
@@ -272,16 +272,16 @@
 </div>
 
 {{-- Unified Patient Directory Table Card with Summary Pills in Header --}}
-<div class="card fade-in-card directory-card-wrapper mb-4" style="border:none; border-radius:24px; box-shadow:var(--wp-shadow-sm); overflow:hidden; position:relative !important; z-index:10 !important;">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 px-4" style="background:var(--color-surface); background-color:var(--color-surface); border:none;">
+<div class="card fade-in-card directory-card-wrapper mb-4" style="border:1px solid var(--color-border); border-radius:24px; box-shadow:var(--wp-shadow-sm); overflow:hidden; position:relative !important; z-index:10 !important;">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2 py-3 px-4" style="background:var(--color-surface); background-color:var(--color-surface); border:1px solid var(--color-border);">
         <h5 class="mb-0 fw-bold" style="color:var(--color-text); font-family:'Plus Jakarta Sans',sans-serif; font-size:1.05rem;">
             Patient Directory
         </h5>
         <div class="d-flex align-items-center gap-2 flex-wrap">
-            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background:var(--color-success-soft); background-color:var(--color-success-soft); border:none; color:var(--color-success-text); font-size:0.78rem;">
+            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background:var(--color-success-soft); background-color:var(--color-success-soft); border:1px solid var(--color-border); color:var(--color-success-text); font-size:0.78rem;">
                 <i class="bi bi-calendar-check-fill me-1"></i> Scheduled Checkups: {{ $scheduledCheckups }}
             </span>
-            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background:var(--color-danger-soft); background-color:var(--color-danger-soft); border:none; color:var(--color-danger-text); font-size:0.78rem;">
+            <span class="badge rounded-pill px-3 py-1.5 fw-bold" style="background:var(--color-danger-soft); background-color:var(--color-danger-soft); border:1px solid var(--color-border); color:var(--color-danger-text); font-size:0.78rem;">
                 <i class="bi bi-exclamation-circle-fill me-1"></i> Missed: {{ $missedCheckups }}
             </span>
             @if(request('search'))
@@ -294,15 +294,15 @@
     <div class="card-body p-0">
         @if($patients->count() > 0)
             <div class="table-responsive">
-                <table class="table table-hover table-sticky-head mb-0" id="womenTable" style="border:none;">
+                <table class="table table-hover table-sticky-head mb-0" id="womenTable" style="border:1px solid var(--color-border);">
                     <thead>
-                        <tr class="text-uppercase" style="font-size:0.74rem; font-weight:800; color:var(--color-text-muted); border:none;">
-                            <th class="ps-4 py-3" style="border:none;">Woman</th>
-                            <th class="py-3" style="border:none;">Type</th>
-                            <th class="py-3" style="border:none;">Contact Number</th>
-                            <th class="py-3" style="border:none;">Barangay</th>
-                            <th class="py-3" style="border:none;">Pregnancy &amp; Risk Level</th>
-                            <th class="text-end pe-4 py-3" style="border:none;">Clinical Actions</th>
+                        <tr class="text-uppercase" style="font-size:0.74rem; font-weight:800; color:var(--color-text-muted); border:1px solid var(--color-border);">
+                            <th class="ps-4 py-3" style="border:1px solid var(--color-border);">Woman</th>
+                            <th class="py-3" style="border:1px solid var(--color-border);">Type</th>
+                            <th class="py-3" style="border:1px solid var(--color-border);">Contact Number</th>
+                            <th class="py-3" style="border:1px solid var(--color-border);">Barangay</th>
+                            <th class="py-3" style="border:1px solid var(--color-border);">Pregnancy &amp; Risk Level</th>
+                            <th class="text-end pe-4 py-3" style="border:1px solid var(--color-border);">Clinical Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -321,8 +321,8 @@
                                     default            => 'badge-success',
                                 };
                             @endphp
-                            <tr style="border:none;">
-                                <td class="ps-4 py-3" style="border:none;">
+                            <tr style="border:1px solid var(--color-border);">
+                                <td class="ps-4 py-3" style="border:1px solid var(--color-border);">
                                     <div class="women-table-name">
                                         <x-patient-avatar :patient="$patient" :name="$name" :size="42" />
                                         <div>
@@ -338,14 +338,14 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-3" style="border:none;">
+                                <td class="py-3" style="border:1px solid var(--color-border);">
                                     <span class="women-type-badge {{ $isWalkIn ? 'walk-in' : 'registered' }}">
                                         <i class="bi {{ $isWalkIn ? 'bi-person-walking' : 'bi-person-check-fill' }}"></i>
                                         {{ $isWalkIn ? 'Unlinked' : 'Enrolled' }}
                                     </span>
                                 </td>
-                                <td class="py-3" style="border:none; color:var(--color-text); font-weight:600;">{{ $contact ?: '—' }}</td>
-                                <td class="py-3" style="border:none;">
+                                <td class="py-3" style="border:1px solid var(--color-border); color:var(--color-text); font-weight:600;">{{ $contact ?: '—' }}</td>
+                                <td class="py-3" style="border:1px solid var(--color-border);">
                                     {{-- Truncated Barangay to prevent row height breaking --}}
                                     <div class="fw-600 text-truncate" style="max-width:180px;" title="{{ $patient->barangay ? 'Brgy. ' . $patient->barangay : 'San Carlos City' }}">
                                         {{ $patient->barangay ? 'Brgy. ' . $patient->barangay : 'San Carlos City' }}
@@ -354,7 +354,7 @@
                                         <div class="women-sub text-truncate" style="max-width:180px;" title="{{ $patient->purok->name }}">{{ $patient->purok->name }}</div>
                                     @endif
                                 </td>
-                                <td class="py-3" style="border:none;">
+                                <td class="py-3" style="border:1px solid var(--color-border);">
                                     @if($activePreg)
                                         <div>
                                             <span class="pill-badge {{ $badgeClass }}">{{ ucfirst($risk) }} Risk</span>
@@ -366,11 +366,11 @@
                                         <span class="women-sub">Non-pregnant / Postpartum</span>
                                     @endif
                                 </td>
-                                <td class="text-end pe-4 py-3" style="border:none;">
+                                <td class="text-end pe-4 py-3" style="border:1px solid var(--color-border);">
                                     <div class="d-inline-flex align-items-center gap-1.5">
                                         <a href="{{ $isWalkIn ? route('midwife.walk-in-patients.show', $patient->id) : route('midwife.patient-details', $patient->id) }}"
                                            class="btn btn-sm"
-                                           style="border:none; border-radius:999px; padding:0.45rem 1.1rem; font-size:0.8rem; font-weight:800; background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid);"
+                                           style="border:1px solid var(--color-border); border-radius:999px; padding:0.45rem 1.1rem; font-size:0.8rem; font-weight:800; background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid);"
                                            title="Review Patient Record">
                                             <i class="bi bi-eye-fill me-1"></i> Review
                                         </a>
