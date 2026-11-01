@@ -4,9 +4,14 @@
     $stacked = $supportStacked ?? false;
 @endphp
 <section id="decision-support" class="card mb-3" style="scroll-margin-top:90px" aria-labelledby="patient-decision-support-title">
+    {{-- portal-theme.css:256 forces .main-content .card-header to space-between, which
+         flung the icon to one edge and the title to the other. Grouping them keeps the
+         label beside its icon; the record-count badge still rides the right edge. --}}
     <div class="card-header d-flex align-items-center gap-2 py-2 px-3">
-        <i class="bi bi-stars" style="color:var(--color-primary);"></i>
-        <h2 id="patient-decision-support-title" class="h6 mb-0">Patient decision support</h2>
+        <span class="d-inline-flex align-items-center gap-2 min-w-0">
+            <i class="bi bi-stars flex-shrink-0" style="color:var(--color-primary);"></i>
+            <h2 id="patient-decision-support-title" class="h6 mb-0">Patient decision support</h2>
+        </span>
         @if($supportRows->count() > 1)
             <span class="badge rounded-pill text-bg-light border">{{ $supportRows->count() }} open records</span>
         @endif

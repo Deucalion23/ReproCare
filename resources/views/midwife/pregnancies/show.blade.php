@@ -10,9 +10,13 @@
         body .main-content .page-hero .btn-hero-primary,
         body .main-content .page-hero .btn-hero-secondary { padding:0.4rem 0.85rem !important; font-size:0.85rem !important; }
         .pd-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); line-height:1.1; margin-bottom:2px; }
-        .pd-value { font-size:0.82rem; font-weight:600; color:var(--text); line-height:1.3; }
+        .pd-value { font-size:0.82rem; font-weight:600; color:var(--text); line-height:1.3; overflow-wrap:anywhere; }
         .pd-section { font-size:0.78rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--text); margin-bottom:0.5rem; }
-        .pd-stat { padding:0.35rem 0.7rem; border:1px solid var(--border); border-radius:10px; height:100%; }
+        /* Chips share one row, so each must survive being squeezed: min-width:0 lets the
+           flex/grid track shrink below its text, and the badge wraps instead of spilling
+           over its own border and onto the neighbour's label. */
+        .pd-stat { min-width:0; display:flex; flex-direction:column; align-items:flex-start; justify-content:center; gap:2px; padding:0.4rem 0.7rem; border:1px solid var(--border); border-radius:10px; height:100%; }
+        .pd-stat .badge { max-width:100%; font-size:0.72rem; font-weight:700; line-height:1.25; padding:0.16rem 0.5rem; white-space:normal; overflow-wrap:anywhere; }
         .pd-identity { width:46px; height:46px; border-radius:14px; object-fit:cover; border:1px solid var(--border); flex:0 0 auto; }
         .pd-split { position:relative; }
         @media (min-width:1200px) {
@@ -85,8 +89,11 @@
         <div class="col-xl-8">
             <div class="card border-0 shadow-sm fade-in-card mb-3" style="background:var(--bg-card);">
                 <div class="card-body p-3">
-                    <div class="row g-2 align-items-center pb-3 mb-3 border-bottom">
-                        <div class="col-12 col-lg-auto d-flex align-items-center gap-2">
+                    {{-- Identity and chips are stacked, not side-by-side columns: the
+                         auto-width identity block used to eat the row and leave each chip
+                         ~40px wide, so the Status badge spilled over its own border. --}}
+                    <div class="pb-3 mb-3 border-bottom">
+                        <div class="d-flex align-items-center gap-2 flex-wrap">
                             <img src="{{ $patientImage }}" alt="{{ $patientName }}" class="pd-identity">
                             <div class="min-w-0">
                                 <div class="fw-bold text-truncate" style="color:var(--text);font-size:1rem;line-height:1.2;">{{ $patientName }}</div>
@@ -94,31 +101,29 @@
                             </div>
                             <span class="badge {{ $isWalkIn ? 'bg-info' : 'bg-primary' }}">{{ $isWalkIn ? 'Unlinked woman' : 'Enrolled woman' }}</span>
                         </div>
-                        <div class="col-12 col-lg">
-                            <div class="row g-2">
-                                <div class="col-6 col-lg-3">
-                                    <div class="pd-stat">
-                                        <div class="pd-label">Status</div>
-                                        <span class="badge {{ $pregnancy->status === 'completed' ? 'bg-secondary' : 'bg-success' }}">{{ ucfirst($pregnancy->status) }}</span>
-                                    </div>
+                        <div class="row row-cols-2 row-cols-lg-4 g-2 mt-2">
+                            <div class="col">
+                                <div class="pd-stat">
+                                    <div class="pd-label">Status</div>
+                                    <span class="badge {{ $pregnancy->status === 'completed' ? 'bg-secondary' : 'bg-success' }}">{{ ucfirst($pregnancy->status) }}</span>
                                 </div>
-                                <div class="col-6 col-lg-3">
-                                    <div class="pd-stat">
-                                        <div class="pd-label">Risk Level</div>
-                                        <div class="pd-value">{{ $pregnancy->risk_level ?? 'Low' }}</div>
-                                    </div>
+                            </div>
+                            <div class="col">
+                                <div class="pd-stat">
+                                    <div class="pd-label">Risk Level</div>
+                                    <div class="pd-value">{{ $pregnancy->risk_level ?? 'Low' }}</div>
                                 </div>
-                                <div class="col-6 col-lg-3">
-                                    <div class="pd-stat">
-                                        <div class="pd-label">AOG</div>
-                                        <div class="pd-value">{{ $pregnancy->formatted_aog }}</div>
-                                    </div>
+                            </div>
+                            <div class="col">
+                                <div class="pd-stat">
+                                    <div class="pd-label">AOG</div>
+                                    <div class="pd-value">{{ $pregnancy->formatted_aog }}</div>
                                 </div>
-                                <div class="col-6 col-lg-3">
-                                    <div class="pd-stat">
-                                        <div class="pd-label">BMI</div>
-                                        <div class="pd-value">{{ $bmi ? number_format($bmi, 2) . ' - ' . $bmiLabel : 'N/A' }}</div>
-                                    </div>
+                            </div>
+                            <div class="col">
+                                <div class="pd-stat">
+                                    <div class="pd-label">BMI</div>
+                                    <div class="pd-value">{{ $bmi ? number_format($bmi, 2) . ' - ' . $bmiLabel : 'N/A' }}</div>
                                 </div>
                             </div>
                         </div>
