@@ -19,15 +19,27 @@
     .wd-tab:hover { border-color:var(--color-primary) !important; color:var(--color-primary-text) !important; }
     .wd-tab.active { background:var(--color-text) !important; background-color:var(--color-text) !important; border-color:var(--color-text) !important; color:var(--color-bg) !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
     .wd-tab.active i { color:var(--color-bg) !important; }
+    /* The wrapper owns the only border and the only focus ring. theme.css:75/79
+       re-applies border-color + a 3px !important ring to every .form-control and
+       :focus input at (0,3,2)/(0,4,2), so the inner reset needs the same
+       :root[data-theme][data-bs-theme] body prefix plus .wd-search to outrank it. */
     .wd-search { position:relative; box-sizing:border-box; background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-input-border) !important; border-radius:10px !important; max-width:320px; min-height:36px; }
-    .wd-search:focus-within { border-color:var(--color-primary) !important; box-shadow:none !important; }
-    .wd-search .form-control { display:block; min-width:0; width:100%; min-height:34px; background:transparent !important; border:0 !important; border-radius:10px !important; box-shadow:none !important; outline:0 !important; font-size:0.82rem; padding:0.375rem 2.75rem 0.375rem 0.9rem !important; }
+    .wd-search:focus-within { border-color:var(--color-primary-text) !important; box-shadow:0 0 0 3px var(--focus-ring) !important; }
+    :root[data-theme][data-bs-theme] body .wd-search :is(.form-control,.form-select,input,textarea) {
+        display:block; min-width:0; width:100%; min-height:34px; appearance:none;
+        background:transparent !important; background-color:transparent !important;
+        border:0 !important; border-color:transparent !important; border-radius:10px !important;
+        box-shadow:none !important; outline:0 !important;
+        font-size:0.82rem; padding:0.375rem 2.75rem 0.375rem 0.9rem !important;
+    }
+    :root[data-theme][data-bs-theme] body .wd-search :is(.form-control,input,textarea):focus { border:0 !important; border-color:transparent !important; box-shadow:none !important; outline:0 !important; }
     .wd-search .btn { position:absolute; top:0; right:0; bottom:0; display:grid; place-items:center; border:0 !important; border-radius:0 10px 10px 0 !important; background:transparent !important; box-shadow:none !important; outline:0 !important; color:var(--color-text-muted) !important; width:2.5rem; padding:0; }
     .wd-search .btn:hover, .wd-search .btn:focus-visible { color:var(--color-primary-text) !important; background:transparent !important; box-shadow:none !important; outline:0 !important; }
     .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
     .wd-filters .wd-field { display:flex; flex-direction:column; gap:0.25rem; }
     .wd-filters label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
-    .wd-filters .form-control, .wd-filters .form-select { border-radius:10px !important; border-color:var(--color-input-border) !important; font-size:0.82rem; min-height:36px; }
+    .wd-filters .wd-select-field .form-control, .wd-filters .wd-select-field .form-select,
+    .wd-filters .wd-date-field .form-control, .wd-filters .wd-date-field .form-select { border-radius:10px !important; border-color:var(--color-input-border) !important; font-size:0.82rem; min-height:36px; }
     .wd-filters .wd-search-field { flex:1 1 240px; max-width:320px; }
     .wd-filters .wd-select-field { flex:0 1 150px; min-width:130px; }
     .wd-filters .wd-date-field { flex:0 1 150px; min-width:130px; }
