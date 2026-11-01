@@ -3,41 +3,22 @@
 @section('title', 'All Women - BHW President Portal | ReproCare')
 
 @push('styles')
+@include('includes.women-directory-styles')
 <style>
     @media (max-width: 767.98px) {
         .page-hero { padding:0.8rem 0.9rem !important; border-radius:14px !important; margin-bottom:0.8rem !important; }
         .page-hero .page-hero-title { font-size:0.95rem !important; }
         .page-hero .page-hero-subtitle { font-size:0.7rem !important; }
-        .card { border-radius:14px !important; margin-bottom:0.8rem !important; }
-        .card-header { padding:0.65rem 0.8rem !important; gap:0.5rem !important; flex-wrap:wrap !important; }
-        .card-header h5 { font-size:0.82rem !important; }
-        .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
-        .card-body { padding:0.7rem 0.8rem !important; }
-        /* Search bar + button stay side by side on one row. */
-        .pw-search-card { margin-bottom:0.7rem !important; }
-        .pw-search-card .card-body { padding:0.6rem 0.7rem !important; }
-        .pw-search-form { display:flex !important; flex-direction:column !important; gap:0.5rem !important; align-items:stretch !important; }
-        .pw-search-form .pw-search-field { flex:1 1 auto !important; min-width:0 !important; width:100% !important; }
-        .pw-search-form .pw-search-btns { flex:1 1 auto !important; width:100% !important; }
-        .pw-search-form .pw-search-btns .btn { width:100% !important; justify-content:center !important; padding-left:0.7rem !important; padding-right:0.7rem !important; }
-        .pw-search-form .pw-search-label { display:inline !important; }
-        .card-body .form-label { font-size:0.66rem !important; margin-bottom:0.2rem !important; }
-        .card-body .form-control { font-size:0.74rem !important; min-height:2.375rem; }
-        .card-body .btn { font-size:0.7rem !important; }
+        .wd-wrap .card-header { padding:0.65rem 0.7rem !important; gap:0.5rem !important; }
+        .wd-wrap .card-header h5 { font-size:0.82rem !important; }
+        .wd-wrap .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
+        .wd-filters { width:100%; }
+        .wd-filters .wd-search-field { max-width:none; flex:1 1 100%; }
+        .wd-count { font-size:0.7rem; }
         .table { font-size:0.7rem !important; }
         .table th, .table td { padding:0.4rem 0.5rem !important; }
-        .table .pw-patient-name { white-space:nowrap !important; font-size:0.7rem !important; }
-        .table .pw-patient-sub { white-space:nowrap !important; overflow:hidden !important; text-overflow:ellipsis !important; max-width:6.5rem; font-size:0.6rem !important; }
         .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
-        .table .btn {
-            font-size:0.66rem !important; padding:0.32rem 0.6rem !important; white-space:nowrap !important;
-            text-align:center !important; display:inline-flex !important;
-            align-items:center !important; justify-content:center !important;
-        }
         .card-footer { font-size:0.7rem !important; padding:0.6rem !important; }
-        .text-center.py-5 { padding-top:1.25rem !important; padding-bottom:1.25rem !important; }
-        .text-center h6 { font-size:0.85rem !important; }
-        .text-center p { font-size:0.72rem !important; }
     }
 </style>
 @endpush
@@ -45,7 +26,7 @@
 @section('bhw-president-content')
 
 <div class="page-hero fade-in-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <div class="page-hero-title">All Women</div>
             <p class="page-hero-subtitle">Registered women living in your assigned barangay.</p>
@@ -53,58 +34,85 @@
     </div>
 </div>
 
-<div class="card fade-in-card mb-4 pw-search-card">
-    <div class="card-body">
-        <form method="GET" action="{{ route('bhw-president.women.index') }}" class="row g-3 align-items-end pw-search-form">
-            <div class="col-md-9 pw-search-field">
-                <label class="form-label">Search Patient</label>
-                <input type="text" name="search" class="form-control" placeholder="Search name, email, or barangay..." value="{{ $search }}">
-            </div>
-            <div class="col-md-3 d-flex gap-2 pw-search-btns">
-                <button type="submit" class="btn btn-primary flex-fill" aria-label="Search"><i class="bi bi-search"></i><span class="pw-search-label"> Search</span></button>
-                @if($search !== '')
-                    <a href="{{ route('bhw-president.women.index') }}" class="btn btn-outline-secondary">Clear</a>
-                @endif
-            </div>
-        </form>
-    </div>
-</div>
+<div class="card fade-in-card wd-wrap">
+    <div class="card-header bg-transparent p-3">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <h5 class="mb-0">
+                <i class="bi bi-people-fill me-1"></i> Women in Your Barangay ({{ $women->total() }})
+            </h5>
 
-<div class="card fade-in-card">
-    <div class="card-header">
-        <h5 class="mb-0">Women in Your Barangay ({{ $women->total() }})</h5>
+            <form method="GET" action="{{ route('bhw-president.women.index') }}" class="wd-filters">
+                <div class="wd-field wd-search-field">
+                    <label for="pwSearch">Search</label>
+                    <div class="wd-search">
+                        <input type="search" id="pwSearch" name="search" class="form-control"
+                               value="{{ $search }}" placeholder="Name, email, or barangay...">
+                        <button class="btn" type="submit" title="Search"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-sm wd-apply-btn">
+                        <i class="bi bi-funnel me-1"></i> Filter
+                    </button>
+                    @if ($search !== '')
+                        <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                            <i class="bi bi-x-lg me-1"></i> Clear
+                        </a>
+                    @endif
+                </div>
+            </form>
+        </div>
     </div>
+
     <div class="card-body p-0">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3 py-2 border-bottom">
+            <span class="wd-count">
+                Showing <strong>{{ $women->count() }}</strong> of <strong>{{ $women->total() }}</strong>
+                {{ Str::plural('woman', $women->total()) }}
+                @if ($search !== '')
+                    <span class="text-muted">· results for "{{ $search }}"</span>
+                @else
+                    <span class="text-muted">· in your assigned barangay</span>
+                @endif
+            </span>
+            @if ($search !== '')
+                <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
+                </a>
+            @endif
+        </div>
+
         @if($women->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-hover mb-0 table-cards-mobile">
+            <div class="table-responsive" style="overflow:visible;">
+                <table class="table table-hover align-middle table-cards-mobile mb-0">
                     <thead>
                         <tr>
-                            <th>Patient</th>
-                            <th>Barangay</th>
-                            <th>Contact</th>
-                            <th>Status</th>
-                            <th class="text-center">Actions</th>
+                            <th class="px-3 py-3">Patient</th>
+                            <th class="py-3">Barangay</th>
+                            <th class="py-3">Contact</th>
+                            <th class="py-3">Status</th>
+                            <th class="py-3 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($women as $woman)
                             <tr>
-                                <td class="no-card-label" data-label="Patient">
+                                <td class="no-card-label px-3" data-label="Patient">
                                     <div class="d-flex align-items-center gap-2">
-                                        <x-patient-avatar :patient="$woman" :size="26" />
+                                        <x-patient-avatar :patient="$woman" :size="34" />
                                         <div style="min-width:0;">
-                                            <div class="pw-patient-name" style="font-weight:500;">{{ $woman->name ?? 'Unknown' }}</div>
-                                            <small class="text-muted pw-patient-sub d-block">{{ $woman->email ?? 'No email' }}</small>
+                                            <div class="wd-name">{{ $woman->name ?? 'Unknown' }}</div>
+                                            <div class="wd-sub">{{ $woman->email ?? 'No email' }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td data-label="Barangay">{{ $woman->barangay ?? 'N/A' }}</td>
+                                <td class="wd-cell-wrap" data-label="Barangay">{{ $woman->barangay ?? 'N/A' }}</td>
                                 <td data-label="Contact" style="white-space:nowrap;">{{ $woman->contact_number ?? '—' }}</td>
                                 <td data-label="Status">
-                                    <span class="badge bg-success">{{ ucfirst($woman->status ?? 'approved') }}</span>
+                                    <span class="pill-badge badge-success">{{ ucfirst($woman->status ?? 'approved') }}</span>
                                 </td>
-                                <td class="text-center no-card-label" data-label="Actions">
+                                <td class="no-card-label text-center" data-label="Actions">
                                     <a href="{{ route('profile.view', $woman->id) }}" class="btn btn-sm btn-outline-primary" title="View patient" aria-label="View patient">
                                         <i class="bi bi-eye"></i> View
                                     </a>
@@ -114,12 +122,18 @@
                     </tbody>
                 </table>
             </div>
-            <div class="card-footer">{{ $women->links() }}</div>
+
+            <div class="p-3">{{ $women->links('vendor.pagination.numbers-only') }}</div>
         @else
-            <div class="text-center py-5">
-                <i class="bi bi-people empty-state-icon"></i>
-                <h6>No women found</h6>
-                <p>{{ $search !== '' ? 'No registered women match your search in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
+            <div class="empty-state p-5 text-center">
+                <i class="bi bi-people empty-state-icon" style="font-size:2.5rem;"></i>
+                <h6 class="mt-2 fw-bold">No women found</h6>
+                <p class="text-muted">{{ $search !== '' ? 'No registered women match your search in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
+                @if ($search !== '')
+                    <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
+                    </a>
+                @endif
             </div>
         @endif
     </div>
