@@ -369,7 +369,8 @@ class MaternalAnalyticsService
             $next = $linked->filter(fn ($c) => $c->status === 'Scheduled' && $c->scheduled_date
                 && Carbon::parse($c->scheduled_date)->startOfDay()->gte(today()))->sortBy('scheduled_date')->first();
             $entry['next_appointment'] = $next ? Carbon::parse($next->scheduled_date)->toDateString() : null;
-            return $entry;
+
+            return array_merge($entry, $this->supportInsights($pregnancy, $entry, $linked));
         })->sortByDesc(fn ($entry) => ($entry['emergency'] ? 10 : 0) + self::RISK_ORDER[$entry['risk']])->values();
     }
 
@@ -397,7 +398,7 @@ class MaternalAnalyticsService
         } elseif ($days < 0) {
             $reasons[] = 'Expected delivery date passed; pregnancy outcome needs confirmation.';
         } elseif ($days <= 14) {
-            $reasons[] = "Expected delivery is in {$days} day(s).";
+            $reasons[] = 'Expected delivery is in ' . $this->dayUnit($days) . '.';
         }
         $action = match (true) {
             $emergency, $risk === 'Critical' => 'Contact the responsible clinician promptly to review the recorded alert and referral status.',
@@ -419,8 +420,160 @@ class MaternalAnalyticsService
             'risk' => $risk, 'emergency' => $emergency,
             'edd' => $pregnancy->edd?->toDateString(), 'care_gap_count' => $gaps->count(),
             'assessment_date' => $latest?->created_at?->toDateString(),
+            'days_to_edd' => $days,
             'reasons' => $reasons, 'action' => $action,
         ];
+    }
+
+    /**
+     * Detailed, read-only care suggestions for one open pregnancy. Every
+     * statement is grounded in a saved record; nothing here diagnoses,
+     * prescribes, or changes stored data.
+     */
+    private function supportInsights(Pregnancy $pregnancy, array $entry, Collection $linked): array
+    {
+        $latest = $pregnancy->latestHealthRecord;
+        $profile = $pregnancy->maternalCareTargetClient;
+        $hasLmp = (bool) $pregnancy->lmp;
+        $aog = $hasLmp ? (int) $pregnancy->aog_weeks : null;
+        $trimester = $pregnancy->trimester_name;
+        $days = $entry['days_to_edd'];
+        $cadenceWeeks = $aog === null ? null : ($aog >= 36 ? 1 : ($aog >= 28 ? 2 : 4));
+
+        $findings = [];
+        $recommendations = [];
+
+        $summary = $aog !== null ? "{$aog} weeks AOG" : 'Gestational age not computable (LMP missing)';
+        if ($trimester !== 'Unknown') {
+            $summary .= " · {$trimester}";
+        }
+        $summary .= $days === null
+            ? ' · EDD not recorded'
+            : ($days >= 0
+                ? " · EDD {$pregnancy->edd->format('M j, Y')} · {$this->dayUnit($days)} remaining"
+                : " · EDD {$pregnancy->edd->format('M j, Y')} passed " . $this->dayUnit($days * -1) . ' ago');
+
+        if ($entry['emergency']) {
+            $recommendations[] = 'Latest record is flagged as an emergency — contact the responsible clinician promptly to review the alert and referral status.';
+        } elseif ($entry['risk'] === 'Critical') {
+            $recommendations[] = 'Contact the responsible clinician promptly to review the recorded alert and referral status.';
+        } elseif ($entry['risk'] === 'High') {
+            $recommendations[] = 'Prioritize a clinician review and confirm the existing follow-up plan.';
+        } elseif ($entry['risk'] === 'Unassessed') {
+            $recommendations[] = 'Ask the assigned clinician to complete or verify the risk assessment.';
+        }
+
+        if ($days !== null && $days < 0) {
+            $findings[] = 'Expected delivery date has passed while the pregnancy record remains open.';
+            $recommendations[] = 'Confirm whether delivery occurred and record the pregnancy outcome.';
+        }
+
+        $lastCompleted = $linked->where('status', 'Completed')
+            ->filter(fn ($c) => $c->scheduled_date)
+            ->map(fn ($c) => Carbon::parse($c->scheduled_date)->startOfDay())
+            ->max();
+        $lastContact = collect([$latest?->created_at?->copy()->startOfDay(), $lastCompleted])->filter()->max();
+
+        if ($lastContact) {
+            $elapsed = (int) today()->diffInDays($lastContact, false) * -1;
+            $findings[] = "Last recorded contact on {$lastContact->format('M j, Y')} (" . $this->dayUnit($elapsed) . ' ago).';
+            if ($cadenceWeeks !== null && $elapsed > $cadenceWeeks * 7) {
+                $findings[] = "This is beyond the recommended every-" . ($cadenceWeeks === 1 ? 'week' : "{$cadenceWeeks}-week") . " contact interval for this stage of pregnancy.";
+            }
+        } else {
+            $findings[] = 'No prenatal contact is recorded yet for this pregnancy.';
+        }
+
+        if ($entry['care_gap_count'] > 0) {
+            $findings[] = "{$entry['care_gap_count']} scheduled visit(s) were missed or are overdue.";
+            $recommendations[] = "Follow up {$entry['care_gap_count']} missed/overdue visit(s) — contact the patient to rebook and confirm barriers to attendance.";
+        }
+
+        if (! $entry['next_appointment']) {
+            $findings[] = 'No upcoming appointment is currently scheduled.';
+            $recommendations[] = $aog !== null
+                ? 'Schedule the next prenatal contact ' . ($cadenceWeeks === 1 ? 'within the next week' : ($cadenceWeeks === 2 ? 'within the next 2 weeks' : 'within the next month')) . '.'
+                : 'Arrange a prenatal contact as soon as possible and record the LMP to enable visit scheduling.';
+        } elseif ($lastContact && $cadenceWeeks !== null) {
+            $recommendations[] = 'Confirm attendance at the next scheduled contact and review the care plan.';
+        }
+
+        $labs = [];
+        if ($profile) {
+            $labs = [
+                ['Syphilis screening', $profile->syphilis_screening_date, $profile->syphilis_screening_result, 6, 14, 'ideally within the first trimester'],
+                ['Hepatitis B screening', $profile->hepatitis_b_screening_date, $profile->hepatitis_b_screening_result, 6, 14, 'ideally within the first trimester'],
+                ['HIV screening', $profile->hiv_screening_date, null, 6, 14, 'ideally within the first trimester'],
+                ['CBC / anemia screening', $profile->cbc_screening_date, null, 12, 28, 'at least once during pregnancy'],
+                ['Gestational diabetes screening', $profile->gestational_diabetes_screening_date, $profile->gestational_diabetes_result, 24, 28, 'recommended at 24–28 weeks'],
+            ];
+        }
+        $due = [];
+        $overdue = [];
+        $positive = [];
+        foreach ($labs as [$label, $date, $result, $from, $late, $note]) {
+            if ($date) {
+                if ($result === 'positive') {
+                    $positive[] = $label;
+                }
+                continue;
+            }
+            if ($aog === null) {
+                continue;
+            }
+            if ($aog >= $late) {
+                $overdue[] = "{$label} ({$note})";
+            } elseif ($aog >= $from) {
+                $due[] = "{$label} ({$note})";
+            }
+        }
+        if ($positive) {
+            $findings[] = 'Recorded positive result(s): ' . implode(', ', $positive) . ' — verify documented management and referral.';
+        }
+        if ($overdue) {
+            $findings[] = 'Overdue screening(s): ' . implode('; ', $overdue) . '.';
+            $recommendations[] = 'Complete the overdue screening(s) and record the results.';
+        } elseif ($due) {
+            $findings[] = 'Screening(s) due now: ' . implode('; ', $due) . '.';
+            $recommendations[] = 'Offer the due screening(s) at the next contact.';
+        }
+
+        if ($profile) {
+            $tdCount = collect([$profile->td1_date, $profile->td2_date, $profile->td3_date, $profile->td4_date, $profile->td5_date])
+                ->filter()->count();
+            $findings[] = "{$tdCount} of 5 Td doses recorded.";
+            if ($tdCount < 5 && $aog !== null && $aog >= 14) {
+                $recommendations[] = "Td protection is incomplete ({$tdCount}/5 recorded) — give remaining dose(s) where indicated before delivery.";
+            }
+        }
+
+        if ($latest) {
+            $weight = $latest->weight;
+            $height = $latest->height;
+            if ($weight && $height) {
+                $bmi = $weight / pow($height / 100, 2);
+                $label = $bmi < 18.5 ? 'underweight range' : ($bmi >= 30 ? 'obese range' : 'normal range');
+                $findings[] = sprintf('Latest recorded BMI %.1f (%s) on %s.', $bmi, $label, $latest->created_at->format('M j, Y'));
+            }
+            if ($latest->bp) {
+                $findings[] = "Latest recorded BP {$latest->bp} on {$latest->created_at->format('M j, Y')}.";
+            }
+        }
+
+        if ($recommendations === []) {
+            $recommendations[] = $entry['action'];
+        }
+
+        return [
+            'summary' => $summary,
+            'findings' => array_values(array_unique($findings)),
+            'recommendations' => array_values(array_unique($recommendations)),
+        ];
+    }
+
+    private function dayUnit(int $days): string
+    {
+        return $days === 1 ? '1 day' : $days . ' days';
     }
 
     private function area(?string $value): string

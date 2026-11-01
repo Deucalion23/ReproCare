@@ -236,6 +236,12 @@ class MaternalAnalyticsTest extends AutomationTestCase
         $html = view('midwife.partials.decision-support', ['decisionSupport' => $rows])->render();
         $this->assertStringContainsString('Patient decision support', $html);
         $this->assertStringContainsString('Emergency flag', $html);
+        $this->assertStringContainsString('Key findings', $html);
+        $this->assertStringContainsString('Suggested next steps', $html);
+        $this->assertStringNotContainsString('Recorded-data rules', $html);
+        $this->assertStringNotContainsString('Pregnancy #', $html);
+        $this->assertNotEmpty($rows[0]['findings']);
+        $this->assertNotEmpty($rows[0]['recommendations']);
         $this->assertSame(0, DB::table('sms_logs')->count());
         $this->assertSame('Medium', DB::table('pregnancies')->where('id', $id)->value('risk_level'));
         DB::table('maternal_deaths')->insert(['user_id' => $patient->id, 'death_date' => '2026-09-01']);
