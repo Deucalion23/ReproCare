@@ -53,7 +53,11 @@ class PostpartumController extends Controller
             ->get()
             ->filter->has_danger_signs;
 
-        return view('postpartum.index', compact('delivered', 'newborns', 'dangerVisits'));
+        $immunizationsDue = NewbornImmunization::where('status', 'scheduled')
+            ->whereDate('scheduled_date', '<=', now()->toDateString())
+            ->count();
+
+        return view('postpartum.index', compact('delivered', 'newborns', 'dangerVisits', 'immunizationsDue'));
     }
 
     public function showMother($id)

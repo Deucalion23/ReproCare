@@ -6,6 +6,7 @@
     $contentSection = request()->routeIs('midwife.postpartum.*') ? 'midwife-content' : 'bhw-content';
     $routeBase = request()->routeIs('midwife.postpartum.*') ? 'midwife.postpartum' : 'bhw.postpartum';
     $isMidwife = request()->routeIs('midwife.postpartum.*');
+    $railLimit = 5;
 @endphp
 
 @section($contentSection)
@@ -15,15 +16,20 @@
             <div class="page-hero-title">Postpartum &amp; Newborn Monitoring</div>
             <p class="page-hero-subtitle mb-0">Activated once a delivery date is recorded — prenatal → delivery → postnatal in one view.</p>
         </div>
-        @unless($isMidwife)
-        <span class="summary-chip chip-primary"><i class="bi bi-house-heart-fill"></i> House-to-house toolkit</span>
-        @endunless
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="summary-chip chip-primary"><i class="bi bi-person-badge-fill"></i> {{ $delivered->total() }} mother(s) tracked</span>
+            <span class="summary-chip chip-info"><i class="bi bi-balloon-heart-fill"></i> {{ $newborns->total() }} newborn(s)</span>
+            <span class="summary-chip chip-warning"><i class="bi bi-syringe"></i> {{ $immunizationsDue }} vaccine dose(s) due</span>
+            @if($dangerVisits->count() > 0)
+                <a href="#postpartumFollowUps" class="summary-chip chip-danger text-decoration-none"><i class="bi bi-exclamation-triangle-fill"></i> {{ $dangerVisits->count() }} visit(s) flagged</a>
+            @else
+                <span class="summary-chip chip-success"><i class="bi bi-shield-check"></i> No flagged visits</span>
+            @endif
+            @unless($isMidwife)
+            <span class="summary-chip chip-primary"><i class="bi bi-house-heart-fill"></i> House-to-house toolkit</span>
+            @endunless
+        </div>
     </div>
-    @if($dangerVisits->count() > 0)
-    <div class="d-flex flex-wrap align-items-center gap-2 mt-3 pt-3" style="border-top:1px solid var(--color-border);">
-        <span class="summary-chip chip-danger"><i class="bi bi-exclamation-triangle-fill"></i> {{ $dangerVisits->count() }} visit(s) flagged for follow-up</span>
-    </div>
-    @endif
 </div>
 
 @if(session('success'))
@@ -42,9 +48,12 @@
 <div class="row g-4 align-items-start">
     <div class="col-lg-7">
         <div class="card">
-            <div class="card-header">
-                <h5>Recently Delivered Mothers</h5>
-                <small class="text-muted">Postpartum tracking starts at delivery</small>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">Recently Delivered Mothers</h5>
+                    <small class="text-muted">Postpartum tracking starts at delivery</small>
+                </div>
+                <span class="badge bg-secondary">{{ $delivered->total() }}</span>
             </div>
             <div class="card-body p-0">
                 @forelse($delivered as $preg)
@@ -71,10 +80,40 @@
     </div>
 
     <div class="col-lg-5">
+        @if($dangerVisits->count() > 0)
+        <div class="card mb-4" id="postpartumFollowUps">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">Needs Follow-up</h5>
+                    <small class="text-muted">Latest visits flagged on review</small>
+                </div>
+                <span class="badge bg-danger">{{ $dangerVisits->count() }}</span>
+            </div>
+            <div class="card-body p-0">
+                @foreach($dangerVisits->take($railLimit) as $visit)
+                    <a href="{{ route($routeBase . '.show-mother', $visit->user_id) }}" class="d-flex align-items-center gap-3 p-3 text-decoration-none border-bottom" style="border-color:var(--color-border) !important;color:inherit;">
+                        <span style="width:42px;height:42px;border-radius:50%;background:var(--color-danger-soft);color:var(--color-danger-text);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                        <span class="flex-grow-1" style="min-width:0;">
+                            <span class="d-block fw-bold" style="color:var(--color-text);font-size:.9rem;">{{ $visit->mother?->name ?? 'Mother' }} <small class="text-muted fw-normal">· Week {{ $visit->visit_week }}</small></span>
+                            <small class="text-muted d-block">{{ $visit->visit_date->format('M j, Y') }} · {{ implode(' · ', $visit->dangerSignals()) }}</small>
+                        </span>
+                        <i class="bi bi-chevron-right" style="color:var(--color-secondary-text);"></i>
+                    </a>
+                @endforeach
+                @if($dangerVisits->count() > $railLimit)
+                    <div class="p-3 text-center"><small class="text-muted">Showing the {{ $railLimit }} most recent of {{ $dangerVisits->count() }} flagged visits.</small></div>
+                @endif
+            </div>
+        </div>
+        @endif
+
         <div class="card">
-            <div class="card-header">
-                <h5>Newborns</h5>
-                <small class="text-muted">Vitals, danger signs &amp; immunizations</small>
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="mb-0">Newborns</h5>
+                    <small class="text-muted">Vitals, danger signs &amp; immunizations</small>
+                </div>
+                <span class="badge bg-secondary">{{ $newborns->total() }}</span>
             </div>
             <div class="card-body p-0">
                 @forelse($newborns as $nb)

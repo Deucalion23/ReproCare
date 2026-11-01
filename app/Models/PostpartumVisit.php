@@ -50,16 +50,24 @@ class PostpartumVisit extends Model
         return $this->belongsTo(User::class, 'recorded_by_id');
     }
 
-    /** Flag visits needing clinical follow-up. */
-    public function getHasDangerSignsAttribute(): bool
+    /** Reasons this visit needs clinical follow-up; empty means routine. */
+    public function dangerSignals(): array
     {
         [$sys] = $this->parseBp() + [null];
 
-        return $this->bleeding === 'heavy'
-            || !empty(trim((string) $this->infection_signs))
-            || ($sys !== null && $sys >= 140)
-            || ($this->temperature !== null && (float) $this->temperature >= 38.0)
-            || ($this->depression_score !== null && (int) $this->depression_score >= 6);
+        return array_filter([
+            $this->bleeding === 'heavy' ? 'Heavy bleeding' : null,
+            ! empty(trim((string) $this->infection_signs)) ? 'Infection signs' : null,
+            ($sys !== null && $sys >= 140) ? "BP {$this->bp}" : null,
+            ($this->temperature !== null && (float) $this->temperature >= 38.0) ? "{$this->temperature}°C" : null,
+            ($this->depression_score !== null && (int) $this->depression_score >= 6) ? "PPD score {$this->depression_score}" : null,
+        ]);
+    }
+
+    /** Flag visits needing clinical follow-up. */
+    public function getHasDangerSignsAttribute(): bool
+    {
+        return $this->dangerSignals() !== [];
     }
 
     protected function parseBp(): array
