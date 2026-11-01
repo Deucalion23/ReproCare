@@ -123,7 +123,7 @@
                 </table>
             </div>
 
-            <div class="p-3">{{ $women->links('vendor.pagination.arrows-only') }}</div>
+            <div class="p-3">{{ $women->links('pagination::bootstrap-5') }}</div>
         @else
             <div class="empty-state p-5 text-center">
                 <i class="bi bi-people empty-state-icon" style="font-size:2.5rem;"></i>
