@@ -548,7 +548,7 @@
                             <label class="form-label">Bind to barangay</label>
                             <select name="barangay" class="form-select" required>
                                 <option value="" disabled selected>Select Barangay</option>
-                                @foreach($barangays as $brgy)
+                                @foreach($catchmentBarangays as $brgy)
                                     <option value="{{ $brgy->name }}">Barangay {{ $brgy->name }}</option>
                                 @endforeach
                             </select>

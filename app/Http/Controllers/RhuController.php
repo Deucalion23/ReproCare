@@ -15,6 +15,7 @@ use App\Models\WalkInPatient;
 use App\Models\ActivityLog;
 use App\Models\Notification;
 use App\Models\Purok;
+use App\Models\Barangay;
 use App\Services\RiskAnalysisService;
 use App\Services\WomenDirectoryService;
 use Illuminate\Http\Request;
@@ -133,7 +134,10 @@ class RhuController extends Controller
             ->where('status', '!=', 'archived')
             ->orderBy('barangay')
             ->get(['id', 'first_name', 'middle_initial', 'last_name', 'status', 'barangay']);
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        // The catchment grid in this page *defines* the station's scope, so it
+        // still lists the whole city; the staff pickers bind people inside it.
+        $barangays = Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $catchmentBarangays = Barangay::catchmentOptions();
         $promotableBhws = User::where('role', 'bhw')
             ->where('status', 'approved')
             ->orderBy('first_name')
@@ -144,7 +148,7 @@ class RhuController extends Controller
             ->orderBy('first_name')
             ->get(['id', 'first_name', 'middle_initial', 'last_name', 'role']);
 
-        return view('rhu.settings', compact('staff', 'presidents', 'barangays', 'promotableBhws', 'delegationCandidates'));
+        return view('rhu.settings', compact('staff', 'presidents', 'barangays', 'catchmentBarangays', 'promotableBhws', 'delegationCandidates'));
     }
 
     // ─── Midwife Management ──────────────────────────────────────────
@@ -161,7 +165,7 @@ class RhuController extends Controller
 
     public function createMidwife()
     {
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions();
 
         return view('rhu.midwives.create', compact('barangays'));
     }
@@ -321,7 +325,7 @@ class RhuController extends Controller
             ->orderBy('first_name')
             ->get(['id', 'first_name', 'middle_initial', 'last_name', 'barangay']);
 
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions();
 
         return view('rhu.bhw-presidents.create', compact('currentPresident', 'promotableBhws', 'barangays'));
     }
@@ -402,7 +406,7 @@ class RhuController extends Controller
     public function editBhwPresident($id)
     {
         $bhwPresident = User::where('role', 'bhw_president')->findOrFail($id);
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions($bhwPresident->barangay);
         return view('rhu.bhw-presidents.edit', ['president' => $bhwPresident, 'barangays' => $barangays]);
     }
 
@@ -498,7 +502,7 @@ class RhuController extends Controller
             $bhw->checkups_count = Checkup::where('scheduled_by_id', $bhw->id)->count();
         }
 
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions($barangay);
 
         return view('rhu.bhws.index', compact('bhws', 'search', 'status', 'barangay', 'barangays'));
     }
@@ -506,7 +510,7 @@ class RhuController extends Controller
     public function createBhw()
     {
         $puroks = Purok::orderBy('barangay')->orderBy('name')->get();
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions();
 
         return view('rhu.bhws.create', compact('puroks', 'barangays'));
     }
@@ -561,7 +565,7 @@ class RhuController extends Controller
     {
         $bhw = User::where('role', 'bhw')->findOrFail($id);
         $puroks = Purok::orderBy('barangay')->orderBy('name')->get();
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions($bhw->barangay);
 
         return view('rhu.bhws.edit', compact('bhw', 'puroks', 'barangays'));
     }
@@ -1074,7 +1078,7 @@ class RhuController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->pluck('name');
+        $barangays = Barangay::catchmentOptionNames($barangay);
 
         return view('rhu.health-records.index', compact('records', 'search', 'riskLevel', 'barangay', 'barangays'));
     }
@@ -1121,7 +1125,7 @@ class RhuController extends Controller
         $walkIns = WalkInPatient::whereNull('converted_to_user_id')->orderBy('first_name')->get();
         $pregnancies = Pregnancy::orderBy('lmp', 'desc')->get();
         $puroks = Purok::orderBy('name')->get();
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions();
         $patients = $users;
 
         return view('rhu.maternal-deaths.create', compact('users', 'patients', 'walkIns', 'pregnancies', 'puroks', 'barangays'));
@@ -1193,7 +1197,7 @@ class RhuController extends Controller
     {
         $death = MaternalDeath::findOrFail($id);
         $puroks = Purok::orderBy('name')->get();
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        $barangays = Barangay::catchmentOptions($death->barangay);
         $patients = User::where('role', 'user')->where('status', 'approved')->orderBy('first_name')->get();
         return view('rhu.maternal-deaths.edit', compact('death', 'patients', 'puroks', 'barangays'));
     }
@@ -1508,7 +1512,7 @@ class RhuController extends Controller
     public function createPatient()
     {
         $allowed = $this->scopedBarangayNames();
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name'])
+        $barangays = Barangay::active()->orderBy('name')->get(['id', 'name'])
             ->filter(fn ($area) => in_array($area->name, $allowed, true))
             ->values();
 
@@ -1527,7 +1531,7 @@ class RhuController extends Controller
         $catchment = app(WomenDirectoryService::class)->catchmentFor(auth()->user());
         $scope = app(\App\Services\AnalyticsScope::class);
 
-        return \App\Models\Barangay::active()->get(['name'])
+        return Barangay::active()->get(['name'])
             ->filter(fn ($area) => $catchment === null || in_array($scope->key($area->name), $catchment, true))
             ->pluck('name')
             ->values()

@@ -233,7 +233,9 @@ class MidwifeController extends Controller
         $registeredCount = User::where('role', 'user')->where('status', 'approved')->count();
         $unregisteredCount = WalkInPatient::whereNull('converted_to_user_id')->count();
         $puroks = Purok::orderBy('name')->get();
-        $barangays = \App\Models\Barangay::allNames();
+        // The directory only ever holds this station's catchment, so the filter
+        // offers those barangays — plus whatever a shared link already filters on.
+        $barangays = \App\Models\Barangay::catchmentOptionNames($barangay);
 
         return view('midwife.patients', compact(
             'patients',

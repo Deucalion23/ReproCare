@@ -54,7 +54,11 @@ class StaffTransitionController extends Controller
             }
         }
 
-        $barangays = \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name']);
+        // CHO backfills accounts anywhere in the city; an RHU stays inside the
+        // barangays it actually serves.
+        $barangays = auth()->user()->role === 'cho'
+            ? \App\Models\Barangay::active()->orderBy('name')->get(['id', 'name'])
+            : \App\Models\Barangay::catchmentOptions();
         $history = StaffTransition::with('outgoing')->latest()->take(10)->get();
 
         // One shared console for RHU and CHO: layout + route names switch by

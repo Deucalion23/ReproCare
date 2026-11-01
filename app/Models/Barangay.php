@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class Barangay extends Model
 {
@@ -38,6 +39,12 @@ class Barangay extends Model
     public const RHU1_CATCHMENT = self::RHU_CATCHMENTS['RHU 1'];
 
     /**
+     * The station this build serves. Accounts carrying no RHU assignment fall
+     * back to it so a picker can never drift into another RHU's barangays.
+     */
+    public const DEPLOYMENT_RHU = 'RHU 1';
+
+    /**
      * DB-driven catchment names for an RHU assignment.
      * Falls back to the canonical constant when the table is empty
      * (e.g. fresh checkout before seeding) so forms never break.
@@ -53,6 +60,49 @@ class Barangay extends Model
         }
 
         return self::RHU_CATCHMENTS[$rhu] ?? [];
+    }
+
+    /**
+     * Catchment a staff account chooses from: the RHU its own account is
+     * assigned to, otherwise the deployment's station.
+     */
+    private static function staffRhu(): string
+    {
+        $value = strtoupper(trim((string) (auth()->user()?->rhu_assignment ?? '')));
+        $roman = ['RHU I' => 'RHU 1', 'RHU II' => 'RHU 2', 'RHU III' => 'RHU 3', 'RHU IV' => 'RHU 4', 'RHU V' => 'RHU 5'];
+        $value = $roman[$value] ?? $value;
+
+        return isset(self::RHU_CATCHMENTS[$value]) ? $value : self::DEPLOYMENT_RHU;
+    }
+
+    /**
+     * Dropdown rows for the staff pickers. `$keep` pins the name an existing
+     * record or an active filter already carries — even when it sits outside
+     * this catchment — so editing a legacy record never silently rewrites its
+     * barangay to whichever option happens to sort first.
+     *
+     * @return Collection<int, static>
+     */
+    public static function catchmentOptions(array|string|null $keep = null): Collection
+    {
+        $rows = static::active()->forRhu(static::staffRhu())->orderBy('name')->get(['id', 'name']);
+        $names = $rows->pluck('name')->all();
+
+        foreach ((array) $keep as $name) {
+            $name = trim((string) $name);
+            if ($name !== '' && !in_array($name, $names, true)) {
+                $rows->push(new static(['name' => $name]));
+                $names[] = $name;
+            }
+        }
+
+        return $rows->sortBy(fn ($row) => mb_strtolower($row->name))->values();
+    }
+
+    /** The same catchment as plain names, for the filters that render strings. */
+    public static function catchmentOptionNames(array|string|null $keep = null): array
+    {
+        return static::catchmentOptions($keep)->pluck('name')->all();
     }
 
     /** All active San Carlos City barangays, alphabetical (A–Z). */
