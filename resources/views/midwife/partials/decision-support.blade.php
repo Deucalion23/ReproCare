@@ -1,6 +1,7 @@
 @php
     $supportRows = collect($decisionSupport ?? []);
     $isOwnRecord = isset($pregnancy) && $pregnancy instanceof \App\Models\Pregnancy;
+    $stacked = $supportStacked ?? false;
 @endphp
 <section id="decision-support" class="card mb-3" style="scroll-margin-top:90px" aria-labelledby="patient-decision-support-title">
     <div class="card-header d-flex align-items-center gap-2 py-2 px-3">
@@ -23,8 +24,8 @@
                         <span class="badge rounded-pill" style="background:var(--color-{{ $statusColor }}-soft);color:var(--color-{{ $statusColor }}-text)">{{ $support['emergency'] ? 'Emergency flag / ' : '' }}{{ $support['risk'] }} risk</span>
                     </div>
                 </div>
-                <div class="row g-3">
-                    <div class="col-md-6">
+                <div class="row {{ $stacked ? 'g-2' : 'g-3' }}">
+                    <div class="{{ $stacked ? 'col-12' : 'col-md-6' }}">
                         <div class="text-uppercase fw-bold mb-1" style="font-size:0.68rem;letter-spacing:0.07em;color:var(--text-muted);">Key findings</div>
                         <ul class="small mb-0 ps-4" style="color:var(--text);line-height:1.45;">
                             @foreach($support['findings'] ?? $support['reasons'] ?? [] as $finding)
@@ -32,7 +33,7 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div class="col-md-6">
+                    <div class="{{ $stacked ? 'col-12' : 'col-md-6' }}">
                         <div class="text-uppercase fw-bold mb-1" style="font-size:0.68rem;letter-spacing:0.07em;color:var(--text-muted);">Suggested next steps</div>
                         <ol class="small mb-0 ps-4" style="color:var(--text);line-height:1.45;">
                             @foreach($support['recommendations'] ?? [$support['action'] ?? ''] as $recommendation)
@@ -52,6 +53,5 @@
         @empty
             <p class="small mb-0">No eligible open pregnancy record is available for these suggestions. Review the patient's history and confirm the recorded pregnancy status; this does not indicate Low risk.</p>
         @endforelse
-        <p class="small text-muted mb-0 mt-2">Read-only suggestions built from recorded data — no diagnosis, risk change, or reminder is generated.</p>
     </div>
 </section>
