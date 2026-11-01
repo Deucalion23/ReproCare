@@ -221,7 +221,7 @@
                             <th class="py-3">Contact Number</th>
                             <th class="py-3">Barangay</th>
                             <th class="py-3">Pregnancy &amp; Risk Level</th>
-                            <th class="text-end px-3 py-3">Clinical Actions</th>
+                            <th class="text-center px-3 py-3">Clinical Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -280,9 +280,9 @@
                                         <span class="wd-sub">Non-pregnant / Postpartum</span>
                                     @endif
                                 </td>
-                                <td class="text-end px-3">
+                                <td class="text-center px-3">
                                     <a href="{{ $isWalkIn ? route('midwife.walk-in-patients.show', $patient->id) : route('midwife.patient-details', $patient->id) }}"
-                                       class="btn btn-sm btn-outline-primary" style="white-space:nowrap;" title="Review Patient Record">
+                                       class="btn btn-sm btn-outline-primary wd-action-btn" title="Review Patient Record">
                                         <i class="bi bi-eye"></i> Review
                                     </a>
                                 </td>

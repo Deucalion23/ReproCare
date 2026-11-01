@@ -231,7 +231,7 @@
                         <th class="py-3">Barangay / Purok</th>
                         <th class="py-3">Pregnancy</th>
                         <th class="py-3">Added</th>
-                        <th class="py-3 text-end px-3">Action</th>
+                        <th class="py-3 text-center px-3">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -283,8 +283,8 @@
                             <td style="white-space:nowrap;">
                                 {{ $woman->created_at ? $woman->created_at->format('M d, Y') : '—' }}
                             </td>
-                            <td class="text-end px-3">
-                                <a href="{{ $detailUrl($woman) }}" class="btn btn-sm btn-outline-primary" style="font-size:0.75rem;white-space:nowrap;">
+                            <td class="text-center px-3">
+                                <a href="{{ $detailUrl($woman) }}" class="btn btn-sm btn-outline-primary wd-action-btn">
                                     <i class="bi bi-eye"></i> View
                                 </a>
                             </td>

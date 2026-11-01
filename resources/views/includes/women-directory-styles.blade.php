@@ -76,6 +76,15 @@
     .wd-wrap .table td .wd-name { font-size:0.78rem; line-height:1.1; }
     .wd-wrap .table td .wd-pill { font-size:0.6rem; padding:0.1em 0.35em; }
     .wd-wrap .table .btn { padding:0.15rem 0.45rem !important; font-size:0.65rem !important; }
+    /* The row action is the one button worth more than a 0.65rem chip: it sat
+       right-aligned inside a column already ~150px wide from its own header, so it
+       read as clipped against the card edge. Needs the same .table .btn specificity
+       plus !important to beat the rule above. */
+    .wd-wrap .table .wd-action-btn {
+        display:inline-flex; align-items:center; justify-content:center; gap:0.35rem;
+        min-width:112px; padding:0.4rem 0.9rem !important; font-size:0.78rem !important;
+        font-weight:700; white-space:nowrap;
+    }
     .wd-wrap .card-header { padding-top:0.4rem !important; padding-bottom:0.4rem !important; }
     .wd-wrap .card-body { padding:0 !important; }
     .wd-wrap .table-responsive { border:none; }
