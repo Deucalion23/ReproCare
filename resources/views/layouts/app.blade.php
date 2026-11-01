@@ -2127,7 +2127,7 @@
         }
 
         /* ═══════════════════════════════════════════════════════════
-           26. COUNT-UP ANIMATION  — triggered by IntersectionObserver
+           26. HERO SECONDARY BUTTON
         ═══════════════════════════════════════════════════════════ */
         .btn-hero-secondary {
             display:inline-flex;
@@ -2894,19 +2894,6 @@
             if (checkDark)  checkDark.style.display  = mode === 'dark'  ? '' : 'none';
         }
 
-        /* -- Count-Up Animation -- */
-        function animateCountUp(el, target, duration) {
-            duration = duration || 1200;
-            const start = 0;
-            const step  = target / (duration / 16);
-            let current = start;
-            const timer = setInterval(function() {
-                current = Math.min(current + step, target);
-                el.textContent = Math.floor(current).toLocaleString();
-                if (current >= target) clearInterval(timer);
-            }, 16);
-        }
-
         /* -- Adaptive breakpoint: single source of truth (mirrors §28 CSS) -- */
         const RC_DESKTOP_QUERY = '(min-width: 1024px)';
         function rcIsDesktop() {
@@ -3160,12 +3147,6 @@
                 document.body.classList.add('sidebar-collapsed');
             }
             syncCollapseArrow();
-
-            /* Count-up for all [data-count] elements */
-            document.querySelectorAll('[data-count]').forEach(function(el) {
-                const target = parseInt(el.getAttribute('data-count'), 10);
-                if (!isNaN(target)) animateCountUp(el, target);
-            });
 
             /* Fade-in via IntersectionObserver */
             const observer = new IntersectionObserver(function(entries) {

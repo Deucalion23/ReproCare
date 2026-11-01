@@ -65,7 +65,7 @@
         <div class="stat-card stat-purple fade-in-card">
             <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
             <div class="stat-label">Total Staff Accounts</div>
-            <div class="stat-number" data-count="{{ $totalUsers }}">0</div>
+            <div class="stat-number">{{ $totalUsers }}</div>
             <div class="stat-trend">
                 <i class="bi bi-shield-lock-fill"></i> Health workers & admins
             </div>
@@ -76,7 +76,7 @@
         <div class="stat-card stat-rose fade-in-card">
             <div class="stat-icon"><i class="bi bi-heart-pulse-fill"></i></div>
             <div class="stat-label">Active Pregnancies</div>
-            <div class="stat-number" data-count="{{ $activePregnancies }}">0</div>
+            <div class="stat-number">{{ $activePregnancies }}</div>
             <div class="stat-trend">
                 <i class="bi bi-activity"></i> Monitoring city-wide
             </div>
@@ -87,7 +87,7 @@
         <div class="stat-card stat-cyan fade-in-card">
             <div class="stat-icon"><i class="bi bi-box-seam-fill"></i></div>
             <div class="stat-label">Supply Requests</div>
-            <div class="stat-number" data-count="{{ $totalSupplyRequests }}">0</div>
+            <div class="stat-number">{{ $totalSupplyRequests }}</div>
             <div class="stat-trend up">
                 <i class="bi bi-clock-history"></i> {{ $pendingSupplyRequests }} pending review
             </div>
@@ -98,7 +98,7 @@
         <div class="stat-card stat-danger fade-in-card">
             <div class="stat-icon"><i class="bi bi-journal-x"></i></div>
             <div class="stat-label">Maternal Deaths</div>
-            <div class="stat-number" data-count="{{ $totalDeaths }}">0</div>
+            <div class="stat-number">{{ $totalDeaths }}</div>
             <div class="stat-trend danger">
                 <i class="bi bi-exclamation-triangle-fill"></i> {{ $totalNearMiss }} Near-miss events
             </div>
@@ -289,28 +289,6 @@
 <script type="application/json" id="cho-dashboard-risk-data">{!! json_encode($dashboardMapData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) !!}</script>
 <script type="application/json" id="cho-dashboard-barangay-boundaries">{!! file_get_contents(public_path('data/san-carlos-city-barangays.geojson')) !!}</script>
 <script>
-function animateStatNumbers() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    statNumbers.forEach(stat => {
-        const target = parseInt(stat.dataset.count);
-        if (target > 0) {
-            let current = 0;
-            const increment = target / 50;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    stat.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    stat.textContent = Math.floor(current);
-                }
-            }, 30);
-        } else {
-            stat.textContent = 0;
-        }
-    });
-}
-document.addEventListener('DOMContentLoaded', animateStatNumbers);
 // Real-time dashboard statistics: refresh counters from the database every
 // 30 seconds (and on window focus) without reloading the whole page.
 (function () {
@@ -323,7 +301,7 @@ document.addEventListener('DOMContentLoaded', animateStatNumbers);
                 var numbers = document.querySelectorAll('.stat-number');
                 Object.keys(map).forEach(function (key) {
                     var el = numbers[map[key]];
-                    if (el && stats[key] !== undefined) { el.dataset.count = stats[key]; el.textContent = stats[key]; }
+                    if (el && stats[key] !== undefined) { el.textContent = stats[key]; }
                 });
                 document.querySelectorAll('[data-live-stat]').forEach(function (el) {
                     var key = el.getAttribute('data-live-stat');

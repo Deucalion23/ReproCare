@@ -81,7 +81,7 @@
         <div class="stat-card stat-purple fade-in-card">
             <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
             <div class="stat-label">Total Patients</div>
-            <div class="stat-number" data-count="{{ $totalPatients }}">0</div>
+            <div class="stat-number">{{ $totalPatients }}</div>
             <div class="stat-trend up"><i class="bi bi-arrow-up-short"></i> Enrolled patients</div>
         </div>
     </div>
@@ -90,7 +90,7 @@
         <div class="stat-card stat-cyan fade-in-card">
             <div class="stat-icon"><i class="bi bi-person-workspace"></i></div>
             <div class="stat-label">Active BHWs</div>
-            <div class="stat-number" data-count="{{ $totalBhws }}">0</div>
+            <div class="stat-number">{{ $totalBhws }}</div>
             <div class="stat-trend"><i class="bi bi-users"></i> Health workers</div>
         </div>
     </div>
@@ -99,7 +99,7 @@
         <div class="stat-card stat-rose fade-in-card">
             <div class="stat-icon"><i class="bi bi-heart-pulse-fill"></i></div>
             <div class="stat-label">Active Pregnancies</div>
-            <div class="stat-number" data-count="{{ $activePregnancies }}">0</div>
+            <div class="stat-number">{{ $activePregnancies }}</div>
             <div class="stat-trend up"><i class="bi bi-arrow-up-short"></i> Currently monitoring</div>
         </div>
     </div>
@@ -108,7 +108,7 @@
         <div class="stat-card stat-amber fade-in-card">
             <div class="stat-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
             <div class="stat-label">High Risk</div>
-            <div class="stat-number" data-count="{{ $highRiskPregnanciesCount }}">0</div>
+            <div class="stat-number">{{ $highRiskPregnanciesCount }}</div>
             <div class="stat-trend danger"><i class="bi bi-exclamation"></i> Requires attention</div>
         </div>
     </div>
@@ -119,7 +119,7 @@
         <div class="stat-card stat-green fade-in-card">
             <div class="stat-icon"><i class="bi bi-calendar-check-fill"></i></div>
             <div class="stat-label">Scheduled Checkups</div>
-            <div class="stat-number" data-count="{{ $scheduledCheckups }}">0</div>
+            <div class="stat-number">{{ $scheduledCheckups }}</div>
             <div class="stat-trend"><i class="bi bi-clock"></i> Upcoming sessions</div>
         </div>
     </div>
@@ -128,7 +128,7 @@
         <div class="stat-card stat-violet fade-in-card">
             <div class="stat-icon"><i class="bi bi-calendar-x-fill"></i></div>
             <div class="stat-label">Missed Checkups</div>
-            <div class="stat-number" data-count="{{ $missedCheckups }}">0</div>
+            <div class="stat-number">{{ $missedCheckups }}</div>
             <div class="stat-trend danger"><i class="bi bi-exclamation-circle"></i> Follow-up needed</div>
         </div>
     </div>
@@ -137,7 +137,7 @@
         <div class="stat-card stat-purple fade-in-card">
             <div class="stat-icon"><i class="bi bi-clipboard-check-fill"></i></div>
             <div class="stat-label">Completed Checkups</div>
-            <div class="stat-number" data-count="{{ $completedCheckups }}">0</div>
+            <div class="stat-number">{{ $completedCheckups }}</div>
             <div class="stat-trend up"><i class="bi bi-check-circle"></i> Successfully completed</div>
         </div>
     </div>
@@ -146,7 +146,7 @@
         <div class="stat-card stat-cyan fade-in-card">
             <div class="stat-icon"><i class="bi bi-file-medical-fill"></i></div>
             <div class="stat-label">Health Records</div>
-            <div class="stat-number" data-count="{{ $totalHealthRecords }}">0</div>
+            <div class="stat-number">{{ $totalHealthRecords }}</div>
             <div class="stat-trend up"><i class="bi bi-arrow-up-short"></i> Total records</div>
         </div>
     </div>
@@ -297,30 +297,5 @@
         </div>
     </div>
 </div>
-
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    // Animate stat numbers
-    const statNumbers = document.querySelectorAll('.stat-number');
-    statNumbers.forEach(stat => {
-        const target = parseInt(stat.dataset.count);
-        if (target > 0) {
-            let current = 0;
-            const increment = target / 50;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    stat.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    stat.textContent = Math.floor(current);
-                }
-            }, 30);
-        }
-    });
-});
-</script>
-@endpush
 
 @endsection

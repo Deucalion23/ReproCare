@@ -272,7 +272,7 @@
         <div class="stat-card stat-cyan fade-in-card">
             <i class="bi bi-people-fill stat-icon"></i>
             <div class="stat-label">Total BHWs</div>
-            <div class="stat-number" data-count="{{ $totalBhws }}">{{ $totalBhws }}</div>
+            <div class="stat-number">{{ $totalBhws }}</div>
             <div class="stat-trend">All accounts in this directory</div>
         </div>
     </div>
@@ -280,7 +280,7 @@
         <div class="stat-card stat-green fade-in-card">
             <i class="bi bi-person-check-fill stat-icon"></i>
             <div class="stat-label">Approved</div>
-            <div class="stat-number" data-count="{{ $approvedBhws }}">{{ $approvedBhws }}</div>
+            <div class="stat-number">{{ $approvedBhws }}</div>
             <div class="stat-trend">Ready for active work</div>
         </div>
     </div>
@@ -288,7 +288,7 @@
         <div class="stat-card stat-amber fade-in-card">
             <i class="bi bi-person-dash-fill stat-icon"></i>
             <div class="stat-label">Inactive</div>
-            <div class="stat-number" data-count="{{ $inactiveBhws }}">{{ $inactiveBhws }}</div>
+            <div class="stat-number">{{ $inactiveBhws }}</div>
             <div class="stat-trend">Temporarily unavailable</div>
         </div>
     </div>
@@ -296,7 +296,7 @@
         <div class="stat-card stat-purple fade-in-card">
             <i class="bi bi-archive-fill stat-icon"></i>
             <div class="stat-label">Archived</div>
-            <div class="stat-number" data-count="{{ $archivedBhws }}">{{ $archivedBhws }}</div>
+            <div class="stat-number">{{ $archivedBhws }}</div>
             <div class="stat-trend">Stored for record history</div>
         </div>
     </div>

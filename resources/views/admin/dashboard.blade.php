@@ -44,21 +44,21 @@
             <div class="stat-card stat-blue fade-in-card" style="background:linear-gradient(135deg, var(--color-info) 0%, var(--color-info-text) 100%);">
                 <i class="bi bi-heart-pulse stat-icon"></i>
                 <div class="stat-label">Pregnant Women</div>
-                <div class="stat-number" data-count="{{ $totalPregnantWomen }}">{{ $totalPregnantWomen }}</div>
+                <div class="stat-number">{{ $totalPregnantWomen }}</div>
             </div>
         </div>
         <div class="col">
             <div class="stat-card stat-green fade-in-card">
                 <i class="bi bi-calendar-check stat-icon"></i>
                 <div class="stat-label">Completed Appointments</div>
-                <div class="stat-number" data-count="{{ $completedAppointments }}">{{ $completedAppointments }}</div>
+                <div class="stat-number">{{ $completedAppointments }}</div>
             </div>
         </div>
         <div class="col">
             <div class="stat-card stat-amber fade-in-card">
                 <i class="bi bi-calendar-x stat-icon"></i>
                 <div class="stat-label">Missed Appointments</div>
-                <div class="stat-number" data-count="{{ $missedAppointments }}">{{ $missedAppointments }}</div>
+                <div class="stat-number">{{ $missedAppointments }}</div>
                 <small style="color:color-mix(in srgb, var(--color-on-solid) 70%, transparent); font-size:0.75rem;">{{ $missedRate }}% rate</small>
             </div>
         </div>
@@ -79,14 +79,14 @@
             <div class="stat-card stat-cyan fade-in-card">
                 <i class="bi bi-exclamation-circle stat-icon"></i>
                 <div class="stat-label">Medium Risk Cases</div>
-                <div class="stat-number" data-count="{{ $mediumRiskCases }}">{{ $mediumRiskCases }}</div>
+                <div class="stat-number">{{ $mediumRiskCases }}</div>
             </div>
         </div>
         <div class="col-md-6">
             <div class="stat-card stat-danger fade-in-card">
                 <i class="bi bi-exclamation-triangle stat-icon"></i>
                 <div class="stat-label">High Risk Cases</div>
-                <div class="stat-number" data-count="{{ $highRiskCases }}">{{ $highRiskCases }}</div>
+                <div class="stat-number">{{ $highRiskCases }}</div>
             </div>
         </div>
     </div>

@@ -92,7 +92,7 @@
                 <span class="summary-chip chip-primary" style="font-size:0.72rem;">Registry</span>
             </div>
             <div class="stat-label">Total Patients</div>
-            <div class="stat-number" data-count="{{ $totalPatients }}">0</div>
+            <div class="stat-number">{{ $totalPatients }}</div>
             <div class="stat-trend"><i class="bi bi-check-circle-fill" style="color:var(--color-success-text);"></i> Active Community Records</div>
         </div>
     </div>
@@ -104,7 +104,7 @@
                 <span class="summary-chip chip-success" style="font-size:0.72rem;">Prenatal</span>
             </div>
             <div class="stat-label">Active Pregnancies</div>
-            <div class="stat-number" data-count="{{ $activePregnancies }}">0</div>
+            <div class="stat-number">{{ $activePregnancies }}</div>
             <div class="stat-trend"><i class="bi bi-activity" style="color:var(--color-success-text);"></i> Currently Monitoring</div>
         </div>
     </div>
@@ -116,7 +116,7 @@
                 <span class="summary-chip chip-primary" style="font-size:0.72rem;">Visits</span>
             </div>
             <div class="stat-label">Scheduled Checkups</div>
-            <div class="stat-number" data-count="{{ $scheduledCheckups }}">0</div>
+            <div class="stat-number">{{ $scheduledCheckups }}</div>
             <div class="stat-trend"><i class="bi bi-calendar3" style="color:var(--color-secondary-text);"></i> Upcoming Sessions</div>
         </div>
     </div>
@@ -128,7 +128,7 @@
                 <span class="summary-chip chip-danger" style="font-size:0.72rem;">Triage</span>
             </div>
             <div class="stat-label">High Risk Cases</div>
-            <div class="stat-number" data-count="{{ $highRiskPatients }}">0</div>
+            <div class="stat-number">{{ $highRiskPatients }}</div>
             <div class="stat-trend">
                 <i class="bi {{ $highRiskPatients > 0 ? 'bi-exclamation-circle-fill' : 'bi-shield-check' }}" style="color:{{ $highRiskPatients > 0 ? 'var(--color-danger-text)' : 'var(--color-success-text)' }};"></i>
                 {{ $highRiskPatients > 0 ? 'Requires Follow-up' : 'All Cases Stable' }}
@@ -313,33 +313,6 @@
 
 @push('scripts')
 <script>
-// Animate stat number counters
-function animateStatNumbers() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    statNumbers.forEach(stat => {
-        const target = parseInt(stat.dataset.count);
-        if (target > 0) {
-            let current = 0;
-            const increment = Math.max(1, Math.ceil(target / 30));
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    stat.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    stat.textContent = current;
-                }
-            }, 25);
-        } else {
-            stat.textContent = '0';
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    animateStatNumbers();
-});
-
 function filterTableRows(status, btn) {
     btn.parentElement.querySelectorAll('button').forEach(b => {
         b.classList.remove('text-white');

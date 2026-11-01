@@ -1089,7 +1089,7 @@
                 <div class="stat-top-row">
                     <span class="stat-label-text">Checkups</span>
                 </div>
-                <div class="stat-big-value" data-count="{{ $upcomingCheckups }}">
+                <div class="stat-big-value">
                     {{ $upcomingCheckups }}
                 </div>
             </div>
@@ -1115,7 +1115,7 @@
                 <div class="stat-top-row">
                     <span class="stat-label-text">Messages</span>
                 </div>
-                <div class="stat-big-value" data-count="{{ $unreadMessages }}">
+                <div class="stat-big-value">
                     {{ $unreadMessages }}
                 </div>
             </div>

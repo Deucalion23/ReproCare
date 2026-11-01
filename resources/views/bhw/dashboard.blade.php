@@ -78,7 +78,7 @@
                 <span class="summary-chip chip-primary" style="font-size:0.72rem;">Care</span>
             </div>
             <div class="stat-label">Total Patients</div>
-            <div class="stat-number" data-count="{{ $totalPatients }}">0</div>
+            <div class="stat-number">{{ $totalPatients }}</div>
             <div class="stat-trend"><i class="bi bi-arrow-up-short" style="color:var(--color-success-text);"></i> Under your care</div>
         </div>
     </div>
@@ -90,7 +90,7 @@
                 <span class="summary-chip chip-primary" style="font-size:0.72rem;">Visits</span>
             </div>
             <div class="stat-label">Scheduled Checkups</div>
-            <div class="stat-number" data-count="{{ $scheduledCheckups }}">0</div>
+            <div class="stat-number">{{ $scheduledCheckups }}</div>
             <div class="stat-trend"><i class="bi bi-clock" style="color:var(--color-secondary-text);"></i> Upcoming sessions</div>
         </div>
     </div>
@@ -102,7 +102,7 @@
                 <span class="summary-chip chip-success" style="font-size:0.72rem;">Today</span>
             </div>
             <div class="stat-label">Today's Checkups</div>
-            <div class="stat-number" data-count="{{ $todayCheckups }}">0</div>
+            <div class="stat-number">{{ $todayCheckups }}</div>
             <div class="stat-trend"><i class="bi bi-sun" style="color:var(--color-success-text);"></i> Scheduled for today</div>
         </div>
     </div>
@@ -114,7 +114,7 @@
                 <span class="summary-chip chip-primary" style="font-size:0.72rem;">Records</span>
             </div>
             <div class="stat-label">My Records</div>
-            <div class="stat-number" data-count="{{ $myHealthRecords }}">0</div>
+            <div class="stat-number">{{ $myHealthRecords }}</div>
             <div class="stat-trend"><i class="bi bi-arrow-up-short" style="color:var(--color-success-text);"></i> Records added</div>
         </div>
     </div>
@@ -386,33 +386,11 @@ function drawSparkline(canvasId, data) {
     });
 }
 
-// Animate stat numbers
-function animateStatNumbers() {
-    const statNumbers = document.querySelectorAll('.stat-number');
-    statNumbers.forEach(stat => {
-        const target = parseInt(stat.dataset.count);
-        if (target > 0) {
-            let current = 0;
-            const increment = target / 50;
-            const timer = setInterval(() => {
-                current += increment;
-                if (current >= target) {
-                    stat.textContent = target;
-                    clearInterval(timer);
-                } else {
-                    stat.textContent = Math.floor(current);
-                }
-            }, 30);
-        }
-    });
-}
-
 document.addEventListener('DOMContentLoaded', function () {
     drawSparkline('bhwSparkline1', [5, 8, 7, 10, 9, 12, {{ $totalPatients }}]);
     drawSparkline('bhwSparkline2', [3, 5, 4, 7, 6, 8, {{ $scheduledCheckups }}]);
     drawSparkline('bhwSparkline3', [1, 2, 1, 3, 2, 4, {{ $todayCheckups }}]);
     drawSparkline('bhwSparkline4', [4, 6, 5, 8, 7, 9, {{ $myHealthRecords }}]);
-    animateStatNumbers();
 });
 </script>
 @endpush
