@@ -79,13 +79,16 @@
                     </div>
                 </div>
                 <div class="col-12 col-lg-6">
-                    <div id="registeredSearchWrap" class="mb-2">
-                        <label for="patientSearch" class="form-label">Search Enrolled Woman</label>
-                        <input type="text" class="form-control" id="patientSearch" placeholder="Search by name or email">
-                    </div>
-                    <div id="registered_patient_section">
-                        <label for="user_id" class="form-label">Enrolled Woman</label>
-                        <select class="form-select" id="user_id" name="user_id">
+                    {{-- One field per branch: type to filter and the list drops down
+                         under it. The select stays in the DOM as the value that gets
+                         submitted, hidden once rc-combobox.js is ready. --}}
+                    <div id="registeredPatientWrap" class="mb-2" data-combo>
+                        <label for="patientSearch" class="form-label">Enrolled woman</label>
+                        @include('includes.patient-combobox', [
+                            'cbInput' => 'patientSearch',
+                            'cbPlaceholder' => 'Type to search by name or email',
+                        ])
+                        <select class="rc-combo-store" id="user_id" name="user_id">
                             <option value="">Select woman</option>
                             @foreach($women as $woman)
                                 <option value="{{ $woman->id }}"
@@ -101,9 +104,13 @@
                             @endforeach
                         </select>
                     </div>
-                    <div id="walk_in_patient_section" class="d-none">
-                        <label for="walk_in_patient_id" class="form-label">Unlinked Woman</label>
-                        <select class="form-select" id="walk_in_patient_id" name="walk_in_patient_id">
+                    <div id="walkInPatientWrap" class="mb-2 d-none" data-combo>
+                        <label for="walkInSearch" class="form-label">Unlinked woman</label>
+                        @include('includes.patient-combobox', [
+                            'cbInput' => 'walkInSearch',
+                            'cbPlaceholder' => 'Type to search by name or contact',
+                        ])
+                        <select class="rc-combo-store" id="walk_in_patient_id" name="walk_in_patient_id">
                             <option value="">Select unlinked woman</option>
                             @foreach($walkInPatients as $walkInPatient)
                                 <option value="{{ $walkInPatient->id }}"
@@ -111,6 +118,7 @@
                                     data-subtitle="{{ $walkInPatient->contact_number ?? 'No contact number' }}"
                                     data-age="{{ $walkInPatient->age }}"
                                     data-active="{{ $walkInPatient->pregnancies->where('id', '!=', $pregnancy->id)->isNotEmpty() ? '1' : '0' }}"
+                                    data-search="{{ strtolower($walkInPatient->full_name . ' ' . ($walkInPatient->contact_number ?? '')) }}"
                                     {{ (int) old('walk_in_patient_id', $pregnancy->walk_in_patient_id) === (int) $walkInPatient->id ? 'selected' : '' }}>
                                     {{ $walkInPatient->full_name }} - {{ $walkInPatient->contact_number ?? 'No contact number' }}
                                 </option>
@@ -319,10 +327,10 @@
     const womanSelect = document.getElementById('user_id');
     const walkInPatientSelect = document.getElementById('walk_in_patient_id');
     const patientSearch = document.getElementById('patientSearch');
-    const registeredSearchWrap = document.getElementById('registeredSearchWrap');
-    const registeredSection = document.getElementById('registered_patient_section');
+    const walkInSearch = document.getElementById('walkInSearch');
+    const registeredPatientWrap = document.getElementById('registeredPatientWrap');
     const registeredMeta = document.getElementById('registered_patient_meta');
-    const walkInSection = document.getElementById('walk_in_patient_section');
+    const walkInPatientWrap = document.getElementById('walkInPatientWrap');
     const walkInMeta = document.getElementById('walk_in_patient_meta');
     const lmpInput = document.getElementById('lmp');
     const eddInput = document.getElementById('edd');
@@ -346,16 +354,27 @@
     const outcomeDetailsWrap = document.getElementById('outcome_details_wrap');
     const hiddenPatientType = document.querySelector('input[name="patient_type"]');
 
+    /* Filtering and picking live in rc-combobox.js. This only swaps which branch is
+       in play, and `required` belongs on the visible input — Chrome refuses to
+       validate the hidden store select and would block the submit silently. */
     function togglePatientType() {
         const isRegistered = patientTypeRegistered.checked;
         if (hiddenPatientType) hiddenPatientType.value = isRegistered ? 'registered' : 'walk_in';
-        registeredSearchWrap?.classList.toggle('d-none', !isRegistered);
-        registeredSection?.classList.toggle('d-none', !isRegistered);
+        registeredPatientWrap?.classList.toggle('d-none', !isRegistered);
+        walkInPatientWrap?.classList.toggle('d-none', isRegistered);
         registeredMeta?.classList.toggle('d-none', !isRegistered);
-        walkInSection?.classList.toggle('d-none', isRegistered);
         walkInMeta?.classList.toggle('d-none', isRegistered);
-        if (womanSelect) womanSelect.required = isRegistered;
-        if (walkInPatientSelect) walkInPatientSelect.required = !isRegistered;
+        if (patientSearch) {
+            patientSearch.disabled = !isRegistered;
+            patientSearch.required = isRegistered;
+        }
+        if (walkInSearch) {
+            walkInSearch.disabled = isRegistered;
+            walkInSearch.required = !isRegistered;
+        }
+        // Disabled stores are left out of the POST, so only one key is sent.
+        if (womanSelect) womanSelect.disabled = !isRegistered;
+        if (walkInPatientSelect) walkInPatientSelect.disabled = isRegistered;
     }
 
     function updateRegisteredPreview() {
@@ -365,7 +384,10 @@
         document.getElementById('patient_preview_name').textContent = selected.dataset.name || 'No woman selected';
         document.getElementById('patient_preview_subtitle').textContent = selected.dataset.subtitle || '';
         document.getElementById('patient_preview_age').textContent = selected.dataset.age ? `Age: ${selected.dataset.age} years old` : '';
-        womanSelect.setCustomValidity(selected.dataset.active === '1' ? 'This woman already has another active pregnancy record.' : '');
+        // The warning has to land on the visible input; the store select is hidden.
+        if (patientSearch) {
+            patientSearch.setCustomValidity(selected.dataset.active === '1' ? 'This woman already has another active pregnancy record.' : '');
+        }
     }
 
     function updateWalkInPreview() {
@@ -374,7 +396,9 @@
         document.getElementById('walkin_preview_name').textContent = selected.dataset.name || 'No walk-in selected';
         document.getElementById('walkin_preview_subtitle').textContent = selected.dataset.subtitle || '';
         document.getElementById('walkin_preview_age').textContent = selected.dataset.age ? `Age: ${selected.dataset.age} years old` : '';
-        walkInPatientSelect.setCustomValidity(selected.dataset.active === '1' ? 'This unlinked woman already has another active pregnancy record.' : '');
+        if (walkInSearch) {
+            walkInSearch.setCustomValidity(selected.dataset.active === '1' ? 'This unlinked woman already has another active pregnancy record.' : '');
+        }
     }
 
     function updateDates() {
@@ -434,19 +458,6 @@
             if (outcomeInput) outcomeInput.value = '';
             if (outcomeDetails) outcomeDetails.value = '';
         }
-    }
-
-    if (patientSearch && womanSelect) {
-        patientSearch.addEventListener('input', function () {
-            const searchTerm = this.value.toLowerCase();
-            womanSelect.querySelectorAll('option').forEach(function (option) {
-                if (!option.value) {
-                    option.hidden = false;
-                    return;
-                }
-                option.hidden = !(option.dataset.search || '').includes(searchTerm);
-            });
-        });
     }
 
     patientTypeRegistered?.addEventListener('change', togglePatientType);

@@ -266,24 +266,20 @@
                     @csrf
 
                     <div class="row g-3">
-                        <div class="col-12">
+                        {{-- One field that searches and drops a list under itself. The
+                             select stays as the picked value, hidden once
+                             rc-combobox.js is ready; submitHealthRecord() reads it. --}}
+                        <div class="col-12" data-combo>
                             <label for="patientSearch" class="form-label">
-                                <i class="bi bi-search me-1" style="color:var(--primary-light);"></i>
-                                Search Patient
-                            </label>
-                            <input type="text"
-                                   class="form-control"
-                                   id="patientSearch"
-                                   placeholder="Search by name or email..."
-                                   onkeyup="filterPatients()">
-                        </div>
-
-                        <div class="col-12">
-                            <label for="patientSelect" class="form-label">
                                 <i class="bi bi-person-fill me-1" style="color:var(--primary-light);"></i>
-                                Select Patient
+                                Patient
                             </label>
-                            <select class="form-select" id="patientSelect" required>
+                            @include('includes.patient-combobox', [
+                                'cbInput' => 'patientSearch',
+                                'cbPlaceholder' => 'Type to search by name or email...',
+                                'cbRequired' => true,
+                            ])
+                            <select class="rc-combo-store" id="patientSelect" required>
                                 <option value="">Choose a patient...</option>
                                 @foreach(\App\Models\User::where('role', 'user')->where('status', 'approved')->get() as $woman)
                                     <option value="{{ $woman->id }}"
@@ -349,15 +345,8 @@
 
 @push('scripts')
 <script>
-function filterPatients() {
-    const val = document.getElementById('patientSearch').value.toLowerCase();
-    const opts = document.getElementById('patientSelect').getElementsByTagName('option');
-    Array.from(opts).forEach(o => {
-        const s = o.getAttribute('data-search') || o.text.toLowerCase();
-        o.style.display = (s.indexOf(val) > -1 || o.value === '') ? '' : 'none';
-    });
-}
-
+/* Searching and picking live in rc-combobox.js; it keeps #patientSelect in sync,
+   which is what submitHealthRecord() reads to build the form action. */
 function submitHealthRecord() {
     const id = document.getElementById('patientSelect').value;
     if (!id) { alert('Please select a patient'); return; }

@@ -342,10 +342,13 @@
                         </div>
                     </div>
 
-                    <div id="registeredPatientSection" class="mb-4">
-                                <label class="form-label fw-semibold">Search Enrolled Patient</label>
-                        <input type="text" class="form-control mb-2" id="patientSearch" placeholder="Search by name or email..." oninput="filterSelectOptions('patientSearch', 'patientSelect')">
-                        <select class="form-select" id="patientSelect" name="user_id">
+                    <div id="registeredPatientSection" class="mb-4" data-combo>
+                                <label for="patientSearch" class="form-label fw-semibold">Enrolled patient</label>
+                        @include('includes.patient-combobox', [
+                            'cbInput' => 'patientSearch',
+                            'cbPlaceholder' => 'Type to search by name or email...',
+                        ])
+                        <select class="rc-combo-store" id="patientSelect" name="user_id">
                             <option value="">Choose a patient...</option>
                             @foreach($registeredWomen as $woman)
                                 <option value="{{ $woman->id }}">{{ $woman->name }}{{ $woman->email ? ' - ' . $woman->email : '' }}</option>
@@ -353,10 +356,13 @@
                         </select>
                     </div>
 
-                    <div id="walkInPatientSection" class="mb-4 d-none">
-                        <label class="form-label fw-semibold">Search Unlinked Patient</label>
-                        <input type="text" class="form-control mb-2" id="walkInSearch" placeholder="Search by name or contact number..." oninput="filterSelectOptions('walkInSearch', 'walkInPatientSelect')">
-                        <select class="form-select" id="walkInPatientSelect" name="walk_in_patient_id">
+                    <div id="walkInPatientSection" class="mb-4 d-none" data-combo>
+                        <label for="walkInSearch" class="form-label fw-semibold">Unlinked patient</label>
+                        @include('includes.patient-combobox', [
+                            'cbInput' => 'walkInSearch',
+                            'cbPlaceholder' => 'Type to search by name or contact number...',
+                        ])
+                        <select class="rc-combo-store" id="walkInPatientSelect" name="walk_in_patient_id">
                             <option value="">Choose an unlinked patient...</option>
                             @foreach($walkInPatients as $walkIn)
                                 <option value="{{ $walkIn->id }}">{{ $walkIn->full_name }}{{ $walkIn->contact_number ? ' - ' . $walkIn->contact_number : '' }}</option>
@@ -422,29 +428,26 @@
 </div>
 
 <script>
+/* Filtering and picking live in rc-combobox.js. `required` goes on the visible
+   combobox input, never the hidden store select: Chrome cannot focus an invisible
+   control and would abandon the submit without a message. */
 function toggleRecordPatientType() {
     const isRegistered = document.getElementById('patientTypeRegistered').checked;
     const registeredSection = document.getElementById('registeredPatientSection');
     const walkInSection = document.getElementById('walkInPatientSection');
     const patientSelect = document.getElementById('patientSelect');
     const walkInSelect = document.getElementById('walkInPatientSelect');
+    const patientSearch = document.getElementById('patientSearch');
+    const walkInSearch = document.getElementById('walkInSearch');
 
     registeredSection.classList.toggle('d-none', !isRegistered);
     walkInSection.classList.toggle('d-none', isRegistered);
-    patientSelect.required = isRegistered;
-    walkInSelect.required = !isRegistered;
+    patientSearch.required = isRegistered;
+    patientSearch.disabled = !isRegistered;
+    walkInSearch.required = !isRegistered;
+    walkInSearch.disabled = isRegistered;
     patientSelect.disabled = !isRegistered;
     walkInSelect.disabled = isRegistered;
-}
-
-function filterSelectOptions(inputId, selectId) {
-    const term = document.getElementById(inputId).value.toLowerCase();
-    const options = document.getElementById(selectId).options;
-
-    for (let index = 0; index < options.length; index++) {
-        const option = options[index];
-        option.hidden = !(option.value === '' || option.text.toLowerCase().includes(term));
-    }
 }
 
 function updateBpAndBmi() {

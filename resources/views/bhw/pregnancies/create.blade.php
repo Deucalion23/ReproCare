@@ -93,27 +93,40 @@
                 </div>
 
                 <div id="existing-patient-section" class="mb-4">
-                    <div id="registered-patient-group">
-                        <label class="form-label fw-semibold">Search Enrolled Woman</label>
-                        <input type="text" id="registered-search" class="form-control mb-2" placeholder="Search by name..." oninput="filterOptions('registered-search', 'registered-patient-select')">
-                        <select name="user_id" id="registered-patient-select" class="form-select">
+                    {{-- data-combo on each group: one field that searches and drops a
+                         list under itself. The select stays as the submitted value and
+                         is hidden once rc-combobox.js is ready. --}}
+                    <div id="registered-patient-group" data-combo>
+                        <label for="registered-search" class="form-label fw-semibold">Enrolled woman</label>
+                        @include('includes.patient-combobox', [
+                            'cbInput' => 'registered-search',
+                            'cbPlaceholder' => 'Type to search by name...',
+                            'cbRequired' => true,
+                        ])
+                        <select name="user_id" id="registered-patient-select" class="rc-combo-store">
                             <option value="">Select enrolled woman</option>
                             @foreach($women as $woman)
                                 <option value="{{ $woman->id }}" {{ (string) old('user_id') === (string) $woman->id ? 'selected' : '' }}>
-                                    {{ $woman->name }}{{ $woman->purok?->name ? ' - ' . $woman->purok->name : '' }}{{ $woman->pregnancies->isNotEmpty() ? ' (already tracked)' : '' }}
+                                    {{ $woman->name }}{{ $woman->purok?->name ? ' - ' . $woman->purok->name : ''}}{{ $woman->pregnancies->isNotEmpty() ? ' (already tracked)' : '' }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div id="walk-in-patient-group" class="d-none">
-                        <label class="form-label fw-semibold">Search Existing Unlinked Profile</label>
-                        <input type="text" id="walkin-search" class="form-control mb-2" placeholder="Search by name..." oninput="filterOptions('walkin-search', 'unregistered-patient-select')">
-                        <select name="walk_in_patient_id" id="unregistered-patient-select" class="form-select">
+                    <div id="walk-in-patient-group" class="d-none" data-combo>
+                        <label for="walkin-search" class="form-label fw-semibold">Existing unlinked profile</label>
+                        {{-- No `required` in markup: this group starts hidden and a hidden
+                           required control blocks the whole submit. togglePatientType()
+                           switches it on with the branch. --}}
+                        @include('includes.patient-combobox', [
+                            'cbInput' => 'walkin-search',
+                            'cbPlaceholder' => 'Type to search by name...',
+                        ])
+                        <select name="walk_in_patient_id" id="unregistered-patient-select" class="rc-combo-store">
                             <option value="">Select unlinked patient</option>
                             @foreach($walkInPatients as $patient)
                                 <option value="{{ $patient->id }}" {{ (string) old('walk_in_patient_id') === (string) $patient->id ? 'selected' : '' }}>
-                                    {{ $patient->full_name }}{{ $patient->purok?->name ? ' - ' . $patient->purok->name : '' }}{{ $patient->pregnancies->isNotEmpty() ? ' (already tracked)' : '' }}
+                                    {{ $patient->full_name }}{{ $patient->purok?->name ? ' - ' . $patient->purok->name : ''}}{{ $patient->pregnancies->isNotEmpty() ? ' (already tracked)' : '' }}
                                 </option>
                             @endforeach
                         </select>
@@ -160,6 +173,10 @@
 </div>
 
 <script>
+    /* Filtering and picking live in rc-combobox.js. This only decides which of the
+       three modes is in play. `required` belongs on the visible combobox input:
+       Chrome refuses to validate the hidden store select and would block the
+       submit silently. */
     function togglePatientType() {
         var checked = document.querySelector('input[name="patient_type"]:checked');
         var type = checked ? checked.value : 'registered';
@@ -168,16 +185,14 @@
         document.getElementById('new-walk-in-section').classList.toggle('d-none', !isNew);
         document.getElementById('registered-patient-group').classList.toggle('d-none', type !== 'registered');
         document.getElementById('walk-in-patient-group').classList.toggle('d-none', type !== 'walk_in');
-        document.getElementById('registered-patient-select').required = type === 'registered';
+        var registeredInput = document.getElementById('registered-search');
+        var walkInInput = document.getElementById('walkin-search');
+        registeredInput.disabled = type !== 'registered';
+        registeredInput.required = type === 'registered';
+        walkInInput.disabled = type !== 'walk_in';
+        walkInInput.required = type === 'walk_in';
         document.getElementById('registered-patient-select').disabled = isNew;
-        document.getElementById('unregistered-patient-select').required = type === 'walk_in';
         document.getElementById('unregistered-patient-select').disabled = isNew;
-    }
-    function filterOptions(searchId, selectId) {
-        var q = document.getElementById(searchId).value.toLowerCase();
-        document.querySelectorAll('#' + selectId + ' option').forEach(function (opt) {
-            opt.hidden = q !== '' && opt.text.toLowerCase().indexOf(q) === -1;
-        });
     }
     document.addEventListener('DOMContentLoaded', togglePatientType);
 </script>

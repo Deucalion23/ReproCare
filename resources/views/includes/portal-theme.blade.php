@@ -625,5 +625,51 @@
         .main-content .empty-state h6 { font-size:0.8rem !important; }
         .main-content .empty-state p { font-size:0.7rem !important; }
     }
+
+    /* ═══════════════════════════════════════════════════════════
+       PATIENT COMBOBOX — one field that searches and lists at once
+       The <select> store is hidden only after rc-combobox.js marks the
+       wrapper .is-ready, so without the script the plain dropdown stays.
+    ═══════════════════════════════════════════════════════════ */
+    .main-content .rc-combo-field { position:relative; }
+    .main-content [data-combo].is-ready .rc-combo-store { display:none !important; }
+    .main-content [data-combo] .rc-combo-input { padding-right:2.5rem; }
+    .main-content .rc-combo-toggle {
+        position:absolute; top:50%; right:0.3rem; transform:translateY(-50%);
+        width:1.9rem; height:1.9rem; display:inline-flex; align-items:center; justify-content:center;
+        border:0 !important; border-radius:8px !important; background:transparent !important;
+        background-color:transparent !important; color:var(--color-text-muted) !important;
+        box-shadow:none !important; outline:0 !important; cursor:pointer; padding:0;
+    }
+    .main-content .rc-combo-toggle:hover { color:var(--color-primary-text) !important; background:var(--color-surface-soft) !important; }
+    .main-content .rc-combo-list {
+        position:absolute; z-index:1050; top:calc(100% + 4px); left:0; right:0; margin:0;
+        max-height:230px; overflow-y:auto; padding:0.25rem;
+        background:var(--color-surface); background-color:var(--color-surface);
+        border:1px solid var(--color-input-border) !important; border-radius:12px;
+        box-shadow:0 12px 28px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 18%, transparent);
+    }
+    /* The list is absolute, so pin the closed state instead of trusting the UA rule. */
+    .main-content .rc-combo-list[hidden] { display:none !important; }
+    /* rc-combobox.js flips to a drop-up when the field sits too low for 230px. */
+    .main-content [data-combo].is-up .rc-combo-list { top:auto; bottom:calc(100% + 4px); }
+    .main-content .rc-combo-opt {
+        display:block; width:100%; text-align:left; border:0; background:transparent;
+        color:var(--color-text); font-size:0.82rem; font-weight:600; line-height:1.25;
+        padding:0.4rem 0.6rem; border-radius:8px; cursor:pointer; white-space:normal;
+    }
+    .main-content .rc-combo-opt:hover { background:var(--color-surface-soft); }
+    .main-content .rc-combo-opt.is-active { background:var(--color-primary-soft); color:var(--color-primary-text); }
+    .main-content .rc-combo-opt.is-selected { color:var(--color-primary-text); }
+    .main-content .rc-combo-opt.is-selected::before { content:'\2713'; margin-right:0.4rem; font-weight:800; }
+    .main-content .rc-combo-empty { padding:0.5rem 0.6rem; font-size:0.78rem; color:var(--color-text-muted); }
+    .main-content .rc-combo-meta {
+        position:sticky; bottom:0; padding:0.28rem 0.6rem 0.15rem;
+        font-size:0.64rem; font-weight:800; letter-spacing:0.06em; text-transform:uppercase;
+        color:var(--color-text-muted); background:var(--color-surface); border-top:1px solid var(--color-border);
+    }
+    /* The store is hidden, so Bootstrap's .is-invalid sibling trick cannot reach
+       the error text. These pages render it with an explicit class instead. */
+    .main-content .rc-combo-error { display:block; margin-top:0.3rem; font-size:0.74rem; color:var(--color-danger-text); }
 </style>
 @endpush

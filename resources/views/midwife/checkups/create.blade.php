@@ -11,9 +11,12 @@
     .ck-dot.mint { background:var(--color-success-text); }
     .ck-dot.lav { background:var(--color-primary); }
     .ck-avatar { width:32px; height:32px; border-radius:50%; background:var(--color-secondary-text); background-color:var(--color-secondary-text); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-    .ck-input { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; color:var(--color-text) !important; border-radius:10px !important; }
-    .ck-input:focus { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:none !important; box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent) !important; }
-    .ck-input::placeholder { color:var(--color-text-muted); }
+    /* .rc-combo-input is the visible half of the patient picker; it needs the same
+       soft skin as Date/Time/Purpose or it reads as a foreign field. The store
+       select underneath is hidden by rc-combobox.js. */
+    .ck-input, .rc-combo-input { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; color:var(--color-text) !important; border-radius:10px !important; }
+    .ck-input:focus, .rc-combo-input:focus { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:none !important; box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent) !important; }
+    .ck-input::placeholder, .rc-combo-input::placeholder { color:var(--color-text-muted); }
     .ptype-wrap { display:inline-flex; gap:0.4rem; background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none; border-radius:999px; padding:0.22rem; }
     .ptype-label { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.8rem !important; padding:0.34rem 1.05rem !important; color:var(--color-text) !important; background:transparent !important; margin:0 !important; cursor:pointer; }
     .ptype-check:checked + .ptype-label { background:var(--color-secondary-text) !important; background-color:var(--color-secondary-text) !important; color:var(--color-on-solid) !important; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent); }
@@ -142,51 +145,49 @@
                             </div>
                         </div>
 
-                        {{-- Only one search box is visible at a time, so d-none lets the
-                             other one take the same slot in the grid. --}}
-                        <div class="ck-w8" id="registeredSearchWrap">
+                        {{-- One field per branch: type to filter and the list drops
+                             down under it. The select stays in the DOM as the value
+                             that gets submitted, hidden once rc-combobox.js is ready. --}}
+                        <div class="ck-full ck-w8" id="registeredPatientWrap" data-combo>
                             <label for="patientSearch" class="form-label ck-label">
-                                Search Patient
+                                Patient <span style="color:var(--color-danger-text);">*</span>
                             </label>
-                            <input type="text" class="form-control ck-input" id="patientSearch"
-                                   placeholder="Type to search patient by name or email...">
-                        </div>
-                        <div class="ck-w8 d-none" id="walkInSearchWrap">
-                            <label for="walkInSearch" class="form-label ck-label">
-                                Search Unlinked Woman
-                            </label>
-                            <input type="text" class="form-control ck-input" id="walkInSearch"
-                                   placeholder="Type to search unlinked woman...">
-                        </div>
-
-                        <div class="ck-full" id="registeredSelectWrap">
-                            <label for="user_id" class="form-label ck-label">
-                                Select Patient <span style="color:var(--color-danger-text);">*</span>
-                            </label>
-                            <select class="form-select ck-input @error('user_id') is-invalid @enderror"
-                                    id="user_id" name="user_id" required>
-                                <option value="" style="background:var(--bg-card); color:var(--text);">Choose a patient...</option>
+                            @include('includes.patient-combobox', [
+                                'cbInput' => 'patientSearch',
+                                'cbPlaceholder' => 'Type to search by name or email...',
+                                'cbRequired' => true,
+                                'cbInvalid' => $errors->has('user_id'),
+                            ])
+                            <select class="rc-combo-store" id="user_id" name="user_id">
+                                <option value="">Choose a patient...</option>
                                 @if(isset($women) && $women)
                                     @foreach($women as $woman)
                                         <option value="{{ $woman->id }}"
                                                 data-search="{{ strtolower($woman->name . ' ' . $woman->email) }}"
-                                                {{ old('user_id') == $woman->id ? 'selected' : '' }}
-                                                style="background:var(--bg-card); color:var(--text);">
+                                                {{ old('user_id') == $woman->id ? 'selected' : '' }}>
                                             {{ $woman->name }} - {{ $woman->email }}
                                         </option>
                                     @endforeach
                                 @endif
                             </select>
                             @error('user_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="rc-combo-error">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="ck-full d-none" id="unregisteredSelectWrap">
-                            <label for="walk_in_patient_id" class="form-label ck-label">
-                                Select Unlinked Woman <span style="color:var(--color-danger-text);">*</span>
+
+                        <div class="ck-full ck-w8 d-none" id="walkInPatientWrap" data-combo>
+                            <label for="walkInSearch" class="form-label ck-label">
+                                Unlinked woman <span style="color:var(--color-danger-text);">*</span>
                             </label>
-                            <select class="form-select ck-input @error('walk_in_patient_id') is-invalid @enderror"
-                                    id="walk_in_patient_id" name="walk_in_patient_id">
+                            {{-- No `required` in markup: this branch starts hidden and a
+                               hidden required control blocks the entire submit.
+                               syncPatientType() switches it on with the branch. --}}
+                            @include('includes.patient-combobox', [
+                                'cbInput' => 'walkInSearch',
+                                'cbPlaceholder' => 'Type to search by name, barangay or contact...',
+                                'cbInvalid' => $errors->has('walk_in_patient_id'),
+                            ])
+                            <select class="rc-combo-store" id="walk_in_patient_id" name="walk_in_patient_id">
                                 <option value="">Choose an unlinked woman...</option>
                                 @foreach(($walkInPatients ?? collect()) as $patient)
                                     <option value="{{ $patient->id }}" data-search="{{ strtolower(($patient->full_name ?? '') . ' ' . ($patient->barangay ?? '') . ' ' . ($patient->contact_number ?? '')) }}" {{ old('walk_in_patient_id') == $patient->id ? 'selected' : '' }}>
@@ -195,7 +196,7 @@
                                 @endforeach
                             </select>
                             @error('walk_in_patient_id')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="rc-combo-error">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
@@ -283,74 +284,35 @@
 
 @push('scripts')
 <script>
-    const searchInput = document.getElementById('patientSearch');
-    const patientSelect = document.getElementById('user_id');
     const patientTypeRegistered = document.getElementById('patient_type_registered');
     const patientTypeUnregistered = document.getElementById('patient_type_unregistered');
-    const registeredSearchWrap = document.getElementById('registeredSearchWrap');
-    const registeredSelectWrap = document.getElementById('registeredSelectWrap');
-    const unregisteredSelectWrap = document.getElementById('unregisteredSelectWrap');
+    const registeredWrap = document.getElementById('registeredPatientWrap');
+    const walkInWrap = document.getElementById('walkInPatientWrap');
+    const patientInput = document.getElementById('patientSearch');
+    const walkInInput = document.getElementById('walkInSearch');
+    const patientSelect = document.getElementById('user_id');
     const walkInSelect = document.getElementById('walk_in_patient_id');
-    const walkInSearchWrap = document.getElementById('walkInSearchWrap');
-    const walkInSearch = document.getElementById('walkInSearch');
 
+    /* Filtering and picking live in rc-combobox.js; this only swaps which of the
+       two branches is in play. `required` belongs on the visible input — Chrome
+       refuses to validate the hidden select and would block the submit. */
     function syncPatientType() {
-        if (!patientTypeRegistered || !patientTypeUnregistered || !registeredSelectWrap || !unregisteredSelectWrap) {
+        if (!patientTypeRegistered || !registeredWrap || !walkInWrap) {
             return;
         }
 
         const isRegistered = patientTypeRegistered.checked;
-        registeredSearchWrap?.classList.toggle('d-none', !isRegistered);
-        registeredSelectWrap.classList.toggle('d-none', !isRegistered);
-        unregisteredSelectWrap.classList.toggle('d-none', isRegistered);
-        walkInSearchWrap?.classList.toggle('d-none', isRegistered);
+        registeredWrap.classList.toggle('d-none', !isRegistered);
+        walkInWrap.classList.toggle('d-none', isRegistered);
 
-        if (patientSelect) {
-            patientSelect.disabled = !isRegistered;
-            patientSelect.required = isRegistered;
-        }
-        if (walkInSelect) {
-            walkInSelect.disabled = isRegistered;
-            walkInSelect.required = !isRegistered;
-        }
-    }
+        patientInput.disabled = !isRegistered;
+        patientInput.required = isRegistered;
+        walkInInput.disabled = isRegistered;
+        walkInInput.required = !isRegistered;
 
-    if (searchInput && patientSelect) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const options = patientSelect.querySelectorAll('option');
-
-            options.forEach(function(option) {
-                if (option.value === '') {
-                    option.style.display = 'block';
-                    return;
-                }
-
-                const searchData = option.getAttribute('data-search') || '';
-                if (searchData.includes(searchTerm)) {
-                    option.style.display = 'block';
-                } else {
-                    option.style.display = 'none';
-                }
-            });
-        });
-    }
-
-    if (walkInSearch && walkInSelect) {
-        walkInSearch.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const options = walkInSelect.querySelectorAll('option');
-
-            options.forEach(function(option) {
-                if (option.value === '') {
-                    option.hidden = false;
-                    return;
-                }
-
-                const searchData = option.getAttribute('data-search') || '';
-                option.hidden = !searchData.includes(searchTerm);
-            });
-        });
+        // Disabled stores are left out of the POST, so only one key is sent.
+        patientSelect.disabled = !isRegistered;
+        walkInSelect.disabled = isRegistered;
     }
 
     patientTypeRegistered?.addEventListener('change', syncPatientType);
