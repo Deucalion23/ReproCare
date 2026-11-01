@@ -34,15 +34,84 @@ class FamilyPlanningController extends Controller
         return redirect()->route('user.family-planning.index')->with('success', 'Your counseling request was saved. A health worker will discuss options with you privately.');
     }
 
-    public function staffIndex()
+    public function staffIndex(Request $request)
     {
-        $query = FamilyPlanningRecord::with(['client:id,first_name,last_name,barangay', 'recordedBy:id,first_name,last_name'])
-            ->latest('next_follow_up');
+        $filters = $this->staffFilters($request);
+
+        $query = FamilyPlanningRecord::with(['client:id,first_name,last_name,barangay', 'recordedBy:id,first_name,last_name']);
         $this->applyBhwScope($query);
-        $records = $query->paginate(20);
+
+        // The banner counts describe the whole service area, so they are read off
+        // the scoped-but-unfiltered query before the filters go on.
         $dueCount = (clone $query)->whereNotNull('next_follow_up')->whereDate('next_follow_up', '<=', today())->count();
         $pendingCount = (clone $query)->where('status', 'requested')->count();
-        return view('family-planning.staff-index', compact('records', 'dueCount', 'pendingCount'));
+
+        $this->applyStaffFilters($query, $filters);
+        $records = $query->latest('next_follow_up')->paginate(20)->withQueryString();
+
+        return view('family-planning.staff-index', compact('records', 'dueCount', 'pendingCount', 'filters') + [
+            'methodOptions' => self::METHODS,
+            'statusOptions' => ['requested', 'active', 'stopped', 'referred'],
+        ]);
+    }
+
+    /**
+     * Anything outside the option lists falls back to "all", so a hand-edited
+     * query string can never widen the scope or turn into a SQL error.
+     */
+    private function staffFilters(Request $request): array
+    {
+        $filters = [
+            'search' => trim((string) $request->input('search', '')),
+            'method' => (string) $request->input('method', 'all'),
+            'status' => (string) $request->input('status', 'all'),
+            'follow_up' => (string) $request->input('follow_up', 'all'),
+        ];
+
+        $filters['method'] = in_array($filters['method'], array_merge(self::METHODS, ['pending']), true) ? $filters['method'] : 'all';
+        $filters['status'] = in_array($filters['status'], ['requested', 'active', 'stopped', 'referred'], true) ? $filters['status'] : 'all';
+        $filters['follow_up'] = in_array($filters['follow_up'], ['due', 'upcoming', 'none'], true) ? $filters['follow_up'] : 'all';
+
+        return $filters;
+    }
+
+    private function applyStaffFilters($query, array $filters): void
+    {
+        if ($filters['search'] !== '') {
+            $like = '%'.$filters['search'].'%';
+            $query->whereHas('client', fn ($client) => $client->where(function ($fields) use ($like) {
+                $fields->where('first_name', 'like', $like)
+                    ->orWhere('middle_initial', 'like', $like)
+                    ->orWhere('last_name', 'like', $like)
+                    ->orWhere('contact_number', 'like', $like)
+                    ->orWhere('address', 'like', $like)
+                    ->orWhere('barangay', 'like', $like);
+            }));
+        }
+
+        if ($filters['status'] !== 'all') {
+            $query->where('status', $filters['status']);
+        }
+
+        // The method column shows "Pending counseling" until a method is given, so
+        // the filter matches what the cell displays rather than the raw columns.
+        if ($filters['method'] === 'pending') {
+            $query->whereNull('method_given')->where('status', 'requested');
+        } elseif ($filters['method'] !== 'all') {
+            $query->where(function ($q) use ($filters) {
+                $q->where('method_given', $filters['method'])
+                    ->orWhere(fn ($w) => $w->whereNull('method_given')
+                        ->where('status', '!=', 'requested')
+                        ->where('preferred_method', $filters['method']));
+            });
+        }
+
+        match ($filters['follow_up']) {
+            'due' => $query->whereNotNull('next_follow_up')->whereDate('next_follow_up', '<=', today()),
+            'upcoming' => $query->whereNotNull('next_follow_up')->whereDate('next_follow_up', '>', today()),
+            'none' => $query->whereNull('next_follow_up'),
+            default => null,
+        };
     }
 
     public function staffCreate()
