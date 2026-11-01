@@ -21,6 +21,9 @@
             <span class="btn-hero-secondary">
                 <i class="bi bi-people-fill me-1 text-primary"></i> {{ $patients->total() ?? 0 }} Total Walk-ins
             </span>
+            <a href="{{ route('midwife.patients') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Women
+            </a>
         </div>
     </div>
 </div>
