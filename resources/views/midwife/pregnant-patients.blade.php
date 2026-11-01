@@ -139,7 +139,7 @@
                             <th class="py-3">Barangay</th>
                             <th class="py-3">Clinical Triage</th>
                             <th class="py-3">Estimated Due Date</th>
-                            <th class="py-3 text-end pe-4">Actions</th>
+                            <th class="py-3 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -196,25 +196,17 @@
                                         <span style="color:var(--color-text-muted);">—</span>
                                     @endif
                                 </td>
-                                <td class="py-3 text-end pe-4">
-                                    <div class="d-flex gap-2 justify-content-end">
-                                        @if($pregnancy->user_id && $pregnancy->woman)
-                                        <a href="{{ route('midwife.patient-details', $pregnancy->user_id) }}" 
-                                           class="btn btn-sm btn-light border" 
-                                           style="border-radius:8px;"
-                                           title="View Patient Record">
-                                            <i class="bi bi-person me-1"></i> Patient
-                                        </a>
-                                        @endif
-                                        <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}" 
-                                           class="btn btn-sm btn-primary" 
-                                           style="border-radius:8px; font-weight:600;"
+                                <td class="py-3 text-center">
+                                    <div class="d-flex gap-2 justify-content-center">
+                                        <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}"
+                                           class="btn btn-sm btn-primary"
+                                           style="border-radius:8px; font-weight:600; display:inline-flex; align-items:center; justify-content:center; text-align:center;"
                                            title="View Pregnancy Details">
-                                            <i class="bi bi-eye me-1"></i> Case
+                                            <i class="bi bi-eye"></i><span>View</span>
                                         </a>
                                     </div>
                                     @if(!$pregnancy->user_id && $pregnancy->walk_in_patient_id)
-                                        {{-- The row dead-ended at "Case" with no way to enrol her. --}}
+                                        {{-- The row dead-ended at "View" with no way to enrol her. --}}
                                         <a href="{{ route('midwife.walk-in-patients.show', $pregnancy->walk_in_patient_id) }}"
                                            class="btn btn-sm btn-outline-primary w-100 mt-2"
                                            style="border-radius:8px; font-size:0.75rem; font-weight:600;">
