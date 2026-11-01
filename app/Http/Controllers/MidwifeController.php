@@ -1083,31 +1083,46 @@ class MidwifeController extends Controller
 
     // --- Risk Alerts inbox (clinical review queue) ---
 
-    public function riskAlerts()
+    public function riskAlerts(Request $request)
     {
-        $highRiskPregnancies = Pregnancy::active()
-            ->highRisk()
-            ->with(['woman', 'walkInPatient'])
-            ->latest()
-            ->paginate(10, ['*'], 'pregnancies_page');
+        // The tab bar always shows every count, but only the selected queue is listed,
+        // so the other three never run a page query.
+        $counts = [
+            'pregnancies' => Pregnancy::active()->highRisk()->count(),
+            'referrals' => CheckupReferral::whereIn('urgency', ['urgent', 'emergency'])
+                ->whereIn('status', ['pending', 'reviewed'])
+                ->count(),
+            'missed' => Checkup::missed()->count(),
+            'records' => HealthRecord::where('workflow_status', 'submitted_to_midwife')->count(),
+        ];
 
-        $urgentReferrals = \App\Models\CheckupReferral::with(['woman', 'walkInPatient', 'referredByBhw'])
-            ->whereIn('urgency', ['urgent', 'emergency'])
-            ->whereIn('status', ['pending', 'reviewed'])
-            ->latest()
-            ->paginate(10, ['*'], 'referrals_page');
+        $queue = (string) $request->query('queue');
+        $queue = isset($counts[$queue]) ? $queue : 'all';
+        $show = fn (string $key): bool => $queue === 'all' || $queue === $key;
 
-        $missedCheckups = Checkup::missed()
-            ->with(['woman', 'walkInPatient', 'midwife'])
-            ->latest('scheduled_date')
-            ->paginate(10, ['*'], 'missed_page');
+        $highRiskPregnancies = $show('pregnancies')
+            ? Pregnancy::active()->highRisk()->with(['woman', 'walkInPatient'])->latest()->paginate(10, ['*'], 'pregnancies_page')
+            : null;
 
-        $pendingRecords = HealthRecord::with(['woman', 'walkInPatient', 'recordedBy'])
-            ->where('workflow_status', 'submitted_to_midwife')
-            ->latest()
-            ->paginate(10, ['*'], 'records_page');
+        $urgentReferrals = $show('referrals')
+            ? \App\Models\CheckupReferral::with(['woman', 'walkInPatient', 'referredByBhw'])
+                ->whereIn('urgency', ['urgent', 'emergency'])
+                ->whereIn('status', ['pending', 'reviewed'])
+                ->latest()
+                ->paginate(10, ['*'], 'referrals_page')
+            : null;
+
+        $missedCheckups = $show('missed')
+            ? Checkup::missed()->with(['woman', 'walkInPatient', 'midwife'])->latest('scheduled_date')->paginate(10, ['*'], 'missed_page')
+            : null;
+
+        $pendingRecords = $show('records')
+            ? HealthRecord::with(['woman', 'walkInPatient', 'recordedBy'])->where('workflow_status', 'submitted_to_midwife')->latest()->paginate(10, ['*'], 'records_page')
+            : null;
 
         return view('midwife.risk-alerts.index', compact(
+            'counts',
+            'queue',
             'highRiskPregnancies',
             'urgentReferrals',
             'missedCheckups',

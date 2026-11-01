@@ -69,7 +69,12 @@
     .wd-wrap .table-responsive { overflow:visible !important; }
     .wd-wrap { overflow:hidden; }
     .wd-wrap .table { font-size:0.7rem !important; min-width:100%; table-layout:auto; line-height:1.1; }
-    .wd-wrap .table th, .wd-wrap .table td { padding:0.2rem 0.3rem !important; white-space:nowrap; }
+    /* portal-theme pins cells at `.main-content .table tbody td` / `thead th`
+       (0,2,2) with 0.9rem padding !important, which outranked the compact values
+       here and left every .wd-wrap table with the framework's roomy rows. Needs
+       body + the same three classes to actually win. */
+    body .main-content .wd-wrap .table :is(thead th, tbody td) { padding:0.2rem 0.3rem !important; }
+    .wd-wrap .table th, .wd-wrap .table td { white-space:nowrap; }
     .wd-wrap .table td.wd-cell-wrap { white-space:normal; }
     .wd-wrap .table tbody tr { height:28px !important; }
     .wd-wrap .table td .wd-sub { font-size:0.65rem; line-height:1.1; }
@@ -85,7 +90,10 @@
         min-width:112px; padding:0.4rem 0.9rem !important; font-size:0.78rem !important;
         font-weight:700; white-space:nowrap;
     }
-    .wd-wrap .card-header { padding-top:0.4rem !important; padding-bottom:0.4rem !important; }
+    /* portal-theme pins `.main-content .card-header` padding at (0,2,0) with
+       !important and its block lands after this partial, so the compact header
+       needs the body + .main-content prefix to actually win. */
+    body .main-content .wd-wrap .card-header { padding:0.45rem 0.75rem !important; }
     .wd-wrap .card-body { padding:0 !important; }
     .wd-wrap .table-responsive { border:none; }
     .wd-wrap .p-3 { padding:0.3rem !important; }
