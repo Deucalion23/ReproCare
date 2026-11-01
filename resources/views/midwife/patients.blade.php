@@ -121,17 +121,17 @@
             <div class="d-flex align-items-center gap-2 flex-wrap">
                 <a href="{{ route('midwife.patients', array_merge(request()->except(['page']), ['filter' => 'all'])) }}" 
                    class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5"
-                   style="border:1px solid var(--color-border); {{ request('filter', 'all') === 'all' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
+                   style="border:1px solid var(--color-border); {{ request('filter', 'all') === 'all' ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
                     <i class="bi bi-people-fill"></i> All Women ({{ $patients->total() }})
                 </a>
                 <a href="{{ route('midwife.patients', array_merge(request()->except(['page']), ['filter' => 'registered'])) }}" 
                    class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5"
-                   style="border:1px solid var(--color-border); {{ request('filter') === 'registered' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
+                   style="border:1px solid var(--color-border); {{ request('filter') === 'registered' ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
                     <i class="bi bi-person-check-fill"></i> Enrolled ({{ $registeredCount }})
                 </a>
                 <a href="{{ route('midwife.patients', array_merge(request()->except(['page']), ['filter' => 'unregistered'])) }}" 
                    class="btn btn-sm rounded-pill px-3 py-2 fw-bold d-inline-flex align-items-center gap-1.5"
-                   style="border:1px solid var(--color-border); {{ request('filter') === 'unregistered' ? 'background:var(--color-text) !important; color:var(--color-on-solid) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
+                   style="border:1px solid var(--color-border); {{ request('filter') === 'unregistered' ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);' }}">
                     <i class="bi bi-person-badge-fill"></i> Unlinked ({{ $unregisteredCount }})
                 </a>
             </div>

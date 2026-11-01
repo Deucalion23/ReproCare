@@ -575,12 +575,12 @@
                 <div class="d-flex gap-1 p-1 rounded-pill" style="background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none;">
                     <a href="{{ route('forum.index') }}"
                        class="btn btn-sm"
-                       style="border:none; border-radius:999px; font-weight:800; font-size:0.78rem; padding:0.35rem 0.95rem; {{ !$filter ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:transparent; color:var(--color-text);' }}">
+                       style="border:none; border-radius:999px; font-weight:800; font-size:0.78rem; padding:0.35rem 0.95rem; {{ !$filter ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:transparent; color:var(--color-text);' }}">
                         All Discussions
                     </a>
                     <a href="{{ route('forum.index', ['filter' => 'my-posts']) }}"
                        class="btn btn-sm"
-                       style="border:none; border-radius:999px; font-weight:800; font-size:0.78rem; padding:0.35rem 0.95rem; {{ $filter === 'my-posts' ? 'background:var(--color-text); background-color:var(--color-surface-strong); color:var(--color-on-solid);' : 'background:transparent; color:var(--color-text);' }}">
+                       style="border:none; border-radius:999px; font-weight:800; font-size:0.78rem; padding:0.35rem 0.95rem; {{ $filter === 'my-posts' ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:transparent; color:var(--color-text);' }}">
                         My Posts
                     </a>
                 </div>
