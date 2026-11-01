@@ -3,13 +3,7 @@
 @section('title', 'Edit Pregnancy - ReproCare')
 
 @push('styles')
-<style>
-    .preg-grid { display:grid; gap:1.25rem; }
-    .preg-card { border:1px solid var(--border); border-radius:18px; background:var(--bg-card); padding:1.25rem; }
-    .preg-label { font-size:0.78rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.8rem; }
-    .preg-avatar { width:68px; height:68px; border-radius:18px; object-fit:cover; border:2px solid var(--border); }
-    .bmi-chip { display:inline-flex; align-items:center; padding:0.55rem 0.8rem; border-radius:12px; background:var(--bg-card2); min-height:42px; font-weight:600; }
-</style>
+    @include('midwife.partials.pregnancy-form-styles')
 @endpush
 
 @section('midwife-content')
@@ -23,12 +17,12 @@
     [$storedSystolic, $storedDiastolic] = array_pad(explode('/', (string) ($pregnancy->healthRecords->first()->bp ?? '')), 2, '');
 @endphp
 
-<div class="py-4">
-    <div class="page-hero fade-in-card mb-4">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
+<div class="py-3">
+    <div class="page-hero fade-in-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2" style="position:relative;z-index:1;">
             <div>
                 <h1 class="page-hero-title">Edit Pregnancy</h1>
-                <p class="page-hero-subtitle">Update the current pregnancy record for {{ $selectedName }}.</p>
+                <p class="page-hero-subtitle">{{ $selectedName }} · {{ $pregnancy->formatted_aog }}</p>
             </div>
             <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}" class="btn-hero-primary">
                 <i class="bi bi-arrow-left"></i> Back to Pregnancy
@@ -37,8 +31,8 @@
     </div>
 
     @if ($errors->any())
-        <div class="alert alert-danger fade-in-card">
-            <ul class="mb-0">
+        <div class="alert alert-danger py-2 fade-in-card">
+            <ul class="mb-0 small">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -46,75 +40,78 @@
         </div>
     @endif
 
-    <form action="{{ route('midwife.pregnancies.update', $pregnancy->id) }}" method="POST" class="preg-grid">
+    <form action="{{ route('midwife.pregnancies.update', $pregnancy->id) }}" method="POST" class="pf pf-grid">
         @csrf
         @method('PUT')
         <input type="hidden" name="patient_type" value="{{ $isWalkIn ? 'walk_in' : 'registered' }}">
 
-        <div class="preg-card fade-in-card">
-            <div class="preg-label"><i class="bi bi-person-vcard me-1"></i>Patient Information</div>
-            <div class="row g-3 align-items-end">
-                <div class="col-md-4">
+        <div class="pf-card fade-in-card">
+            <div class="pf-title"><i class="bi bi-person-vcard me-1"></i>Patient Information</div>
+            <div class="row g-2">
+                <div class="col-12 col-lg-2">
                     <label class="form-label">Patient Type</label>
-                    <div class="d-flex gap-2 flex-wrap">
-                        <input type="radio" class="btn-check" name="patient_type_switch" id="patient_type_registered" value="registered" {{ !$isWalkIn ? 'checked' : '' }}>
-                        <label class="btn btn-outline-primary" for="patient_type_registered">Enrolled</label>
-                        <input type="radio" class="btn-check" name="patient_type_switch" id="patient_type_walk_in" value="walk_in" {{ $isWalkIn ? 'checked' : '' }}>
-                        <label class="btn btn-outline-primary" for="patient_type_walk_in">Unlinked</label>
+                    <div class="d-flex flex-column gap-2 align-items-start">
+                        <div class="d-flex gap-2">
+                            <input type="radio" class="btn-check" name="patient_type_switch" id="patient_type_registered" value="registered" {{ !$isWalkIn ? 'checked' : '' }}>
+                            <label class="btn btn-outline-primary" for="patient_type_registered">Enrolled</label>
+                            <input type="radio" class="btn-check" name="patient_type_switch" id="patient_type_walk_in" value="walk_in" {{ $isWalkIn ? 'checked' : '' }}>
+                            <label class="btn btn-outline-primary" for="patient_type_walk_in">Unlinked</label>
+                        </div>
+                        <div class="form-text">Re-linking an existing pregnancy is blocked on save.</div>
                     </div>
                 </div>
-                <div class="col-md-8" id="registeredSearchWrap">
-                    <label for="patientSearch" class="form-label">Search Enrolled Woman</label>
-                    <input type="text" class="form-control" id="patientSearch" placeholder="Search by name or email">
+                <div class="col-12 col-lg-4">
+                    <div id="registeredSearchWrap" class="mb-2">
+                        <label for="patientSearch" class="form-label">Search Enrolled Woman</label>
+                        <input type="text" class="form-control" id="patientSearch" placeholder="Search by name or email">
+                    </div>
+                    <div id="registered_patient_section">
+                        <label for="user_id" class="form-label">Enrolled Woman</label>
+                        <select class="form-select" id="user_id" name="user_id">
+                            <option value="">Select woman</option>
+                            @foreach($women as $woman)
+                                <option value="{{ $woman->id }}"
+                                    data-name="{{ $woman->name }}"
+                                    data-subtitle="{{ $woman->email }}"
+                                    data-image="{{ $woman->profile_image_url }}"
+                                    data-age="{{ $woman->age }}"
+                                    data-active="{{ $woman->pregnancies->where('id', '!=', $pregnancy->id)->isNotEmpty() ? '1' : '0' }}"
+                                    data-search="{{ strtolower($woman->name . ' ' . $woman->email) }}"
+                                    {{ (int) old('user_id', $pregnancy->user_id) === (int) $woman->id ? 'selected' : '' }}>
+                                    {{ $woman->name }} - {{ $woman->email }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div id="walk_in_patient_section" class="d-none">
+                        <label for="walk_in_patient_id" class="form-label">Unlinked Woman</label>
+                        <select class="form-select" id="walk_in_patient_id" name="walk_in_patient_id">
+                            <option value="">Select unlinked woman</option>
+                            @foreach($walkInPatients as $walkInPatient)
+                                <option value="{{ $walkInPatient->id }}"
+                                    data-name="{{ $walkInPatient->full_name }}"
+                                    data-subtitle="{{ $walkInPatient->contact_number ?? 'No contact number' }}"
+                                    data-age="{{ $walkInPatient->age }}"
+                                    data-active="{{ $walkInPatient->pregnancies->where('id', '!=', $pregnancy->id)->isNotEmpty() ? '1' : '0' }}"
+                                    {{ (int) old('walk_in_patient_id', $pregnancy->walk_in_patient_id) === (int) $walkInPatient->id ? 'selected' : '' }}>
+                                    {{ $walkInPatient->full_name }} - {{ $walkInPatient->contact_number ?? 'No contact number' }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <div class="col-md-8" id="registered_patient_section">
-                    <label for="user_id" class="form-label">Enrolled Woman</label>
-                    <select class="form-select" id="user_id" name="user_id">
-                        <option value="">Select woman</option>
-                        @foreach($women as $woman)
-                            <option value="{{ $woman->id }}"
-                                data-name="{{ $woman->name }}"
-                                data-subtitle="{{ $woman->email }}"
-                                data-image="{{ $woman->profile_image_url }}"
-                                data-age="{{ $woman->age }}"
-                                data-active="{{ $woman->pregnancies->where('id', '!=', $pregnancy->id)->isNotEmpty() ? '1' : '0' }}"
-                                data-search="{{ strtolower($woman->name . ' ' . $woman->email) }}"
-                                {{ (int) old('user_id', $pregnancy->user_id) === (int) $woman->id ? 'selected' : '' }}>
-                                {{ $woman->name }} - {{ $woman->email }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4" id="registered_patient_meta">
-                    <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:var(--bg-card2);">
-                        <img src="{{ $selectedImage }}" id="patient_preview_image" alt="Preview" class="preg-avatar">
-                        <div>
+                <div class="col-12 col-lg-6">
+                    <div id="registered_patient_meta" class="pf-identity">
+                        <img src="{{ $selectedImage }}" id="patient_preview_image" alt="Preview" class="pf-avatar">
+                        <div class="min-w-0">
                             <div id="patient_preview_name" class="fw-bold">{{ $selectedName }}</div>
                             <div id="patient_preview_subtitle" class="text-muted small">{{ $selectedSubtitle }}</div>
                             <div id="patient_preview_age" class="text-muted small">{{ $selectedPatient?->age ? 'Age: ' . $selectedPatient->age . ' years old' : '' }}</div>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-8 d-none" id="walk_in_patient_section">
-                    <label for="walk_in_patient_id" class="form-label">Unlinked Woman</label>
-                    <select class="form-select" id="walk_in_patient_id" name="walk_in_patient_id">
-                        <option value="">Select unlinked woman</option>
-                        @foreach($walkInPatients as $walkInPatient)
-                            <option value="{{ $walkInPatient->id }}"
-                                data-name="{{ $walkInPatient->full_name }}"
-                                data-subtitle="{{ $walkInPatient->contact_number ?? 'No contact number' }}"
-                                data-age="{{ $walkInPatient->age }}"
-                                data-active="{{ $walkInPatient->pregnancies->where('id', '!=', $pregnancy->id)->isNotEmpty() ? '1' : '0' }}"
-                                {{ (int) old('walk_in_patient_id', $pregnancy->walk_in_patient_id) === (int) $walkInPatient->id ? 'selected' : '' }}>
-                                {{ $walkInPatient->full_name }} - {{ $walkInPatient->contact_number ?? 'No contact number' }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4 d-none" id="walk_in_patient_meta">
-                    <div class="d-flex align-items-center gap-3 p-3 rounded-3" style="background:var(--bg-card2);">
-                        <img src="/images/avatars/avatar-female.svg" id="walkin_preview_image" alt="Preview" class="preg-avatar">
-                        <div>
+                    <div id="walk_in_patient_meta" class="pf-identity d-none">
+                        <img src="/images/avatars/avatar-female.svg" id="walkin_preview_image" alt="Preview" class="pf-avatar">
+                        <div class="min-w-0">
                             <div id="walkin_preview_name" class="fw-bold">{{ $selectedName }}</div>
                             <div id="walkin_preview_subtitle" class="text-muted small">{{ $selectedSubtitle }}</div>
                             <div id="walkin_preview_age" class="text-muted small">{{ $selectedPatient?->age ? 'Age: ' . $selectedPatient->age . ' years old' : '' }}</div>
@@ -124,63 +121,66 @@
             </div>
         </div>
 
-        <div class="row g-4">
-            <div class="col-lg-7">
-                <div class="preg-card fade-in-card h-100">
-                    <div class="preg-label"><i class="bi bi-calendar-heart me-1"></i>Pregnancy Timeline</div>
-                    <div class="row g-3">
-                        <div class="col-md-4">
+        <div class="row g-3">
+            <div class="col-xl-7">
+                <div class="pf-card fade-in-card h-100">
+                    <div class="pf-title"><i class="bi bi-calendar-heart me-1"></i>Pregnancy Timeline</div>
+                    <div class="row g-2">
+                        <div class="col-6 col-lg-4">
                             <label for="lmp" class="form-label">LMP</label>
                             <input type="date" class="form-control" id="lmp" name="lmp" value="{{ old('lmp', optional($pregnancy->lmp)->format('Y-m-d')) }}" required>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-6 col-lg-4">
                             <label for="edd" class="form-label">EDD</label>
                             <input type="date" class="form-control" id="edd" value="{{ optional($pregnancy->edd)->format('Y-m-d') }}" readonly>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-12 col-lg-4">
                             <label for="aog_display" class="form-label">AOG</label>
                             <input type="text" class="form-control" id="aog_display" value="{{ $pregnancy->formatted_aog }}" readonly>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-12">
+                            <div class="pf-sub">Obstetric History (GTPAL)</div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-2">
                             <label for="gravida" class="form-label">Gravida</label>
                             <input type="number" class="form-control" id="gravida" name="gravida" value="{{ old('gravida', $profile?->gravida) }}" min="1">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <label for="para" class="form-label">Para</label>
                             <input type="number" class="form-control" id="para" name="para" value="{{ old('para', $profile?->parity) }}" min="0">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <label for="gtpal_term" class="form-label">Term</label>
                             <input type="number" class="form-control" id="gtpal_term" name="gtpal_term" value="{{ old('gtpal_term', $profile?->gtpal_term ?? 0) }}" min="0">
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-6 col-md-4 col-lg-2">
                             <label for="gtpal_preterm" class="form-label">Preterm</label>
                             <input type="number" class="form-control" id="gtpal_preterm" name="gtpal_preterm" value="{{ old('gtpal_preterm', $profile?->gtpal_preterm ?? 0) }}" min="0">
                         </div>
-                        <div class="col-md-6" id="outcome_wrap">
-                            <label for="gtpal_abortions" class="form-label">Abortions / Miscarriages</label>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <label for="gtpal_abortions" class="form-label">Abortions</label>
                             <input type="number" class="form-control" id="gtpal_abortions" name="gtpal_abortions" value="{{ old('gtpal_abortions', $profile?->gtpal_abortions ?? 0) }}" min="0">
                         </div>
-                        <div class="col-md-6">
-                            <label for="gtpal_living_children" class="form-label">Living Children</label>
+                        <div class="col-6 col-md-4 col-lg-2">
+                            <label for="gtpal_living_children" class="form-label">Living Kids</label>
                             <input type="number" class="form-control" id="gtpal_living_children" name="gtpal_living_children" value="{{ old('gtpal_living_children', $profile?->gtpal_living_children ?? 0) }}" min="0">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="col-lg-5">
-                <div class="preg-card fade-in-card h-100">
-                    <div class="preg-label"><i class="bi bi-heart-pulse me-1"></i>Status, Outcome And Assessment</div>
-                    <div class="row g-3">
-                        <div class="col-md-6">
+            <div class="col-xl-5">
+                <div class="pf-card fade-in-card h-100">
+                    <div class="pf-title"><i class="bi bi-heart-pulse me-1"></i>Status, Outcome And Assessment</div>
+                    <div class="row g-2">
+                        <div class="col-6">
                             <label for="status" class="form-label">Pregnancy Status</label>
                             <select class="form-select" id="status" name="status">
                                 <option value="active" {{ old('status', $pregnancy->status) === 'active' ? 'selected' : '' }}>Active</option>
                                 <option value="completed" {{ old('status', $pregnancy->status) === 'completed' ? 'selected' : '' }}>Completed</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-6 d-none" id="outcome_wrap">
                             <label for="outcome" class="form-label">Outcome</label>
                             <select class="form-select" id="outcome" name="outcome">
                                 <option value="">Select outcome</option>
@@ -189,52 +189,27 @@
                                 @endforeach
                             </select>
                         </div>
-                        <div class="col-12" id="outcome_details_wrap">
+                        <div class="col-12 d-none" id="outcome_details_wrap">
                             <label for="outcome_details" class="form-label">Outcome Details</label>
                             <textarea class="form-control" id="outcome_details" name="outcome_details" rows="2">{{ old('outcome_details', $profile?->outcome_details) }}</textarea>
                         </div>
-                        <div class="col-md-6">
-                            <label for="risk_assessment_mode" class="form-label">Risk Assessment</label>
+                        <div class="col-12">
+                            <div class="pf-sub">Risk Assessment</div>
+                        </div>
+                        <div class="col-6">
+                            <label for="risk_assessment_mode" class="form-label">Mode</label>
                             <select class="form-select" id="risk_assessment_mode" name="risk_assessment_mode">
                                 <option value="automatic" {{ old('risk_assessment_mode', $pregnancy->risk_assessment_mode) === 'automatic' ? 'selected' : '' }}>Automatic</option>
                                 <option value="manual" {{ old('risk_assessment_mode', $pregnancy->risk_assessment_mode) === 'manual' ? 'selected' : '' }}>Manual</option>
                             </select>
                         </div>
-                        <div class="col-md-6" id="risk_level_wrap">
+                        <div class="col-6" id="risk_level_wrap">
                             <label for="risk_level" class="form-label">Manual Risk</label>
                             <select class="form-select" id="risk_level" name="risk_level">
                                 <option value="Low" {{ old('risk_level', $pregnancy->risk_level) === 'Low' ? 'selected' : '' }}>Low</option>
                                 <option value="Medium" {{ old('risk_level', $pregnancy->risk_level) === 'Medium' ? 'selected' : '' }}>Medium</option>
                                 <option value="High" {{ old('risk_level', $pregnancy->risk_level) === 'High' ? 'selected' : '' }}>High</option>
                             </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Blood Pressure</label>
-                            <div class="row g-2">
-                                <div class="col-6"><input type="number" class="form-control" id="bp_systolic" name="bp_systolic" value="{{ old('bp_systolic', $storedSystolic) }}" placeholder="Systolic"></div>
-                                <div class="col-6"><input type="number" class="form-control" id="bp_diastolic" name="bp_diastolic" value="{{ old('bp_diastolic', $storedDiastolic) }}" placeholder="Diastolic"></div>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label for="bp_preview" class="form-label">BP Preview</label>
-                            <input type="text" class="form-control" id="bp_preview" readonly>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="weight" class="form-label">Weight (kg)</label>
-                            <input type="number" step="0.1" class="form-control" id="weight" name="weight" value="{{ old('weight', $pregnancy->healthRecords->first()->weight ?? '') }}">
-                        </div>
-                        <div class="col-md-4">
-                            <label for="height" class="form-label">Height (cm)</label>
-                            <input type="number" step="0.1" class="form-control" id="height" name="height" value="{{ old('height', $pregnancy->healthRecords->first()->height ?? '') }}">
-                            <div class="form-text">Below 122 cm (4 ft) flags short-stature risk.</div>
-                        </div>
-                        <div class="col-md-4">
-                            <label for="bmi_display" class="form-label">BMI</label>
-                            <input type="text" class="form-control" id="bmi_display" readonly>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">BMI Status</label>
-                            <div class="bmi-chip" id="bmi_category">Waiting for weight and height</div>
                         </div>
                         <div class="col-12">
                             <label for="risk_notes" class="form-label">Risk Notes</label>
@@ -245,11 +220,48 @@
             </div>
         </div>
 
-        <div class="preg-card fade-in-card">
-            <div class="preg-label"><i class="bi bi-clipboard2-pulse me-1"></i>Health Conditions</div>
-            <div class="row g-3">
+        <div class="pf-card fade-in-card">
+            <div class="pf-title"><i class="bi bi-clipboard2-pulse me-1"></i>Vitals And Nutrition</div>
+            <div class="row g-2">
+                <div class="col-6 col-lg-2">
+                    <label for="bp_systolic" class="form-label">BP Systolic</label>
+                    <input type="number" class="form-control" id="bp_systolic" name="bp_systolic" value="{{ old('bp_systolic', $storedSystolic) }}" placeholder="Systolic">
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="bp_diastolic" class="form-label">BP Diastolic</label>
+                    <input type="number" class="form-control" id="bp_diastolic" name="bp_diastolic" value="{{ old('bp_diastolic', $storedDiastolic) }}" placeholder="Diastolic">
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="bp_preview" class="form-label">BP Preview</label>
+                    <input type="text" class="form-control" id="bp_preview" readonly>
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="weight" class="form-label">Weight (kg)</label>
+                    <input type="number" step="0.1" class="form-control" id="weight" name="weight" value="{{ old('weight', $pregnancy->healthRecords->first()->weight ?? '') }}">
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="height" class="form-label">Height (cm)</label>
+                    <input type="number" step="0.1" class="form-control" id="height" name="height" value="{{ old('height', $pregnancy->healthRecords->first()->height ?? '') }}">
+                </div>
+                <div class="col-6 col-lg-2">
+                    <label for="bmi_display" class="form-label">BMI</label>
+                    <input type="text" class="form-control" id="bmi_display" readonly>
+                </div>
+                <div class="col-12 col-lg-6">
+                    <label class="form-label">BMI Status</label>
+                    <div class="pf-chip" id="bmi_category">Waiting for weight and height</div>
+                </div>
+                <div class="col-12 col-lg-6 d-flex align-items-end">
+                    <div class="form-text">Height below 122 cm (4 ft) flags short-stature risk. Vitals here sync to the pregnancy's paired health record.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="pf-card fade-in-card">
+            <div class="pf-title"><i class="bi bi-clipboard2-pulse me-1"></i>Health Conditions</div>
+            <div class="row g-2">
                 @foreach($healthConditionOptions as $value => $label)
-                    <div class="col-md-4">
+                    <div class="col-12 col-md-6 col-xl-4">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" id="health_condition_{{ $value }}" name="health_conditions[]" value="{{ $value }}" {{ in_array($value, old('health_conditions', $profile?->health_conditions ?? []), true) ? 'checked' : '' }}>
                             <label class="form-check-label" for="health_condition_{{ $value }}">{{ $label }}</label>
@@ -263,26 +275,39 @@
             </div>
         </div>
 
-        <div class="preg-card fade-in-card">
-            <div class="preg-label"><i class="bi bi-check2-square me-1"></i>Lifestyle And Notes</div>
-            <div class="row g-3">
-                <div class="col-md-4"><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="lifestyle_smoking" name="lifestyle_smoking" value="1" {{ old('lifestyle_smoking', in_array(old('smoking_status', $pregnancy->healthRecords->first()->smoking_status ?? $pregnancy->smoking_status ?? 'none'), ['former', 'current'], true) ? 1 : 0) ? 'checked' : '' }}><label class="form-check-label" for="lifestyle_smoking">Smoking</label></div></div>
-                <div class="col-md-4"><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="lifestyle_alcohol" name="lifestyle_alcohol" value="1" {{ old('lifestyle_alcohol', in_array(old('alcohol_status', $pregnancy->healthRecords->first()->alcohol_use ?? 'none'), ['former', 'current'], true) ? 1 : 0) ? 'checked' : '' }}><label class="form-check-label" for="lifestyle_alcohol">Alcohol</label></div></div>
-                <div class="col-md-4"><div class="form-check mt-2"><input class="form-check-input" type="checkbox" id="lifestyle_drugs" name="lifestyle_drugs" value="1" {{ old('lifestyle_drugs', in_array(old('drug_use_status', $pregnancy->healthRecords->first()->drug_use ?? 'none'), ['former', 'current'], true) ? 1 : 0) ? 'checked' : '' }}><label class="form-check-label" for="lifestyle_drugs">Drugs</label></div></div>
-                <div class="col-md-6">
-                    <label for="lifestyle_other" class="form-label">Other Lifestyle Factors</label>
-                    <textarea class="form-control" id="lifestyle_other" name="lifestyle_other" rows="3">{{ old('lifestyle_other', $pregnancy->healthRecords->first()->lifestyle_notes ?? '') }}</textarea>
+        <div class="pf-card fade-in-card">
+            <div class="pf-title"><i class="bi bi-check2-square me-1"></i>Lifestyle And Notes</div>
+            <div class="row g-2">
+                <div class="col-12">
+                    <div class="d-flex flex-wrap gap-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="lifestyle_smoking" name="lifestyle_smoking" value="1" {{ old('lifestyle_smoking', in_array(old('smoking_status', $pregnancy->healthRecords->first()->smoking_status ?? $pregnancy->smoking_status ?? 'none'), ['former', 'current'], true) ? 1 : 0) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="lifestyle_smoking">Smoking</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="lifestyle_alcohol" name="lifestyle_alcohol" value="1" {{ old('lifestyle_alcohol', in_array(old('alcohol_status', $pregnancy->healthRecords->first()->alcohol_use ?? 'none'), ['former', 'current'], true) ? 1 : 0) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="lifestyle_alcohol">Alcohol</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="lifestyle_drugs" name="lifestyle_drugs" value="1" {{ old('lifestyle_drugs', in_array(old('drug_use_status', $pregnancy->healthRecords->first()->drug_use ?? 'none'), ['former', 'current'], true) ? 1 : 0) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="lifestyle_drugs">Drugs</label>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-12 col-lg-6">
+                    <label for="lifestyle_other" class="form-label">Other Lifestyle Factors</label>
+                    <textarea class="form-control" id="lifestyle_other" name="lifestyle_other" rows="2">{{ old('lifestyle_other', $pregnancy->healthRecords->first()->lifestyle_notes ?? '') }}</textarea>
+                </div>
+                <div class="col-12 col-lg-6">
                     <label for="notes" class="form-label">Notes</label>
-                    <textarea class="form-control" id="notes" name="notes" rows="3">{{ old('notes', $pregnancy->notes) }}</textarea>
+                    <textarea class="form-control" id="notes" name="notes" rows="2">{{ old('notes', $pregnancy->notes) }}</textarea>
                 </div>
             </div>
         </div>
 
-        <div class="d-flex justify-content-end gap-2">
-            <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}" class="btn btn-outline-secondary">Cancel</a>
-            <button type="submit" class="btn btn-primary">Update Pregnancy</button>
+        <div class="pf-actions">
+            <a href="{{ route('midwife.pregnancies.show', $pregnancy->id) }}" class="btn btn-outline-secondary btn-sm">Cancel</a>
+            <button type="submit" class="btn btn-primary btn-sm">Update Pregnancy</button>
         </div>
     </form>
 </div>
