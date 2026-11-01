@@ -14,6 +14,10 @@
         .pd-section { font-size:0.78rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--text); margin-bottom:0.5rem; }
         .pd-stat { padding:0.35rem 0.7rem; border:1px solid var(--border); border-radius:10px; height:100%; }
         .pd-identity { width:46px; height:46px; border-radius:14px; object-fit:cover; border:1px solid var(--border); flex:0 0 auto; }
+        .pd-split { position:relative; }
+        @media (min-width:1200px) {
+            .pd-split::after { content:''; position:absolute; top:2px; bottom:2px; right:-0.75rem; width:1px; background:var(--border); }
+        }
     </style>
 @endpush
 
@@ -74,7 +78,7 @@
     @endif
 
     <div class="row g-3">
-        <div class="col-xl-4">
+        <div class="col-xl-4 pd-split">
             @include('midwife.partials.decision-support', ['supportStacked' => true])
         </div>
 

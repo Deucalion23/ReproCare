@@ -33,7 +33,7 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div class="{{ $stacked ? 'col-12' : 'col-md-6' }}">
+                    <div class="{{ $stacked ? 'col-12 pt-2 border-top' : 'col-md-6' }}">
                         <div class="text-uppercase fw-bold mb-1" style="font-size:0.68rem;letter-spacing:0.07em;color:var(--text-muted);">Suggested next steps</div>
                         <ol class="small mb-0 ps-4" style="color:var(--text);line-height:1.45;">
                             @foreach($support['recommendations'] ?? [$support['action'] ?? ''] as $recommendation)
