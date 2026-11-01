@@ -87,11 +87,16 @@
                     <h5 class="mb-0">Needs Follow-up</h5>
                     <small class="text-muted">Latest visits flagged on review</small>
                 </div>
-                <span class="badge bg-danger">{{ $dangerVisits->count() }}</span>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-danger">{{ $dangerVisits->count() }}</span>
+                    @if($dangerVisits->count() > $railLimit)
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="followUpToggle" aria-expanded="false">Show all</button>
+                    @endif
+                </div>
             </div>
             <div class="card-body p-0">
-                @foreach($dangerVisits->take($railLimit) as $visit)
-                    <a href="{{ route($routeBase . '.show-mother', $visit->user_id) }}" class="d-flex align-items-center gap-3 p-3 text-decoration-none border-bottom" style="border-color:var(--color-border) !important;color:inherit;">
+                @foreach($dangerVisits as $visit)
+                    <a href="{{ route($routeBase . '.show-mother', $visit->user_id) }}" class="d-flex align-items-center gap-3 p-3 text-decoration-none border-bottom{{ $loop->index >= $railLimit ? ' d-none fu-extra' : '' }}" style="border-color:var(--color-border) !important;color:inherit;">
                         <span style="width:42px;height:42px;border-radius:50%;background:var(--color-danger-soft);color:var(--color-danger-text);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="bi bi-exclamation-triangle-fill"></i></span>
                         <span class="flex-grow-1" style="min-width:0;">
                             <span class="d-block fw-bold" style="color:var(--color-text);font-size:.9rem;">{{ $visit->mother?->name ?? 'Mother' }} <small class="text-muted fw-normal">· Week {{ $visit->visit_week }}</small></span>
@@ -100,9 +105,6 @@
                         <i class="bi bi-chevron-right" style="color:var(--color-secondary-text);"></i>
                     </a>
                 @endforeach
-                @if($dangerVisits->count() > $railLimit)
-                    <div class="p-3 text-center"><small class="text-muted">Showing the {{ $railLimit }} most recent of {{ $dangerVisits->count() }} flagged visits.</small></div>
-                @endif
             </div>
         </div>
         @endif
@@ -146,4 +148,20 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('followUpToggle');
+    if (! toggle) return;
+    const extras = document.querySelectorAll('.fu-extra');
+    toggle.addEventListener('click', function () {
+        const expand = toggle.getAttribute('aria-expanded') !== 'true';
+        extras.forEach(function (row) { row.classList.toggle('d-none', ! expand); });
+        toggle.setAttribute('aria-expanded', expand ? 'true' : 'false');
+        toggle.textContent = expand ? 'Show {{ $railLimit }} most recent' : 'Show all';
+    });
+});
+</script>
+@endpush
 @endsection
