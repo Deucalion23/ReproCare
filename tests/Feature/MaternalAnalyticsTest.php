@@ -240,6 +240,13 @@ class MaternalAnalyticsTest extends AutomationTestCase
         $this->assertStringContainsString('Suggested next steps', $html);
         $this->assertStringNotContainsString('Recorded-data rules', $html);
         $this->assertStringNotContainsString('Pregnancy #', $html);
+        $this->assertStringNotContainsString('Personalized care suggestions', $html);
+        $this->assertStringContainsString('Review pregnancy record', $html);
+        $ownRecord = view('midwife.partials.decision-support', [
+            'decisionSupport' => $rows,
+            'pregnancy' => \App\Models\Pregnancy::find($id),
+        ])->render();
+        $this->assertStringNotContainsString('Review pregnancy record', $ownRecord);
         $this->assertNotEmpty($rows[0]['findings']);
         $this->assertNotEmpty($rows[0]['recommendations']);
         $this->assertSame(0, DB::table('sms_logs')->count());
