@@ -117,7 +117,7 @@
                        style="left:0.85rem; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-size:0.9rem;"></i>
                     <input type="text" name="search" class="form-control form-control-sm" 
                            style="border-radius:12px; border:1.5px solid var(--color-border); padding:0.5rem 0.85rem 0.5rem 2.25rem; font-size:0.88rem;"
-                           placeholder="Search patient name or email..." value="{{ $search ?? '' }}">
+                           placeholder="Search name, email or contact number..." value="{{ $search ?? '' }}">
                 </div>
                 @if($search)
                     <a href="{{ route('midwife.pregnant-patients', ['status' => $status]) }}" 
@@ -152,7 +152,7 @@
                                         </div>
                                         <div>
                                             <div class="fw-bold" style="color:var(--color-text);">{{ $pregnancy->patient_name ?? 'Unknown patient' }}</div>
-                                            <small class="text-muted">{{ optional($pregnancy->woman)->email ?? 'No email' }}</small>
+                                            <small class="text-muted">{{ optional($pregnancy->woman)->email ?? optional($pregnancy->walkInPatient)->contact_number ?? 'No contact on file' }}</small>
                                         </div>
                                     </div>
                                 </td>
@@ -166,20 +166,24 @@
                                     @endif
                                 </td>
                                 <td class="py-3">
-                                    @if($pregnancy->status === 'high_risk')
+                                    {{-- Triage and status are separate facts; showing only one
+                                        of them hid every flagged case behind the Active pill. --}}
+                                    @if($pregnancy->is_high_risk)
                                         <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:var(--color-danger-soft); border:1px solid var(--color-secondary-soft); color:var(--color-secondary-text);">
                                             <i class="bi bi-exclamation-triangle-fill me-1"></i> High Risk
                                         </span>
-                                        <small class="d-block text-muted mt-1">{{ $pregnancy->formatted_aog }}</small>
-                                    @elseif($pregnancy->is_active)
+                                    @endif
+                                    @if($pregnancy->is_active)
                                         <span class="badge rounded-pill px-2.5 py-1 fw-bold" style="background:var(--color-success-soft); border:1px solid var(--color-success-soft); color:var(--color-success-text);">
                                             <i class="bi bi-heart-pulse-fill me-1"></i> Active
                                         </span>
-                                        <small class="d-block text-muted mt-1">{{ $pregnancy->formatted_aog }}</small>
                                     @else
                                         <span class="badge rounded-pill bg-light text-muted border font-semibold px-2.5 py-1">
                                             <i class="bi bi-check-circle-fill me-1"></i> Completed
                                         </span>
+                                    @endif
+                                    @if($pregnancy->is_active)
+                                        <small class="d-block text-muted mt-1">{{ $pregnancy->formatted_aog }}</small>
                                     @endif
                                 </td>
                                 <td class="py-3">
@@ -209,6 +213,14 @@
                                             <i class="bi bi-eye me-1"></i> Case
                                         </a>
                                     </div>
+                                    @if(!$pregnancy->user_id && $pregnancy->walk_in_patient_id)
+                                        {{-- The row dead-ended at "Case" with no way to enrol her. --}}
+                                        <a href="{{ route('midwife.walk-in-patients.show', $pregnancy->walk_in_patient_id) }}"
+                                           class="btn btn-sm btn-outline-primary w-100 mt-2"
+                                           style="border-radius:8px; font-size:0.75rem; font-weight:600;">
+                                            <i class="bi bi-person-plus me-1"></i> Field record · enrol
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach

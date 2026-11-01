@@ -47,7 +47,8 @@ class PregnancyController extends Controller
                 })
                 ->orWhereHas('walkInPatient', function($walkInQuery) use ($search) {
                     $walkInQuery->where('first_name', 'like', '%' . $search . '%')
-                               ->orWhere('last_name', 'like', '%' . $search . '%');
+                               ->orWhere('last_name', 'like', '%' . $search . '%')
+                               ->orWhere('contact_number', 'like', '%' . $search . '%');
                 });
             });
         }
@@ -72,9 +73,18 @@ class PregnancyController extends Controller
             }
         }
 
+        // The cards describe the whole filtered result. They used to count the
+        // paginator, so every number changed as the midwife turned pages.
+        $summary = [
+            'total' => (clone $query)->count(),
+            'active' => (clone $query)->active()->count(),
+            'completed' => (clone $query)->completed()->count(),
+            'highRisk' => (clone $query)->highRisk()->count(),
+        ];
+
         $pregnancies = $query->paginate(10)->withQueryString();
 
-        return view('midwife.pregnancies.index', compact('pregnancies', 'trimester', 'riskLevel'));
+        return view('midwife.pregnancies.index', compact('pregnancies', 'trimester', 'riskLevel', 'summary'));
     }
 
     // Create
@@ -474,12 +484,13 @@ class PregnancyController extends Controller
                 })
                 ->orWhereHas('walkInPatient', function($walkInQuery) use ($search) {
                     $walkInQuery->where('first_name', 'like', '%' . $search . '%')
-                               ->orWhere('last_name', 'like', '%' . $search . '%');
+                               ->orWhere('last_name', 'like', '%' . $search . '%')
+                               ->orWhere('contact_number', 'like', '%' . $search . '%');
                 });
             });
         }
 
-        $pregnancies = $query->paginate(10);
+        $pregnancies = $query->paginate(10)->withQueryString();
 
         return view('midwife.pregnancies.active', compact('pregnancies'));
     }

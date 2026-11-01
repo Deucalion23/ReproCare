@@ -3,6 +3,7 @@
 @section('title', 'Notifications - ReproCare')
 
 @push('styles')
+@include('includes.women-directory-styles')
 <style>
     /* ── Notifications table: clean white, borderless pastels ── */
     .ntf-pill { display:inline-flex; align-items:center; gap:.3rem; font-size:.72rem; font-weight:800; padding:.3rem .8rem; border-radius:999px; border:none; white-space:nowrap; }
@@ -69,6 +70,15 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
+
+@include('includes.list-toolbar', [
+    'action' => route('midwife.notifications.index'),
+    'tabs' => $tabs,
+    'active' => $status,
+    'search' => $search,
+    'placeholder' => 'Search alerts...',
+    'label' => 'Notification read state',
+])
 
 <div class="card">
     <div class="card-body p-0">

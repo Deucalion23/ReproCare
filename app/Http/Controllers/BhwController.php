@@ -2026,12 +2026,7 @@ class BhwController extends Controller
             'created_by_bhw_id' => auth()->id(),
         ]);
 
-        $walkInPatient->update([
-            'user_id' => $user->id,
-            'has_portal_access' => true,
-            'converted_to_user_id' => $user->id,
-            'converted_at' => now(),
-        ]);
+        $walkInPatient->linkPortalAccount($user);
 
         return redirect()->route('bhw.walk-in-patients.show', $id)
             ->with('success', 'Portal account activated — Unlinked Profile is now an Enrolled Account (Portal-Active).');

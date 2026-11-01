@@ -2,6 +2,10 @@
 
 @section('title', 'Walk-in Women - ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('midwife-content')
 
 {{-- ═══════════════════════════════
@@ -19,7 +23,7 @@
         </div>
         <div class="d-flex gap-2">
             <span class="btn-hero-secondary">
-                <i class="bi bi-people-fill me-1 text-primary"></i> {{ $patients->total() ?? 0 }} Total Walk-ins
+                <i class="bi bi-people-fill me-1 text-primary"></i> {{ number_format($patients->total()) }} matching
             </span>
             <a href="{{ route('midwife.patients') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i> Back to Women
@@ -27,6 +31,15 @@
         </div>
     </div>
 </div>
+
+@include('includes.list-toolbar', [
+    'action' => route('midwife.walk-in-patients.index'),
+    'tabs' => $tabs,
+    'active' => $status,
+    'search' => $search,
+    'placeholder' => 'Name, contact or barangay...',
+    'label' => 'Field record status',
+])
 
 @if(session('success'))
     <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" 

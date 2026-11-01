@@ -57,7 +57,10 @@
         'missed' => ['label' => 'Missed Checkups', 'icon' => 'bi-calendar-x-fill', 'count' => $counts['missed']],
         'records' => ['label' => 'Awaiting Validation', 'icon' => 'bi-clipboard2-check-fill', 'count' => $counts['records']],
     ];
-    $queueUrl = fn (string $key) => route('midwife.risk-alerts', $key === 'all' ? [] : ['queue' => $key]);
+    $queueUrl = fn (string $key) => route('midwife.risk-alerts', array_filter([
+        'queue' => $key === 'all' ? null : $key,
+        'search' => $search !== '' ? $search : null,
+    ]));
 @endphp
 
 <div class="py-2">
@@ -79,6 +82,16 @@
             </li>
         @endforeach
     </ul>
+
+    @include('includes.list-toolbar', [
+        'action' => route('midwife.risk-alerts'),
+        'tabs' => [],
+        'active' => $queue,
+        'search' => $search,
+        'placeholder' => 'Patient name, email or contact...',
+        'label' => 'Search risk alerts',
+        'preserve' => ['queue' => $queue === 'all' ? null : $queue],
+    ])
 
     @if ($highRiskPregnancies)
         <div class="card fade-in-card wd-wrap mb-3">

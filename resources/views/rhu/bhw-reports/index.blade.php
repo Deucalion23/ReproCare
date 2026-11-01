@@ -2,6 +2,10 @@
 
 @section('title', 'Midwife Monthly Reports - RHU Portal | ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('rhu-content')
 <div class="workspace-stack">
     <div class="page-hero fade-in-card">
@@ -29,44 +33,31 @@
     <div class="metric-grid mb-4" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Reports in Queue</div>
-            <div class="fw-800 text-dark text-2xl">{{ $reports->total() }}</div>
+            <div class="fw-800 text-dark text-2xl">{{ number_format($summary['total']) }}</div>
         </div>
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Pending Review</div>
-            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->where('submission_status', 'approved_by_midwife')->count() }}</div>
+            <div class="fw-800 text-dark text-2xl">{{ number_format($summary['pending']) }}</div>
         </div>
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Approved</div>
-            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->where('submission_status', 'approved_by_rhu')->count() }}</div>
+            <div class="fw-800 text-dark text-2xl">{{ number_format($summary['approved']) }}</div>
         </div>
         <div class="card p-3 fade-in-card bg-light border-0">
             <div class="text-muted text-xs uppercase tracking-wider mb-1">Rejected</div>
-            <div class="fw-800 text-dark text-2xl">{{ $reports->getCollection()->whereIn('submission_status', ['rejected', 'needs_revision'])->count() }}</div>
+            <div class="fw-800 text-dark text-2xl">{{ number_format($summary['rejected']) }}</div>
         </div>
     </div>
 
-    <div class="card fade-in-card mb-4">
-        <div class="card-header bg-transparent py-3">
-            <h5 class="mb-0 fw-700 text-dark">Filter Queue
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="GET" action="{{ route('rhu.bhw-reports.index') }}" class="row g-3 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label text-xs fw-600 text-muted">Report Type</label>
-                    <select name="filter" class="form-select">
-                        <option value="all" {{ $filter === 'all' ? 'selected' : '' }}>All Reports</option>
-                        <option value="health_records" {{ $filter === 'health_records' ? 'selected' : '' }}>Health Records</option>
-                        <option value="pregnancies" {{ $filter === 'pregnancies' ? 'selected' : '' }}>Pregnancies</option>
-                    </select>
-                </div>
-                <div class="col-md-6 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel me-1"></i>Apply Filter</button>
-                    <a href="{{ route('rhu.bhw-reports.index') }}" class="btn btn-outline-secondary"><i class="bi bi-x-lg me-1"></i>Clear</a>
-                </div>
-            </form>
-        </div>
-    </div>
+    @include('includes.list-toolbar', [
+        'action' => route('rhu.bhw-reports.index'),
+        'tabs' => $tabs,
+        'param' => 'filter',
+        'active' => $filter,
+        'search' => $search,
+        'placeholder' => 'BHW or report title...',
+        'label' => 'Report type',
+    ])
 
     <div class="card fade-in-card">
         <div class="card-header bg-transparent py-3">

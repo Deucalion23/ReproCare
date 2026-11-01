@@ -2,6 +2,10 @@
 
 @section('title', 'Activity Logs - RHU Portal | ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('rhu-content')
 
 <div class="page-hero fade-in-card mb-4">
@@ -15,6 +19,16 @@
         </div>
     </div>
 </div>
+
+@include('includes.list-toolbar', [
+    'action' => route('rhu.logs.index'),
+    'tabs' => $tabs,
+    'param' => 'role',
+    'active' => $role,
+    'search' => $search,
+    'placeholder' => 'Action, user, IP or detail...',
+    'label' => 'Log actor role',
+])
 
 <div class="card fade-in-card">
     <div class="card-body p-0">

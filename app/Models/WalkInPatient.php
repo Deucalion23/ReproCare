@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class WalkInPatient extends Model
 {
@@ -73,6 +74,28 @@ class WalkInPatient extends Model
     public function linkedUserId(): ?int
     {
         return $this->user_id ?? $this->converted_to_user_id;
+    }
+
+    /**
+     * Promote a field record to a portal account, and hand the records already
+     * collected under it to that account. Pregnancies keep their
+     * walk_in_patient_id as provenance but must gain a user_id — otherwise the
+     * case still reads as an unlinked profile, hides from every "registered
+     * woman" search, and offers no link to the new portal record.
+     */
+    public function linkPortalAccount(User $user): void
+    {
+        $this->update([
+            'user_id' => $user->id,
+            'converted_to_user_id' => $user->id,
+            'converted_at' => now(),
+            'has_portal_access' => true,
+        ]);
+
+        DB::table('pregnancies')
+            ->where('walk_in_patient_id', $this->id)
+            ->whereNull('user_id')
+            ->update(['user_id' => $user->id, 'updated_at' => now()]);
     }
 
     public function isPortalActive(): bool

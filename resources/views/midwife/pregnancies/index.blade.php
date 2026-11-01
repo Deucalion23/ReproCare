@@ -82,11 +82,10 @@
                 <span style="background:var(--color-primary-soft);color:var(--color-primary-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">All</span>
             </div>
             <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Total Pregnancies</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $pregnancies->total() }}</div>
+            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $summary['total'] }}</div>
             <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
-                <i class="bi bi-heart"></i> All recorded cases
+                <i class="bi bi-heart"></i> All matching cases
             </div>
-            <canvas id="sparkline1" width="80" height="36" style="position:absolute;bottom:1rem;right:1rem;opacity:0.25;"></canvas>
         </div>
     </div>
 
@@ -99,11 +98,10 @@
                 <span style="background:var(--color-success-soft);color:var(--color-success-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Prenatal</span>
             </div>
             <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Active Monitoring</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $pregnancies->where('status', 'active')->count() }}</div>
+            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $summary['active'] }}</div>
             <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
                 <i class="bi bi-activity"></i> Currently tracked
             </div>
-            <canvas id="sparkline2" width="80" height="36" style="position:absolute;bottom:1rem;right:1rem;opacity:0.25;"></canvas>
         </div>
     </div>
 
@@ -116,11 +114,10 @@
                 <span style="background:var(--color-info-soft);color:var(--color-info-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Delivered</span>
             </div>
             <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Completed Deliveries</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $pregnancies->where('status', 'completed')->count() }}</div>
+            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $summary['completed'] }}</div>
             <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
                 <i class="bi bi-check2-all"></i> Postpartum transitioned
             </div>
-            <canvas id="sparkline3" width="80" height="36" style="position:absolute;bottom:1rem;right:1rem;opacity:0.25;"></canvas>
         </div>
     </div>
 
@@ -133,11 +130,10 @@
                 <span style="background:var(--color-danger-soft);color:var(--color-danger-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Triage</span>
             </div>
             <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">High Risk Triage</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $pregnancies->where('risk_level', 'High')->count() }}</div>
+            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $summary['highRisk'] }}</div>
             <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
                 <i class="bi bi-arrow-up-short"></i> Requires clinical attention
             </div>
-            <canvas id="sparkline4" width="80" height="36" style="position:absolute;bottom:1rem;right:1rem;opacity:0.25;"></canvas>
         </div>
     </div>
 </div>
@@ -152,7 +148,7 @@
                 <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                 <input type="text" name="search" class="form-control ps-5" 
                        style="height:42px; border-radius:12px;"
-                       placeholder="Search by patient name..." value="{{ request('search') }}">
+                       placeholder="Search name, email or contact number..." value="{{ request('search') }}">
             </div>
             <select name="trimester" class="form-select" style="width:180px; height:42px; border-radius:12px;" onchange="this.form.submit()">
                 <option value="all" {{ $trimester === 'all' ? 'selected' : '' }}>All Trimesters</option>
@@ -226,7 +222,9 @@
                                                 @if($pregnancy->user_id && $pregnancy->woman)
                                                     {{ $pregnancy->woman->email }}
                                                 @elseif($pregnancy->walk_in_patient_id)
-                                                    Unlinked Patient
+                                                    {{-- A field record has no account yet, so the phone number
+                                                    collected in the barangay is the only way to reach her. --}}
+                                                    {{ optional($pregnancy->walkInPatient)->contact_number ?? 'Field record · no contact' }}
                                                 @endif
                                             </small>
                                         </div>
@@ -319,42 +317,5 @@
         @endif
     </div>
 </div>
-
-@push('scripts')
-<script>
-// Sparkline helper
-function drawSparkline(canvasId, data, color) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas || !window.Chart) return;
-    new Chart(canvas, {
-        type: 'line',
-        data: {
-            labels: data.map((_, i) => i),
-            datasets: [{
-                data: data,
-                borderColor: color || 'rgba(255,255,255,0.9)',
-                borderWidth: 2,
-                pointRadius: 0,
-                tension: 0.4,
-                fill: false
-            }]
-        },
-        options: {
-            responsive: false,
-            plugins: { legend: { display: false }, tooltip: { enabled: false } },
-            scales: { x: { display: false }, y: { display: false } },
-            animation: { duration: 1000 }
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-    drawSparkline('sparkline1', [5, 8, 6, 10, 9, 12, {{ $pregnancies->total() }}], 'rgba(255,255,255,0.9)');
-    drawSparkline('sparkline2', [3, 5, 4, 7, 6, 8, {{ $pregnancies->where('status', 'active')->count() }}], 'rgba(255,255,255,0.9)');
-    drawSparkline('sparkline3', [2, 4, 3, 5, 4, 6, {{ $pregnancies->where('status', 'completed')->count() }}], 'rgba(255,255,255,0.9)');
-    drawSparkline('sparkline4', [1, 2, 1, 3, 2, 4, {{ $pregnancies->where('risk_level', 'High')->count() }}], 'rgba(255,255,255,0.9)');
-});
-</script>
-@endpush
 
 @endsection

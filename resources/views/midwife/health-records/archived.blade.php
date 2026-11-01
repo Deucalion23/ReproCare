@@ -2,6 +2,10 @@
 
 @section('title', 'Archived Health Records - ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('midwife-content')
 
 {{-- ═══════════════════════════════
@@ -32,6 +36,16 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter:invert(1);"></button>
     </div>
 @endif
+
+@include('includes.list-toolbar', [
+    'action' => route('midwife.health-records.archived'),
+    'tabs' => $tabs,
+    'param' => 'risk',
+    'active' => $risk,
+    'search' => $search,
+    'placeholder' => 'Name, email or contact...',
+    'label' => 'Archived record risk',
+])
 
 {{-- ═══════════════════════════════
      STAT CARDS

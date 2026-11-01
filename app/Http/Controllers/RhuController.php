@@ -1112,11 +1112,45 @@ class RhuController extends Controller
 
     public function maternalDeaths()
     {
-        $deaths = MaternalDeath::with(['user', 'walkInPatient', 'purok'])
-            ->latest('death_date')
-            ->paginate(15);
+        $search = (string) request('search', '');
+        $status = (string) request('status', 'all');
 
-        return view('rhu.maternal-deaths.index', compact('deaths'));
+        $base = fn () => MaternalDeath::query()->when($search !== '', function ($query) use ($search) {
+            $like = '%' . $search . '%';
+            $query->where(function ($inner) use ($like) {
+                $inner->whereHas('user', function ($user) use ($like) {
+                        $user->withTrashed()
+                            ->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('email', 'like', $like);
+                    })
+                    ->orWhereHas('walkInPatient', function ($walkIn) use ($like) {
+                        $walkIn->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('contact_number', 'like', $like);
+                    })
+                    ->orWhere('barangay', 'like', $like)
+                    ->orWhere('cause_of_death', 'like', $like)
+                    ->orWhere('cause_category', 'like', $like);
+            });
+        });
+
+        $tabs = ['all' => ['label' => 'All deaths', 'count' => $base()->count()]];
+        foreach ($base()->whereNotNull('audit_status')->distinct()->orderBy('audit_status')->pluck('audit_status') as $key) {
+            $tabs[$key] = [
+                'label' => ucwords(str_replace('_', ' ', (string) $key)),
+                'count' => $base()->where('audit_status', $key)->count(),
+            ];
+        }
+
+        $deaths = $base()
+            ->when($status !== 'all', fn ($query) => $query->where('audit_status', $status))
+            ->with(['user', 'walkInPatient', 'purok'])
+            ->latest('death_date')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('rhu.maternal-deaths.index', compact('deaths', 'search', 'status', 'tabs'));
     }
 
     public function createMaternalDeath()
@@ -1268,11 +1302,47 @@ class RhuController extends Controller
 
     public function morbidities()
     {
-        $morbidities = MaternalMorbidity::with(['user', 'walkInPatient', 'purok'])
-            ->latest('event_date')
-            ->paginate(15);
+        $search = (string) request('search', '');
+        $status = (string) request('status', 'all');
 
-        return view('rhu.morbidities.index', compact('morbidities'));
+        $base = fn () => MaternalMorbidity::query()->when($search !== '', function ($query) use ($search) {
+            $like = '%' . $search . '%';
+            $query->where(function ($inner) use ($like) {
+                $inner->whereHas('user', function ($user) use ($like) {
+                        $user->withTrashed()
+                            ->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('email', 'like', $like);
+                    })
+                    ->orWhereHas('walkInPatient', function ($walkIn) use ($like) {
+                        $walkIn->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('contact_number', 'like', $like);
+                    })
+                    ->orWhere('barangay', 'like', $like)
+                    ->orWhere('complication_type', 'like', $like)
+                    ->orWhere('description', 'like', $like);
+            });
+        });
+
+        // Built from the values the column actually holds, so the review queue
+        // never shows a tab that cannot be reached.
+        $tabs = ['all' => ['label' => 'All events', 'count' => $base()->count()]];
+        foreach ($base()->whereNotNull('review_status')->distinct()->orderBy('review_status')->pluck('review_status') as $key) {
+            $tabs[$key] = [
+                'label' => ucwords(str_replace('_', ' ', (string) $key)),
+                'count' => $base()->where('review_status', $key)->count(),
+            ];
+        }
+
+        $morbidities = $base()
+            ->when($status !== 'all', fn ($query) => $query->where('review_status', $status))
+            ->with(['user', 'walkInPatient', 'purok'])
+            ->latest('event_date')
+            ->paginate(15)
+            ->withQueryString();
+
+        return view('rhu.morbidities.index', compact('morbidities', 'search', 'status', 'tabs'));
     }
 
     public function createMorbidity()
@@ -1414,12 +1484,38 @@ class RhuController extends Controller
 
     public function logs()
     {
-        // RHU sees shared operational history including CHO actions on supply/deaths.
-        $logs = ActivityLog::with('user')
-            ->latest()
-            ->paginate(30);
+        $search = (string) request('search', '');
+        $role = (string) request('role', 'all');
 
-        return view('rhu.logs.index', compact('logs'));
+        // RHU sees shared operational history including CHO actions on supply/deaths.
+        $base = fn () => ActivityLog::query()->when($search !== '', function ($query) use ($search) {
+            $like = '%' . $search . '%';
+            $query->where(function ($inner) use ($like) {
+                $inner->where('description', 'like', $like)
+                    ->orWhere('action', 'like', $like)
+                    ->orWhere('user_name', 'like', $like)
+                    ->orWhere('ip_address', 'like', $like);
+            });
+        });
+
+        // One tab per role that actually appears in the log, so the strip never
+        // offers an empty filter invented from the role enum.
+        $tabs = ['all' => ['label' => 'All activity', 'count' => $base()->count()]];
+        foreach (ActivityLog::whereNotNull('user_role')->select('user_role')->distinct()->orderBy('user_role')->pluck('user_role') as $key) {
+            $tabs[$key] = [
+                'label' => ucwords(str_replace('_', ' ', (string) $key)),
+                'count' => $base()->where('user_role', $key)->count(),
+            ];
+        }
+
+        $logs = $base()
+            ->when($role !== 'all', fn ($query) => $query->where('user_role', $role))
+            ->with('user')
+            ->latest()
+            ->paginate(30)
+            ->withQueryString();
+
+        return view('rhu.logs.index', compact('logs', 'search', 'role', 'tabs'));
     }
 
     // ─── Reports (FHSIS/MNCHN) ───────────────────────────────────────
@@ -1830,17 +1926,49 @@ class RhuController extends Controller
 
     public function bhwReports()
     {
-        $filter = request('filter', 'all');
-        
-        $query = BhwMonthlyReport::with(['bhw', 'submittedToPresidentBy', 'approvedByPresident', 'submittedToMidwifeBy']);
-        
-        if ($filter !== 'all') {
-            $query->where('report_type', $filter);
-        }
-        
-        $reports = $query->latest()->paginate(10);
-        
-        return view('rhu.bhw-reports.index', compact('reports', 'filter'));
+        $filter = (string) request('filter', 'all');
+        $search = (string) request('search', '');
+
+        $base = fn () => BhwMonthlyReport::query()->when($search !== '', function ($query) use ($search) {
+            $like = '%' . $search . '%';
+            $query->where(function ($inner) use ($like) {
+                $inner->whereHas('bhw', function ($bhw) use ($like) {
+                        $bhw->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like);
+                    })
+                    ->orWhere('title', 'like', $like)
+                    ->orWhere('description', 'like', $like);
+            });
+        });
+
+        $tabs = [
+            'all' => 'All reports',
+            'health_records' => 'Health records',
+            'pregnancies' => 'Pregnancies',
+        ];
+        $tabs = collect($tabs)->map(fn ($label, $key) => [
+            'label' => $label,
+            'count' => $key === 'all' ? $base()->count() : $base()->where('report_type', $key)->count(),
+        ])->all();
+
+        $scoped = $base()->when($filter !== 'all' && isset($tabs[$filter]), fn ($query) => $query->where('report_type', $filter));
+
+        // Whole-queue counts: reading ten paginated rows made every card below
+        // change as the admin turned pages.
+        $summary = [
+            'total' => (clone $scoped)->count(),
+            'pending' => (clone $scoped)->where('submission_status', 'approved_by_midwife')->count(),
+            'approved' => (clone $scoped)->where('submission_status', 'approved_by_rhu')->count(),
+            'rejected' => (clone $scoped)->whereIn('submission_status', ['rejected', 'needs_revision'])->count(),
+        ];
+
+        $reports = $scoped
+            ->with(['bhw', 'submittedToPresidentBy', 'approvedByPresident', 'submittedToMidwifeBy'])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('rhu.bhw-reports.index', compact('reports', 'filter', 'search', 'tabs', 'summary'));
     }
 
     public function bhwReportShow($id)

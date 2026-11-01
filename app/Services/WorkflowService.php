@@ -802,12 +802,7 @@ class WorkflowService
                 throw new \RuntimeException('This field profile is already linked to a different account.');
             }
 
-            $walkIn->update([
-                'user_id' => $user->id,
-                'converted_to_user_id' => $user->id,
-                'converted_at' => now(),
-                'has_portal_access' => true,
-            ]);
+            $walkIn->linkPortalAccount($user);
 
             DuplicateReview::create([
                 'user_id' => $user->id,

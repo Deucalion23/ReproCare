@@ -317,9 +317,40 @@ class HealthRecordController extends Controller
     // Archived Records
     public function archived()
     {
-        $archivedRecords = \Illuminate\Support\Facades\DB::table('health_records_archived')
+        $search = (string) request('search', '');
+        $risk = (string) request('risk', 'all');
+
+        $base = fn () => \Illuminate\Support\Facades\DB::table('health_records_archived')
             ->leftJoin('users as women', 'health_records_archived.user_id', '=', 'women.id')
             ->leftJoin('walk_in_patients', 'health_records_archived.walk_in_patient_id', '=', 'walk_in_patients.id')
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . $search . '%';
+                $query->where(function ($inner) use ($like) {
+                    $inner->where('women.first_name', 'like', $like)
+                        ->orWhere('women.last_name', 'like', $like)
+                        ->orWhere('women.email', 'like', $like)
+                        ->orWhere('walk_in_patients.first_name', 'like', $like)
+                        ->orWhere('walk_in_patients.last_name', 'like', $like)
+                        ->orWhere('walk_in_patients.contact_number', 'like', $like)
+                        ->orWhere('health_records_archived.notes', 'like', $like);
+                });
+            });
+
+        $tabs = [
+            'all' => 'All archived',
+            'High' => 'High risk',
+            'Medium' => 'Medium risk',
+            'Low' => 'Low risk',
+        ];
+        $tabs = collect($tabs)->map(fn ($label, $key) => [
+            'label' => $label,
+            'count' => $key === 'all'
+                ? $base()->count()
+                : $base()->where('health_records_archived.risk_level', $key)->count(),
+        ])->all();
+
+        $archivedRecords = $base()
+            ->when($risk !== 'all' && isset($tabs[$risk]), fn ($query) => $query->where('health_records_archived.risk_level', $risk))
             ->leftJoin('users as recorded_by', 'health_records_archived.recorded_by_id', '=', 'recorded_by.id')
             ->select(
                 'health_records_archived.*',
@@ -334,9 +365,10 @@ class HealthRecordController extends Controller
                 'recorded_by.last_name as recorded_by_last_name'
             )
             ->orderBy('health_records_archived.archived_at', 'desc')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
-        return view('midwife.health-records.archived', compact('archivedRecords'));
+        return view('midwife.health-records.archived', compact('archivedRecords', 'search', 'risk', 'tabs'));
     }
 
     public function acceptFromPresident($id)

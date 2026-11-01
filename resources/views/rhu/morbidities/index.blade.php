@@ -2,6 +2,10 @@
 
 @section('title', 'Near-Miss Complications & Morbidities - RHU Portal | ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('rhu-content')
 
 <div class="page-hero fade-in-card mb-4">
@@ -24,6 +28,15 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif
+
+@include('includes.list-toolbar', [
+    'action' => route('rhu.morbidities.index'),
+    'tabs' => $tabs,
+    'active' => $status,
+    'search' => $search,
+    'placeholder' => 'Patient, barangay or complication...',
+    'label' => 'Review status',
+])
 
 <div class="card fade-in-card">
     <div class="card-header bg-transparent py-3">

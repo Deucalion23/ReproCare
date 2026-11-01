@@ -491,7 +491,9 @@ class MidwifeController extends Controller
         ];
         
         $query = Pregnancy::with(['woman' => fn($q) => $q->withTrashed(), 'walkInPatient'])
-            ->select('id', 'user_id', 'walk_in_patient_id', 'lmp', 'edd', 'aog', 'is_high_risk', 'created_at')
+            // ended_at is part of this list because the status/is-active badges
+            // read it; without it a delivered case rendered as still Active.
+            ->select('id', 'user_id', 'walk_in_patient_id', 'lmp', 'edd', 'aog', 'is_high_risk', 'ended_at', 'created_at')
             ->when($status === 'active', function($q) {
                 return $q->active();
             })
@@ -502,15 +504,25 @@ class MidwifeController extends Controller
                 return $q->highRisk();
             });
 
-        // Apply search if provided
+        // A pregnancy may hang off a field record with no account yet, so the
+        // search covers both people — and trashed women, whose cases this page
+        // still lists — or an unlinked mother simply cannot be found.
         if ($search) {
-            $query->whereHas('woman', function($q) use ($search) {
-                $q->where('first_name', 'like', '%' . $search . '%')
-                  ->orWhere('last_name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+            $like = '%' . $search . '%';
+            $query->where(function ($q) use ($like) {
+                $q->whereHas('woman', function ($woman) use ($like) {
+                        $woman->withTrashed()
+                            ->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('email', 'like', $like);
+                    })
+                  ->orWhereHas('walkInPatient', function ($walkIn) use ($like) {
+                        $walkIn->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like)
+                            ->orWhere('contact_number', 'like', $like);
+                    });
             });
         }
-        
         $pregnancies = $query->orderBy('created_at', 'desc')
             ->paginate(10);
         
@@ -543,12 +555,41 @@ class MidwifeController extends Controller
     // Notifications
     public function notifications()
     {
-        $notifications = auth()->user()->notifications()
-            ->with('patientAlert')
-            ->orderBy('created_at', 'desc')
-            ->paginate(20);
+        $search = (string) request('search', '');
+        $status = (string) request('status', 'all');
 
-        return view('midwife.notifications', compact('notifications'));
+        $base = fn () => auth()->user()->notifications()
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . $search . '%';
+                $query->where(function ($inner) use ($like) {
+                    $inner->where('title', 'like', $like)
+                        ->orWhere('message', 'like', $like);
+                });
+            });
+
+        $tabs = [
+            'all' => 'All alerts',
+            'unread' => 'Unread',
+            'read' => 'Read',
+        ];
+        $tabs = collect($tabs)->map(fn ($label, $key) => [
+            'label' => $label,
+            'count' => match ($key) {
+                'all' => $base()->count(),
+                'unread' => $base()->where('is_read', false)->count(),
+                default => $base()->where('is_read', true)->count(),
+            },
+        ])->all();
+
+        $notifications = $base()
+            ->with('patientAlert')
+            ->when($status === 'unread', fn ($query) => $query->where('is_read', false))
+            ->when($status === 'read', fn ($query) => $query->where('is_read', true))
+            ->orderBy('created_at', 'desc')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('midwife.notifications', compact('notifications', 'search', 'status', 'tabs'));
     }
 
     public function showNotification($id)
@@ -618,12 +659,56 @@ class MidwifeController extends Controller
     // Checkup Referrals Management
     public function referrals()
     {
-        $referrals = CheckupReferral::with(['woman', 'walkInPatient', 'referredByBhw', 'assignedMidwife', 'convertedCheckup'])
-            ->where('assigned_midwife_id', auth()->id())
-            ->latest()
-            ->paginate(10);
+        $search = (string) request('search', '');
+        $status = (string) request('status', 'all');
 
-        return view('midwife.referrals.index', compact('referrals'));
+        // A fresh builder per call: the tab counts must not inherit each
+        // other's where clauses.
+        $scope = fn () => CheckupReferral::where('assigned_midwife_id', auth()->id())
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . $search . '%';
+                $query->where(function ($inner) use ($like) {
+                    $inner->whereHas('woman', function ($woman) use ($like) {
+                            $woman->withTrashed()
+                                ->where('first_name', 'like', $like)
+                                ->orWhere('last_name', 'like', $like)
+                                ->orWhere('email', 'like', $like);
+                        })
+                        ->orWhereHas('walkInPatient', function ($walkIn) use ($like) {
+                            $walkIn->where('first_name', 'like', $like)
+                                ->orWhere('last_name', 'like', $like)
+                                ->orWhere('contact_number', 'like', $like);
+                        })
+                        ->orWhereHas('referredByBhw', function ($bhw) use ($like) {
+                            $bhw->where('first_name', 'like', $like)
+                                ->orWhere('last_name', 'like', $like);
+                        })
+                        ->orWhere('reason', 'like', $like);
+                });
+            });
+
+        $tabs = [
+            'all' => 'All referrals',
+            'pending' => 'Pending',
+            'reviewed' => 'Under review',
+            'scheduled' => 'Scheduled',
+            'declined' => 'Declined',
+        ];
+        // Counted in the same shape the tabs render from, so a badge can never
+        // describe a queue the tab does not filter to.
+        $tabs = collect($tabs)->map(fn ($label, $key) => [
+            'label' => $label,
+            'count' => $key === 'all' ? $scope()->count() : $scope()->where('status', $key)->count(),
+        ])->all();
+
+        $referrals = $scope()
+            ->when($status !== 'all' && isset($tabs[$status]), fn ($query) => $query->where('status', $status))
+            ->with(['woman', 'walkInPatient', 'referredByBhw', 'assignedMidwife', 'convertedCheckup'])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('midwife.referrals.index', compact('referrals', 'search', 'status', 'tabs'));
     }
 
     public function showReferral($id)
@@ -730,11 +815,49 @@ class MidwifeController extends Controller
     // Walk-in Patients Management
     public function walkInPatients()
     {
-        $patients = WalkInPatient::with(['recordedBy', 'purok', 'convertedToUser'])
-            ->latest()
-            ->paginate(10);
+        $search = (string) request('search', '');
+        $status = (string) request('status', 'all');
 
-        return view('midwife.walk-in-patients.index', compact('patients'));
+        // Mirrors WalkInPatient::isPortalActive(): a field record counts as an
+        // enrolled account once either link column or the access flag is set.
+        $portalActive = fn ($query) => $query->where(function ($q) {
+            $q->where('has_portal_access', true)
+              ->orWhereNotNull('user_id')
+              ->orWhereNotNull('converted_to_user_id');
+        });
+
+        $tabs = [
+            'all' => 'All field records',
+            'unlinked' => 'Unlinked profiles',
+            'portal' => 'Enrolled accounts',
+        ];
+        $tabs = collect($tabs)->map(fn ($label, $key) => [
+            'label' => $label,
+            'count' => match ($key) {
+                'all' => WalkInPatient::count(),
+                'portal' => $portalActive(WalkInPatient::query())->count(),
+                default => WalkInPatient::whereNot(fn ($q) => $portalActive($q))->count(),
+            },
+        ])->all();
+
+        $patients = WalkInPatient::with(['recordedBy', 'purok', 'convertedToUser'])
+            ->when($search !== '', function ($query) use ($search) {
+                $like = '%' . $search . '%';
+                $query->where(function ($inner) use ($like) {
+                    $inner->where('first_name', 'like', $like)
+                        ->orWhere('last_name', 'like', $like)
+                        ->orWhere('contact_number', 'like', $like)
+                        ->orWhere('barangay', 'like', $like)
+                        ->orWhere('reason_for_visit', 'like', $like);
+                });
+            })
+            ->when($status === 'portal', $portalActive)
+            ->when($status === 'unlinked', fn ($query) => $query->whereNot(fn ($q) => $portalActive($q)))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('midwife.walk-in-patients.index', compact('patients', 'search', 'status', 'tabs'));
     }
 
     public function showWalkInPatient($id)
@@ -800,12 +923,7 @@ class MidwifeController extends Controller
             'created_by_midwife_id' => auth()->id(),
         ]);
 
-        $walkInPatient->update([
-            'user_id' => $user->id,
-            'has_portal_access' => true,
-            'converted_to_user_id' => $user->id,
-            'converted_at' => now(),
-        ]);
+        $walkInPatient->linkPortalAccount($user);
 
         return redirect()->route('midwife.walk-in-patients.show', $id)
             ->with('success', 'Portal account activated — Unlinked Profile is now an Enrolled Account (Portal-Active).');
@@ -883,14 +1001,50 @@ class MidwifeController extends Controller
 
     public function monthlyReports()
     {
-        $filter = request('filter', 'all');
+        $filter = (string) request('filter', 'all');
+        $search = (string) request('search', '');
 
-        $reports = BhwMonthlyReport::with(['bhw', 'approvedByPresident'])
-            ->when($filter !== 'all', fn ($query) => $query->where('report_type', $filter))
+        $base = fn () => BhwMonthlyReport::query()->when($search !== '', function ($query) use ($search) {
+            $like = '%' . $search . '%';
+            $query->where(function ($inner) use ($like) {
+                $inner->whereHas('bhw', function ($bhw) use ($like) {
+                        $bhw->where('first_name', 'like', $like)
+                            ->orWhere('last_name', 'like', $like);
+                    })
+                    ->orWhere('title', 'like', $like)
+                    ->orWhere('description', 'like', $like);
+            });
+        });
+
+        $tabs = [
+            'all' => 'All reports',
+            'health_records' => 'Health records',
+            'pregnancies' => 'Pregnancies',
+        ];
+        $tabs = collect($tabs)->map(fn ($label, $key) => [
+            'label' => $label,
+            'count' => $key === 'all'
+                ? $base()->count()
+                : $base()->where('report_type', $key)->count(),
+        ])->all();
+
+        $scoped = $base()->when($filter !== 'all' && isset($tabs[$filter]), fn ($query) => $query->where('report_type', $filter));
+
+        // The cards sit above the list, so they count the whole queue — not the
+        // ten rows on this page, which is what the old collection filter read.
+        $summary = [
+            'total' => (clone $scoped)->count(),
+            'awaiting' => (clone $scoped)->where('submission_status', 'submitted_to_midwife')->count(),
+            'validated' => (clone $scoped)->where('submission_status', 'approved_by_midwife')->count(),
+            'returned' => (clone $scoped)->where('submission_status', 'returned_to_president')->count(),
+        ];
+
+        $reports = $scoped->with(['bhw', 'approvedByPresident'])
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('midwife.monthly-reports.index', compact('reports', 'filter'));
+        return view('midwife.monthly-reports.index', compact('reports', 'filter', 'search', 'tabs', 'summary'));
     }
 
     public function monthlyReportShow($id)
@@ -1087,15 +1241,22 @@ class MidwifeController extends Controller
 
     public function riskAlerts(Request $request)
     {
+        $search = (string) $request->query('search', '');
+
         // The tab bar always shows every count, but only the selected queue is listed,
-        // so the other three never run a page query.
+        // so the other three never run a page query. Counts carry the search too, or a
+        // tab would advertise rows the list no longer shows.
         $counts = [
-            'pregnancies' => Pregnancy::active()->highRisk()->count(),
-            'referrals' => CheckupReferral::whereIn('urgency', ['urgent', 'emergency'])
-                ->whereIn('status', ['pending', 'reviewed'])
-                ->count(),
-            'missed' => Checkup::missed()->count(),
-            'records' => HealthRecord::where('workflow_status', 'submitted_to_midwife')->count(),
+            'pregnancies' => $this->searchPatients(Pregnancy::active()->highRisk(), $search)->count(),
+            'referrals' => $this->searchPatients(
+                CheckupReferral::whereIn('urgency', ['urgent', 'emergency'])->whereIn('status', ['pending', 'reviewed']),
+                $search
+            )->count(),
+            'missed' => $this->searchPatients(Checkup::missed(), $search)->count(),
+            'records' => $this->searchPatients(
+                HealthRecord::where('workflow_status', 'submitted_to_midwife'),
+                $search
+            )->count(),
         ];
 
         $queue = (string) $request->query('queue');
@@ -1103,32 +1264,70 @@ class MidwifeController extends Controller
         $show = fn (string $key): bool => $queue === 'all' || $queue === $key;
 
         $highRiskPregnancies = $show('pregnancies')
-            ? Pregnancy::active()->highRisk()->with(['woman', 'walkInPatient'])->latest()->paginate(10, ['*'], 'pregnancies_page')
+            ? $this->searchPatients(Pregnancy::active()->highRisk()->with(['woman', 'walkInPatient']), $search)
+                ->latest()->paginate(10, ['*'], 'pregnancies_page')->withQueryString()
             : null;
 
         $urgentReferrals = $show('referrals')
-            ? \App\Models\CheckupReferral::with(['woman', 'walkInPatient', 'referredByBhw'])
-                ->whereIn('urgency', ['urgent', 'emergency'])
-                ->whereIn('status', ['pending', 'reviewed'])
-                ->latest()
-                ->paginate(10, ['*'], 'referrals_page')
+            ? $this->searchPatients(
+                \App\Models\CheckupReferral::with(['woman', 'walkInPatient', 'referredByBhw'])
+                    ->whereIn('urgency', ['urgent', 'emergency'])
+                    ->whereIn('status', ['pending', 'reviewed']),
+                $search
+            )->latest()->paginate(10, ['*'], 'referrals_page')->withQueryString()
             : null;
 
         $missedCheckups = $show('missed')
-            ? Checkup::missed()->with(['woman', 'walkInPatient', 'midwife'])->latest('scheduled_date')->paginate(10, ['*'], 'missed_page')
+            ? $this->searchPatients(Checkup::missed()->with(['woman', 'walkInPatient', 'midwife']), $search)
+                ->latest('scheduled_date')->paginate(10, ['*'], 'missed_page')->withQueryString()
             : null;
 
         $pendingRecords = $show('records')
-            ? HealthRecord::with(['woman', 'walkInPatient', 'recordedBy'])->where('workflow_status', 'submitted_to_midwife')->latest()->paginate(10, ['*'], 'records_page')
+            ? $this->searchPatients(
+                HealthRecord::with(['woman', 'walkInPatient', 'recordedBy'])->where('workflow_status', 'submitted_to_midwife'),
+                $search
+            )->latest()->paginate(10, ['*'], 'records_page')->withQueryString()
             : null;
 
         return view('midwife.risk-alerts.index', compact(
             'counts',
             'queue',
+            'search',
             'highRiskPregnancies',
             'urgentReferrals',
             'missedCheckups',
             'pendingRecords'
         ));
+    }
+
+    /**
+     * Every alert queue hangs off either a registered woman or a field record,
+     * so one clause searches all four by name, email, or the contact number
+     * collected in the barangay. Trashed women stay searchable — their cases
+     * still surface as alerts.
+     *
+     * @param \Illuminate\Database\Eloquent\Builder<\Illuminate\Database\Eloquent\Model> $query
+     */
+    private function searchPatients($query, string $search)
+    {
+        if ($search === '') {
+            return $query;
+        }
+
+        $like = '%' . $search . '%';
+
+        return $query->where(function ($inner) use ($like) {
+            $inner->whereHas('woman', function ($woman) use ($like) {
+                    $woman->withTrashed()
+                        ->where('first_name', 'like', $like)
+                        ->orWhere('last_name', 'like', $like)
+                        ->orWhere('email', 'like', $like);
+                })
+                ->orWhereHas('walkInPatient', function ($walkIn) use ($like) {
+                    $walkIn->where('first_name', 'like', $like)
+                        ->orWhere('last_name', 'like', $like)
+                        ->orWhere('contact_number', 'like', $like);
+                });
+        });
     }
 }

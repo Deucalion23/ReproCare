@@ -2,6 +2,10 @@
 
 @section('title', 'Checkup Referrals - ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('midwife-content')
 <div class="py-2">
     <div class="page-hero fade-in-card mb-4">
@@ -11,10 +15,19 @@
                 <p class="page-hero-subtitle">Review incoming referrals from Barangay Health Workers and schedule consultations.</p>
             </div>
             <div class="btn-hero-secondary">
-                <i class="bi bi-inbox-fill me-1 text-primary"></i> {{ $referrals->total() }} Referrals Waiting
+                <i class="bi bi-inbox-fill me-1 text-primary"></i> {{ number_format($referrals->total()) }} matching
             </div>
         </div>
     </div>
+
+    @include('includes.list-toolbar', [
+        'action' => route('midwife.referrals.index'),
+        'tabs' => $tabs,
+        'active' => $status,
+        'search' => $search,
+        'placeholder' => 'Patient, BHW or reason...',
+        'label' => 'Referral status',
+    ])
 
     @if(session('success'))
         <div class="alert alert-success d-flex align-items-center gap-2 mb-4 fade-in-card" style="border-radius:14px;">

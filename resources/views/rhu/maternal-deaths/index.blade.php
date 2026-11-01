@@ -2,6 +2,10 @@
 
 @section('title', 'Maternal Death Surveillance - RHU Portal | ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@endpush
+
 @section('rhu-content')
 
 <div class="page-hero fade-in-card mb-4">
@@ -25,6 +29,15 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 @endif
+
+@include('includes.list-toolbar', [
+    'action' => route('rhu.maternal-deaths.index'),
+    'tabs' => $tabs,
+    'active' => $status,
+    'search' => $search,
+    'placeholder' => 'Patient, barangay or cause...',
+    'label' => 'Audit status',
+])
 
 <div class="card fade-in-card">
     <div class="card-body p-0">
