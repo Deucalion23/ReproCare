@@ -3,7 +3,9 @@
      same pills as the rest of the app, and stays visible below the sm breakpoint
      where the framework view swaps to worded Previous/Next buttons. --}}
 @if ($paginator->hasPages())
-    <nav class="d-flex align-items-center justify-content-between gap-2" aria-label="Pagination">
+    {{-- w-100 keeps the nav full-width: list pages wrap links() in .d-flex.justify-content-center,
+         and an auto-width nav would shrink into the middle beside its chevrons. --}}
+    <nav class="w-100 d-flex align-items-center justify-content-between gap-2" aria-label="Pagination">
         <p class="small text-muted mb-0 d-none d-sm-block">
             {!! __('Showing') !!}
             <span class="fw-semibold">{{ $paginator->firstItem() }}</span>
