@@ -5,10 +5,43 @@
 @push('styles')
 <style>
     .patient-avatar {
-        width:34px; height:34px; border-radius:50%;
+        width:30px; height:30px; border-radius:50%;
         background:linear-gradient(135deg, var(--primary), var(--accent-violet));
         display:flex; align-items:center; justify-content:center;
-        font-size:0.78rem; font-weight:800; color:var(--color-on-solid); flex-shrink:0;
+        font-size:0.72rem; font-weight:800; color:var(--color-on-solid); flex-shrink:0;
+    }
+    /* One-line summary strip. The four cards it replaces stacked to 832px on a
+       phone before the list began, so the strip keeps every count but drops the
+       decorative footnotes and the icon-above-number layout. */
+    .ck-summary-cell {
+        display:flex; align-items:center; gap:0.6rem; min-width:0;
+        padding:0.6rem 0.95rem; border-right:1px solid var(--color-border);
+    }
+    .ck-summary-cell:last-child { border-right:0; }
+    .ck-summary-icon {
+        width:28px; height:28px; border-radius:9px; flex-shrink:0; font-size:0.85rem;
+        display:inline-flex; align-items:center; justify-content:center;
+    }
+    .ck-ico-primary { background:var(--color-primary-soft); color:var(--color-primary-text); }
+    .ck-ico-warning { background:var(--color-warning-soft); color:var(--color-warning-text); }
+    .ck-ico-success { background:var(--color-success-soft); color:var(--color-success-text); }
+    .ck-ico-danger  { background:var(--color-danger-soft);  color:var(--color-danger-text); }
+    .ck-summary-text { display:flex; flex-direction:column; min-width:0; line-height:1.2; }
+    .ck-summary-label {
+        font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em;
+        color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .ck-summary-value { font-size:1.15rem; font-weight:800; color:var(--color-text); }
+    .ck-alerts > [class*="col-"] { display:flex; }
+    .ck-alerts .checkup-alert { margin-bottom:0; flex:1 1 auto; }
+    /* The layout pins table cells with `.main-content .table thead th { padding: … !important }`,
+       so this needs both the extra class and !important. Vertical only: the horizontal
+       gutter is kept because .ps-3/.pe-3 inset the first and last columns on purpose. */
+    .main-content .table.ck-table thead th,
+    .main-content .table.ck-table tbody td { padding-top:0.5rem !important; padding-bottom:0.5rem !important; }
+    @media (max-width: 767.98px) {
+        .ck-summary-cell:nth-child(2n) { border-right:0; }
+        .ck-summary-cell:nth-child(-n+2) { border-bottom:1px solid var(--color-border); }
     }
     .search-bar {
         display:flex; gap:0.5rem; align-items:center;
@@ -116,22 +149,24 @@
 </div>
 
 {{-- ── Single-Row Filters ── --}}
-<div class="card fade-in-card mb-4">
+{{-- Heights are left to the layout's 42px .main-content control rule: it is a deliberate
+     touch target for field use, and it wins over anything this page sets anyway. --}}
+<div class="card fade-in-card mb-3">
     <div class="card-body p-3">
         <form method="GET" action="{{ route('midwife.checkups.index') }}" class="d-flex gap-2 align-items-center flex-wrap">
-            <div class="position-relative flex-grow-1" style="min-width:240px; max-width:360px;">
+            <div class="position-relative flex-grow-1" style="min-width:200px; max-width:300px;">
                 <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
-                <input type="search" name="search" placeholder="Search patient, purpose..." value="{{ request('search') }}" class="form-control ps-5" style="height:42px; border-radius:12px;">
+                <input type="search" name="search" placeholder="Search patient, purpose..." value="{{ request('search') }}" class="form-control ps-5" style="border-radius:10px; font-size:0.85rem;">
             </div>
-            <select name="status" class="form-select" style="width:160px; height:42px; border-radius:12px;" onchange="this.form.submit()">
+            <select name="status" class="form-select" style="width:150px; border-radius:10px; font-size:0.85rem;" onchange="this.form.submit()">
                 <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All Statuses</option>
                 <option value="scheduled" {{ $status === 'scheduled' ? 'selected' : '' }}>Scheduled</option>
                 <option value="completed" {{ $status === 'completed' ? 'selected' : '' }}>Completed</option>
                 <option value="missed" {{ $status === 'missed' ? 'selected' : '' }}>Missed</option>
                 <option value="rescheduled" {{ $status === 'rescheduled' ? 'selected' : '' }}>Rescheduled</option>
             </select>
-            <input type="date" name="start_date" class="form-control" value="{{ $startDate }}" style="width:160px; height:42px; border-radius:12px;" onchange="this.form.submit()">
-            <input type="date" name="end_date" class="form-control" value="{{ $endDate }}" style="width:160px; height:42px; border-radius:12px;" onchange="this.form.submit()">
+            <input type="date" name="start_date" class="form-control" value="{{ $startDate }}" style="width:150px; border-radius:10px; font-size:0.85rem;" onchange="this.form.submit()">
+            <input type="date" name="end_date" class="form-control" value="{{ $endDate }}" style="width:150px; border-radius:10px; font-size:0.85rem;" onchange="this.form.submit()">
             @if(request()->hasAny(['search', 'status', 'start_date', 'end_date']))
                 <a href="{{ route('midwife.checkups.index') }}" class="btn btn-sm btn-link text-danger text-decoration-none fw-semibold">
                     <i class="bi bi-x-circle me-1"></i> Reset
@@ -150,190 +185,150 @@
     </div>
 @endif
 
-{{-- ── Summary stat cards ── --}}
-<div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card fade-in-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:24px;padding:1.4rem 1.5rem;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 32px rgba(155,100,185,0.12)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="width:44px;height:44px;border-radius:14px;background:var(--color-primary-soft);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--color-primary-text);">
-                    <i class="bi bi-clipboard-check"></i>
-                </div>
-                <span style="background:var(--color-primary-soft);color:var(--color-primary-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Total</span>
-            </div>
-            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Total Visits</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $stats['total'] }}</div>
-            <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
-                <i class="bi bi-calendar3"></i> All time registry
-            </div>
+{{-- ── Summary strip ── --}}
+<div class="card fade-in-card mb-3">
+    <div class="row g-0">
+        <div class="col-6 col-lg-3 ck-summary-cell">
+            <span class="ck-summary-icon ck-ico-primary"><i class="bi bi-clipboard-check"></i></span>
+            <span class="ck-summary-text">
+                <span class="ck-summary-label">Total visits</span>
+                <span class="ck-summary-value">{{ $stats['total'] }}</span>
+            </span>
         </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card fade-in-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:24px;padding:1.4rem 1.5rem;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 32px rgba(217,119,6,0.12)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="width:44px;height:44px;border-radius:14px;background:var(--color-warning-soft);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--color-warning-text);">
-                    <i class="bi bi-clock"></i>
-                </div>
-                <span style="background:var(--color-warning-soft);color:var(--color-warning-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Pending</span>
-            </div>
-            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Scheduled</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $stats['scheduled'] }}</div>
-            <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
-                <i class="bi bi-calendar-check"></i> Confirmed upcoming
-            </div>
+        <div class="col-6 col-lg-3 ck-summary-cell">
+            <span class="ck-summary-icon ck-ico-warning"><i class="bi bi-clock"></i></span>
+            <span class="ck-summary-text">
+                <span class="ck-summary-label">Scheduled</span>
+                <span class="ck-summary-value">{{ $stats['scheduled'] }}</span>
+            </span>
         </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card fade-in-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:24px;padding:1.4rem 1.5rem;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 32px rgba(4,120,87,0.12)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="width:44px;height:44px;border-radius:14px;background:var(--color-success-soft);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--color-success-text);">
-                    <i class="bi bi-check2-circle"></i>
-                </div>
-                <span style="background:var(--color-success-soft);color:var(--color-success-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Done</span>
-            </div>
-            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Completed</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $stats['completed'] }}</div>
-            <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
-                <i class="bi bi-shield-check"></i> Finished visits
-            </div>
+        <div class="col-6 col-lg-3 ck-summary-cell">
+            <span class="ck-summary-icon ck-ico-success"><i class="bi bi-check2-circle"></i></span>
+            <span class="ck-summary-text">
+                <span class="ck-summary-label">Completed</span>
+                <span class="ck-summary-value">{{ $stats['completed'] }}</span>
+            </span>
         </div>
-    </div>
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card fade-in-card" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:24px;padding:1.4rem 1.5rem;position:relative;overflow:hidden;transition:transform .25s,box-shadow .25s;" onmouseenter="this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 32px rgba(220,38,38,0.10)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
-            <div class="d-flex justify-content-between align-items-start mb-3">
-                <div style="width:44px;height:44px;border-radius:14px;background:var(--color-danger-soft);display:flex;align-items:center;justify-content:center;font-size:1.2rem;color:var(--color-danger-text);">
-                    <i class="bi bi-x-circle"></i>
-                </div>
-                <span style="background:var(--color-danger-soft);color:var(--color-danger-text);border-radius:8px;font-size:0.72rem;font-weight:700;padding:0.2em 0.6em;">Action</span>
-            </div>
-            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--color-text-muted);margin-bottom:0.35rem;">Missed / Rescheduled</div>
-            <div class="stat-number" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:2.1rem;font-weight:800;line-height:1.1;color:var(--color-text);margin-bottom:0.4rem;">{{ $stats['missed'] + $stats['rescheduled'] }}</div>
-            <div style="font-size:0.8rem;font-weight:600;color:var(--color-text-muted);display:flex;align-items:center;gap:0.25rem;">
-                <i class="bi bi-arrow-repeat"></i> Requires follow-up
-            </div>
+        <div class="col-6 col-lg-3 ck-summary-cell">
+            <span class="ck-summary-icon ck-ico-danger"><i class="bi bi-x-circle"></i></span>
+            <span class="ck-summary-text">
+                <span class="ck-summary-label">Missed / Rescheduled</span>
+                <span class="ck-summary-value">{{ $stats['missed'] + $stats['rescheduled'] }}</span>
+            </span>
         </div>
     </div>
 </div>
-
-{{-- ── Rescheduled Checkups Alert Section ── --}}
+{{-- ── Follow-up alerts (side by side when both are present) ── --}}
 @php
     $rescheduledTotal = $stats['rescheduled'];
+    $missedTotal = $stats['missed'];
     $rescheduledCheckups = \App\Models\Checkup::with(['woman', 'walkInPatient'])
         ->where('status', 'Rescheduled')
         ->orderBy('scheduled_date', 'desc')
         ->take(20)
         ->get();
-    $rescheduledExpanded = $rescheduledCheckups->count() <= 3;
-@endphp
-@if($rescheduledTotal > 0)
-<div class="checkup-alert fade-in-card">
-    <div class="checkup-alert-head" role="button" data-bs-toggle="collapse" data-bs-target="#rescheduledCheckupsPanel"
-         aria-expanded="{{ $rescheduledExpanded ? 'true' : 'false' }}" aria-controls="rescheduledCheckupsPanel">
-        <div class="checkup-alert-icon"><i class="bi bi-arrow-repeat"></i></div>
-        <div style="flex:1 1 auto; min-width:0;">
-            <div class="checkup-alert-title">{{ $rescheduledTotal }} Rescheduled Checkup{{ $rescheduledTotal === 1 ? '' : 's' }} Pending</div>
-            <div class="checkup-alert-sub">Confirm the new schedule with {{ $rescheduledTotal === 1 ? 'this patient' : 'these patients' }}.</div>
-        </div>
-        <span class="checkup-alert-count">{{ $rescheduledTotal }}</span>
-        <i class="bi bi-chevron-down checkup-alert-chevron"></i>
-    </div>
-    <div class="collapse {{ $rescheduledExpanded ? 'show' : '' }}" id="rescheduledCheckupsPanel">
-        <div class="checkup-alert-body">
-            @foreach($rescheduledCheckups as $rescheduled)
-            @php
-                $dateDisplay = $rescheduled->scheduled_date
-                    ? (\is_string($rescheduled->scheduled_date)
-                        ? \Carbon\Carbon::parse($rescheduled->scheduled_date)
-                        : $rescheduled->scheduled_date)->format('M j, Y')
-                    : '—';
-            @endphp
-            <div class="checkup-alert-row">
-                <div class="checkup-alert-patient">
-                    <div class="patient-avatar">{{ strtoupper(substr($rescheduled->patient_name, 0, 1)) }}</div>
-                    <div style="min-width:0;">
-                        <div class="checkup-alert-name">{{ $rescheduled->patient_name }}</div>
-                        <div class="checkup-alert-meta">{{ Str::limit($rescheduled->purpose ?? 'No purpose', 34) }}</div>
-                    </div>
-                </div>
-                <div class="checkup-alert-date is-warning">
-                    {{ $dateDisplay }}
-                </div>
-                <div class="checkup-alert-action">
-                    <a href="{{ route('midwife.checkups.show', $rescheduled->id) }}" class="btn btn-sm btn-outline-info">
-                        <i class="bi bi-eye"></i> View
-                    </a>
-                </div>
-            </div>
-            @endforeach
-            <div class="checkup-alert-foot">
-                <a href="{{ route('midwife.checkups.index') }}?status=rescheduled">
-                    View all {{ $rescheduledTotal }} rescheduled checkup{{ $rescheduledTotal === 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-</div>
-@endif
-
-{{-- ── Missed Checkups Alert Section ── --}}
-@php
-    $missedTotal = $stats['missed'];
     $missedCheckups = \App\Models\Checkup::with(['woman', 'walkInPatient'])
         ->where('status', 'Missed')
         ->orderBy('scheduled_date', 'desc')
         ->take(20)
         ->get();
+    $rescheduledExpanded = $rescheduledCheckups->count() <= 3;
     $missedExpanded = $missedCheckups->count() <= 3;
+    $alertCol = ($rescheduledTotal > 0 && $missedTotal > 0) ? 'col-lg-6' : 'col-12';
+    $dateLabel = fn ($checkup) => $checkup->scheduled_date
+        ? \Carbon\Carbon::parse($checkup->scheduled_date)->format('M j, Y')
+        : '—';
 @endphp
-@if($missedTotal > 0)
-<div class="checkup-alert is-danger fade-in-card">
-    <div class="checkup-alert-head" role="button" data-bs-toggle="collapse" data-bs-target="#missedCheckupsPanel"
-         aria-expanded="{{ $missedExpanded ? 'true' : 'false' }}" aria-controls="missedCheckupsPanel">
-        <div class="checkup-alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
-        <div style="flex:1 1 auto; min-width:0;">
-            <div class="checkup-alert-title">{{ $missedTotal }} Missed Checkup{{ $missedTotal === 1 ? '' : 's' }} Require Attention</div>
-            <div class="checkup-alert-sub">Reschedule or follow up on {{ $missedTotal === 1 ? 'this visit' : 'these visits' }}.</div>
-        </div>
-        <span class="checkup-alert-count">{{ $missedTotal }}</span>
-        <i class="bi bi-chevron-down checkup-alert-chevron"></i>
-    </div>
-    <div class="collapse {{ $missedExpanded ? 'show' : '' }}" id="missedCheckupsPanel">
-        <div class="checkup-alert-body">
-            @foreach($missedCheckups as $missed)
-            @php
-                $dateDisplay = $missed->scheduled_date
-                    ? (\is_string($missed->scheduled_date)
-                        ? \Carbon\Carbon::parse($missed->scheduled_date)
-                        : $missed->scheduled_date)->format('M j, Y')
-                    : '—';
-            @endphp
-            <div class="checkup-alert-row">
-                <div class="checkup-alert-patient">
-                    <div class="patient-avatar">{{ strtoupper(substr($missed->patient_name, 0, 1)) }}</div>
-                    <div style="min-width:0;">
-                        <div class="checkup-alert-name">{{ $missed->patient_name }}</div>
-                        <div class="checkup-alert-meta">{{ Str::limit($missed->purpose ?? 'No purpose', 34) }}</div>
+@if($rescheduledTotal > 0 || $missedTotal > 0)
+<div class="row g-3 mb-4 ck-alerts">
+    @if($rescheduledTotal > 0)
+    <div class="{{ $alertCol }}">
+        <div class="checkup-alert fade-in-card">
+            <div class="checkup-alert-head" role="button" data-bs-toggle="collapse" data-bs-target="#rescheduledCheckupsPanel"
+                 aria-expanded="{{ $rescheduledExpanded ? 'true' : 'false' }}" aria-controls="rescheduledCheckupsPanel">
+                <div class="checkup-alert-icon"><i class="bi bi-arrow-repeat"></i></div>
+                <div style="flex:1 1 auto; min-width:0;">
+                    <div class="checkup-alert-title">{{ $rescheduledTotal }} Rescheduled Checkup{{ $rescheduledTotal === 1 ? '' : 's' }} Pending</div>
+                    <div class="checkup-alert-sub">Confirm the new schedule with {{ $rescheduledTotal === 1 ? 'this patient' : 'these patients' }}.</div>
+                </div>
+                <span class="checkup-alert-count">{{ $rescheduledTotal }}</span>
+                <i class="bi bi-chevron-down checkup-alert-chevron"></i>
+            </div>
+            <div class="collapse {{ $rescheduledExpanded ? 'show' : '' }}" id="rescheduledCheckupsPanel">
+                <div class="checkup-alert-body">
+                    @foreach($rescheduledCheckups as $rescheduled)
+                    <div class="checkup-alert-row">
+                        <div class="checkup-alert-patient">
+                            <div class="patient-avatar">{{ strtoupper(substr($rescheduled->patient_name, 0, 1)) }}</div>
+                            <div style="min-width:0;">
+                                <div class="checkup-alert-name">{{ $rescheduled->patient_name }}</div>
+                                <div class="checkup-alert-meta">{{ Str::limit($rescheduled->purpose ?? 'No purpose', 34) }}</div>
+                            </div>
+                        </div>
+                        <div class="checkup-alert-date is-warning">{{ $dateLabel($rescheduled) }}</div>
+                        <div class="checkup-alert-action">
+                            <a href="{{ route('midwife.checkups.show', $rescheduled->id) }}" class="btn btn-sm btn-outline-info">
+                                <i class="bi bi-eye"></i> View
+                            </a>
+                        </div>
+                    </div>
+                    @endforeach
+                    <div class="checkup-alert-foot">
+                        <a href="{{ route('midwife.checkups.index') }}?status=rescheduled">
+                            View all {{ $rescheduledTotal }} rescheduled checkup{{ $rescheduledTotal === 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="checkup-alert-date is-danger">
-                    {{ $dateDisplay }}
-                </div>
-                <div class="checkup-alert-action">
-                    <form action="{{ route('midwife.checkups.schedule', $missed->id) }}" method="POST" class="d-inline">
-                        @csrf
-                        <button class="btn btn-sm btn-outline-warning" title="Reschedule">
-                            <i class="bi bi-calendar-event me-1"></i> Reschedule
-                        </button>
-                    </form>
-                </div>
-            </div>
-            @endforeach
-            <div class="checkup-alert-foot">
-                <a href="{{ route('midwife.checkups.index') }}?status=missed">
-                    View all {{ $missedTotal }} missed checkup{{ $missedTotal === 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i>
-                </a>
             </div>
         </div>
     </div>
+    @endif
+
+    @if($missedTotal > 0)
+    <div class="{{ $alertCol }}">
+        <div class="checkup-alert is-danger fade-in-card">
+            <div class="checkup-alert-head" role="button" data-bs-toggle="collapse" data-bs-target="#missedCheckupsPanel"
+                 aria-expanded="{{ $missedExpanded ? 'true' : 'false' }}" aria-controls="missedCheckupsPanel">
+                <div class="checkup-alert-icon"><i class="bi bi-exclamation-triangle-fill"></i></div>
+                <div style="flex:1 1 auto; min-width:0;">
+                    <div class="checkup-alert-title">{{ $missedTotal }} Missed Checkup{{ $missedTotal === 1 ? '' : 's' }} Require Attention</div>
+                    <div class="checkup-alert-sub">Reschedule or follow up on {{ $missedTotal === 1 ? 'this visit' : 'these visits' }}.</div>
+                </div>
+                <span class="checkup-alert-count">{{ $missedTotal }}</span>
+                <i class="bi bi-chevron-down checkup-alert-chevron"></i>
+            </div>
+            <div class="collapse {{ $missedExpanded ? 'show' : '' }}" id="missedCheckupsPanel">
+                <div class="checkup-alert-body">
+                    @foreach($missedCheckups as $missed)
+                    <div class="checkup-alert-row">
+                        <div class="checkup-alert-patient">
+                            <div class="patient-avatar">{{ strtoupper(substr($missed->patient_name, 0, 1)) }}</div>
+                            <div style="min-width:0;">
+                                <div class="checkup-alert-name">{{ $missed->patient_name }}</div>
+                                <div class="checkup-alert-meta">{{ Str::limit($missed->purpose ?? 'No purpose', 34) }}</div>
+                            </div>
+                        </div>
+                        <div class="checkup-alert-date is-danger">{{ $dateLabel($missed) }}</div>
+                        <div class="checkup-alert-action">
+                            <form action="{{ route('midwife.checkups.schedule', $missed->id) }}" method="POST" class="d-inline">
+                                @csrf
+                                <button class="btn btn-sm btn-outline-warning" title="Reschedule">
+                                    <i class="bi bi-calendar-event me-1"></i> Reschedule
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    @endforeach
+                    <div class="checkup-alert-foot">
+                        <a href="{{ route('midwife.checkups.index') }}?status=missed">
+                            View all {{ $missedTotal }} missed checkup{{ $missedTotal === 1 ? '' : 's' }} <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 </div>
 @endif
 
@@ -342,15 +337,15 @@
 
     @if($checkups->count() > 0)
     <div class="table-responsive">
-        <table class="table table-hover table-sticky-head mb-0">
+        <table class="table table-hover table-sticky-head ck-table mb-0">
             <thead>
                 <tr style="border-bottom:1px solid var(--color-border);">
-                    <th class="ps-3 py-3">Date &amp; Time</th>
-                    <th class="py-3">Patient</th>
-                    <th class="py-3">Purpose</th>
-                    <th class="py-3">Midwife</th>
-                    <th class="py-3">Status</th>
-                    <th class="pe-3 py-3 text-end">Actions</th>
+                    <th class="ps-3 py-2">Date &amp; Time</th>
+                    <th class="py-2">Patient</th>
+                    <th class="py-2">Purpose</th>
+                    <th class="py-2">Midwife</th>
+                    <th class="py-2">Status</th>
+                    <th class="pe-3 py-2 text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -367,8 +362,8 @@
                     }
                 @endphp
                 <tr>
-                    <td>
-                        <div style="font-weight:600;font-size:0.875rem;color:var(--text);">{{ $dateDisplay }}</div>
+                    <td style="white-space:nowrap;">
+                        <div style="font-weight:600;font-size:0.85rem;color:var(--text);">{{ $dateDisplay ?: '—' }}</div>
                         @if($timeDisplay)
                         <div style="font-size:0.75rem;color:var(--text-muted);">
                             <i class="bi bi-clock me-1"></i>{{ $timeDisplay }}
@@ -398,15 +393,6 @@
                         @endif
                     </td>
                     <td>
-                        @if($timeDisplay)
-                        <div style="font-weight:600;font-size:0.875rem;color:var(--text);">
-                            <i class="bi bi-clock me-1" style="color:var(--primary-light);"></i>{{ $timeDisplay }}
-                        </div>
-                        @else
-                        <span style="color:var(--text-muted);font-size:0.875rem;">—</span>
-                        @endif
-                    </td>
-                    <td>
                         @switch($checkup->status)
                             @case('scheduled')
                             @case('Scheduled')   <span class="status-scheduled"><i class="bi bi-clock"></i> Scheduled</span>  @break
@@ -419,7 +405,7 @@
                             @default             <span class="status-pending">{{ ucfirst($checkup->status ?? 'Unknown') }}</span>
                         @endswitch
                     </td>
-                    <td class="text-end pe-3 py-3">
+                    <td class="text-end pe-3 py-2">
                         <div class="d-inline-flex align-items-center gap-1">
                             {{-- Primary Action: View Details --}}
                             <a href="{{ route('midwife.checkups.show', $checkup->id) }}" class="btn btn-sm btn-view px-2.5 py-1" style="border-radius:8px; font-size:0.8rem; font-weight:700;" title="View Details">
@@ -492,7 +478,7 @@
         </table>
     </div>
 
-    <div class="d-flex justify-content-center" style="padding:1.25rem;">
+    <div class="d-flex justify-content-center" style="padding:0.6rem 0.9rem;">
         {{ $checkups->links() }}
     </div>
 
