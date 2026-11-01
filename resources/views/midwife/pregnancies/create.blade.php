@@ -48,6 +48,24 @@
                 </div>
             @else
                 <div class="row g-2">
+                    <div class="col-12 col-lg-4">
+                        <div id="registered_patient_meta" class="pf-identity">
+                            <img src="/images/avatars/avatar-female.svg" id="patient_preview_image" alt="Preview" class="pf-avatar">
+                            <div class="min-w-0">
+                                <div id="patient_preview_name" class="fw-bold">No woman selected</div>
+                                <div id="patient_preview_subtitle" class="text-muted small">Choose an enrolled woman</div>
+                                <div id="patient_preview_age" class="text-muted small"></div>
+                            </div>
+                        </div>
+                        <div id="walk_in_patient_meta" class="pf-identity d-none">
+                            <img src="/images/avatars/avatar-female.svg" id="walkin_preview_image" alt="Preview" class="pf-avatar">
+                            <div class="min-w-0">
+                                <div id="walkin_preview_name" class="fw-bold">No walk-in selected</div>
+                                <div id="walkin_preview_subtitle" class="text-muted small">Choose an unlinked woman</div>
+                                <div id="walkin_preview_age" class="text-muted small"></div>
+                            </div>
+                        </div>
+                    </div>
                     <div class="col-12 col-lg-2">
                         <label class="form-label">Patient Type</label>
                         <div class="d-flex flex-column gap-2 align-items-start">
@@ -60,7 +78,7 @@
                             <div class="form-text">Pick the woman who owns this record.</div>
                         </div>
                     </div>
-                    <div class="col-12 col-lg-4">
+                    <div class="col-12 col-lg-6">
                         <div id="registeredSearchWrap" class="mb-2">
                             <label for="patientSearch" class="form-label">Search Enrolled Woman</label>
                             <input type="text" class="form-control" id="patientSearch" placeholder="Search by name or email">
@@ -102,24 +120,6 @@
                                 @endforeach
                             </select>
                             @error('walk_in_patient_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-6">
-                        <div id="registered_patient_meta" class="pf-identity">
-                            <img src="/images/avatars/avatar-female.svg" id="patient_preview_image" alt="Preview" class="pf-avatar">
-                            <div class="min-w-0">
-                                <div id="patient_preview_name" class="fw-bold">No woman selected</div>
-                                <div id="patient_preview_subtitle" class="text-muted small">Choose an enrolled woman</div>
-                                <div id="patient_preview_age" class="text-muted small"></div>
-                            </div>
-                        </div>
-                        <div id="walk_in_patient_meta" class="pf-identity d-none">
-                            <img src="/images/avatars/avatar-female.svg" id="walkin_preview_image" alt="Preview" class="pf-avatar">
-                            <div class="min-w-0">
-                                <div id="walkin_preview_name" class="fw-bold">No walk-in selected</div>
-                                <div id="walkin_preview_subtitle" class="text-muted small">Choose an unlinked woman</div>
-                                <div id="walkin_preview_age" class="text-muted small"></div>
-                            </div>
                         </div>
                     </div>
                 </div>
