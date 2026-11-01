@@ -292,7 +292,7 @@
                 </table>
             </div>
 
-            <div class="p-3">{{ $patients->links('pagination::bootstrap-5') }}</div>
+            <div class="p-3">{{ $patients->links('vendor.pagination.arrows-only') }}</div>
         @else
             <div class="empty-state p-5 text-center">
                 <i class="bi bi-people empty-state-icon" style="font-size:2.5rem;"></i>

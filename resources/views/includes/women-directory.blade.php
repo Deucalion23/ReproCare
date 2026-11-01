@@ -309,7 +309,7 @@
         </div>
 
         @if ($women->hasPages())
-            <div class="p-3">{{ $women->links('pagination::bootstrap-5') }}</div>
+            <div class="p-3">{{ $women->links('vendor.pagination.arrows-only') }}</div>
         @endif
     </div>
 </div>
