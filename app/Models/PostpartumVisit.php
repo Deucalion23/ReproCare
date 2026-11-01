@@ -50,17 +50,20 @@ class PostpartumVisit extends Model
         return $this->belongsTo(User::class, 'recorded_by_id');
     }
 
-    /** Reasons this visit needs clinical follow-up; empty means routine. */
+    /**
+     * Reasons this visit needs clinical follow-up, keyed by the metric name so
+     * views can highlight exactly the offending chip. Empty means routine.
+     */
     public function dangerSignals(): array
     {
-        [$sys] = $this->parseBp() + [null];
+        $systolic = $this->parseBp()[0];
 
         return array_filter([
-            $this->bleeding === 'heavy' ? 'Heavy bleeding' : null,
-            ! empty(trim((string) $this->infection_signs)) ? 'Infection signs' : null,
-            ($sys !== null && $sys >= 140) ? "BP {$this->bp}" : null,
-            ($this->temperature !== null && (float) $this->temperature >= 38.0) ? "{$this->temperature}°C" : null,
-            ($this->depression_score !== null && (int) $this->depression_score >= 6) ? "PPD score {$this->depression_score}" : null,
+            'bleeding' => $this->bleeding === 'heavy' ? 'Heavy bleeding' : null,
+            'infection' => ! empty(trim((string) $this->infection_signs)) ? 'Infection signs' : null,
+            'bp' => ($systolic !== null && $systolic >= 140) ? "BP {$this->bp}" : null,
+            'temperature' => ($this->temperature !== null && (float) $this->temperature >= 38.0) ? "{$this->temperature}°C" : null,
+            'mood' => ($this->depression_score !== null && (int) $this->depression_score >= 6) ? "PPD score {$this->depression_score}" : null,
         ]);
     }
 
