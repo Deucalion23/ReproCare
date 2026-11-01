@@ -112,7 +112,7 @@
                 </table>
             </div>
             <div class="p-4 border-top">
-                {{ $patients->links('pagination::bootstrap-5') }}
+                {{ $patients->links() }}
             </div>
         @else
             <div class="text-center py-5">

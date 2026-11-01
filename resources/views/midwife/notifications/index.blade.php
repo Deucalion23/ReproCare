@@ -236,7 +236,7 @@
         </div>
 
         <div class="d-flex justify-content-center p-4 border-top" style="border-color:var(--mw-border)!important;">
-            {{ $notifications->links('pagination::bootstrap-5') }}
+            {{ $notifications->links() }}
         </div>
     @else
         <div class="text-center py-5">

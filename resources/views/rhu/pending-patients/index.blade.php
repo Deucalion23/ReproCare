@@ -282,7 +282,7 @@
         </div>
         <div class="p-4 border-top">
             <div class="d-flex justify-content-center">
-                {{ $pending->links('pagination::bootstrap-5') }}
+                {{ $pending->links() }}
             </div>
         </div>
     @else

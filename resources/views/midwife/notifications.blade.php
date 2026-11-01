@@ -158,7 +158,7 @@
             </div>
 
             @if($notifications->hasPages())
-                <div class="ntf-pager">{{ $notifications->onEachSide(1)->links('pagination::bootstrap-5') }}</div>
+                <div class="ntf-pager">{{ $notifications->onEachSide(1)->links() }}</div>
             @endif
         @else
             <div class="empty-state text-center py-5">

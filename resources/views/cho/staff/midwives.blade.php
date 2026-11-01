@@ -55,6 +55,6 @@
             </table>
         </div>
     </div>
-    <div class="p-3 border-top d-flex justify-content-center">{{ $midwives->links('pagination::bootstrap-5') }}</div>
+    <div class="p-3 border-top d-flex justify-content-center">{{ $midwives->links() }}</div>
 </div>
 @endsection

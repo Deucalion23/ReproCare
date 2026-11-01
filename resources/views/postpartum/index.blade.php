@@ -65,7 +65,7 @@
                 @endforelse
             </div>
             @if($delivered->hasPages())
-                <div class="px-3 py-2 border-top">{{ $delivered->links('pagination::bootstrap-5') }}</div>
+                <div class="px-3 py-2 border-top">{{ $delivered->links() }}</div>
             @endif
         </div>
     </div>
@@ -102,7 +102,7 @@
                 @endforelse
             </div>
             @if($newborns->hasPages())
-                <div class="px-3 py-2 border-top">{{ $newborns->links('pagination::bootstrap-5') }}</div>
+                <div class="px-3 py-2 border-top">{{ $newborns->links() }}</div>
             @endif
         </div>
     </div>

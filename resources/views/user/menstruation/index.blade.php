@@ -470,7 +470,7 @@
             @endif
         </div>
         @if($records->hasPages())
-            <div class="card-footer bg-transparent">{{ $records->links('pagination::bootstrap-5') }}</div>
+            <div class="card-footer bg-transparent">{{ $records->links() }}</div>
         @endif
     </div>
 

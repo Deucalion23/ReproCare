@@ -92,7 +92,7 @@
         </div>
     </div>
     <div class="card-footer bg-transparent">
-        {{ $healthRecords->links('pagination::bootstrap-5') }}
+        {{ $healthRecords->links() }}
     </div>
 </div>
 @endsection

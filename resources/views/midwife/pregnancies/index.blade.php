@@ -302,7 +302,7 @@
 
             {{-- Pagination --}}
             <div class="d-flex justify-content-center mt-4">
-                {{ $pregnancies->links('pagination::bootstrap-5') }}
+                {{ $pregnancies->links() }}
             </div>
         @else
             {{-- Empty State --}}

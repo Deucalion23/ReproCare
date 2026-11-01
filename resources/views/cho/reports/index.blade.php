@@ -73,6 +73,6 @@
             </table>
         </div>
     </div>
-    <div class="p-3 border-top d-flex justify-content-center">{{ $reports->links('pagination::bootstrap-5') }}</div>
+    <div class="p-3 border-top d-flex justify-content-center">{{ $reports->links() }}</div>
 </div>
 @endsection

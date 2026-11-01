@@ -196,7 +196,7 @@
                 @endforelse
             </div>
             @if($logs->hasPages())
-                <div class="rc-pager">{{ $logs->onEachSide(1)->withQueryString()->links('pagination::bootstrap-5') }}</div>
+                <div class="rc-pager">{{ $logs->onEachSide(1)->withQueryString()->links() }}</div>
             @endif
         </section>
 

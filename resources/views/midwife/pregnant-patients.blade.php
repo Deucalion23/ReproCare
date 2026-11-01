@@ -217,7 +217,7 @@
             </div>
 
             <div class="p-4 border-top">
-                {{ $pregnancies->links('pagination::bootstrap-5') }}
+                {{ $pregnancies->links() }}
             </div>
         @else
             <div class="text-center py-5">

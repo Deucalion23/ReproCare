@@ -174,7 +174,7 @@
     <!-- Pagination -->
     @if($materials->count() > 0)
         <div class="d-flex justify-content-center mt-5">
-            {{ $materials->links('pagination::bootstrap-5') }}
+            {{ $materials->links() }}
         </div>
     @endif
 </div>

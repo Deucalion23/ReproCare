@@ -272,7 +272,7 @@
                 {{-- Pagination --}}
                 <div class="card-footer" style="background:transparent; border-top:1px solid var(--border-color); padding:1rem 1.5rem;">
                     <div class="d-flex justify-content-center">
-                        {{ $healthRecords->links('pagination::bootstrap-5') }}
+                        {{ $healthRecords->links() }}
                     </div>
                 </div>
             @else
