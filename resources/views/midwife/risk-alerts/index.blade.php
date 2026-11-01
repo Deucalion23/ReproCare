@@ -100,7 +100,7 @@
                     <span class="ra-icon ra-icon-danger"><i class="bi {{ $queues['pregnancies']['icon'] }}"></i></span>
                     <span class="ra-label">{{ $queues['pregnancies']['label'] }} ({{ $counts['pregnancies'] }})</span>
                 </h2>
-                <a href="{{ route('midwife.pregnant-patients') }}" class="btn btn-sm btn-outline-primary ra-open-link">
+                <a href="{{ route('midwife.pregnancies.index', ['status' => 'high-risk']) }}" class="btn btn-sm btn-outline-primary ra-open-link">
                     <i class="bi bi-list-ul me-1"></i> Open list
                 </a>
             </div>

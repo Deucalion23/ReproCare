@@ -476,63 +476,6 @@ class MidwifeController extends Controller
         return back()->with('success', 'Preferences saved successfully.');
     }
 
-    // Pregnant Patients Management
-    public function pregnantPatients()
-    {
-        $search = request('search');
-        $status = request('status', 'active');
-        
-        // Live totals (never filtered by search, and never cached — a cache
-        // here showed stale counts right after new pregnancies appeared).
-        $stats = [
-            'totalActive' => Pregnancy::active()->count(),
-            'totalCompleted' => Pregnancy::completed()->count(),
-            'totalHighRisk' => Pregnancy::highRisk()->count(),
-        ];
-        
-        $query = Pregnancy::with(['woman' => fn($q) => $q->withTrashed(), 'walkInPatient'])
-            // ended_at is part of this list because the status/is-active badges
-            // read it; without it a delivered case rendered as still Active.
-            ->select('id', 'user_id', 'walk_in_patient_id', 'lmp', 'edd', 'aog', 'is_high_risk', 'ended_at', 'created_at')
-            ->when($status === 'active', function($q) {
-                return $q->active();
-            })
-            ->when($status === 'completed', function($q) {
-                return $q->completed();
-            })
-            ->when($status === 'high-risk', function($q) {
-                return $q->highRisk();
-            });
-
-        // A pregnancy may hang off a field record with no account yet, so the
-        // search covers both people — and trashed women, whose cases this page
-        // still lists — or an unlinked mother simply cannot be found.
-        if ($search) {
-            $like = '%' . $search . '%';
-            $query->where(function ($q) use ($like) {
-                $q->whereHas('woman', function ($woman) use ($like) {
-                        $woman->withTrashed()
-                            ->where('first_name', 'like', $like)
-                            ->orWhere('last_name', 'like', $like)
-                            ->orWhere('email', 'like', $like);
-                    })
-                  ->orWhereHas('walkInPatient', function ($walkIn) use ($like) {
-                        $walkIn->where('first_name', 'like', $like)
-                            ->orWhere('last_name', 'like', $like)
-                            ->orWhere('contact_number', 'like', $like);
-                    });
-            });
-        }
-        $pregnancies = $query->orderBy('created_at', 'desc')
-            ->paginate(10);
-        
-        return view('midwife.pregnant-patients', array_merge($stats, compact(
-            'pregnancies',
-            'search',
-            'status'
-        )));
-    }
-
     public function pregnancyHistory($id)
     {
         $pregnancy = Pregnancy::with(['checkups' => function($query) {

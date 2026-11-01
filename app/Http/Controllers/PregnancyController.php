@@ -33,15 +33,21 @@ class PregnancyController extends Controller
         $search = request('search');
         $trimester = request('trimester', 'all');
         $riskLevel = request('risk_level', 'all');
+        $status = (string) request('status', 'all');
+        $month = (string) request('month', '');
 
-        $query = app(\App\Services\PatientPresentation::class)->originalPatientsFirst(Pregnancy::with(['woman', 'walkInPatient']))
-            ->orderByDesc('created_at');
+        // A trashed account does not retire its case: this list is now the only place
+        // a midwife sees every pregnancy, so it has to keep covering her record.
+        $query = app(\App\Services\PatientPresentation::class)->originalPatientsFirst(
+            Pregnancy::with(['woman' => fn ($womanQuery) => $womanQuery->withTrashed(), 'walkInPatient'])
+        )->orderByDesc('created_at');
 
         // Apply search if provided
         if ($search) {
             $query->where(function($q) use ($search) {
                 $q->whereHas('woman', function($womanQuery) use ($search) {
-                    $womanQuery->where('first_name', 'like', '%' . $search . '%')
+                    $womanQuery->withTrashed()
+                             ->where('first_name', 'like', '%' . $search . '%')
                              ->orWhere('last_name', 'like', '%' . $search . '%')
                              ->orWhere('email', 'like', '%' . $search . '%');
                 })
@@ -73,8 +79,21 @@ class PregnancyController extends Controller
             }
         }
 
-        // The cards describe the whole filtered result. They used to count the
-        // paginator, so every number changed as the midwife turned pages.
+        // A month means "deliveries due in that month". edd is derived from LMP on save,
+        // so a plain date range stays portable between the sqlite dev and MySQL servers.
+        if (! preg_match('/^\d{4}-\d{2}$/', $month)) {
+            $month = '';
+        }
+        if ($month !== '') {
+            $monthStart = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $query->whereBetween('edd', [
+                $monthStart->toDateString(),
+                $monthStart->copy()->endOfMonth()->toDateString(),
+            ]);
+        }
+
+        // The tiles count everything the other filters allow but not the tile itself,
+        // otherwise picking "Completed" would leave the other three reading zero.
         $summary = [
             'total' => (clone $query)->count(),
             'active' => (clone $query)->active()->count(),
@@ -82,9 +101,15 @@ class PregnancyController extends Controller
             'highRisk' => (clone $query)->highRisk()->count(),
         ];
 
+        $query->when($status === 'active', fn ($case) => $case->active())
+            ->when($status === 'completed', fn ($case) => $case->completed())
+            ->when($status === 'high-risk', fn ($case) => $case->highRisk());
+
         $pregnancies = $query->paginate(10)->withQueryString();
 
-        return view('midwife.pregnancies.index', compact('pregnancies', 'trimester', 'riskLevel', 'summary'));
+        return view('midwife.pregnancies.index', compact(
+            'pregnancies', 'trimester', 'riskLevel', 'status', 'month', 'summary'
+        ));
     }
 
     // Create

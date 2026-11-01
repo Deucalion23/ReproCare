@@ -11,7 +11,7 @@
             <p class="page-hero-subtitle">Browse completed and archived pregnancy cases.</p>
         </div>
         <div class="d-flex gap-2 flex-wrap">
-            <a href="{{ route('midwife.pregnant-patients') }}" class="btn btn-outline-secondary me-2">
+            <a href="{{ route('midwife.pregnancies.index', ['status' => 'completed']) }}" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left me-2"></i>Back to List
             </a>
             <a href="{{ route('midwife.patient-details', $woman->id) }}" class="btn btn-primary">

@@ -266,8 +266,10 @@ Route::prefix('midwife')->name('midwife.')->middleware(['web', 'absolute.logout'
         Route::post('/{id}/return', [MidwifeController::class, 'monthlyReportReturn'])->name('return');
     });
     
-    // Pregnant Patients
-    Route::get('/pregnant-patients', [MidwifeController::class, 'pregnantPatients'])->name('pregnant-patients');
+    // Pregnant Patients retired: its table duplicated the pregnancy list, so the old URL
+    // now lands there and carries the same status/search values across.
+    Route::get('/pregnant-patients', fn () => redirect()->route('midwife.pregnancies.index',
+        array_filter(request()->only(['status', 'search']), fn ($value) => $value !== '')))->name('pregnant-patients');
     Route::get('/pregnant-patients/{id}/history', [MidwifeController::class, 'pregnancyHistory'])->name('pregnancy-history');
 
     // Risk Alerts inbox (clinical review queue)
