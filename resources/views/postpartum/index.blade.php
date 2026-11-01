@@ -7,6 +7,7 @@
     $routeBase = request()->routeIs('midwife.postpartum.*') ? 'midwife.postpartum' : 'bhw.postpartum';
     $isMidwife = request()->routeIs('midwife.postpartum.*');
     $railLimit = 5;
+    $hasRail = $dangerVisits->count() > 0;
 @endphp
 
 @section($contentSection)
@@ -20,8 +21,8 @@
             <span class="summary-chip chip-primary"><i class="bi bi-person-badge-fill"></i> {{ $delivered->total() }} mother(s) tracked</span>
             <span class="summary-chip chip-info"><i class="bi bi-balloon-heart-fill"></i> {{ $newborns->total() }} newborn(s)</span>
             <span class="summary-chip chip-warning"><i class="bi bi-syringe"></i> {{ $immunizationsDue }} vaccine dose(s) due</span>
-            @if($dangerVisits->count() > 0)
-                <a href="#postpartumFollowUps" class="summary-chip chip-danger text-decoration-none"><i class="bi bi-exclamation-triangle-fill"></i> {{ $dangerVisits->count() }} visit(s) flagged</a>
+            @if($hasRail)
+                <span class="summary-chip chip-danger"><i class="bi bi-exclamation-triangle-fill"></i> {{ $dangerVisits->count() }} visit(s) flagged</span>
             @else
                 <span class="summary-chip chip-success"><i class="bi bi-shield-check"></i> No flagged visits</span>
             @endif
@@ -30,6 +31,30 @@
             @endunless
         </div>
     </div>
+</div>
+
+@push('styles')
+<style>
+    /* Mirrors .wd-tab from the women directory; the app has no global tab style. */
+    .pp-filter { display:inline-flex; align-items:center; gap:0.4rem; border:1px solid var(--color-border) !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
+    .pp-filter:hover { border-color:var(--color-primary) !important; color:var(--color-primary-text) !important; }
+    .pp-filter.active { background:var(--color-text) !important; background-color:var(--color-text) !important; border-color:var(--color-text) !important; color:var(--color-bg) !important; }
+    .pp-filter.active i, .pp-filter .count { color:inherit; }
+    .pp-filter .count { opacity:0.7; font-weight:700; }
+
+    /* One section at a time has to beat Bootstrap's col-lg-* widths. */
+    #postpartumSections.is-filtered > [data-section] { display:none; }
+    #postpartumSections.is-filtered > [data-section].is-active { display:block; flex:0 0 100%; max-width:100%; }
+</style>
+@endpush
+
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4" id="postpartumFilters" role="group" aria-label="Choose which list to show">
+    <button type="button" class="pp-filter active" data-view="all" aria-pressed="true"><i class="bi bi-collection-fill"></i> All</button>
+    <button type="button" class="pp-filter" data-view="mothers" aria-pressed="false"><i class="bi bi-person-badge-fill"></i> Recently Delivered Mothers <span class="count">{{ $delivered->total() }}</span></button>
+    @if($hasRail)
+        <button type="button" class="pp-filter" data-view="followups" aria-pressed="false"><i class="bi bi-exclamation-triangle-fill"></i> Needs Follow-up <span class="count">{{ $dangerVisits->count() }}</span></button>
+    @endif
+    <button type="button" class="pp-filter" data-view="newborns" aria-pressed="false"><i class="bi bi-balloon-heart-fill"></i> Newborns <span class="count">{{ $newborns->total() }}</span></button>
 </div>
 
 @if(session('success'))
@@ -45,8 +70,8 @@
     </div>
 @endif
 
-<div class="row g-4 align-items-start">
-    <div class="col-lg-7">
+<div class="row g-4 align-items-start" id="postpartumSections">
+    <div class="col-12 col-lg-7" data-section="mothers">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
@@ -79,9 +104,9 @@
         </div>
     </div>
 
-    <div class="col-lg-5">
-        @if($dangerVisits->count() > 0)
-        <div class="card mb-4" id="postpartumFollowUps">
+    @if($hasRail)
+    <div class="col-12 col-lg-5" data-section="followups">
+        <div class="card" id="postpartumFollowUps">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
                     <h5 class="mb-0">Needs Follow-up</h5>
@@ -107,8 +132,10 @@
                 @endforeach
             </div>
         </div>
-        @endif
+    </div>
+    @endif
 
+    <div class="col-12{{ $hasRail ? '' : ' col-lg-5' }}" data-section="newborns">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
@@ -152,15 +179,45 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    const bar = document.getElementById('postpartumFilters');
+    const grid = document.getElementById('postpartumSections');
     const toggle = document.getElementById('followUpToggle');
-    if (! toggle) return;
-    const extras = document.querySelectorAll('.fu-extra');
-    toggle.addEventListener('click', function () {
-        const expand = toggle.getAttribute('aria-expanded') !== 'true';
-        extras.forEach(function (row) { row.classList.toggle('d-none', ! expand); });
-        toggle.setAttribute('aria-expanded', expand ? 'true' : 'false');
-        toggle.textContent = expand ? 'Show {{ $railLimit }} most recent' : 'Show all';
+
+    /* The pagers reload this page and Laravel drops unknown query params, so the
+       chosen section rides through the session instead of the URL. */
+    function applyView(view) {
+        const buttons = [...bar.querySelectorAll('.pp-filter')];
+        const btn = buttons.find(b => b.dataset.view === view) || buttons[0];
+        buttons.forEach(function (b) {
+            const on = b === btn;
+            b.classList.toggle('active', on);
+            b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        });
+        const isAll = btn.dataset.view === 'all';
+        grid.classList.toggle('is-filtered', !isAll);
+        grid.querySelectorAll('[data-section]').forEach(function (col) {
+            col.classList.toggle('is-active', col.dataset.section === btn.dataset.view);
+        });
+        try { sessionStorage.setItem('postpartum_view', btn.dataset.view); } catch (e) {}
+    }
+
+    bar.addEventListener('click', function (e) {
+        if (e.target.closest('.pp-filter')) applyView(e.target.closest('.pp-filter').dataset.view);
     });
+
+    let stored = null;
+    try { stored = sessionStorage.getItem('postpartum_view'); } catch (e) {}
+    if (stored && stored !== 'all' && bar.querySelector('[data-view="' + stored + '"]')) applyView(stored);
+
+    if (toggle) {
+        const extras = document.querySelectorAll('.fu-extra');
+        toggle.addEventListener('click', function () {
+            const expand = toggle.getAttribute('aria-expanded') !== 'true';
+            extras.forEach(function (row) { row.classList.toggle('d-none', ! expand); });
+            toggle.setAttribute('aria-expanded', expand ? 'true' : 'false');
+            toggle.textContent = expand ? 'Show {{ $railLimit }} most recent' : 'Show all';
+        });
+    }
 });
 </script>
 @endpush
