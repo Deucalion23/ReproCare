@@ -4,35 +4,70 @@
 
 @push('styles')
 <style>
-    .ck-form-card { box-shadow:var(--wp-shadow-sm); }
     .ck-label { font-size:0.72rem; font-weight:800; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:0.6px; display:flex; align-items:center; gap:0.45rem; }
     .ck-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; display:inline-block; }
     .ck-dot.rose { background:var(--color-secondary-text); }
     .ck-dot.peach { background:var(--color-peach); }
     .ck-dot.mint { background:var(--color-success-text); }
     .ck-dot.lav { background:var(--color-primary); }
-    .ck-avatar-rose { width:40px; height:40px; border-radius:50%; background:var(--color-secondary-text); background-color:var(--color-secondary-text); display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 30%, transparent); }
-    .ck-input { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; color:var(--color-text) !important; border-radius:12px !important; }
+    .ck-avatar { width:32px; height:32px; border-radius:50%; background:var(--color-secondary-text); background-color:var(--color-secondary-text); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .ck-input { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; color:var(--color-text) !important; border-radius:10px !important; }
     .ck-input:focus { background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:none !important; box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent) !important; }
     .ck-input::placeholder { color:var(--color-text-muted); }
-    .ptype-wrap { display:inline-flex; gap:0.4rem; background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none; border-radius:999px; padding:0.3rem; }
-    .ptype-label { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.82rem !important; padding:0.45rem 1.25rem !important; color:var(--color-text) !important; background:transparent !important; margin:0 !important; cursor:pointer; }
+    .ptype-wrap { display:inline-flex; gap:0.4rem; background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none; border-radius:999px; padding:0.22rem; }
+    .ptype-label { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.8rem !important; padding:0.34rem 1.05rem !important; color:var(--color-text) !important; background:transparent !important; margin:0 !important; cursor:pointer; }
     .ptype-check:checked + .ptype-label { background:var(--color-secondary-text) !important; background-color:var(--color-secondary-text) !important; color:var(--color-on-solid) !important; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent); }
     #patient_type_unregistered:checked + .ptype-label { background:var(--color-peach) !important; background-color:var(--color-peach) !important; color:var(--color-on-solid) !important; box-shadow:0 4px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 35%, transparent); }
-    .ck-hint { color:var(--color-text-muted); font-size:0.78rem; }
-    .ck-btn-dark { border:none; border-radius:999px; padding:0.62rem 1.5rem; font-weight:800; font-size:0.86rem; background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); }
+    .ck-hint { color:var(--color-text-muted); font-size:0.72rem; margin-top:0.2rem; }
+    .ck-btn-dark { border:none; border-radius:999px; padding:0.5rem 1.25rem; font-weight:800; font-size:0.84rem; background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); }
     .ck-btn-dark:hover { background:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; transform:translateY(-1px); }
-    .ck-btn-soft { border:none; border-radius:999px; padding:0.62rem 1.3rem; font-weight:800; font-size:0.86rem; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; color:var(--color-text) !important; }
+    .ck-btn-soft { border:none; border-radius:999px; padding:0.5rem 1.05rem; font-weight:800; font-size:0.84rem; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; color:var(--color-text) !important; }
     .ck-btn-soft:hover { background:var(--color-border) !important; color:var(--color-text) !important; }
+
+    /* ── Compaction ──
+       The layout pins the hero and the card body with !important, so these need
+       the same body .main-content prefix plus !important to land. Same recipe as
+       the bhw checkups index. */
+    body .main-content .page-hero { padding:0.85rem 1.25rem !important; margin-bottom:1rem !important; border-radius:16px !important; }
+    body .main-content .page-hero .page-hero-title { font-size:1.15rem !important; margin-bottom:0.15rem !important; }
+    body .main-content .page-hero .page-hero-subtitle { font-size:0.78rem !important; margin-bottom:0 !important; }
+    body .main-content .page-hero .btn-hero-secondary { padding:0.4rem 0.95rem !important; font-size:0.8rem !important; }
+    .ck-card { border:none !important; border-radius:20px !important; overflow:hidden; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent) !important; }
+    body .main-content .ck-card .card-body { padding:1rem 1.25rem 1.15rem !important; }
+    body .main-content .ck-card .form-label { margin-bottom:0.28rem; }
+    .ck-section + .ck-section { border-top:1px solid var(--color-border); margin-top:1rem; padding-top:1rem; }
+    .ck-section > .ck-label { margin-bottom:0.7rem; }
+    .ck-actions { border-top:1px solid var(--color-border); margin-top:1rem; padding-top:1rem; gap:0.5rem; }
+    /* The layout forces every .col-md-* / .col-lg-* inside .rc-adaptive-form to
+       full width below 1024px, so pairing fields there only works on a desktop.
+       This grid is untouched by that rule and pairs from 576px up. */
+    .ck-fields { display:grid; gap:0.75rem 1rem; grid-template-columns:minmax(0,1fr); }
+    .ck-fields > * { min-width:0; }
+    @media (min-width: 576px) {
+        .ck-fields { grid-template-columns:repeat(2, minmax(0,1fr)); }
+        .ck-fields > .ck-full { grid-column:1 / -1; }
+    }
+    @media (min-width: 1024px) {
+        .ck-fields { grid-template-columns:repeat(12, minmax(0,1fr)); }
+        /* Same .ck-fields > prefix as .ck-full above, so a cell that is both
+           ck-full (spans on a phone) and ck-w6 (a third on a desktop) resolves. */
+        .ck-fields > .ck-w3 { grid-column:span 3; }
+        .ck-fields > .ck-w4 { grid-column:span 4; }
+        .ck-fields > .ck-w6 { grid-column:span 6; }
+        .ck-fields > .ck-w8 { grid-column:span 8; }
+    }
+    @media (max-width: 575.98px) {
+        .ck-actions { flex-direction:column; align-items:stretch; }
+        .ck-actions .btn { width:100%; justify-content:center; margin-left:0 !important; }
+    }
+    .ck-optional { font-size:0.62rem; font-weight:800; letter-spacing:0.04em; text-transform:uppercase; color:var(--color-text-muted); background:var(--color-surface-soft); background-color:var(--color-surface-soft); border-radius:999px; padding:0.12rem 0.45rem; }
+    .ck-locked { background:var(--color-bg); background-color:var(--color-bg); border-radius:12px; }
 </style>
 @endpush
 
 @section('midwife-content')
 
-{{-- ═══════════════════════════════
-     PAGE HERO
-═══════════════════════════════ --}}
-<div class="page-hero fade-in-card mb-4">
+<div class="page-hero fade-in-card">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
         <div>
             <div class="page-hero-title">@if(isset($woman) && $woman)
@@ -60,56 +95,40 @@
 </div>
 
 @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" 
+    <div class="alert alert-success alert-dismissible fade show mb-3" role="alert"
          style="background:color-mix(in srgb, var(--color-success-text) 10%, transparent); border:1px solid color-mix(in srgb, var(--color-success-text) 30%, transparent); color:var(--success); border-radius:10px;">
         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" style="filter:invert(1);"></button>
     </div>
 @endif
 
-{{-- ═══════════════════════════════
-     CHECKUP FORM CARD
-═══════════════════════════════ --}}
-<div class="card fade-in-card mb-4 ck-form-card" style="border:none; border-radius:20px; background:var(--color-surface); background-color:var(--color-surface);">
-    <div class="card-header" style="background:transparent; background-color:transparent; border:none; padding:1.25rem 1.5rem 0;">
-        <h5 class="mb-0 fw-800" style="font-family:'Plus Jakarta Sans',sans-serif; color:var(--color-text); font-size:1.1rem;">
-            Checkup Details
-        </h5>
-    </div>
-    <div class="card-body p-4">
-            {{-- rc-adaptive-form: ≥1024px multi-column (Layout A) · <1024px strictly stacked (Layout B) --}}
-            <form action="{{ route('midwife.checkups.store') }}" method="POST" class="rc-adaptive-form">
-                @csrf
-                
-                {{-- ═══════════════════════════════
-                     PATIENT INFORMATION
-                ════════════════════════════════ --}}
-                <div class="row mb-4">
-                    <div class="col-12 mb-3">
-                        <div class="ck-label" style="margin-bottom:0.75rem;">
-                            <span class="ck-dot rose"></span> Patient Information
+<div class="card fade-in-card ck-card">
+    <div class="card-body">
+        {{-- rc-adaptive-form: ≥1024px multi-column (Layout A) · <1024px strictly stacked (Layout B) --}}
+        <form action="{{ route('midwife.checkups.store') }}" method="POST" class="rc-adaptive-form">
+            @csrf
+
+            {{-- ── PATIENT ── --}}
+            <div class="ck-section">
+                <div class="ck-label">
+                    <span class="ck-dot rose"></span> Patient
+                </div>
+
+                @if(isset($woman) && $woman)
+                    <input type="hidden" name="patient_type" value="registered">
+                    <input type="hidden" name="user_id" value="{{ $woman->id }}">
+                    <div class="ck-locked p-2 px-3 d-flex align-items-center gap-2">
+                        <div class="ck-avatar">
+                            <i class="bi bi-person" style="color:var(--color-on-solid);font-size:0.95rem;"></i>
+                        </div>
+                        <div style="min-width:0;">
+                            <div style="font-weight:700; color:var(--color-text); line-height:1.15;">{{ $woman->name }}</div>
+                            <small style="color:var(--color-text-muted);">{{ $woman->email }}</small>
                         </div>
                     </div>
-                    
-                    @if(isset($woman) && $woman)
-                        <input type="hidden" name="patient_type" value="registered">
-                        <input type="hidden" name="user_id" value="{{ $woman->id }}">
-                        <div class="col-12">
-                            <div class="p-3 mb-3" style="background:var(--color-bg); background-color:var(--color-bg); border:none; border-radius:14px;">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="ck-avatar-rose">
-                                        <i class="bi bi-person" style="color:var(--color-on-solid);font-size:1.2rem;"></i>
-                                    </div>
-                                    <div>
-                                        <small style="color:var(--text-muted); text-transform:uppercase; font-size:0.7rem; letter-spacing:0.5px;">Patient</small>
-                                        <div style="font-weight:600; color:var(--text);">{{ $woman->name }}</div>
-                                        <small style="color:var(--text-muted);">{{ $woman->email }}</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @else
-                        <div class="col-md-12 mb-3">
+                @else
+                    <div class="ck-fields">
+                        <div class="ck-w4">
                             <label class="form-label ck-label">
                                 Patient Type <span style="color:var(--color-danger-text);">*</span>
                             </label>
@@ -122,16 +141,25 @@
                                 </span>
                             </div>
                         </div>
-                        {{-- Patient Search --}}
-                        <div class="col-md-12 mb-3" id="registeredSearchWrap">
+
+                        {{-- Only one search box is visible at a time, so d-none lets the
+                             other one take the same slot in the grid. --}}
+                        <div class="ck-w8" id="registeredSearchWrap">
                             <label for="patientSearch" class="form-label ck-label">
                                 Search Patient
                             </label>
                             <input type="text" class="form-control ck-input" id="patientSearch"
                                    placeholder="Type to search patient by name or email...">
                         </div>
+                        <div class="ck-w8 d-none" id="walkInSearchWrap">
+                            <label for="walkInSearch" class="form-label ck-label">
+                                Search Unlinked Woman
+                            </label>
+                            <input type="text" class="form-control ck-input" id="walkInSearch"
+                                   placeholder="Type to search unlinked woman...">
+                        </div>
 
-                        <div class="col-md-12 mb-3" id="registeredSelectWrap">
+                        <div class="ck-full" id="registeredSelectWrap">
                             <label for="user_id" class="form-label ck-label">
                                 Select Patient <span style="color:var(--color-danger-text);">*</span>
                             </label>
@@ -153,14 +181,7 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                        <div class="col-md-12 mb-3 d-none" id="walkInSearchWrap">
-                            <label for="walkInSearch" class="form-label ck-label">
-                                Search Unlinked Woman
-                            </label>
-                            <input type="text" class="form-control ck-input" id="walkInSearch"
-                                   placeholder="Type to search unlinked woman...">
-                        </div>
-                        <div class="col-md-12 mb-3 d-none" id="unregisteredSelectWrap">
+                        <div class="ck-full d-none" id="unregisteredSelectWrap">
                             <label for="walk_in_patient_id" class="form-label ck-label">
                                 Select Unlinked Woman <span style="color:var(--color-danger-text);">*</span>
                             </label>
@@ -177,94 +198,86 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
-                    @endif
-                </div>
-
-                <div class="row mb-4">
-                    <div class="col-12 mb-3">
-                        <div class="ck-label" style="margin-bottom:0.75rem;">
-                            <span class="ck-dot mint"></span> Checkup Details
-                        </div>
                     </div>
-                    
-                    <div class="col-md-6 mb-3">
+                @endif
+            </div>
+
+            {{-- ── SCHEDULE ── --}}
+            <div class="ck-section">
+                <div class="ck-label">
+                    <span class="ck-dot mint"></span> Schedule
+                </div>
+                <div class="ck-fields">
+                    <div class="ck-w3">
                         <label for="scheduled_date" class="form-label ck-label">
-                            Scheduled Date <span style="color:var(--color-danger-text);">*</span>
+                            Date <span style="color:var(--color-danger-text);">*</span>
                         </label>
-                        <input type="date" class="form-control ck-input @error('scheduled_date') is-invalid @enderror" 
-                               id="scheduled_date" name="scheduled_date" value="{{ old('scheduled_date') }}" 
+                        <input type="date" class="form-control ck-input @error('scheduled_date') is-invalid @enderror"
+                               id="scheduled_date" name="scheduled_date" value="{{ old('scheduled_date') }}"
                                min="{{ now()->format('Y-m-d') }}" required>
                         @error('scheduled_date')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                         <small class="ck-hint"><i class="bi bi-info-circle me-1"></i>Cannot be in the past</small>
                     </div>
-                    
-                    <div class="col-md-6 mb-3">
+
+                    <div class="ck-w3">
                         <label for="scheduled_time" class="form-label ck-label">
-                            Scheduled Time <span style="color:var(--color-danger-text);">*</span>
+                            Time <span style="color:var(--color-danger-text);">*</span>
                         </label>
-                        <input type="time" class="form-control ck-input @error('scheduled_time') is-invalid @enderror" 
+                        <input type="time" class="form-control ck-input @error('scheduled_time') is-invalid @enderror"
                                id="scheduled_time" name="scheduled_time" value="{{ old('scheduled_time') }}" required>
                         @error('scheduled_time')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
-                        <small class="ck-hint"><i class="bi bi-clock me-1"></i>Working hours: 8:00 AM - 5:00 PM</small>
+                        <small class="ck-hint"><i class="bi bi-clock me-1"></i>8:00 AM - 5:00 PM</small>
                     </div>
-                    
-                    <div class="col-md-12 mb-3">
+
+                    <div class="ck-full ck-w6">
                         <label for="purpose" class="form-label ck-label">
                             Purpose of Checkup <span style="color:var(--color-danger-text);">*</span>
                         </label>
-                        <textarea class="form-control ck-input @error('purpose') is-invalid @enderror" 
-                                  id="purpose" name="purpose" rows="3" required
+                        <textarea class="form-control ck-input @error('purpose') is-invalid @enderror"
+                                  id="purpose" name="purpose" rows="2" required
                                   placeholder="Describe the reason for this checkup...">{{ old('purpose') }}</textarea>
                         @error('purpose')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
+            </div>
 
-                <div class="row mb-4">
-                    <div class="col-12 mb-3">
-                        <div class="ck-label" style="margin-bottom:0.75rem;">
-                            <span class="ck-dot lav"></span> Additional Notes
-                        </div>
-                    </div>
-                    
-                    <div class="col-12 mb-3">
+            {{-- ── NOTES ── --}}
+            <div class="ck-section">
+                <div class="ck-label">
+                    <span class="ck-dot lav"></span> Notes <span class="ck-optional">optional</span>
+                </div>
+                <div class="ck-fields">
+                    <div class="ck-full">
                         <label for="notes" class="form-label ck-label">
                             Special Instructions
                         </label>
-                        <textarea class="form-control ck-input @error('notes') is-invalid @enderror" 
-                                  id="notes" name="notes" rows="3" placeholder="Any special instructions or preparations needed...">{{ old('notes') }}</textarea>
+                        <textarea class="form-control ck-input @error('notes') is-invalid @enderror"
+                                  id="notes" name="notes" rows="2" placeholder="Any special instructions or preparations needed...">{{ old('notes') }}</textarea>
                         @error('notes')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
                 </div>
+            </div>
 
-                {{-- ═══════════════════════════════
-                     FORM ACTIONS
-                ════════════════════════════════ --}}
-                <div class="d-flex justify-content-between align-items-center pt-3" style="border:none;">
-                    <a href="{{ route('midwife.checkups.index') }}" 
-                       class="btn ck-btn-soft">
-                        <i class="bi bi-x-circle me-1"></i> Cancel
-                    </a>
-                    <div class="d-flex gap-2">
-                        <button type="reset" 
-                                class="btn ck-btn-soft">
-                            <i class="bi bi-arrow-clockwise me-1"></i> Reset
-                        </button>
-                        <button type="submit" 
-                                class="btn ck-btn-dark">
-                            <i class="bi bi-check-circle me-1"></i> Schedule Checkup
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+            <div class="d-flex align-items-center flex-wrap ck-actions">
+                <a href="{{ route('midwife.checkups.index') }}" class="btn ck-btn-soft">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </a>
+                <button type="reset" class="btn ck-btn-soft ms-auto">
+                    <i class="bi bi-arrow-clockwise me-1"></i> Reset
+                </button>
+                <button type="submit" class="btn ck-btn-dark">
+                    <i class="bi bi-check-circle me-1"></i> Schedule Checkup
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
