@@ -11,6 +11,9 @@
         body .main-content .page-hero .btn-hero-secondary { padding:0.4rem 0.85rem !important; font-size:0.85rem !important; }
         .pd-label { font-size:0.68rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); line-height:1.1; margin-bottom:2px; }
         .pd-value { font-size:0.82rem; font-weight:600; color:var(--text); line-height:1.3; }
+        .pd-section { font-size:0.78rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--text); margin-bottom:0.5rem; }
+        .pd-stat { padding:0.3rem 0.7rem; border:1px solid var(--border); border-radius:10px; min-width:104px; }
+        .pd-identity { width:46px; height:46px; border-radius:14px; object-fit:cover; border:1px solid var(--border); flex:0 0 auto; }
     </style>
 @endpush
 
@@ -27,6 +30,12 @@
     $height = $latestRecord?->height;
     $bmi = ($weight && $height) ? $weight / pow($height / 100, 2) : null;
     $bmiLabel = $bmi === null ? 'N/A' : ($bmi < 18.5 ? 'Malnourished' : ($bmi >= 30 ? 'Obese' : 'Normal'));
+    $conditionLabels = collect($profile?->health_conditions ?? [])
+        ->map(fn ($value) => $healthConditionOptions[$value] ?? $value)
+        ->filter()
+        ->implode(', ');
+    $conditionText = ($conditionLabels ?: 'None recorded')
+        . ($conditionLabels && $profile?->health_condition_other ? ', ' . $profile->health_condition_other : '');
 @endphp
 
 <div class="py-3">
@@ -66,131 +75,124 @@
 
     @include('midwife.partials.decision-support')
 
-    <div class="row g-3">
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm h-100 fade-in-card" style="background:var(--bg-card);">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-center gap-3">
-                        <img src="{{ $patientImage }}" alt="{{ $patientName }}" style="width:54px;height:54px;border-radius:16px;object-fit:cover;border:2px solid var(--border);flex:0 0 auto;">
-                        <div class="min-w-0">
-                            <div class="fw-bold text-truncate" style="color:var(--text);font-size:1.02rem;">{{ $patientName }}</div>
-                            <div class="small text-truncate" style="color:var(--text-muted);">{{ $patientSubtitle }}</div>
-                            <span class="badge {{ $isWalkIn ? 'bg-info' : 'bg-primary' }}">{{ $isWalkIn ? 'Unlinked woman' : 'Enrolled woman' }}</span>
-                        </div>
-                    </div>
-
-                    <div class="row g-2 mt-3 pt-3 border-top">
-                        <div class="col-6">
-                            <div class="pd-label">Status</div>
-                            <span class="badge {{ $pregnancy->status === 'completed' ? 'bg-secondary' : 'bg-success' }}">{{ ucfirst($pregnancy->status) }}</span>
-                        </div>
-                        <div class="col-6">
-                            <div class="pd-label">Risk Level</div>
-                            <div class="pd-value">{{ $pregnancy->risk_level ?? 'Low' }}</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="pd-label">AOG</div>
-                            <div class="pd-value">{{ $pregnancy->formatted_aog }}</div>
-                        </div>
-                        <div class="col-6">
-                            <div class="pd-label">BMI</div>
-                            <div class="pd-value">{{ $bmi ? number_format($bmi, 2) . ' - ' . $bmiLabel : 'N/A' }}</div>
-                        </div>
-                    </div>
+    <div class="card border-0 shadow-sm fade-in-card mb-3" style="background:var(--bg-card);">
+        <div class="card-body p-3">
+            <div class="d-flex flex-wrap align-items-center gap-2 pb-3 mb-3 border-bottom">
+                <img src="{{ $patientImage }}" alt="{{ $patientName }}" class="pd-identity">
+                <div class="min-w-0 me-auto">
+                    <div class="fw-bold text-truncate" style="color:var(--text);font-size:1rem;line-height:1.2;">{{ $patientName }}</div>
+                    <div class="small text-truncate" style="color:var(--text-muted);">{{ $patientSubtitle }}</div>
                 </div>
-            </div>
-        </div>
-
-        <div class="col-lg-8">
-            <div class="card border-0 shadow-sm fade-in-card mb-3" style="background:var(--bg-card);">
-                <div class="card-body p-3">
-                    <h5 class="h6 mb-2" style="color:var(--text);">Pregnancy Summary</h5>
-                    <div class="row g-2">
-                        <div class="col-md-3"><div class="pd-label">LMP</div><div class="pd-value">{{ optional($pregnancy->lmp)->format('F j, Y') }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">EDD</div><div class="pd-value">{{ optional($pregnancy->edd)->format('F j, Y') }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Trimester</div><div class="pd-value">{{ $pregnancy->trimester_name }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Risk Assessment</div><div class="pd-value">{{ ucfirst($pregnancy->risk_assessment_mode ?? 'automatic') }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Gravida</div><div class="pd-value">{{ $pregnancy->gravida ?? 'N/A' }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Para</div><div class="pd-value">{{ $pregnancy->para ?? 'N/A' }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Term</div><div class="pd-value">{{ $pregnancy->gtpal_term ?? 0 }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Preterm</div><div class="pd-value">{{ $pregnancy->gtpal_preterm ?? 0 }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Abortions / Miscarriages</div><div class="pd-value">{{ $pregnancy->gtpal_abortions ?? 0 }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Living Children</div><div class="pd-value">{{ $pregnancy->gtpal_living_children ?? 0 }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Outcome</div><div class="pd-value">{{ $pregnancy->status === 'completed' ? ($profile?->pregnancy_outcome ? ucfirst($profile->pregnancy_outcome) : 'N/A') : 'Available when completed' }}</div></div>
-                        @if($pregnancy->status === 'completed' && $profile?->outcome_details)
-                            <div class="col-md-6"><div class="pd-label">Outcome Details</div><div class="pd-value">{{ $profile->outcome_details }}</div></div>
-                        @endif
-                        @if($pregnancy->risk_notes)
-                            <div class="col-12"><div class="pd-label">Risk Notes</div><div class="pd-value">{{ $pregnancy->risk_notes }}</div></div>
-                        @endif
-                        @if($pregnancy->notes)
-                            <div class="col-12"><div class="pd-label">Notes</div><div class="pd-value">{{ $pregnancy->notes }}</div></div>
-                        @endif
+                <span class="badge {{ $isWalkIn ? 'bg-info' : 'bg-primary' }}">{{ $isWalkIn ? 'Unlinked woman' : 'Enrolled woman' }}</span>
+                <div class="d-flex flex-wrap gap-2">
+                    <div class="pd-stat">
+                        <div class="pd-label">Status</div>
+                        <span class="badge {{ $pregnancy->status === 'completed' ? 'bg-secondary' : 'bg-success' }}">{{ ucfirst($pregnancy->status) }}</span>
                     </div>
-
-                    <h5 class="h6 mt-3 pt-3 mb-2 border-top" style="color:var(--text);">Latest Health Snapshot</h5>
-                    <div class="row g-2">
-                        <div class="col-md-3"><div class="pd-label">Blood Pressure</div><div class="pd-value">{{ $latestRecord?->bp ?? 'N/A' }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Weight</div><div class="pd-value">{{ $weight ? $weight . ' kg' : 'N/A' }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">Height</div><div class="pd-value">{{ $height ? $height . ' cm' : 'N/A' }}</div></div>
-                        <div class="col-md-3"><div class="pd-label">BMI Status</div><div class="pd-value">{{ $bmiLabel }}</div></div>
-                        @php
-                            $conditionLabels = collect($profile?->health_conditions ?? [])
-                                ->map(fn ($value) => $healthConditionOptions[$value] ?? $value)
-                                ->filter()
-                                ->implode(', ');
-                        @endphp
-                        <div class="col-12">
-                            <div class="pd-label">Health Conditions</div>
-                            <div class="pd-value">{{ $conditionLabels ?: 'None recorded' }}{{ $conditionLabels && $profile?->health_condition_other ? ', ' : '' }}{{ $profile?->health_condition_other }}</div>
-                        </div>
+                    <div class="pd-stat">
+                        <div class="pd-label">Risk Level</div>
+                        <div class="pd-value">{{ $pregnancy->risk_level ?? 'Low' }}</div>
+                    </div>
+                    <div class="pd-stat">
+                        <div class="pd-label">AOG</div>
+                        <div class="pd-value">{{ $pregnancy->formatted_aog }}</div>
+                    </div>
+                    <div class="pd-stat">
+                        <div class="pd-label">BMI</div>
+                        <div class="pd-value">{{ $bmi ? number_format($bmi, 2) . ' - ' . $bmiLabel : 'N/A' }}</div>
                     </div>
                 </div>
             </div>
 
-            <div class="card border-0 shadow-sm fade-in-card" style="background:var(--bg-card);">
-                <div class="card-body p-0">
-                    <div class="p-3 border-bottom">
-                        <h5 class="h6 mb-0" style="color:var(--text);">Linked Health Records</h5>
+            <div class="row g-4">
+                <div class="col-xl-7">
+                    <h5 class="pd-section">Pregnancy Summary</h5>
+                    <div class="row g-2">
+                        <div class="col-6 col-md-4"><div class="pd-label">LMP</div><div class="pd-value">{{ optional($pregnancy->lmp)->format('F j, Y') }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">EDD</div><div class="pd-value">{{ optional($pregnancy->edd)->format('F j, Y') }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Trimester</div><div class="pd-value">{{ $pregnancy->trimester_name }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Risk Assessment</div><div class="pd-value">{{ ucfirst($pregnancy->risk_assessment_mode ?? 'automatic') }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Outcome</div><div class="pd-value">{{ $pregnancy->status === 'completed' ? ($profile?->pregnancy_outcome ? ucfirst($profile->pregnancy_outcome) : 'N/A') : 'Available when completed' }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Gravida</div><div class="pd-value">{{ $pregnancy->gravida ?? 'N/A' }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Para</div><div class="pd-value">{{ $pregnancy->para ?? 'N/A' }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Term</div><div class="pd-value">{{ $pregnancy->gtpal_term ?? 0 }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Preterm</div><div class="pd-value">{{ $pregnancy->gtpal_preterm ?? 0 }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Abortions / Miscarriages</div><div class="pd-value">{{ $pregnancy->gtpal_abortions ?? 0 }}</div></div>
+                        <div class="col-6 col-md-4"><div class="pd-label">Living Children</div><div class="pd-value">{{ $pregnancy->gtpal_living_children ?? 0 }}</div></div>
                     </div>
-                    @if($pregnancy->healthRecords->isEmpty())
-                        <div class="p-3 text-muted small">No linked health records yet.</div>
-                    @else
-                        <div class="table-responsive">
-                            <table class="table table-sm align-middle mb-0">
-                                <thead>
-                                    <tr>
-                                        <th>Date</th>
-                                        <th>Vitals</th>
-                                        <th>Risk</th>
-                                        <th></th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($pregnancy->healthRecords->sortByDesc('created_at') as $record)
-                                        <tr>
-                                            <td>
-                                                <div class="pd-value">{{ $record->created_at->format('M j, Y') }}</div>
-                                                <small class="text-muted">{{ $record->created_at->format('h:i A') }}</small>
-                                            </td>
-                                            <td class="small">
-                                                <div>BP: {{ $record->bp ?? 'N/A' }}</div>
-                                                <div>Weight: {{ $record->weight ? $record->weight . ' kg' : 'N/A' }}</div>
-                                            </td>
-                                            <td class="small">{{ $record->risk_level ?? 'Low' }}</td>
-                                            <td class="text-end pe-3">
-                                                <a href="{{ route('midwife.health-records.show', $record->id) }}" class="btn btn-sm btn-outline-primary py-0">
-                                                    <i class="bi bi-eye"></i> View
-                                                </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+                </div>
+
+                <div class="col-xl-5">
+                    <h5 class="pd-section">Latest Health Snapshot</h5>
+                    <div class="row g-2">
+                        <div class="col-6"><div class="pd-label">Blood Pressure</div><div class="pd-value">{{ $latestRecord?->bp ?? 'N/A' }}</div></div>
+                        <div class="col-6"><div class="pd-label">Weight</div><div class="pd-value">{{ $weight ? $weight . ' kg' : 'N/A' }}</div></div>
+                        <div class="col-6"><div class="pd-label">Height</div><div class="pd-value">{{ $height ? $height . ' cm' : 'N/A' }}</div></div>
+                        <div class="col-6"><div class="pd-label">BMI Status</div><div class="pd-value">{{ $bmiLabel }}</div></div>
+                        <div class="col-12"><div class="pd-label">Health Conditions</div><div class="pd-value">{{ $conditionText }}</div></div>
+                    </div>
+                </div>
+            </div>
+
+            @if(($pregnancy->status === 'completed' && $profile?->outcome_details) || $pregnancy->risk_notes || $pregnancy->notes)
+                <div class="row g-2 mt-3 pt-3 border-top">
+                    @if($pregnancy->status === 'completed' && $profile?->outcome_details)
+                        <div class="col-md-4"><div class="pd-label">Outcome Details</div><div class="pd-value">{{ $profile->outcome_details }}</div></div>
+                    @endif
+                    @if($pregnancy->risk_notes)
+                        <div class="col-md-4"><div class="pd-label">Risk Notes</div><div class="pd-value">{{ $pregnancy->risk_notes }}</div></div>
+                    @endif
+                    @if($pregnancy->notes)
+                        <div class="col-md-4"><div class="pd-label">Notes</div><div class="pd-value">{{ $pregnancy->notes }}</div></div>
                     @endif
                 </div>
+            @endif
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm fade-in-card" style="background:var(--bg-card);">
+        <div class="card-body p-0">
+            <div class="d-flex align-items-center gap-2 p-3 border-bottom">
+                <h5 class="pd-section mb-0">Linked Health Records</h5>
+                <span class="badge rounded-pill text-bg-light border">{{ $pregnancy->healthRecords->count() }}</span>
             </div>
+            @if($pregnancy->healthRecords->isEmpty())
+                <div class="p-3 text-muted small">No linked health records yet.</div>
+            @else
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Blood Pressure</th>
+                                <th>Weight</th>
+                                <th>Height</th>
+                                <th>Risk</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($pregnancy->healthRecords->sortByDesc('created_at') as $record)
+                                <tr>
+                                    <td>
+                                        <div class="pd-value">{{ $record->created_at->format('M j, Y') }}</div>
+                                        <small class="text-muted">{{ $record->created_at->format('h:i A') }}</small>
+                                    </td>
+                                    <td class="small">{{ $record->bp ?? 'N/A' }}</td>
+                                    <td class="small">{{ $record->weight ? $record->weight . ' kg' : 'N/A' }}</td>
+                                    <td class="small">{{ $record->height ? $record->height . ' cm' : 'N/A' }}</td>
+                                    <td class="small">{{ $record->risk_level ?? 'Low' }}</td>
+                                    <td class="text-end pe-3">
+                                        <a href="{{ route('midwife.health-records.show', $record->id) }}" class="btn btn-sm btn-outline-primary py-0">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 </div>
