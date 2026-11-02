@@ -101,4 +101,35 @@ class AnalyticsScope
 
         return array_values(array_unique($patterns));
     }
+
+    /**
+     * Constrain a query to a catchment of normalized barangay keys. Null means
+     * city-wide. The SQL pass is a superset of the exact PHP match, so callers
+     * still re-check the key before returning a record.
+     */
+    public function applyCatchment($query, ?array $catchment, string $column = 'barangay'): void
+    {
+        if ($catchment === null) {
+            return;
+        }
+
+        $patterns = [];
+        foreach ($catchment as $key) {
+            foreach ($this->matchPatterns($key) as $pattern) {
+                $patterns[] = $pattern;
+            }
+        }
+
+        if ($patterns === []) {
+            $query->whereRaw('1 = 0');
+
+            return;
+        }
+
+        $query->where(function ($builder) use ($patterns, $column) {
+            foreach ($patterns as $pattern) {
+                $builder->orWhereRaw("LOWER({$column}) LIKE ?", [$pattern]);
+            }
+        });
+    }
 }

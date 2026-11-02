@@ -64,9 +64,10 @@ class Barangay extends Model
 
     /**
      * Catchment a staff account chooses from: the RHU its own account is
-     * assigned to, otherwise the deployment's station.
+     * assigned to, otherwise the deployment's station. Public because the
+     * list queries that feed those pickers must scope to the same station.
      */
-    private static function staffRhu(): string
+    public static function staffRhu(): string
     {
         $value = strtoupper(trim((string) (auth()->user()?->rhu_assignment ?? '')));
         $roman = ['RHU I' => 'RHU 1', 'RHU II' => 'RHU 2', 'RHU III' => 'RHU 3', 'RHU IV' => 'RHU 4', 'RHU V' => 'RHU 5'];
@@ -85,7 +86,16 @@ class Barangay extends Model
      */
     public static function catchmentOptions(array|string|null $keep = null): Collection
     {
-        $rows = static::active()->forRhu(static::staffRhu())->orderBy('name')->get(['id', 'name']);
+        $rhu = static::staffRhu();
+        $rows = static::active()->forRhu($rhu)->orderBy('name')->get(['id', 'name']);
+
+        // An unseeded registry still has an official catchment. Falling back to
+        // the constant keeps the picker inside this RHU instead of widening it
+        // to the whole city.
+        if ($rows->isEmpty()) {
+            $rows = collect(self::RHU_CATCHMENTS[$rhu] ?? [])->map(fn ($name) => new static(['name' => $name]));
+        }
+
         $names = $rows->pluck('name')->all();
 
         foreach ((array) $keep as $name) {

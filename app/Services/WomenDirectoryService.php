@@ -266,28 +266,7 @@ class WomenDirectoryService
      */
     private function applyScope($query, ?array $catchment, string $column): void
     {
-        if ($catchment === null) {
-            return;
-        }
-
-        $patterns = [];
-        foreach ($catchment as $key) {
-            foreach ($this->scope->matchPatterns($key) as $pattern) {
-                $patterns[] = $pattern;
-            }
-        }
-
-        if ($patterns === []) {
-            $query->whereRaw('1 = 0');
-
-            return;
-        }
-
-        $query->where(function ($builder) use ($patterns, $column) {
-            foreach ($patterns as $pattern) {
-                $builder->orWhereRaw("LOWER({$column}) LIKE ?", [$pattern]);
-            }
-        });
+        $this->scope->applyCatchment($query, $catchment, $column);
     }
 
     private function scopedCount($query, ?array $catchment): int

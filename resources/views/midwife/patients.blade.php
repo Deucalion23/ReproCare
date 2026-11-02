@@ -41,7 +41,7 @@
     if (!empty($trimester) && $trimester !== 'all') $secActiveCount++;
     if (!empty($pregnancyStatus) && $pregnancyStatus !== 'all') $secActiveCount++;
     $filtersActive = $secActiveCount > 0 || request('search') || request('barangay');
-    $bList = !empty($barangays) ? $barangays : \App\Http\Controllers\AuthController::getSanCarlosBarangays();
+    $bList = $barangays;
 @endphp
 
 {{-- Summary cards --}}

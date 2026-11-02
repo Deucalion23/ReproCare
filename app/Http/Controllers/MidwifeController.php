@@ -81,6 +81,16 @@ class MidwifeController extends Controller
         $riskLevel = request('risk_level', 'all');
         $trimester = request('trimester', 'all');
 
+        // A station midwife sees only her own catchment; without this the
+        // directory leaks women registered under the other RHUs.
+        $analytics = app(\App\Services\AnalyticsScope::class);
+        $catchment = $analytics->areas(\App\Models\Barangay::staffRhu());
+        $inStation = function ($query) use ($analytics, $catchment) {
+            $analytics->applyCatchment($query, $catchment);
+
+            return $query;
+        };
+
         // Get registered patients
         $registeredQuery = User::where('role', 'user')
             ->with([
@@ -93,6 +103,8 @@ class MidwifeController extends Controller
                 },
             ])
             ->where('status', 'approved');
+
+        $inStation($registeredQuery);
 
         if ($search) {
             $cleanSearch = ltrim($search, '#');
@@ -133,6 +145,8 @@ class MidwifeController extends Controller
             $query->active();
         }])
             ->whereNull('converted_to_user_id')->whereNull('user_id');
+
+        $inStation($unregisteredQuery);
 
         if ($search) {
             $unregisteredQuery->where(function ($q) use ($search) {
@@ -227,11 +241,12 @@ class MidwifeController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
-        // Get statistics
-        $scheduledCheckups = Checkup::where('status', 'Scheduled')->count();
-        $missedCheckups = Checkup::where('status', 'Missed')->count();
-        $registeredCount = User::where('role', 'user')->where('status', 'approved')->count();
-        $unregisteredCount = WalkInPatient::whereNull('converted_to_user_id')->count();
+        // Get statistics. Each card and tab counts the same catchment the table
+        // shows, otherwise the totals promise women this station cannot open.
+        $scheduledCheckups = $this->stationCheckups('Scheduled', $analytics, $catchment)->count();
+        $missedCheckups = $this->stationCheckups('Missed', $analytics, $catchment)->count();
+        $registeredCount = $inStation(User::where('role', 'user')->where('status', 'approved'))->count();
+        $unregisteredCount = $inStation(WalkInPatient::whereNull('converted_to_user_id'))->count();
         $puroks = Purok::orderBy('name')->get();
         // The directory only ever holds this station's catchment, so the filter
         // offers those barangays — plus whatever a shared link already filters on.
@@ -252,6 +267,24 @@ class MidwifeController extends Controller
             'riskLevel',
             'trimester'
         ));
+    }
+
+    /**
+     * A checkup carries no barangay of its own, so the station's catchment
+     * reaches it through the woman the visit belongs to.
+     */
+    private function stationCheckups(string $status, \App\Services\AnalyticsScope $analytics, ?array $catchment)
+    {
+        $query = Checkup::where('status', $status);
+
+        if ($catchment === null) {
+            return $query;
+        }
+
+        return $query->where(function ($outer) use ($analytics, $catchment) {
+            $outer->whereHas('woman', fn ($woman) => $analytics->applyCatchment($woman, $catchment))
+                ->orWhereHas('walkInPatient', fn ($walkIn) => $analytics->applyCatchment($walkIn, $catchment));
+        });
     }
 
     public function decisionSupport(\Illuminate\Http\Request $request)
