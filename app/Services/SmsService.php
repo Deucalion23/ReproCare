@@ -155,15 +155,19 @@ class SmsService
 
     /**
      * Send a broadcast SMS to all patients in a given purok or barangay.
+     * `$catchment` is the sender's own station: null keeps the city-wide reach the
+     * CHO desk needs, a key list stops a midwife's blast from leaving her RHU.
      * Rate-limited to 500 per call.
      */
-    public function broadcast(string $enMessage, string $tlMessage = '', ?int $purokId = null, ?string $barangay = null): int
+    public function broadcast(string $enMessage, string $tlMessage = '', ?int $purokId = null, ?string $barangay = null, ?array $catchment = null): int
     {
         $query = User::where('role', 'user')
             ->where('status', 'approved')
             ->where('sms_opt_out', false)
             ->whereNotNull('contact_number')
             ->where('contact_number', '!=', '');
+
+        app(AnalyticsScope::class)->applyCatchment($query, $catchment);
 
         if ($purokId) {
             $query->where('purok_id', $purokId);

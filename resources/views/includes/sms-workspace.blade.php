@@ -1,14 +1,17 @@
 {{-- SMS workspace, shared by the midwife and RHU portals (they were byte-identical
      apart from the accent hue). Expects $wsRoute ('midwife.sms' | 'rhu.sms') and
-     $wsAccent ('primary' | 'secondary'); the controller supplies $patients,
-     $statusTabs, $recentByUser, $stats, $search, $status, $type, $puroks and the
-     thread variables. --}}
+     $wsAccent ('primary' | 'secondary'); the controller supplies $recipientsList,
+     $statusTabs, $roleTabs, $recentByUser, $stats, $search, $status, $type, $peerRole,
+     $puroks and the thread variables. --}}
 @php
     $wsRoute = $wsRoute ?? 'midwife.sms';
     $wsAccent = $wsAccent ?? 'primary';
     $search = (string) ($search ?? '');
     $status = (string) ($status ?? '');
     $type = (string) ($type ?? '');
+    $peerRole = (string) ($peerRole ?? '');
+    $roleTabs = $roleTabs ?? collect();
+    $recipientsList = $recipientsList ?? collect();
     $threadId = $threadUserId ?? null;
     $threadPhone = trim((string) ($threadPhone ?? ''));
     $threadLogs = $threadLogs ?? collect();
@@ -32,18 +35,18 @@
         }
         return route($wsRoute.'.index', array_filter($query, fn ($value) => $value !== '' && $value !== null && $value !== []));
     };
-    $isFiltered = $search !== '' || $status !== '' || $type !== '';
+    $isFiltered = $search !== '' || $status !== '' || $type !== '' || $peerRole !== '';
 @endphp
 
 <div class="rc-sms" style="--rc-accent:var(--color-{{ $wsAccent }}); --rc-accent-soft:var(--color-{{ $wsAccent }}-soft); --rc-accent-text:var(--color-{{ $wsAccent }}-text);">
     <div class="rc-sms-bar">
         <div class="rc-sms-heading">
             <h1><i class="bi bi-chat-dots-fill"></i> SMS Alerts</h1>
-            <p>Reminders and health alerts straight to a patient's phone.</p>
+            <p>Reminders and health alerts to the women and health workers in your barangays.</p>
         </div>
         <div class="rc-sms-tools">
-            <span class="rc-optin" title="Approved patients with a number who have not opted out"><i class="bi bi-people-fill"></i> {{ $stats['enabled'] }} opted-in</span>
-            <div class="rc-seg" role="group" aria-label="Filter patients by delivery status">
+            <span class="rc-optin" title="Approved recipients with a number who have not opted out"><i class="bi bi-people-fill"></i> {{ $stats['enabled'] }} reachable</span>
+            <div class="rc-seg" role="group" aria-label="Filter recipients by delivery status">
                 @foreach($statusTabs as $tabKey => $tab)
                     <a href="{{ $wsUrl(['status' => $tabKey === '' ? null : $tabKey]) }}"
                        class="rc-seg-btn {{ $status === $tabKey ? 'active' : '' }}"
@@ -52,11 +55,12 @@
             </div>
             <form method="GET" action="{{ $wsUrl() }}" class="rc-sms-form" role="search">
                 <input type="hidden" name="status" value="{{ $status }}">
+                <input type="hidden" name="role" value="{{ $peerRole }}">
                 @if($threadUser)<input type="hidden" name="to" value="{{ $threadUser->id }}">@endif
                 @if($threadPhone !== '')<input type="hidden" name="phone" value="{{ $threadPhone }}">@endif
                 <span class="rc-search">
                     <i class="bi bi-search" aria-hidden="true"></i>
-                    <input type="search" name="search" value="{{ $search }}" placeholder="Name or number..." aria-label="Search patients by name or number">
+                    <input type="search" name="search" value="{{ $search }}" placeholder="Name or number..." aria-label="Search recipients by name or number">
                 </span>
                 <select name="type" class="rc-select" aria-label="Filter by message type">
                     @foreach(['' => 'All types', 'appointment_reminder' => 'Appointment', 'high_risk_alert' => 'High risk', 'missed_checkup' => 'Missed check-up', 'custom' => 'Custom', 'broadcast' => 'Broadcast'] as $optionKey => $optionLabel)
@@ -72,8 +76,8 @@
     @if($isFiltered)
         <div class="rc-filterline d-flex align-items-center gap-2 mb-2" style="font-size:.74rem; color:var(--color-text-muted);">
             <i class="bi bi-funnel-fill"></i>
-            <span>Filtered by {{ collect(['search' => $search !== '' ? '"'.$search.'"' : null, 'status' => $status !== '' ? $status : null, 'type' => $type !== '' ? str_replace('_',' ',$type) : null])->filter()->implode(', ') }}.</span>
-            <a href="{{ $wsUrl([], ['status', 'type', 'search', 'to', 'phone']) }}" class="rc-reset"><i class="bi bi-x-lg"></i> Clear</a>
+            <span>Filtered by {{ collect(['role' => $peerRole !== '' ? ($roleTabs[$peerRole]['label'] ?? $peerRole) : null, 'search' => $search !== '' ? '"'.$search.'"' : null, 'status' => $status !== '' ? $status : null, 'type' => $type !== '' ? str_replace('_',' ',$type) : null])->filter()->implode(', ') }}.</span>
+            <a href="{{ $wsUrl([], ['status', 'type', 'search', 'role', 'to', 'phone']) }}" class="rc-reset"><i class="bi bi-x-lg"></i> Clear</a>
         </div>
     @endif
 
@@ -85,21 +89,31 @@
     @endif
 
     <div class="rc-sms-shell" data-thread="{{ $openThread ? 1 : 0 }}">
-        <section class="rc-panel rc-conv-panel" aria-label="Patients">
+        <section class="rc-panel rc-conv-panel" aria-label="Recipients">
             <div class="rc-panel-head" aria-live="polite">
-                <h3><i class="bi bi-person-lines-fill"></i> Patients</h3>
-                <span class="rc-count">{{ $patients->total() }} shown</span>
+                <h3><i class="bi bi-person-lines-fill"></i> Recipients</h3>
+                <span class="rc-count">{{ $recipientsList->total() }} shown</span>
+            </div>
+
+            {{-- Beside the status pills the bar would need three rows at a real
+                 content width, so the recipient type sits with the list it scopes. --}}
+            <div class="rc-roles" role="group" aria-label="Filter recipients by role">
+                @foreach($roleTabs as $roleKey => $tab)
+                    <a href="{{ $wsUrl(['role' => $roleKey === '' ? null : $roleKey]) }}"
+                       class="rc-role-btn {{ $peerRole === $roleKey ? 'active' : '' }}"
+                       @if($peerRole === $roleKey) aria-current="true" @endif>{{ $tab['label'] }} <b>{{ $tab['count'] }}</b></a>
+                @endforeach
             </div>
 
             <div class="rc-conv-list">
-                @forelse($patients as $patient)
+                @forelse($recipientsList as $patient)
                     @php
                         $last = $recentByUser->get($patient->id);
                         $label = $patient->name ?: trim($patient->first_name.' '.$patient->last_name);
                     @endphp
                     <a href="{{ $wsUrl(['to' => $patient->id], [], true) }}"
                        class="rc-conv {{ $threadId === (int) $patient->id ? 'active' : '' }} {{ $last ? 'has-thread' : '' }}"
-                       title="{{ $patient->contact_number }}@if($last) — {{ $last->message }}@endif">
+                       title="{{ $patient->contact_number }}{{ $patient->barangay ? ' · '.$patient->barangay : '' }}@if($last) — {{ $last->message }}@endif">
                         <x-patient-avatar :patient="$patient" :size="34" />
                         <span class="rc-conv-meta">
                             <span class="rc-conv-top">
@@ -108,31 +122,39 @@
                             </span>
                             <span class="rc-conv-sub">{{ $last ? \Illuminate\Support\Str::limit($last->message, 54) : $patient->contact_number }}</span>
                         </span>
+                        {{-- Beside the dot, never inside the name: a long name with the
+                             tag inline would clip the tag before it clipped the name. --}}
+                        @if($patient->role !== 'user')
+                            <span class="rc-role">{{ $patient->role === 'bhw_president' ? 'Pres' : 'BHW' }}</span>
+                        @endif
                         <span class="rc-dot {{ $last?->status ?? '' }}"></span>
                     </a>
                 @empty
                     <div class="rc-empty">
                         <i class="bi bi-chat-dots"></i>
-                        <strong>{{ $isFiltered ? 'No match' : 'No patients yet' }}</strong>
-                        <span>{{ $isFiltered ? 'No SMS-enabled patient matches these filters.' : 'Approved patients with a mobile number appear here.' }}</span>
+                        <strong>{{ $isFiltered ? 'No match' : 'No recipients yet' }}</strong>
+                        <span>{{ $isFiltered ? 'No one with a mobile number matches these filters.' : 'Women on the caseload and their health workers appear here.' }}</span>
                     </div>
                 @endforelse
             </div>
 
-            @if($patients->hasPages())
-                <div class="rc-pager">{{ $patients->links() }}</div>
+            @if($recipientsList->hasPages())
+                <div class="rc-pager">{{ $recipientsList->links() }}</div>
             @endif
         </section>
 
         <section class="rc-panel rc-thread-panel" aria-label="Conversation">
             @if($openThread)
                 <div class="rc-thread-head">
-                    <a href="{{ $wsUrl([], ['to', 'phone']) }}" class="rc-back"><i class="bi bi-chevron-left"></i> Patients</a>
+                    <a href="{{ $wsUrl([], ['to', 'phone']) }}" class="rc-back"><i class="bi bi-chevron-left"></i> Recipients</a>
                     <x-patient-avatar :patient="$threadUser" :name="$peerName" :size="34" />
                     <div class="rc-peer">
                         <h2>{{ $peerName }}</h2>
                         <small>
                             <i class="bi bi-telephone-fill me-1"></i>{{ $peerPhone ?: 'No number on file' }}
+                            @if($threadUser && $threadUser->role !== 'user')
+                                · {{ $threadUser->role === 'bhw_president' ? 'BHW president' : 'Barangay health worker' }}
+                            @endif
                             @if($threadUser)
                                 · <span class="{{ $threadUser->hasSmsEnabled() ? 'on' : 'off' }}">{{ $threadUser->hasSmsEnabled() ? 'SMS enabled' : 'SMS unavailable' }}</span>
                             @endif
@@ -197,7 +219,7 @@
             @else
                 <div class="rc-empty">
                     <i class="bi bi-cursor-fill"></i>
-                    <strong>Pick a patient</strong>
+                    <strong>Pick a recipient</strong>
                     <span>Choose anyone on the left to read their thread and send an SMS.</span>
                 </div>
             @endif
@@ -231,12 +253,12 @@
                         <textarea name="message_tl" id="broadcastTl" class="form-control form-control-sm" rows="3" maxlength="320" placeholder="Mensahe sa Tagalog..." style="border-radius:10px;"></textarea>
                     </div>
                     <div class="alert alert-warning py-2 mb-0" style="font-size:.76rem; border-radius:10px;">
-                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Sends to up to <strong>{{ $stats['enabled'] }}</strong> opted-in patients. Cannot be undone.
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Sends to up to <strong>{{ $stats['broadcast'] }}</strong> opted-in patients in your barangays. Health workers are not included. Cannot be undone.
                     </div>
                 </div>
                 <div class="modal-footer py-2">
                     <button type="button" class="rc-btn-ghost" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="rc-btn-pink" onclick="return confirm('Send broadcast SMS to {{ $stats['enabled'] }} patient(s)?')"><i class="bi bi-megaphone-fill"></i> Send Broadcast</button>
+                    <button type="submit" class="rc-btn-pink" onclick="return confirm('Send broadcast SMS to {{ $stats['broadcast'] }} patient(s)?')"><i class="bi bi-megaphone-fill"></i> Send Broadcast</button>
                 </div>
             </form>
         </div>
@@ -283,6 +305,14 @@
             }
         };
 
+        // The status pills sit in the bar, outside the swapped panel: left alone, a
+        // click after typing a name would silently drop that name from the URL.
+        var syncPills = function (doc) {
+            var next = doc.querySelector('.rc-seg');
+            var current = document.querySelector('.rc-seg');
+            if (next && current) { current.outerHTML = next.outerHTML; }
+        };
+
         var refresh = function () {
             var params = new URLSearchParams();
             new FormData(searchForm).forEach(function (value, key) {
@@ -304,6 +334,7 @@
                     var nextPanel = doc.querySelector('.rc-conv-panel');
                     if (nextPanel) { convPanel.innerHTML = nextPanel.innerHTML; }
                     syncFilterLine(doc);
+                    syncPills(doc);
                     window.history.replaceState(null, '', url);
                 })
                 .catch(function () { lastQuery = null; })

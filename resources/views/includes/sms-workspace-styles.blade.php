@@ -7,17 +7,21 @@
 <style>
     .rc-sms { max-width:1280px; margin:0 auto; padding-bottom:1.25rem; }
 
-    /* ── Bar: title + the two actions, one line on a laptop ── */
-    .rc-sms-bar { display:flex; align-items:center; justify-content:space-between; gap:.5rem .75rem; flex-wrap:wrap; margin-bottom:.7rem; }
-    .rc-sms-heading { min-width:0; }
+    /* ── Bar: the title and Broadcast share line one, every control shares line
+       two. Two counted filter segments plus a search cannot sit beside a heading,
+       and a wrapped third line reads as clutter. ── */
+    .rc-sms-bar { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; gap:.5rem .75rem; margin-bottom:.7rem; }
+    .rc-sms-heading { grid-area:1 / 1 / 2 / 2; min-width:0; }
+    .rc-sms-broadcast { grid-area:1 / 2 / 2 / 3; justify-self:end; }
+    .rc-sms-tools { grid-area:2 / 1 / 3 / 3; display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; justify-content:flex-start; }
     .rc-sms-bar h1 { display:flex; align-items:center; gap:.5rem; margin:0; font-family:'Plus Jakarta Sans',sans-serif; font-size:1.06rem; font-weight:800; letter-spacing:-.01em; color:var(--color-text); }
     .rc-sms-bar h1 i { color:var(--rc-accent-text); }
     .rc-sms-bar p { margin:.1rem 0 0; font-size:.76rem; color:var(--color-text-muted); }
-    .rc-sms-tools { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; flex:1 1 auto; justify-content:flex-end; }
     .rc-optin { display:inline-flex; align-items:center; gap:.35rem; font-size:.74rem; font-weight:700; color:var(--color-success-text); background:var(--color-success-soft); border-radius:999px; padding:.34rem .7rem; white-space:nowrap; }
 
-    /* ── Status tabs: counted, and each one filters the same list below ── */
-    .rc-seg { display:inline-flex; gap:.15rem; padding:.15rem; background:var(--color-surface-soft); border-radius:999px; }
+    /* ── Counted pills: each one filters the same list below ── */
+    .rc-seg { display:inline-flex; gap:.15rem; padding:.15rem; background:var(--color-surface-soft); border-radius:999px; max-width:100%; overflow-x:auto; scrollbar-width:none; }
+    .rc-seg::-webkit-scrollbar { display:none; }
     /* !important on every anchor colour, because theme.css paints all body links
        with the primary accent at (0,11,2) specificity — the shared .wd-tab pills
        do the same. Without it the RHU tabs would silently turn midwife-violet. */
@@ -28,10 +32,10 @@
     .rc-seg-btn.active b { opacity:1; }
 
     /* ── One form carries search + type, so no filter can drop another ── */
-    .rc-sms-form { display:flex; align-items:center; gap:.45rem; flex-wrap:wrap; }
-    .rc-search { position:relative; }
+    .rc-sms-form { display:flex; align-items:center; gap:.45rem; flex-wrap:wrap; flex:1 1 320px; }
+    .rc-search { position:relative; flex:1 1 230px; min-width:150px; max-width:330px; }
     .rc-search i { position:absolute; left:.7rem; top:50%; transform:translateY(-50%); font-size:.78rem; color:var(--color-text-muted); pointer-events:none; }
-    .rc-search input { width:230px; min-width:0; padding:.4rem .8rem .4rem 1.9rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface); font-size:.8rem; color:var(--color-text); outline:none; }
+    .rc-search input { width:100%; min-width:0; padding:.4rem .8rem .4rem 1.9rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface); font-size:.8rem; color:var(--color-text); outline:none; }
     .rc-select { width:auto; flex:0 0 auto; padding:.4rem .6rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface); font-size:.78rem; font-weight:600; color:var(--color-text); }
     .rc-submit { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; border-radius:50%; border:1px solid var(--color-border); background:var(--color-surface); color:var(--color-text-muted); cursor:pointer; }
     .rc-submit:hover { color:var(--rc-accent-text); background:var(--rc-accent-soft); border-color:transparent; }
@@ -46,6 +50,17 @@
     .rc-panel-head h2 i, .rc-panel-head h3 i { color:var(--rc-accent-text); font-size:.9rem; }
     .rc-count { font-size:.72rem; font-weight:800; color:var(--color-text-muted); background:var(--color-surface-soft); border-radius:999px; padding:.2rem .55rem; white-space:nowrap; }
 
+    /* ── Recipient type: the list's own scope control, in the narrow column ── */
+    .rc-roles { display:flex; gap:.2rem; padding:.45rem .5rem .1rem; overflow-x:auto; scrollbar-width:none; }
+    .rc-roles::-webkit-scrollbar { display:none; }
+    /* !important again: theme.css paints every link with the primary accent, which
+       would silently turn the RHU pills midwife-violet. */
+    .rc-role-btn { display:inline-flex; align-items:baseline; gap:.25rem; padding:.24rem .5rem; border-radius:9px; border:1px solid var(--color-border); background:var(--color-surface); font-size:.68rem; font-weight:800; color:var(--color-text-muted) !important; text-decoration:none; white-space:nowrap; }
+    .rc-role-btn b { font-size:.64rem; font-weight:800; opacity:.7; }
+    .rc-role-btn:hover { color:var(--color-text) !important; background:var(--color-bg); }
+    .rc-role-btn.active { color:var(--rc-accent-text) !important; background:var(--rc-accent-soft); border-color:color-mix(in srgb, var(--rc-accent-text) 35%, transparent); }
+    .rc-role-btn.active b { opacity:1; }
+
     .rc-conv-list { flex:1; min-height:0; overflow-y:auto; padding:.4rem; display:flex; flex-direction:column; gap:.15rem; }
     /* Live search keeps the panel on screen; a dim while fetching says "working"
        without a spinner that would shove the list around. */
@@ -59,6 +74,9 @@
     .rc-conv-time { font-size:.66rem; color:var(--color-text-muted); white-space:nowrap; flex-shrink:0; }
     .rc-conv-sub { display:block; font-size:.72rem; color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:.1rem; }
     .rc-conv.has-thread .rc-conv-sub { color:var(--color-text); font-size:.76rem; }
+    /* A texted health worker must not read as a mis-filed patient. The tag sits
+       outside the name block, so a long name clips itself and never the tag. */
+    .rc-role { flex-shrink:0; font-size:.58rem; font-weight:800; letter-spacing:.4px; text-transform:uppercase; color:var(--rc-accent-text); background:var(--rc-accent-soft); border-radius:999px; padding:.16rem .42rem; }
     .rc-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; background:var(--color-border); }
     .rc-dot.sent { background:var(--color-success); } .rc-dot.failed { background:var(--color-danger); } .rc-dot.pending { background:var(--color-warning); }
 
@@ -100,19 +118,6 @@
     .rc-pager .pagination { gap:.25rem; }
     .rc-pager .page-link { font-size:.76rem; font-weight:800; border-radius:9px; padding:.25rem .6rem; min-width:32px; line-height:1.4; }
 
-    /* Below a full workspace width the bar becomes two rows — title with
-       Broadcast beside it, then the controls — instead of three. */
-    @media (max-width:1200px) {
-        .rc-sms-bar { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:center; }
-        .rc-sms-heading { grid-area:1 / 1 / 2 / 2; }
-        .rc-sms-broadcast { grid-area:1 / 2 / 2 / 3; justify-self:end; }
-        .rc-sms-tools { grid-area:2 / 1 / 3 / 3; justify-content:flex-start; }
-        .rc-seg { order:-1; flex:1 1 auto; min-width:0; overflow-x:auto; scrollbar-width:none; }
-        .rc-seg::-webkit-scrollbar { display:none; }
-        .rc-sms-form { flex:1 1 100%; }
-        .rc-search { flex:1 1 0; min-width:0; }
-        .rc-search input { width:100%; }
-    }
     @media (max-width:991px) {
         /* One job per screen: the list OR the open thread, never both stacked. */
         .rc-sms-shell { grid-template-columns:1fr; }

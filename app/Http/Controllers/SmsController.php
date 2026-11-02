@@ -2,14 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barangay;
 use App\Models\SmsLog;
 use App\Models\User;
 use App\Models\Purok;
+use App\Services\AnalyticsScope;
 use App\Services\SmsService;
 use Illuminate\Http\Request;
 
 class SmsController extends Controller
 {
+    /**
+     * Who the desk may text: the women on the caseload, plus the barangay health
+     * workers and their president, who relay reminders out in the field.
+     */
+    private const RECIPIENT_ROLES = ['user', 'bhw', 'bhw_president'];
+
+    /** Role pills above the list. Short enough to sit in the narrow people column. */
+    private const ROLE_TABS = ['' => 'All', 'user' => 'Patients', 'bhw' => 'BHW', 'bhw_president' => 'BHW Pres'];
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -25,6 +36,12 @@ class SmsController extends Controller
         $search = trim((string) $request->query('search', ''));
         $status = (string) $request->query('status', '');
         $type = (string) $request->query('type', '');
+        // A hand-typed ?role= that matches no role would show an empty list and
+        // read like a missing record, so it falls back to the All pill.
+        $peerRole = (string) $request->query('role', '');
+        if (!in_array($peerRole, self::RECIPIENT_ROLES, true)) {
+            $peerRole = '';
+        }
         // Render runs Postgres, where LIKE is case-sensitive, so "lorna" has to find
         // Lorna. Field staff also read numbers aloud with spaces in them while the
         // column only ever holds digits, so both spellings are matched.
@@ -59,31 +76,33 @@ class SmsController extends Controller
             });
         };
 
-        $patientsBase = User::where('role', 'user')
+        $recipientBase = User::whereIn('role', self::RECIPIENT_ROLES)
             ->where('status', 'approved')
             ->where('sms_opt_out', false)
             ->whereNotNull('contact_number')
             ->where('contact_number', '!=', '');
 
         if ($userRole === 'bhw' && auth()->user()->purok_id) {
-            $patientsBase->where('purok_id', auth()->user()->purok_id);
+            $recipientBase->where('purok_id', auth()->user()->purok_id);
         }
+        // Every staff desk texts its own station; without this a midwife reaches
+        // all five RHUs' worth of numbers.
+        app(AnalyticsScope::class)->applyCatchment($recipientBase, $this->stationCatchment());
 
-        // One closure builds every patient count and the list itself, so a tab can
-        // never advertise patients that clicking it would not show. The status and
+        // One closure builds every pill count and the list itself, so a tab can
+        // never advertise people that clicking it would not show. The status and
         // type conditions live inside a single whereHas: the same text message has
         // to be both sent and of that type, not one message of each.
-        $messageable = function (?string $logStatus = null) use ($patientsBase, $search, $type, $matchPatient) {
-            return (clone $patientsBase)->when(
-                $search !== '',
-                fn ($query) => $matchPatient($query)
-            )->when(
-                $logStatus !== null || $type !== '',
-                fn ($query) => $query->whereHas('smsLogs', function ($log) use ($logStatus, $type) {
+        $messageable = function (?string $logStatus = null, ?string $role = null) use ($recipientBase, $search, $type, $peerRole, $matchPatient) {
+            $role = $role ?? $peerRole;
+
+            return (clone $recipientBase)
+                ->when($role !== '', fn ($query) => $query->where('role', $role))
+                ->when($search !== '', fn ($query) => $matchPatient($query))
+                ->when($logStatus !== null || $type !== '', fn ($query) => $query->whereHas('smsLogs', function ($log) use ($logStatus, $type) {
                     $log->when($logStatus !== null, fn ($s) => $s->where('status', $logStatus))
                         ->when($type !== '', fn ($t) => $t->where('type', $type));
-                })
-            );
+                }));
         };
 
         $puroks = Purok::when(
@@ -91,7 +110,13 @@ class SmsController extends Controller
             fn ($query) => $query->where('id', auth()->user()->purok_id)
         )->orderBy('name')->get();
 
-        $enabled = (clone $patientsBase)->count();
+        // The pills honour the typed search; these two answer "how many exist", so
+        // a broadcast warning cannot over-promise while a name is half typed.
+        // Patients only, because a broadcast never goes to a staff number.
+        $recipients = (clone $recipientBase)
+            ->when($peerRole !== '', fn ($query) => $query->where('role', $peerRole))
+            ->count();
+        $patientReach = (clone $recipientBase)->where('role', 'user')->count();
 
         if ($userRole === 'cho') {
             // The CHO desk is an audit view: a flat city-wide log feed, no threads.
@@ -117,7 +142,7 @@ class SmsController extends Controller
                 'total'   => $this->staffScopedLogs()->count(),
                 'sent'    => $this->staffScopedLogs()->where('status', 'sent')->count(),
                 'failed'  => $this->staffScopedLogs()->where('status', 'failed')->count(),
-                'enabled' => $enabled,
+                'enabled' => $patientReach,
             ];
 
             return view('cho.sms.index', compact('logs', 'stats') + $this->thread($request));
@@ -129,13 +154,19 @@ class SmsController extends Controller
                 'count' => $messageable($key === '' ? null : $key)->count(),
             ]]);
 
-        $patients = $messageable($status === '' ? null : $status)
+        $roleTabs = collect(self::ROLE_TABS)
+            ->mapWithKeys(fn ($label, $key) => [$key => [
+                'label' => $label,
+                'count' => $messageable($status === '' ? null : $status, $key)->count(),
+            ]]);
+
+        $recipientsList = $messageable($status === '' ? null : $status)
             ->orderBy('first_name')
             ->paginate(25)
             ->withQueryString();
 
-        // Latest log per listed patient, so previews survive pagination.
-        $latestIds = SmsLog::whereIn('user_id', $patients->getCollection()->pluck('id'))
+        // Latest log per listed recipient, so previews survive pagination.
+        $latestIds = SmsLog::whereIn('user_id', $recipientsList->getCollection()->pluck('id'))
             ->groupBy('user_id')
             ->selectRaw('MAX(id) as id')
             ->pluck('id');
@@ -143,8 +174,8 @@ class SmsController extends Controller
             ? SmsLog::whereIn('id', $latestIds)->get()->keyBy('user_id')
             : collect();
 
-        $view = compact('patients', 'statusTabs', 'recentByUser', 'search', 'status', 'type', 'puroks')
-            + ['stats' => ['enabled' => $enabled]]
+        $view = compact('recipientsList', 'statusTabs', 'roleTabs', 'recentByUser', 'search', 'status', 'type', 'peerRole', 'puroks')
+            + ['stats' => ['enabled' => $recipients, 'broadcast' => $patientReach]]
             + $this->thread($request);
 
         return $userRole === 'rhu'
@@ -153,9 +184,30 @@ class SmsController extends Controller
     }
 
     /**
-     * The selected thread, resolved from ?to= (a patient) or ?phone= (a number
-     * with no account yet). The patient is fetched on its own because the
-     * conversation list is paginated and the open thread is rarely on page one.
+     * The barangays this account may text, as normalized keys, or null for the
+     * city-wide CHO desk. catchmentNames() falls back to the official list when
+     * the registry is not seeded yet, so a fresh deploy still has recipients
+     * instead of an empty directory that reads like missing data.
+     *
+     * @return array<int, string>|null
+     */
+    private function stationCatchment(): ?array
+    {
+        if (auth()->user()->role === 'cho') {
+            return null;
+        }
+        $scope = app(AnalyticsScope::class);
+
+        return array_map(
+            fn (string $name): string => $scope->key($name),
+            Barangay::catchmentNames(Barangay::staffRhu())
+        );
+    }
+
+    /**
+     * The selected thread, resolved from ?to= (a recipient) or ?phone= (a number
+     * with no account yet). The row is fetched on its own because the list is
+     * paginated and the open thread is rarely on page one.
      *
      * @return array{threadUser: ?User, threadLogs: \Illuminate\Support\Collection, threadUserId: ?int, threadPhone: string}
      */
@@ -169,7 +221,9 @@ class SmsController extends Controller
             : ($threadPhone !== '' ? SmsLog::with('user')->where('phone_number', $threadPhone) : null);
 
         return [
-            'threadUser' => $threadUserId ? User::where('role', 'user')->find($threadUserId) : null,
+            'threadUser' => $threadUserId
+                ? User::whereIn('role', self::RECIPIENT_ROLES)->find($threadUserId)
+                : null,
             'threadLogs' => $query
                 ? $query->latest()->limit(100)->get()->sortBy('created_at')->values()
                 : collect(),
@@ -296,7 +350,8 @@ class SmsController extends Controller
             $request->message_en,
             $request->message_tl ?? '',
             $purokId,
-            $request->barangay
+            $request->barangay,
+            $this->stationCatchment()
         );
 
         $scope = $purokId ? "Purok #{$purokId}" : ($request->barangay ?: 'all patients');
