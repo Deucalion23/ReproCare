@@ -47,6 +47,9 @@
     .rc-count { font-size:.72rem; font-weight:800; color:var(--color-text-muted); background:var(--color-surface-soft); border-radius:999px; padding:.2rem .55rem; white-space:nowrap; }
 
     .rc-conv-list { flex:1; min-height:0; overflow-y:auto; padding:.4rem; display:flex; flex-direction:column; gap:.15rem; }
+    /* Live search keeps the panel on screen; a dim while fetching says "working"
+       without a spinner that would shove the list around. */
+    .rc-conv-panel.is-loading .rc-conv-list { opacity:.45; transition:opacity .12s ease; }
     .rc-conv { display:flex; align-items:center; gap:.6rem; padding:.5rem .55rem; border-radius:12px; text-decoration:none; color:inherit !important; }
     .rc-conv:hover { background:var(--color-bg); color:inherit !important; }
     .rc-conv.active { background:var(--rc-accent-soft); box-shadow:inset 2px 0 0 var(--rc-accent-text); }

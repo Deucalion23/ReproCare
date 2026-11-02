@@ -25,7 +25,39 @@ class SmsController extends Controller
         $search = trim((string) $request->query('search', ''));
         $status = (string) $request->query('status', '');
         $type = (string) $request->query('type', '');
-        $like = '%' . $search . '%';
+        // Render runs Postgres, where LIKE is case-sensitive, so "lorna" has to find
+        // Lorna. Field staff also read numbers aloud with spaces in them while the
+        // column only ever holds digits, so both spellings are matched.
+        $like = '%' . mb_strtolower($search) . '%';
+        $digits = preg_replace('/\D+/', '', $search);
+
+        // A name typed as "lorna pascual" spans the given and family columns, so every
+        // word is required to land on at least one of them — reversed order works too.
+        $nameWords = array_values(array_filter(
+            preg_split('/\s+/', mb_strtolower($search), -1, PREG_SPLIT_NO_EMPTY),
+            fn (string $word): bool => preg_match('/\D/', $word) === 1
+        ));
+        $matchNames = function ($query, array $columns) use ($nameWords): void {
+            foreach ($nameWords as $word) {
+                $query->where(function ($clause) use ($columns, $word) {
+                    foreach ($columns as $column) {
+                        $clause->orWhereRaw('lower(' . $column . ') like ?', ['%' . $word . '%']);
+                    }
+                });
+            }
+        };
+
+        $matchPatient = function ($query) use ($like, $digits, $nameWords, $matchNames) {
+            $query->where(function ($inner) use ($like, $digits, $nameWords, $matchNames) {
+                if ($nameWords !== []) {
+                    $inner->where(fn ($name) => $matchNames($name, ['first_name', 'middle_initial', 'last_name']));
+                }
+                $inner->orWhereRaw('lower(contact_number) like ?', [$like]);
+                if ($digits !== '') {
+                    $inner->orWhere('contact_number', 'like', '%' . $digits . '%');
+                }
+            });
+        };
 
         $patientsBase = User::where('role', 'user')
             ->where('status', 'approved')
@@ -41,17 +73,10 @@ class SmsController extends Controller
         // never advertise patients that clicking it would not show. The status and
         // type conditions live inside a single whereHas: the same text message has
         // to be both sent and of that type, not one message of each.
-        $messageable = function (?string $logStatus = null) use ($patientsBase, $search, $like, $type) {
+        $messageable = function (?string $logStatus = null) use ($patientsBase, $search, $type, $matchPatient) {
             return (clone $patientsBase)->when(
                 $search !== '',
-                function ($query) use ($like) {
-                    $query->where(function ($inner) use ($like) {
-                        $inner->where('first_name', 'like', $like)
-                            ->orWhere('middle_initial', 'like', $like)
-                            ->orWhere('last_name', 'like', $like)
-                            ->orWhere('contact_number', 'like', $like);
-                    });
-                }
+                fn ($query) => $matchPatient($query)
             )->when(
                 $logStatus !== null || $type !== '',
                 fn ($query) => $query->whereHas('smsLogs', function ($log) use ($logStatus, $type) {
@@ -73,11 +98,15 @@ class SmsController extends Controller
             $logs = $this->staffScopedLogs()
                 ->when($status !== '', fn ($query) => $query->where('status', $status))
                 ->when($type !== '', fn ($query) => $query->where('type', $type))
-                ->when($search !== '', function ($query) use ($like) {
-                    $query->where(function ($inner) use ($like) {
-                        $inner->where('phone_number', 'like', $like)
-                            ->orWhereHas('user', fn ($u) => $u->where('first_name', 'like', $like)
-                                ->orWhere('last_name', 'like', $like));
+                ->when($search !== '', function ($query) use ($like, $digits, $nameWords, $matchNames) {
+                    $query->where(function ($inner) use ($like, $digits, $nameWords, $matchNames) {
+                        $inner->whereRaw('lower(phone_number) like ?', [$like]);
+                        if ($digits !== '') {
+                            $inner->orWhere('phone_number', 'like', '%' . $digits . '%');
+                        }
+                        if ($nameWords !== []) {
+                            $inner->orWhereHas('user', fn ($u) => $matchNames($u, ['first_name', 'middle_initial', 'last_name']));
+                        }
                     });
                 })
                 ->latest()

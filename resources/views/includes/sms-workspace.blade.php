@@ -58,7 +58,7 @@
                     <i class="bi bi-search" aria-hidden="true"></i>
                     <input type="search" name="search" value="{{ $search }}" placeholder="Name or number..." aria-label="Search patients by name or number">
                 </span>
-                <select name="type" class="rc-select" aria-label="Filter by message type" onchange="this.form.submit()">
+                <select name="type" class="rc-select" aria-label="Filter by message type">
                     @foreach(['' => 'All types', 'appointment_reminder' => 'Appointment', 'high_risk_alert' => 'High risk', 'missed_checkup' => 'Missed check-up', 'custom' => 'Custom', 'broadcast' => 'Broadcast'] as $optionKey => $optionLabel)
                         <option value="{{ $optionKey }}" {{ $type === $optionKey ? 'selected' : '' }}>{{ $optionLabel }}</option>
                     @endforeach
@@ -70,7 +70,7 @@
     </div>
 
     @if($isFiltered)
-        <div class="d-flex align-items-center gap-2 mb-2" style="font-size:.74rem; color:var(--color-text-muted);">
+        <div class="rc-filterline d-flex align-items-center gap-2 mb-2" style="font-size:.74rem; color:var(--color-text-muted);">
             <i class="bi bi-funnel-fill"></i>
             <span>Filtered by {{ collect(['search' => $search !== '' ? '"'.$search.'"' : null, 'status' => $status !== '' ? $status : null, 'type' => $type !== '' ? str_replace('_',' ',$type) : null])->filter()->implode(', ') }}.</span>
             <a href="{{ $wsUrl([], ['status', 'type', 'search', 'to', 'phone']) }}" class="rc-reset"><i class="bi bi-x-lg"></i> Clear</a>
@@ -86,7 +86,7 @@
 
     <div class="rc-sms-shell" data-thread="{{ $openThread ? 1 : 0 }}">
         <section class="rc-panel rc-conv-panel" aria-label="Patients">
-            <div class="rc-panel-head">
+            <div class="rc-panel-head" aria-live="polite">
                 <h3><i class="bi bi-person-lines-fill"></i> Patients</h3>
                 <span class="rc-count">{{ $patients->total() }} shown</span>
             </div>
@@ -259,6 +259,74 @@
     sizePanels();
     window.addEventListener('resize', sizePanels);
     window.addEventListener('load', sizePanels);
+
+    // Staff read the list while they type, so the panel refreshes in place: a real
+    // form submit would reload the page and drop the caret they are still using.
+    var searchForm = document.querySelector('.rc-sms-form');
+    var searchBox = searchForm ? searchForm.querySelector('input[name="search"]') : null;
+    var convPanel = document.querySelector('.rc-conv-panel');
+
+    if (searchForm && searchBox && convPanel) {
+        var seq = 0;
+        var settle = null;
+        var lastQuery = null;
+        var endpoint = searchForm.getAttribute('action').split('?')[0];
+        var workspace = document.querySelector('.rc-sms');
+
+        var syncFilterLine = function (doc) {
+            var next = doc.querySelector('.rc-filterline');
+            var current = document.querySelector('.rc-filterline');
+            if (current && next) { current.innerHTML = next.innerHTML; return; }
+            if (current && !next) { current.remove(); return; }
+            if (!current && next && workspace) {
+                workspace.insertBefore(document.importNode(next, true), shell);
+            }
+        };
+
+        var refresh = function () {
+            var params = new URLSearchParams();
+            new FormData(searchForm).forEach(function (value, key) {
+                if (String(value).trim() !== '') { params.append(key, value); }
+            });
+            var query = params.toString();
+            if (query === lastQuery) { return; }
+            lastQuery = query;
+
+            var url = query === '' ? endpoint : endpoint + '?' + query;
+            var attempt = ++seq;
+            convPanel.classList.add('is-loading');
+
+            fetch(url, { credentials: 'same-origin' })
+                .then(function (response) { return response.text(); })
+                .then(function (html) {
+                    if (attempt !== seq) { return; }
+                    var doc = new DOMParser().parseFromString(html, 'text/html');
+                    var nextPanel = doc.querySelector('.rc-conv-panel');
+                    if (nextPanel) { convPanel.innerHTML = nextPanel.innerHTML; }
+                    syncFilterLine(doc);
+                    window.history.replaceState(null, '', url);
+                })
+                .catch(function () { lastQuery = null; })
+                .finally(function () {
+                    if (attempt === seq) { convPanel.classList.remove('is-loading'); }
+                });
+        };
+
+        searchBox.addEventListener('input', function () {
+            clearTimeout(settle);
+            settle = setTimeout(refresh, 260);
+        });
+        // Enter and the magnifier take the same path so the caret survives.
+        searchForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            clearTimeout(settle);
+            refresh();
+        });
+        // The type dropdown used to call form.submit(), which bypasses this handler
+        // and reloads the page; without script the magnifier still applies it.
+        var typeSelect = searchForm.querySelector('.rc-select');
+        if (typeSelect) { typeSelect.addEventListener('change', refresh); }
+    }
 
     var thread = document.getElementById('smsThread');
     if (thread) { thread.scrollTop = thread.scrollHeight; }
