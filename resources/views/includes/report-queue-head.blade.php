@@ -12,15 +12,26 @@
      * @param string $action_href  optional primary button, e.g. the Create Report link
      * @param string $action_label
      * @param string $action_icon
+     * @param array  $actions  list of ['href' => string, 'label' => string, 'icon' => string,
+     *                          'target' => string] for pages whose authority is more than one
+     *                          button (e.g. the RHU and CHO CSV + PDF exports)
+     * @param string $bar_class  extra classes for pages that are not inside a .workspace-stack
+     *                          and so get no gap from their parent
      */
     $chips = $chips ?? [];
     $icon = $icon ?? 'bi-clipboard2-check-fill';
-    $actionHref = $action_href ?? null;
-    $actionLabel = $action_label ?? 'Create Report';
-    $actionIcon = $action_icon ?? 'bi-plus-circle-fill';
+    $barClass = $bar_class ?? '';
+    $actions = $actions ?? [];
+    if (!empty($action_href)) {
+        $actions[] = [
+            'href' => $action_href,
+            'label' => $action_label ?? 'Create Report',
+            'icon' => $action_icon ?? 'bi-plus-circle-fill',
+        ];
+    }
 @endphp
 
-<div class="rq-bar fade-in-card">
+<div class="rq-bar fade-in-card {{ $barClass }}">
     <div class="rq-bar-id">
         <div class="rq-bar-title"><i class="bi {{ $icon }}" aria-hidden="true"></i>{{ $title }}</div>
         @if (!empty($subtitle))
@@ -31,16 +42,21 @@
     @if ($chips !== [])
         <div class="rq-chips" aria-label="Queue counts">
             @foreach ($chips as $chip)
+                {{-- Rates arrive as floats (facility delivery %), counts as ints: keep one
+                     decimal only when the value actually has one. --}}
                 <span class="summary-chip chip-{{ $chip['tone'] ?? 'primary' }} rq-chip">
-                    <b>{{ number_format((int) $chip['value']) }}</b>{{ $chip['label'] }}
+                    <b>{{ number_format($chip['value'], floor($chip['value']) == $chip['value'] ? 0 : 1) }}</b>{{ $chip['label'] }}
                 </span>
             @endforeach
         </div>
     @endif
 
-    @if (!empty($actionHref))
-        <a href="{{ $actionHref }}" class="rq-action"><i class="bi {{ $actionIcon }}" aria-hidden="true"></i>{{ $actionLabel }}</a>
-    @endif
+    @foreach ($actions as $action)
+        <a href="{{ $action['href'] }}" class="rq-action"
+           @if (!empty($action['target'])) target="{{ $action['target'] }}" rel="noopener" @endif>
+            <i class="bi {{ $action['icon'] ?? 'bi-plus-circle-fill' }}" aria-hidden="true"></i>{{ $action['label'] }}
+        </a>
+    @endforeach
 </div>
 
 @if (session('success'))

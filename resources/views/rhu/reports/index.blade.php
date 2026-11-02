@@ -2,73 +2,28 @@
 
 @section('title', 'FHSIS & MNCHN Surveillance Reports - RHU Portal | ReproCare')
 
+@push('styles')
+@include('includes.report-queue-styles')
+@endpush
+
 @section('rhu-content')
 
-<div class="page-hero fade-in-card mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="page-hero-title">FHSIS &amp; MNCHN Reports</div>
-            <p class="page-hero-subtitle">
-                <i class="bi bi-file-earmark-bar-graph-fill me-1"></i> Field Health Service Information System &amp; Maternal Health Registry.
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('rhu.reports.export.csv') }}" class="btn btn-sm btn-outline-primary">
-                <i class="bi bi-filetype-csv me-1"></i> Export CSV
-            </a>
-            <a href="{{ route('rhu.reports.export.pdf') }}" target="_blank" class="btn btn-sm btn-outline-danger">
-                <i class="bi bi-file-pdf me-1"></i> Print PDF
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- Indicator Summary Cards -->
-<div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-purple fade-in-card py-3">
-            <div class="stat-icon" style="font-size:1.5rem;"><i class="bi bi-heart-pulse-fill"></i></div>
-            <div class="stat-label" style="font-size:0.78rem;">Active Pregnant Women</div>
-            <div class="stat-number" style="font-size:1.8rem;">{{ $totalPregnant }}</div>
-            <div class="stat-trend text-xs mt-1">
-                Currently tracking prenatal status
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-cyan fade-in-card py-3">
-            <div class="stat-icon" style="font-size:1.5rem;"><i class="bi bi-clipboard2-check-fill"></i></div>
-            <div class="stat-label" style="font-size:0.78rem;">Postpartum Tracking</div>
-            <div class="stat-number" style="font-size:1.8rem;">{{ $totalPostpartum }}</div>
-            <div class="stat-trend text-xs mt-1">
-                Completed monitoring phase
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-rose fade-in-card py-3">
-            <div class="stat-icon" style="font-size:1.5rem;"><i class="bi bi-gender-ambiguous"></i></div>
-            <div class="stat-label" style="font-size:0.78rem;">Total Recorded Births</div>
-            <div class="stat-number" style="font-size:1.8rem;">{{ $totalBirths }}</div>
-            <div class="stat-trend text-xs mt-1">
-                Recorded pregnancy ends
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="stat-card stat-success fade-in-card py-3">
-            <div class="stat-icon" style="font-size:1.5rem;"><i class="bi bi-hospital-fill"></i></div>
-            <div class="stat-label" style="font-size:0.78rem;">Facility Delivery Rate</div>
-            <div class="stat-number" style="font-size:1.8rem;">{{ $facilityBirthRate }}%</div>
-            <div class="stat-trend text-xs mt-1">
-                Deliveries inside formal clinics
-            </div>
-        </div>
-    </div>
-</div>
+@include('includes.report-queue-head', [
+    'title' => 'FHSIS & MNCHN Reports',
+    'subtitle' => 'Field Health Service Information System & Maternal Health Registry for the RHU catchment.',
+    'icon' => 'bi-file-earmark-bar-graph-fill',
+    'bar_class' => 'mb-2',
+    'chips' => [
+        ['label' => 'active pregnancies', 'value' => $totalPregnant, 'tone' => 'danger'],
+        ['label' => 'postpartum tracked', 'value' => $totalPostpartum, 'tone' => 'info'],
+        ['label' => 'recorded births', 'value' => $totalBirths, 'tone' => 'primary'],
+        ['label' => '% facility deliveries', 'value' => $facilityBirthRate, 'tone' => 'success'],
+    ],
+    'actions' => [
+        ['href' => route('rhu.reports.export.csv'), 'label' => 'Export CSV', 'icon' => 'bi-filetype-csv'],
+        ['href' => route('rhu.reports.export.pdf'), 'label' => 'Print PDF', 'icon' => 'bi-file-pdf', 'target' => '_blank'],
+    ],
+])
 
 <!-- Search & Table Card -->
 <div class="card fade-in-card">

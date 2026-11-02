@@ -2,21 +2,25 @@
 
 @section('title', 'City-Wide Reports - CHO Portal | ReproCare')
 
-@section('cho-content')
-<div class="page-hero fade-in-card mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-                <div class="page-hero-title">City-Wide Midwife Reports</div>
-            <p class="page-hero-subtitle" style="font-weight:600;">Monthly submissions across all barangays for {{ date('F Y', strtotime($month . '-01')) }}.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('cho.reports.export.csv', ['month' => $month]) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-csv me-1"></i> CSV</a>
-            <a href="{{ route('cho.reports.export.pdf', ['month' => $month]) }}" class="btn btn-outline-secondary btn-sm"><i class="bi bi-filetype-pdf me-1"></i> PDF</a>
-        </div>
-    </div>
-</div>
+@push('styles')
+@include('includes.report-queue-styles')
+@endpush
 
-<div class="card fade-in-card mb-4">
+@section('cho-content')
+{{-- CHO authority is receipt + record keeping: the bar carries the month scope and
+     the two exports, while "Receive" stays a per-report action in the table. --}}
+@include('includes.report-queue-head', [
+    'title' => 'City-Wide Midwife Reports',
+    'subtitle' => 'Monthly submissions across all barangays for ' . date('F Y', strtotime($month . '-01')) . '.',
+    'icon' => 'bi-building-fill-check',
+    'bar_class' => 'mb-2',
+    'actions' => [
+        ['href' => route('cho.reports.export.csv', ['month' => $month]), 'label' => 'CSV', 'icon' => 'bi-filetype-csv'],
+        ['href' => route('cho.reports.export.pdf', ['month' => $month]), 'label' => 'PDF', 'icon' => 'bi-filetype-pdf'],
+    ],
+])
+
+<div class="card fade-in-card mb-2">
     <div class="card-body">
         <form method="GET" action="{{ route('cho.reports.index') }}" class="row g-3">
             <div class="col-md-4">

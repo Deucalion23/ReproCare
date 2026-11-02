@@ -20,6 +20,9 @@
     body .main-content a.rq-action { color:var(--color-on-solid) !important; }
     body .main-content a.rq-action:hover, body .main-content a.rq-action:focus-visible { color:var(--color-on-solid) !important; opacity:0.9; }
     .rq-bar-id + .rq-action { margin-left:auto; }
+    /* Only the first button reaches for the right edge; a page with two exports
+       would otherwise strand one in the middle of the bar. */
+    .rq-action + .rq-action { margin-left:0; }
 
     /* The queue sits under .main-content, so the framework's chip sizing needs
        body + the modifier class to be beaten. */
@@ -74,6 +77,7 @@
         .rq-chips { order:2; width:100%; flex-wrap:nowrap; overflow-x:auto; padding-bottom:0.15rem; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, #000 92%, transparent 100%); mask-image:linear-gradient(90deg, #000 92%, transparent 100%); }
         /* The button keeps the title's line; the count strip drops below both. */
         .rq-action { order:1; margin-left:auto; padding:0.25rem 0.65rem; font-size:0.72rem; }
+        .rq-action + .rq-action { margin-left:0; }
         .rq-chips::-webkit-scrollbar { display:none; }
         .rq-chip { flex:0 0 auto; }
         body .main-content .rq-wrap .table :is(thead th, tbody td) { padding:0.32rem 0.45rem !important; }

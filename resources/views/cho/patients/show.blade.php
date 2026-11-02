@@ -271,6 +271,10 @@
                 tab.setAttribute('aria-selected', active ? 'true' : 'false');
             });
             panels.forEach(panel => panel.hidden = panel.dataset.recordPanel !== selected);
+            // A panel that starts hidden never intersected, so the cards inside
+            // it have no reveal class yet and would fade in as blank space.
+            const shown = [...panels].find(panel => !panel.hidden);
+            if (shown) window.ReproCareReveal(shown);
             if (history.replaceState) history.replaceState(null, '', `${location.pathname}${location.search}#${selected}`);
         };
         tabs.forEach(tab => tab.addEventListener('click', () => selectTab(tab.dataset.recordTab)));

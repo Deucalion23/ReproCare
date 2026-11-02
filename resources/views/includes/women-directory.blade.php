@@ -12,6 +12,7 @@
 --}}
 @push('styles')
 @include('includes.women-directory-styles')
+@include('includes.report-queue-styles')
 @endpush
 
 @php
@@ -46,68 +47,25 @@
         : route($womenRoute, $keep + ['status' => 'pending']);
 @endphp
 
-<div class="page-hero fade-in-card mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="page-hero-title">All Women</div>
-            <p class="page-hero-subtitle mb-0" style="font-weight:600;">
-                {{ $subtitle ?? 'Registered and unregistered women in your scope area · ' . $scopeLabel . '.' }}
-            </p>
-        </div>
-        <div class="d-flex gap-2">
-            <span class="badge bg-secondary p-2 d-flex align-items-center">
-                <i class="bi bi-geo-alt-fill me-1"></i> {{ $scopeLabel }}
-            </span>
-        </div>
+{{-- Slim head bar. The two filters that had no home in the tab row below live
+     here as pills; All / Registered / Unregistered stay in the tabs so their
+     counts are not shown twice. --}}
+<div class="rq-bar fade-in-card mb-2">
+    <div class="rq-bar-id">
+        <div class="rq-bar-title"><i class="bi bi-people-fill" aria-hidden="true"></i>All Women</div>
+        <p class="rq-bar-subtitle">
+            {{ $subtitle ?? 'Registered and unregistered women in your scope area.' }}
+        </p>
     </div>
-</div>
 
-{{-- Summary cards --}}
-<div class="row g-3 mb-4 wd-mini">
-    <div class="col-6 col-md-4 col-lg">
-        <a href="{{ $typeLink('all') }}" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $type === 'all' && ! $pregnant ? 'is-active' : '' }}">
-                <i class="bi bi-people-fill text-primary mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">All Women</div>
-                <h4 class="fw-800 text-primary mb-0 mt-1">{{ $totalCount }}</h4>
-            </div>
+    <div class="rq-chips" aria-label="Directory filters">
+        <a class="wd-tab {{ $pregnant ? 'active' : '' }}" href="{{ $pregnantLink }}">
+            <i class="bi bi-heart-pulse me-1"></i> With Pregnancy ({{ $pregnantCount }})
         </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg">
-        <a href="{{ $typeLink('registered') }}" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $type === 'registered' ? 'is-active' : '' }}">
-                <i class="bi bi-person-check-fill text-success mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Registered</div>
-                <h4 class="fw-800 text-success mb-0 mt-1">{{ $registeredCount }}</h4>
-            </div>
+        <a class="wd-tab {{ $status === 'pending' ? 'active' : '' }}" href="{{ $pendingLink }}">
+            <i class="bi bi-hourglass-split me-1"></i> Pending Review ({{ $pendingCount }})
         </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg">
-        <a href="{{ $typeLink('unregistered') }}" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $type === 'unregistered' ? 'is-active' : '' }}">
-                <i class="bi bi-person-plus-fill text-warning mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Unregistered</div>
-                <h4 class="fw-800 text-warning mb-0 mt-1">{{ $unregisteredCount }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg">
-        <a href="{{ $pregnantLink }}" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $pregnant ? 'is-active' : '' }}">
-                <i class="bi bi-heart-pulse-fill text-danger mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">With Pregnancy</div>
-                <h4 class="fw-800 text-danger mb-0 mt-1">{{ $pregnantCount }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg">
-        <a href="{{ $pendingLink }}" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $status === 'pending' ? 'is-active' : '' }}">
-                <i class="bi bi-hourglass-split text-info mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Pending Review</div>
-                <h4 class="fw-800 text-info mb-0 mt-1">{{ $pendingCount }}</h4>
-            </div>
-        </a>
+        <span class="wd-pill wd-pill-muted"><i class="bi bi-geo-alt-fill me-1"></i>{{ $scopeLabel }}</span>
     </div>
 </div>
 
