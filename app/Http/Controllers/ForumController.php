@@ -19,6 +19,8 @@ class ForumController extends Controller
         'forum/',
     ];
 
+    private const FEED_PAGE_SIZE = 10;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -53,32 +55,91 @@ class ForumController extends Controller
         $currentUser = $this->getCurrentUser();
         if (!$currentUser) return redirect()->route('login');
 
+        $posts = $this->feedQuery()->cursorPaginate(self::FEED_PAGE_SIZE, ['created_at', 'id'], 'cursor');
+        $likedIds = $this->likedPostIds($currentUser, $posts->items());
+
+        $filter = request('filter');
+        $search = request('search');
+
+        // One shared community design for every role.
+        return view('forum.index', compact('posts', 'filter', 'search', 'likedIds'));
+    }
+
+    /**
+     * Next page of the feed as a bare fragment, for the infinite scroll.
+     */
+    public function feed()
+    {
+        $currentUser = $this->getCurrentUser();
+        if (!$currentUser) return response()->json(['html' => '', 'hasMore' => false], 401);
+
+        $posts = $this->feedQuery()->cursorPaginate(self::FEED_PAGE_SIZE, ['created_at', 'id'], 'cursor');
+        $likedIds = $this->likedPostIds($currentUser, $posts->items());
+        $isLimited = (bool) $currentUser->hasLimitedAccess();
+
+        $html = collect($posts->items())
+            ->map(fn ($post) => view('forum.post-card', [
+                'post' => $post,
+                'isLimited' => $isLimited,
+                'likedIds' => $likedIds,
+            ])->render())
+            ->implode("\n");
+
+        $next = $posts->nextCursor();
+
+        return response()->json([
+            'html' => $html,
+            'cursor' => $next ? $next->encode() : null,
+            'hasMore' => $posts->hasMorePages(),
+        ]);
+    }
+
+    /**
+     * The feed, ordered for a stable cursor. Shared by the page and the
+     * infinite-scroll endpoint so both agree on what "next" means.
+     */
+    private function feedQuery()
+    {
+        $currentUser = $this->getCurrentUser();
+
         $query = ForumPost::active()
             ->with([
                 'user',
-                'comments' => function($query) {
+                'comments' => function ($query) {
                     $query->with('user');
                     $query->latest()->take(3);
                 },
             ])
             ->withCount(['likes as likes_count', 'comments as comments_count']);
-        
-        // Filter by search query
+
         $search = request('search');
         if ($search) {
             $query->where('content', 'like', '%' . $search . '%');
         }
 
-        // Filter by user's own posts if requested
-        $filter = request('filter');
-        if ($filter === 'my-posts') {
+        if (request('filter') === 'my-posts') {
             $query->where('user_id', $currentUser->id);
         }
 
-        $posts = $query->latest()->paginate(10)->withQueryString();
+        // created_at is not unique, so two posts sharing a second would sit on
+        // either side of a cursor and one would be handed out twice. id ties it.
+        return $query->orderByDesc('created_at')->orderByDesc('id');
+    }
 
-        // One shared community design for every role.
-        return view('forum.index', compact('posts', 'filter', 'search'));
+    /**
+     * Which of these posts the viewer already liked, in one query — the card
+     * used to ask per post, which the scroll multiplied every page.
+     */
+    private function likedPostIds($currentUser, array $posts): array
+    {
+        if (!$currentUser || $posts === []) {
+            return [];
+        }
+
+        return ForumLike::where('user_id', $currentUser->id)
+            ->whereIn('post_id', array_map(fn ($post) => $post->id, $posts))
+            ->pluck('post_id')
+            ->all();
     }
 
     // Show single post
@@ -259,7 +320,7 @@ class ForumController extends Controller
     }
 
     // Like/Unlike post
-    public function like($postId)
+    public function like(Request $request, $postId)
     {
         $currentUser = $this->getCurrentUser();
         if (!$currentUser) return redirect()->route('login');
@@ -282,6 +343,15 @@ class ForumController extends Controller
             } catch (\Illuminate\Database\QueryException $e) {
                 // Already liked concurrently — treat as liked.
             }
+        }
+
+        // The feed is infinite, so a like must not reload the page and throw
+        // away every page the reader already scrolled in.
+        if ($request->expectsJson()) {
+            return response()->json([
+                'liked' => !$existingLike,
+                'likes_count' => ForumLike::where('post_id', $post->id)->count(),
+            ]);
         }
 
         return redirect()->back();

@@ -610,6 +610,9 @@ Route::prefix('user')->name('user.')->middleware(['web', 'absolute.logout', 'aut
 // Forum Routes (browsing open to provisional patients; posting needs full access)
 Route::prefix('forum')->name('forum.')->middleware(['web', 'absolute.logout', 'auth', 'account.active', 'complete.profile', 'prevent-back'])->group(function () {
     Route::get('/', [ForumController::class, 'index'])->name('index');
+    // Next-page fragment for the infinite scroll; before /{id} so it is not
+    // swallowed by the post show route.
+    Route::get('/feed', [ForumController::class, 'feed'])->name('feed');
 
     Route::middleware('full.access')->group(function () {
         Route::get('/create', [ForumController::class, 'create'])->name('create');

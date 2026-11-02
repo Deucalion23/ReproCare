@@ -227,6 +227,16 @@
         box-shadow:var(--wp-shadow-md);
         transform:translateY(-2px);
     }
+    /* ── Infinite scroll tail ── */
+    .forum-feed-sentinel { width:100%; height:1px; }
+    .forum-feed-status { display:flex; align-items:center; justify-content:center; gap:.55rem; padding:.9rem 0 1.4rem; font-size:.82rem; font-weight:700; color:var(--color-text-muted); text-align:center; }
+    .forum-feed-status.is-hidden { display:none; }
+    .forum-feed-spinner { width:15px; height:15px; border-radius:50%; border:2px solid var(--color-border); border-top-color:var(--color-secondary-text); animation:forum-spin .7s linear infinite; flex-shrink:0; }
+    .forum-feed-status.is-done .forum-feed-spinner { display:none; }
+    .forum-feed-status.is-error { color:var(--color-danger-text); }
+    .forum-feed-status.is-error .forum-feed-spinner { display:none; }
+    .forum-feed-retry { border:1px solid var(--color-danger-text); background:transparent; color:var(--color-danger-text); border-radius:999px; padding:.2rem .75rem; font-size:.75rem; font-weight:700; cursor:pointer; }
+    @keyframes forum-spin { to { transform:rotate(360deg); } }
     .post-header {
         display:flex;
         justify-content:space-between;
@@ -587,171 +597,9 @@
             </div>
 
             {{-- Posts Feed --}}
+            <div id="forumFeed" class="forum-feed-stack">
             @forelse($posts as $post)
-                @php
-                    $author = $post->user;
-                    $authorPhoto = $author ? $author->profile_image_url : '/images/avatars/avatar-female.svg';
-                    $roleType = $post->user_type ?? 'user';
-                    $roleClass = match($roleType) {
-                        'midwife' => 'midwife',
-                        'bhw' => 'bhw',
-                        'bhw_president' => 'president',
-                        default => 'member',
-                    };
-                    $roleName = match($roleType) {
-                        'midwife' => 'Midwife',
-                        'bhw' => 'BHW Health Worker',
-                        'bhw_president' => 'BHW President',
-                        default => 'Community Mother',
-                    };
-                    $isLiked = $post->isLikedBy(auth()->id(), \App\Models\User::class);
-                @endphp
-
-                <article class="forum-post-card fade-in-card" id="post-{{ $post->id }}">
-                    {{-- Header --}}
-                    <div class="post-header">
-                        <div class="author-lockup">
-                            <img src="{{ $authorPhoto }}"
-                                 alt="{{ optional($author)->name ?? 'User' }}"
-                                 class="author-avatar"
-                                 onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
-                            <div>
-                                <h4 class="author-name">
-                                    {{ optional($author)->name ?? 'Community Member' }}
-                                    @if($roleClass !== 'member')
-                                    <span class="role-verified-badge {{ $roleClass }}">
-                                        <i class="bi bi-patch-check-fill"></i> {{ $roleName }}
-                                    </span>
-                                    @endif
-                                </h4>
-                                <div class="author-time">
-                                    <i class="bi bi-clock"></i>
-                                    {{ $post->created_at->diffForHumans() }}
-                                </div>
-                            </div>
-                        </div>
-
-                        @if(auth()->id() === $post->user_id)
-                            <div class="dropdown">
-                                <button class="btn btn-sm rounded-circle" type="button" data-bs-toggle="dropdown" style="border:none; background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text);">
-                                    <i class="bi bi-three-dots-vertical"></i>
-                                </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="border:none; border-radius:12px; font-size:0.85rem;">
-                                    <li>
-                                        <a class="dropdown-item py-2" href="{{ route('forum.edit', $post->id) }}">
-                                            <i class="bi bi-pencil me-2"></i> Edit Post
-                                        </a>
-                                    </li>
-                                    <li><hr class="dropdown-divider my-1"></li>
-                                    <li>
-                                        <form action="{{ route('forum.destroy', $post->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this post?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="dropdown-item py-2 text-danger">
-                                                <i class="bi bi-trash me-2"></i> Delete
-                                            </button>
-                                        </form>
-                                    </li>
-                                </ul>
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- Post Content --}}
-                    <div class="post-text-body">{{ $post->content }}</div>
-
-                    {{-- Attached Photo Preview --}}
-                    @if($post->post_image_url)
-                        <div class="post-media-frame">
-                            <img src="{{ $post->post_image_url }}" alt="Attached photo">
-                        </div>
-                    @endif
-
-                    {{-- Interaction Bar --}}
-                    <div class="post-engagement-bar">
-                        <div class="engagement-actions">
-                            @if($isLimited)
-                            <span class="btn-engage" title="Liking unlocks after RHU approval of your account" style="cursor:default;">
-                                <i class="bi bi-heart"></i>
-                                <span>{{ $post->likes_count }}</span>
-                                <span class="d-none d-sm-inline">{{ $post->likes_count === 1 ? 'Like' : 'Likes' }}</span>
-                            </span>
-                            @else
-                            <form action="{{ route('forum.like', $post->id) }}" method="POST" class="d-inline">
-                                @csrf
-                                <button type="submit" class="btn-engage {{ $isLiked ? 'liked' : '' }}">
-                                    <i class="bi {{ $isLiked ? 'bi-heart-fill' : 'bi-heart' }}"></i>
-                                    <span>{{ $post->likes_count }}</span>
-                                    <span class="d-none d-sm-inline">{{ $post->likes_count === 1 ? 'Like' : 'Likes' }}</span>
-                                </button>
-                            </form>
-                            @endif
-
-                            <button type="button" class="btn-engage" data-bs-toggle="collapse" data-bs-target="#comments-{{ $post->id }}">
-                                <i class="bi bi-chat-dots"></i>
-                                <span>{{ $post->comments_count }}</span>
-                                <span class="d-none d-sm-inline">{{ $post->comments_count === 1 ? 'Comment' : 'Comments' }}</span>
-                            </button>
-
-                            <button type="button" class="btn-engage" onclick="sharePost('{{ route('forum.show', $post->id) }}')">
-                                <i class="bi bi-share"></i>
-                                <span class="d-none d-sm-inline">Share</span>
-                            </button>
-                        </div>
-
-                        <a href="{{ route('forum.show', $post->id) }}" class="btn-engage">
-                            <i class="bi bi-arrows-angle-expand"></i> Full View
-                        </a>
-                    </div>
-
-                    {{-- Inline Comments Tray --}}
-                    <div class="collapse mt-3" id="comments-{{ $post->id }}">
-                        <div class="comments-tray">
-                            {{-- Add Comment Form (locked until RHU approval) --}}
-                            @if(!$isLimited)
-                            <form action="{{ route('forum.comment', $post->id) }}" method="POST" class="mb-3">
-                                @csrf
-                                <div class="input-group">
-                                    <input type="text"
-                                           name="content"
-                                           class="form-control"
-                                           placeholder="Write a warm, supportive comment..."
-                                           style="border:none; background:var(--color-surface); background-color:var(--color-surface); border-radius:999px 0 0 999px; font-size:0.88rem;"
-                                           required>
-                                    <button type="submit" class="btn" style="border:none; border-radius:0 999px 999px 0; padding:0 1.25rem; background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid);">
-                                        <i class="bi bi-send-fill"></i>
-                                    </button>
-                                </div>
-                            </form>
-                            @endif
-
-                            {{-- Comments List --}}
-                            @forelse($post->comments as $comment)
-                                @php
-                                    $commentUser = $comment->user;
-                                    $commentPhoto = $commentUser ? $commentUser->profile_image_url : '/images/avatars/avatar-female.svg';
-                                @endphp
-                                <div class="comment-item">
-                                    <img src="{{ $commentPhoto }}"
-                                         alt="{{ optional($commentUser)->name ?? 'User' }}"
-                                         class="comment-avatar"
-                                         onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
-                                    <div class="comment-bubble">
-                                        <div class="d-flex justify-content-between align-items-center gap-2">
-                                            <div class="comment-author">{{ optional($commentUser)->name ?? 'User' }}</div>
-                                            <small class="text-muted">{{ $comment->created_at->diffForHumans() }}</small>
-                                        </div>
-                                        <p class="comment-text">{{ $comment->content }}</p>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="text-center py-2 text-muted" style="font-size:0.85rem;">
-                                    No comments yet. Be the first to share your thoughts!
-                                </div>
-                            @endforelse
-                        </div>
-                    </div>
-                </article>
+                @include('forum.post-card', ['post' => $post, 'isLimited' => $isLimited, 'likedIds' => $likedIds])
             @empty
                 <div class="card p-5 text-center fade-in-card" style="border:none; border-radius:20px; box-shadow:var(--wp-shadow-sm);">
                     <i class="bi bi-chat-heart" style="font-size:3.5rem; color:var(--color-border); margin-bottom:1rem;"></i>
@@ -766,10 +614,22 @@
                     @endif
                 </div>
             @endforelse
-
-            <div class="d-flex justify-content-center mt-4">
-                {{ $posts->links() }}
             </div>
+
+            {{-- Infinite scroll: the observer watches this sentinel, and the
+                 status line is the only feedback besides freshly added cards.
+                 An empty feed has nothing to scroll onto, so the tail is skipped. --}}
+            @if($posts->isNotEmpty())
+            <div id="forumFeedSentinel" class="forum-feed-sentinel"
+                 data-endpoint="{{ route('forum.feed') }}"
+                 data-cursor="{{ $posts->nextCursor()?->encode() }}"
+                 data-has-more="{{ $posts->hasMorePages() ? 1 : 0 }}"
+                 data-filter="{{ $filter ?? '' }}" data-search="{{ $search ?? '' }}"></div>
+            <div id="forumFeedStatus" class="forum-feed-status{{ $posts->hasMorePages() ? '' : ' is-done' }}" role="status" aria-live="polite">
+                <span class="forum-feed-spinner" aria-hidden="true"></span>
+                <span class="forum-feed-status-text">{{ $posts->hasMorePages() ? 'Loading more discussions...' : 'You are all caught up.' }}</span>
+            </div>
+            @endif
         </div>
 
         {{-- Right Column: Community Guidelines & Activity --}}
@@ -870,6 +730,176 @@ function sharePost(url) {
         prompt('Copy link to share:', url);
     }
 }
+
+/* ── Infinite scroll ──
+   The feed is cursor-paginated on (created_at, id), so a page never shifts
+   the way an offset page does when a new post lands. The seen set is the
+   second half of that promise: it also covers the reader scrolling back up
+   and re-triggering the sentinel. */
+(function () {
+    var feed = document.getElementById('forumFeed');
+    var sentinel = document.getElementById('forumFeedSentinel');
+    var status = document.getElementById('forumFeedStatus');
+    if (!feed || !sentinel || !status) return;
+
+    var label = status.querySelector('.forum-feed-status-text');
+    var endpoint = sentinel.getAttribute('data-endpoint');
+    var nextCursor = sentinel.getAttribute('data-cursor') || '';
+    var filter = sentinel.getAttribute('data-filter') || '';
+    var search = sentinel.getAttribute('data-search') || '';
+
+    var seen = new Set();
+    feed.querySelectorAll('[data-post-id]').forEach(function (card) {
+        seen.add(card.getAttribute('data-post-id'));
+    });
+
+    var loading = false;
+    var done = sentinel.getAttribute('data-has-more') !== '1';
+    var retry = null;
+
+    function setIdle() {
+        status.className = 'forum-feed-status';
+        label.textContent = 'Loading more discussions...';
+        if (retry) {
+            retry.remove();
+            retry = null;
+        }
+    }
+
+    function finish() {
+        done = true;
+        observer.disconnect();
+        status.className = 'forum-feed-status is-done';
+        label.textContent = 'You are all caught up.';
+    }
+
+    function fail() {
+        status.className = 'forum-feed-status is-error';
+        label.textContent = "Couldn't load more discussions.";
+        if (retry) return;
+        retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'forum-feed-retry';
+        retry.textContent = 'Try again';
+        retry.addEventListener('click', function () {
+            setIdle();
+            load();
+        });
+        status.appendChild(retry);
+    }
+
+    function appendCards(html) {
+        if (!html || !html.trim()) return 0;
+        var bag = document.createElement('div');
+        bag.innerHTML = html;
+        var added = 0;
+        bag.querySelectorAll('.forum-post-card').forEach(function (card) {
+            var id = card.getAttribute('data-post-id');
+            if (!id || seen.has(id)) return;
+            seen.add(id);
+            feed.appendChild(card);
+            added++;
+        });
+        return added;
+    }
+
+    // A page of already-read posts means the tail is looping; stopping beats
+    // spinning forever on a sentinel that never leaves the viewport.
+    function isExhausted(added, hasMore, cursor) {
+        return !hasMore || !cursor || added === 0;
+    }
+
+    function load() {
+        if (loading || done) return;
+        loading = true;
+        setIdle();
+
+        var url = new URL(endpoint, window.location.origin);
+        if (filter) url.searchParams.set('filter', filter);
+        if (search) url.searchParams.set('search', search);
+        url.searchParams.set('cursor', nextCursor);
+
+        fetch(url.toString(), {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error('Feed request failed.');
+                return response.json();
+            })
+            .then(function (data) {
+                var added = appendCards(data.html);
+                nextCursor = data.cursor || '';
+                loading = false;
+
+                if (isExhausted(added, data.hasMore, nextCursor)) {
+                    finish();
+                    return;
+                }
+                // Appending can leave the sentinel exactly where it was, and an
+                // unchanged intersection never re-fires the observer.
+                requestAnimationFrame(fillViewport);
+            })
+            .catch(function () {
+                loading = false;
+                fail();
+            });
+    }
+
+    function fillViewport() {
+        if (done || loading) return;
+        var viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+        if (sentinel.getBoundingClientRect().top - 600 < viewportHeight) load();
+    }
+
+    var observer = new IntersectionObserver(function (entries) {
+        if (entries.some(function (entry) { return entry.isIntersecting; })) load();
+    }, { rootMargin: '600px 0px' });
+    observer.observe(sentinel);
+})();
+
+/* Liking stays on the page: a full reload would drop every page the reader
+   scrolled in and send them back through posts they already read. Delegated on
+   the document so appended cards behave like the server-rendered ones. */
+(function () {
+    document.addEventListener('submit', function (event) {
+        var form = event.target.closest('form[data-forum-like]');
+        if (!form || form.dataset.busy) return;
+        event.preventDefault();
+        form.dataset.busy = '1';
+
+        var button = form.querySelector('button');
+        var token = form.querySelector('input[name="_token"]');
+        var icon = button.querySelector('i');
+        var count = button.querySelector('.forum-like-count');
+        var word = button.querySelector('.forum-like-word');
+
+        fetch(form.getAttribute('action'), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': token ? token.value : '',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                if (!response.ok) throw new Error('Like request failed.');
+                return response.json();
+            })
+            .then(function (data) {
+                delete form.dataset.busy;
+                button.classList.toggle('liked', !!data.liked);
+                icon.className = 'bi ' + (data.liked ? 'bi-heart-fill' : 'bi-heart');
+                count.textContent = data.likes_count;
+                word.textContent = Number(data.likes_count) === 1 ? 'Like' : 'Likes';
+            })
+            .catch(function () {
+                // Nothing reached the server, so fall back to the plain form
+                // post rather than leaving a heart that only looks pressed.
+                delete form.dataset.busy;
+                form.submit();
+            });
+    });
+})();
 </script>
 @endpush
 @endsection
