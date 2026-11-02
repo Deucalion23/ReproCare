@@ -53,6 +53,25 @@ class ForumFeedTest extends AutomationTestCase
         $this->assertStringContainsString('data-has-more="0"', $html);
     }
 
+    public function test_the_scroll_hands_the_reader_fields_to_resume_from(): void
+    {
+        $this->seedPosts(12);
+        $viewer = $this->patient();
+
+        $html = $this->actingAs($viewer)->get(route('forum.index'))
+            ->assertOk()
+            ->getContent();
+
+        // The feed collapses what was already read by timestamp, so a card
+        // without one cannot be placed and gets shown again next visit.
+        preg_match_all('/data-post-id="(\d+)"\s+data-created="(\d+)"/', $html, $cards);
+        $this->assertCount(10, $cards[1], 'every rendered card needs a resume timestamp');
+        $this->assertMatchesRegularExpression('/data-user="' . $viewer->id . '"/', $html);
+
+        // Appended cards stay invisible unless the layout is told to observe them.
+        $this->assertStringContainsString('window.ReproCareReveal(feed)', $html);
+    }
+
     public function test_scroll_pages_never_repeat_or_skip_a_post(): void
     {
         $this->seedPosts(23);

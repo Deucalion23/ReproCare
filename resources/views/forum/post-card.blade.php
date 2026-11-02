@@ -19,7 +19,9 @@
     $isLiked = in_array($post->id, $likedIds ?? [], true);
 @endphp
 
-<article class="forum-post-card fade-in-card" id="post-{{ $post->id }}" data-post-id="{{ $post->id }}">
+<article class="forum-post-card fade-in-card" id="post-{{ $post->id }}"
+         data-post-id="{{ $post->id }}"
+         data-created="{{ $post->created_at ? $post->created_at->timestamp : 0 }}">
     {{-- Header --}}
     <div class="post-header">
         <div class="author-lockup">

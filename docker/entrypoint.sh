@@ -113,8 +113,12 @@ if [ "${APP_ENV}" = "production" ] && [ "${SEED_FIFTY_TEST_WOMEN:-true}" = "true
 fi
 
 # Community forum content is curated by CommunityForumSeeder, which also removes
-# the legacy "[TEST]" fixtures. Run it when the feed is empty or still tagged,
-# so already-seeded databases get refreshed without re-seeding everything else.
+# the legacy "[TEST]" fixtures. The feed is cursor-paginated at ten posts a page,
+# so a database with only a handful of posts ends with "You are all caught up"
+# before the reader has scrolled anything. Top up when the feed is shallower than
+# FORUM_TARGET_POSTS; the seeder matches posts by content, so a full feed boots
+# untouched and a trimmed one refills.
+FORUM_TARGET_POSTS=70
 if [ "${SKIP_SEED}" != "true" ]; then
     FORUM_CURATED_COUNT=$(php artisan tinker --execute="echo DB::table('forum_posts')->where('content', 'not like', '%[TEST]%')->count();" 2>/dev/null | tr -cd '0-9')
     FORUM_TAGGED_COUNT=$(php artisan tinker --execute="echo DB::table('forum_posts')->where('content', 'like', '%[TEST]%')->count();" 2>/dev/null | tr -cd '0-9')
@@ -124,8 +128,8 @@ if [ "${SKIP_SEED}" != "true" ]; then
     if [ -z "${FORUM_TAGGED_COUNT}" ]; then
         FORUM_TAGGED_COUNT="0"
     fi
-    if [ "${FORUM_CURATED_COUNT}" = "0" ] || [ "${FORUM_TAGGED_COUNT}" != "0" ]; then
-        echo "Refreshing community forum content (curated: ${FORUM_CURATED_COUNT}, tagged: ${FORUM_TAGGED_COUNT})..."
+    if [ "${FORUM_CURATED_COUNT}" -lt "${FORUM_TARGET_POSTS}" ] || [ "${FORUM_TAGGED_COUNT}" != "0" ]; then
+        echo "Refreshing community forum content (curated: ${FORUM_CURATED_COUNT}/${FORUM_TARGET_POSTS}, tagged: ${FORUM_TAGGED_COUNT})..."
         php artisan db:seed --class=CommunityForumSeeder --force || echo "Warning: Community forum seeding failed."
     else
         echo "Community forum already curated (${FORUM_CURATED_COUNT} posts), skipping."

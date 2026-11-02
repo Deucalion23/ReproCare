@@ -33,21 +33,21 @@
     .forum-container {
         max-width:1200px;
         margin:0 auto;
-        padding-bottom:2rem;
+        padding-bottom:1rem;
     }
 
-    /* ── Hero Banner ── */
+    /* ── Hero Banner (one slim line: what this is, and where to write) ── */
     .forum-hero {
         background:var(--color-surface); background-color:var(--color-surface);
         border:none;
-        border-radius:22px;
-        padding:1.75rem 2rem;
-        margin-bottom:1.5rem;
+        border-radius:16px;
+        padding:0.7rem 0.95rem;
+        margin-bottom:0.85rem;
         color:var(--color-text);
         display:flex;
         justify-content:space-between;
         align-items:center;
-        gap:1.5rem;
+        gap:0.9rem;
         flex-wrap:wrap;
         box-shadow:var(--wp-shadow-sm);
     }
@@ -58,42 +58,42 @@
     }
     .forum-hero-title {
         font-family:'Plus Jakarta Sans', sans-serif;
-        font-size:1.75rem;
+        font-size:1.05rem;
         font-weight:800;
-        margin:0 0 0.3rem;
+        margin:0;
         display:flex;
         align-items:center;
-        gap:0.6rem;
+        gap:0.5rem;
         color:var(--color-text);
-        letter-spacing:-0.02em;
+        letter-spacing:-0.01em;
     }
     .forum-hero-sub {
-        font-size:0.9rem;
+        font-size:0.78rem;
         color:var(--color-text-muted);
-        margin:0;
-        max-width:600px;
-        line-height:1.5;
+        margin:0.1rem 0 0;
+        max-width:76ch;
+        line-height:1.35;
         opacity:1;
     }
-    .forum-composer-btn { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; border:none !important; border-radius:999px !important; padding:0.6rem 1.3rem !important; font-weight:800 !important; color:var(--color-on-solid) !important; box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); }
+    .forum-composer-btn { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; border:none !important; border-radius:999px !important; padding:0.38rem 0.85rem !important; font-size:0.78rem !important; font-weight:800 !important; color:var(--color-on-solid) !important; box-shadow:0 6px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 20%, transparent); }
     .forum-composer-btn:hover { background:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; transform:translateY(-1px); }
 
     /* ── Quick Share / Composer Card (Makes sharing effortless) ── */
     .quick-composer-card {
         background:var(--color-surface); background-color:var(--color-surface);
         border:none;
-        border-radius:20px;
-        padding:1.25rem 1.4rem;
+        border-radius:16px;
+        padding:0.65rem 0.8rem;
         box-shadow:var(--wp-shadow-sm);
-        margin-bottom:1.5rem;
+        margin-bottom:0.85rem;
         transition:border-color 0.2s;
     }
     .quick-composer-card:hover {
         border:none;
     }
     .composer-user-avatar {
-        width:44px;
-        height:44px;
+        width:32px;
+        height:32px;
         border-radius:50%;
         object-fit:cover;
         border:none;
@@ -146,20 +146,20 @@
         display:flex;
         justify-content:space-between;
         align-items:center;
-        gap:1rem;
-        margin-top:0.85rem;
+        gap:0.6rem;
+        margin-top:0.5rem;
         flex-wrap:wrap;
     }
     .btn-attach-photo {
         display:inline-flex;
         align-items:center;
-        gap:0.4rem;
-        padding:0.5rem 0.95rem;
+        gap:0.35rem;
+        padding:0.3rem 0.7rem;
         border-radius:999px;
         border:none;
         background:var(--color-surface-soft); background-color:var(--color-surface-soft);
         color:var(--color-text);
-        font-size:0.84rem;
+        font-size:0.76rem;
         font-weight:700;
         cursor:pointer;
         transition:all 0.2s;
@@ -200,12 +200,13 @@
         overflow:hidden;
         white-space:nowrap !important;
         text-overflow:ellipsis !important;
-        padding:0.72rem 1.25rem !important;
+        padding:0.42rem 0.85rem !important;
+        font-size:0.84rem;
         line-height:1.4 !important;
     }
     .quick-composer-card:focus-within .quick-inline-input {
         border-radius:14px !important;
-        min-height:88px;
+        min-height:72px;
         white-space:normal !important;
         line-height:1.5 !important;
     }
@@ -216,20 +217,19 @@
     .forum-post-card {
         background:var(--color-surface); background-color:var(--color-surface);
         border:none;
-        border-radius:22px;
-        padding:1.5rem;
-        margin-bottom:1.25rem;
+        border-radius:16px;
+        padding:0.85rem 0.95rem;
+        margin-bottom:0.6rem;
         box-shadow:var(--wp-shadow-sm);
         transition:all 0.25s ease;
     }
     .forum-post-card:hover {
         border:none;
         box-shadow:var(--wp-shadow-md);
-        transform:translateY(-2px);
     }
     /* ── Infinite scroll tail ── */
     .forum-feed-sentinel { width:100%; height:1px; }
-    .forum-feed-status { display:flex; align-items:center; justify-content:center; gap:.55rem; padding:.9rem 0 1.4rem; font-size:.82rem; font-weight:700; color:var(--color-text-muted); text-align:center; }
+    .forum-feed-status { display:flex; align-items:center; justify-content:center; gap:.55rem; padding:.55rem 0 .8rem; font-size:.78rem; font-weight:700; color:var(--color-text-muted); text-align:center; }
     .forum-feed-status.is-hidden { display:none; }
     .forum-feed-spinner { width:15px; height:15px; border-radius:50%; border:2px solid var(--color-border); border-top-color:var(--color-secondary-text); animation:forum-spin .7s linear infinite; flex-shrink:0; }
     .forum-feed-status.is-done .forum-feed-spinner { display:none; }
@@ -237,21 +237,25 @@
     .forum-feed-status.is-error .forum-feed-spinner { display:none; }
     .forum-feed-retry { border:1px solid var(--color-danger-text); background:transparent; color:var(--color-danger-text); border-radius:999px; padding:.2rem .75rem; font-size:.75rem; font-weight:700; cursor:pointer; }
     @keyframes forum-spin { to { transform:rotate(360deg); } }
+    /* ── Resume strip: what the reader already scrolled past, one line away ── */
+    .forum-post-card.is-read { display:none; }
+    .forum-read-strip { display:flex; align-items:center; justify-content:space-between; gap:.6rem; margin-bottom:.7rem; padding:.45rem .7rem .45rem .85rem; border:1px dashed var(--color-border); border-radius:12px; background:var(--color-surface-soft); color:var(--color-text-muted); font-size:.78rem; font-weight:700; }
+    .forum-read-strip button { border:1px solid var(--color-border); background:transparent; color:var(--color-text); border-radius:999px; padding:.18rem .7rem; font-size:.73rem; font-weight:800; cursor:pointer; }
     .post-header {
         display:flex;
         justify-content:space-between;
         align-items:flex-start;
-        gap:1rem;
-        margin-bottom:1rem;
+        gap:0.6rem;
+        margin-bottom:0.5rem;
     }
     .author-lockup {
         display:flex;
         align-items:center;
-        gap:0.85rem;
+        gap:0.6rem;
     }
     .author-avatar {
-        width:46px;
-        height:46px;
+        width:34px;
+        height:34px;
         border-radius:50%;
         object-fit:cover;
         border:none;
@@ -259,21 +263,22 @@
     }
     .author-name {
         font-family:'Plus Jakarta Sans', sans-serif;
-        font-size:0.96rem;
+        font-size:0.86rem;
         font-weight:800;
         color:var(--color-text);
         margin:0;
         display:flex;
         align-items:center;
         gap:0.4rem;
+        flex-wrap:wrap;
     }
     .author-time {
-        font-size:0.76rem;
+        font-size:0.72rem;
         color:var(--color-text-muted);
         display:flex;
         align-items:center;
         gap:0.3rem;
-        margin-top:0.15rem;
+        margin-top:0.05rem;
     }
     .role-verified-badge {
         font-size:0.64rem;
@@ -293,24 +298,24 @@
     .role-verified-badge.member { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); }
 
     .post-text-body {
-        font-size:0.95rem;
-        line-height:1.68;
+        font-size:0.86rem;
+        line-height:1.5;
         color:var(--color-text);
         white-space:pre-wrap;
-        margin-bottom:1rem;
+        margin-bottom:0.55rem;
     }
 
     .post-media-frame {
-        border-radius:16px;
+        border-radius:12px;
         overflow:hidden;
-        margin-bottom:1.15rem;
+        margin-bottom:0.6rem;
         border:none;
-        max-height:380px;
+        max-height:280px;
     }
     .post-media-frame img {
         width:100%;
         height:auto;
-        max-height:380px;
+        max-height:280px;
         object-fit:cover;
         display:block;
     }
@@ -320,26 +325,26 @@
         display:flex;
         justify-content:space-between;
         align-items:center;
-        gap:0.75rem;
+        gap:0.5rem;
         border:none;
-        padding-top:0.85rem;
+        padding-top:0.35rem;
         flex-wrap:wrap;
     }
     .engagement-actions {
         display:flex;
         align-items:center;
-        gap:0.5rem;
+        gap:0.4rem;
     }
     .btn-engage {
         display:inline-flex;
         align-items:center;
-        gap:0.45rem;
-        padding:0.45rem 0.9rem;
+        gap:0.35rem;
+        padding:0.28rem 0.65rem;
         border-radius:999px;
         border:none;
         background:var(--color-surface-soft); background-color:var(--color-surface-soft);
         color:var(--color-text);
-        font-size:0.82rem;
+        font-size:0.75rem;
         font-weight:700;
         cursor:pointer;
         text-decoration:none;
@@ -358,10 +363,10 @@
 
     /* Comment Section */
     .comments-tray {
-        margin-top:1.15rem;
-        padding:1.15rem;
+        margin-top:0.6rem;
+        padding:0.7rem;
         background:var(--color-bg); background-color:var(--color-bg);
-        border-radius:16px;
+        border-radius:12px;
         border:none;
     }
     .comment-item {
@@ -369,12 +374,12 @@
         /* flex-start also blocks the default align-items:stretch, which would
            otherwise elongate a height-less avatar into an ellipse. */
         align-items:flex-start;
-        gap:0.75rem;
-        margin-bottom:0.95rem;
+        gap:0.55rem;
+        margin-bottom:0.6rem;
     }
     .comment-avatar {
-        width:34px;
-        height:34px;
+        width:28px;
+        height:28px;
         border-radius:50%;
         object-fit:cover;
         flex-shrink:0;
@@ -382,21 +387,21 @@
     .comment-bubble {
         background:var(--color-surface); background-color:var(--color-surface);
         border:none;
-        border-radius:14px;
-        padding:0.7rem 0.9rem;
+        border-radius:12px;
+        padding:0.45rem 0.65rem;
         flex:1;
     }
     .comment-author {
         font-family:'Plus Jakarta Sans', sans-serif;
-        font-size:0.86rem;
+        font-size:0.78rem;
         font-weight:700;
         color:var(--color-text);
-        margin-bottom:0.2rem;
+        margin-bottom:0.1rem;
     }
     .comment-text {
-        font-size:0.86rem;
+        font-size:0.8rem;
         color:var(--color-text);
-        line-height:1.5;
+        line-height:1.45;
         margin:0;
     }
 
@@ -404,17 +409,17 @@
     .forum-side-card {
         background:var(--color-surface); background-color:var(--color-surface);
         border:none;
-        border-radius:20px;
-        padding:1.35rem;
-        margin-bottom:1.25rem;
+        border-radius:16px;
+        padding:0.85rem 0.95rem;
+        margin-bottom:0.85rem;
         box-shadow:var(--wp-shadow-sm);
     }
     .side-card-title {
         font-family:'Plus Jakarta Sans', sans-serif;
-        font-size:1.05rem;
+        font-size:0.92rem;
         font-weight:800;
         color:var(--color-text);
-        margin:0 0 0.9rem;
+        margin:0 0 0.55rem;
         display:flex;
         align-items:center;
         gap:0.5rem;
@@ -422,11 +427,11 @@
     .guide-item {
         display:flex;
         align-items:flex-start;
-        gap:0.65rem;
-        margin-bottom:0.75rem;
-        font-size:0.83rem;
+        gap:0.5rem;
+        margin-bottom:0.5rem;
+        font-size:0.78rem;
         color:var(--color-text-muted);
-        line-height:1.5;
+        line-height:1.45;
     }
     .guide-item i {
         color:var(--color-primary-text);
@@ -501,12 +506,12 @@
                 Community Forum
             </h1>
             <p class="forum-hero-sub">
-                A safe, caring space for expectant mothers and local healthcare workers in San Carlos City to exchange advice, support, and experiences.
+                Mothers and health workers of San Carlos City exchange advice, support, and experiences.
             </p>
         </div>
         <div class="d-flex align-items-center gap-2">
             @if($isLimited)
-                <span class="badge rounded-pill px-3 py-2" style="border:1px solid var(--color-border); background:var(--color-surface-soft); color:var(--color-text-muted); font-size:0.75rem;" title="Posting unlocks after RHU approval of your account">
+                <span class="badge rounded-pill px-3 py-2" style="border:1px solid var(--color-border); background:var(--color-surface-soft); color:var(--color-text-muted); font-size:0.72rem;" title="Posting unlocks after RHU approval of your account">
                     <i class="bi bi-lock-fill me-1"></i> Read-only
                 </span>
             @else
@@ -524,7 +529,7 @@
         </div>
     @endif
 
-    <div class="row g-4">
+    <div class="row g-3">
 
         {{-- Left Column: Feed & Composer --}}
         <div class="col-lg-8">
@@ -532,13 +537,13 @@
             {{-- Quick Post Creation Card (type directly in the pill — expands in place) --}}
             @if($isLimited)
             <div class="quick-composer-card fade-in-card">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:44px; height:44px; border-radius:50%; background:var(--color-surface-soft); color:var(--color-text-muted); font-size:1.1rem;" aria-hidden="true">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center justify-content-center flex-shrink-0" style="width:32px; height:32px; border-radius:50%; background:var(--color-surface-soft); color:var(--color-text-muted); font-size:0.9rem;" aria-hidden="true">
                         <i class="bi bi-lock-fill"></i>
                     </div>
                     <div style="min-width:0;">
-                        <div style="font-weight:800; font-size:0.9rem; color:var(--color-text);">Posting unlocks after RHU approval</div>
-                        <div style="font-size:0.82rem; color:var(--color-text-muted);">You're browsing with limited access — read and explore meanwhile.</div>
+                        <div style="font-weight:800; font-size:0.82rem; color:var(--color-text);">Posting unlocks after RHU approval</div>
+                        <div style="font-size:0.75rem; color:var(--color-text-muted);">You're browsing with limited access — read and explore meanwhile.</div>
                     </div>
                 </div>
             </div>
@@ -546,7 +551,7 @@
             <div class="quick-composer-card fade-in-card">
                 <form action="{{ route('forum.store') }}" method="POST" enctype="multipart/form-data" class="composer-form quick-inline-form">
                     @csrf
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center gap-2">
                         <img src="{{ $forumUser->profile_image_url }}"
                              alt="{{ $forumUser->name }}"
                              class="composer-user-avatar"
@@ -569,7 +574,7 @@
                             <span id="quickImgName">photo.jpg</span>
                             <button type="button" onclick="clearQuickImage()"><i class="bi bi-x-circle-fill"></i></button>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="border-radius:12px;padding:0.5rem 1.35rem;font-weight:700;">
+                        <button type="submit" class="btn btn-primary" style="border-radius:999px;padding:0.3rem 0.95rem;font-size:0.8rem;font-weight:800;">
                             <i class="bi bi-send-fill me-1"></i> Post
                         </button>
                     </div>
@@ -578,19 +583,19 @@
             @endif
 
             {{-- Feed Filters (All Posts vs My Posts) --}}
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3 forum-feed-head">
-                <h3 class="forum-feed-title" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.15rem;font-weight:800;color:var(--color-text);margin:0;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 forum-feed-head">
+                <h3 class="forum-feed-title" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:0.95rem;font-weight:800;color:var(--color-text);margin:0;">
                     Community Feed
                 </h3>
                 <div class="d-flex gap-1 p-1 rounded-pill" style="background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:none;">
                     <a href="{{ route('forum.index') }}"
                        class="btn btn-sm"
-                       style="border:none; border-radius:999px; font-weight:800; font-size:0.78rem; padding:0.35rem 0.95rem; {{ !$filter ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:transparent; color:var(--color-text);' }}">
+                       style="border:none; border-radius:999px; font-weight:800; font-size:0.75rem; padding:0.26rem 0.8rem; {{ !$filter ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:transparent; color:var(--color-text);' }}">
                         All Discussions
                     </a>
                     <a href="{{ route('forum.index', ['filter' => 'my-posts']) }}"
                        class="btn btn-sm"
-                       style="border:none; border-radius:999px; font-weight:800; font-size:0.78rem; padding:0.35rem 0.95rem; {{ $filter === 'my-posts' ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:transparent; color:var(--color-text);' }}">
+                       style="border:none; border-radius:999px; font-weight:800; font-size:0.75rem; padding:0.26rem 0.8rem; {{ $filter === 'my-posts' ? 'background:var(--color-text) !important; color:var(--color-bg) !important;' : 'background:transparent; color:var(--color-text);' }}">
                         My Posts
                     </a>
                 </div>
@@ -601,10 +606,10 @@
             @forelse($posts as $post)
                 @include('forum.post-card', ['post' => $post, 'isLimited' => $isLimited, 'likedIds' => $likedIds])
             @empty
-                <div class="card p-5 text-center fade-in-card" style="border:none; border-radius:20px; box-shadow:var(--wp-shadow-sm);">
-                    <i class="bi bi-chat-heart" style="font-size:3.5rem; color:var(--color-border); margin-bottom:1rem;"></i>
-                    <h4 style="font-family:'Plus Jakarta Sans',sans-serif; font-weight:800; color:var(--color-text);">No discussions yet</h4>
-                    <p style="color:var(--color-text-muted); max-width:440px; margin:0 auto 1.5rem;">
+                <div class="card p-4 text-center fade-in-card" style="border:none; border-radius:16px; box-shadow:var(--wp-shadow-sm);">
+                    <i class="bi bi-chat-heart" style="font-size:2.2rem; color:var(--color-border); margin-bottom:0.6rem;"></i>
+                    <h4 style="font-family:'Plus Jakarta Sans',sans-serif; font-size:1rem; font-weight:800; color:var(--color-text);">No discussions yet</h4>
+                    <p style="color:var(--color-text-muted); font-size:0.84rem; max-width:440px; margin:0 auto 1rem;">
                         {{ $filter === 'my-posts' ? "You haven't posted in the community yet." : "The community feed is peaceful. Be the first mother or healthcare worker to start a conversation!" }}
                     </p>
                     @if(!$isLimited)
@@ -624,6 +629,7 @@
                  data-endpoint="{{ route('forum.feed') }}"
                  data-cursor="{{ $posts->nextCursor()?->encode() }}"
                  data-has-more="{{ $posts->hasMorePages() ? 1 : 0 }}"
+                 data-user="{{ (int) ($forumUser->id ?? 0) }}"
                  data-filter="{{ $filter ?? '' }}" data-search="{{ $search ?? '' }}"></div>
             <div id="forumFeedStatus" class="forum-feed-status{{ $posts->hasMorePages() ? '' : ' is-done' }}" role="status" aria-live="polite">
                 <span class="forum-feed-spinner" aria-hidden="true"></span>
@@ -666,12 +672,12 @@
                     Recent Discussions
                 </h4>
                 @forelse($recentPosts as $recent)
-                    <a href="{{ route('forum.show', $recent->id) }}" class="d-block text-decoration-none p-2.5 rounded-3 mb-2" style="background:var(--color-bg); background-color:var(--color-bg); border:none; border-radius:12px; transition:all 0.2s; padding:0.65rem 0.8rem;">
+                    <a href="{{ route('forum.show', $recent->id) }}" class="d-block text-decoration-none mb-1" style="background:var(--color-bg); background-color:var(--color-bg); border:none; border-radius:10px; transition:all 0.2s; padding:0.4rem 0.6rem;">
                         <div class="d-flex justify-content-between align-items-center">
-                            <span style="font-weight:800; font-size:0.86rem; color:var(--color-text);">{{ optional($recent->user)->name }}</span>
-                            <small style="color:var(--color-text-muted);">{{ $recent->created_at->diffForHumans(null, true, true) }}</small>
+                            <span style="font-weight:800; font-size:0.79rem; color:var(--color-text);">{{ optional($recent->user)->name }}</span>
+                            <small style="font-size:0.68rem; color:var(--color-text-muted);">{{ $recent->created_at->diffForHumans(null, true, true) }}</small>
                         </div>
-                        <p class="small text-truncate mb-0 mt-1" style="color:var(--color-text-muted);">{{ $recent->content }}</p>
+                        <p class="text-truncate mb-0" style="font-size:0.75rem; color:var(--color-text-muted);">{{ $recent->content }}</p>
                     </a>
                 @empty
                     <p class="small mb-0" style="color:var(--color-text-muted);">No recent activity.</p>
@@ -753,6 +759,135 @@ function sharePost(url) {
         seen.add(card.getAttribute('data-post-id'));
     });
 
+    /* Resume, don't re-read. The reader who scrolled down to post 17 should
+       open the feed on post 16 next visit instead of meeting the same ten
+       posts again; a search is a different question, so it never resumes. */
+    var markerKey = 'forum-read:' + (sentinel.getAttribute('data-user') || '0') + ':' + (filter || 'all');
+    var resumable = search === '';
+    var readUpTo = null;
+    var skippedPages = 0;
+
+    function cardList() {
+        return Array.prototype.slice.call(feed.querySelectorAll('.forum-post-card'));
+    }
+
+    function readMarker() {
+        if (!resumable) return null;
+        try { return JSON.parse(window.localStorage.getItem(markerKey) || 'null'); }
+        catch (e) { return null; }
+    }
+
+    /* The feed runs newest first, so a post at or above the stamp the reader
+       stopped on is one they already passed. Comparing timestamps rather than
+       page positions keeps pages that arrive after the resume in the same
+       collapsed region instead of slipping past it. */
+    function isRead(card) {
+        return readUpTo !== null && Number(card.getAttribute('data-created')) >= readUpTo;
+    }
+
+    function readStrip() {
+        var existing = feed.querySelector('.forum-read-strip');
+        if (existing) return existing;
+        var strip = document.createElement('div');
+        strip.className = 'forum-read-strip';
+        var text = document.createElement('span');
+        var toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.textContent = 'Show';
+        toggle.addEventListener('click', function () {
+            readUpTo = null;
+            cardList().forEach(function (card) { card.classList.remove('is-read'); });
+            strip.remove();
+        });
+        strip.appendChild(text);
+        strip.appendChild(toggle);
+        return strip;
+    }
+
+    /* Returns true when every loaded post is already-read, which is the signal
+       to pull the next page until the reader lands on something new. */
+    function syncReadState() {
+        if (readUpTo === null) return false;
+        var firstUnread = null;
+        var readCount = 0;
+        cardList().forEach(function (card) {
+            if (isRead(card)) {
+                card.classList.add('is-read');
+                readCount++;
+            } else if (!firstUnread) {
+                firstUnread = card;
+            }
+        });
+        var strip = readStrip();
+        if (readCount === 0) {
+            strip.remove();
+            return false;
+        }
+        strip.querySelector('span').textContent = readCount +
+            (readCount === 1 ? ' post you have already read' : ' posts you have already read');
+        feed.insertBefore(strip, firstUnread);
+        return firstUnread === null;
+    }
+
+    function revealEverything() {
+        readUpTo = null;
+        cardList().forEach(function (card) { card.classList.remove('is-read'); });
+        var strip = feed.querySelector('.forum-read-strip');
+        if (strip) strip.remove();
+    }
+
+    /* Eight pages covers the whole curated feed, so a reader who has seen
+       everything can always reach the "all caught up" state instead of being
+       left with a collapsed feed and nothing under it. */
+    function keepSkipping() {
+        if (skippedPages < 8 && !loading && !done) {
+            skippedPages++;
+            load();
+        }
+    }
+
+    function resume() {
+        var marker = readMarker();
+        if (!marker) return;
+        readUpTo = Number(marker.created);
+        if (!isFinite(readUpTo)) {
+            readUpTo = null;
+            return;
+        }
+        settleResume();
+    }
+
+    function settleResume() {
+        if (!syncReadState()) return;
+        if (done) {
+            // Nothing unseen exists anywhere: an all-hidden feed would read as
+            // missing posts, so leave the posts where the reader expects them.
+            revealEverything();
+            return;
+        }
+        keepSkipping();
+    }
+
+    var deepest = null;
+    var tracker = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            var index = cardList().indexOf(entry.target);
+            if (index > -1 && (!deepest || index > deepest.index)) {
+                deepest = {index: index, id: entry.target.getAttribute('data-post-id'), created: entry.target.getAttribute('data-created')};
+            }
+        });
+    }, { rootMargin: '-15% 0px -15% 0px' });
+
+    function track(card) { tracker.observe(card); }
+    cardList().forEach(track);
+    window.addEventListener('pagehide', function () {
+        if (deepest) {
+            try { window.localStorage.setItem(markerKey, JSON.stringify({id: deepest.id, created: deepest.created})); }
+            catch (e) { /* a private-mode block only costs the resume, not the feed */ }
+        }
+    });
+
     var loading = false;
     var done = sentinel.getAttribute('data-has-more') !== '1';
     var retry = null;
@@ -798,8 +933,20 @@ function sharePost(url) {
             if (!id || seen.has(id)) return;
             seen.add(id);
             feed.appendChild(card);
+            track(card);
             added++;
         });
+        if (added) {
+            // Without this the page the reader scrolled into is invisible: the
+            // layout fades cards in only for nodes it got to observe at load.
+            if (typeof window.ReproCareReveal === 'function') {
+                window.ReproCareReveal(feed);
+            } else {
+                feed.querySelectorAll('.fade-in-card:not(.visible)').forEach(function (card) {
+                    card.classList.add('visible');
+                });
+            }
+        }
         return added;
     }
 
@@ -831,13 +978,13 @@ function sharePost(url) {
                 nextCursor = data.cursor || '';
                 loading = false;
 
-                if (isExhausted(added, data.hasMore, nextCursor)) {
-                    finish();
-                    return;
-                }
+                if (isExhausted(added, data.hasMore, nextCursor)) finish();
+                // A resumed reader can be handed another page of posts they
+                // already passed, so re-split the feed before pulling more.
+                settleResume();
                 // Appending can leave the sentinel exactly where it was, and an
                 // unchanged intersection never re-fires the observer.
-                requestAnimationFrame(fillViewport);
+                if (!done) requestAnimationFrame(fillViewport);
             })
             .catch(function () {
                 loading = false;
@@ -855,6 +1002,8 @@ function sharePost(url) {
         if (entries.some(function (entry) { return entry.isIntersecting; })) load();
     }, { rootMargin: '600px 0px' });
     observer.observe(sentinel);
+
+    resume();
 })();
 
 /* Liking stays on the page: a full reload would drop every page the reader

@@ -3148,19 +3148,27 @@
             }
             syncCollapseArrow();
 
-            /* Fade-in via IntersectionObserver */
-            const observer = new IntersectionObserver(function(entries) {
+            /* Fade-in via IntersectionObserver.
+               Cards injected after this point — the forum's infinite scroll is
+               the reason this exists — are not in the page yet when the first
+               sweep runs, and a .fade-in-card nobody observes stays at
+               opacity:0 forever. The hook lets that code register its own
+               nodes instead of each page inventing a different workaround. */
+            const fadeObserver = new IntersectionObserver(function(entries) {
                 entries.forEach(function(e) {
                     if (e.isIntersecting) {
                         e.target.classList.add('visible');
-                        observer.unobserve(e.target);
+                        fadeObserver.unobserve(e.target);
                     }
                 });
             }, { threshold: 0.08 });
 
-            document.querySelectorAll('.fade-in-card').forEach(function(el) {
-                observer.observe(el);
-            });
+            window.ReproCareReveal = function (scope) {
+                (scope || document).querySelectorAll('.fade-in-card:not(.visible)')
+                    .forEach(function (el) { fadeObserver.observe(el); });
+            };
+
+            window.ReproCareReveal(document);
 
             /* Sync theme toggle checkboxes */
             document.querySelectorAll('.theme-switch-input').forEach(function(el) {
