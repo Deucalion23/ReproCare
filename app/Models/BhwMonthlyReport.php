@@ -267,10 +267,25 @@ class BhwMonthlyReport extends Model
 
     public function getReportPeriodAttribute()
     {
+        return $this->periodDate()->format('F Y');
+    }
+
+    /**
+     * "Nov 2026" — the queue row only has room for the short month, and the long
+     * form stays available in the detail view and the cell tooltip.
+     */
+    public function getReportPeriodShortAttribute()
+    {
+        return $this->periodDate()->format('M Y');
+    }
+
+    protected function periodDate()
+    {
+        // Day 1 before setMonth(): re-dating the 31st straight onto a shorter month
+        // overflows into the next one and would label the report wrongly.
         return now()
-            ->setMonth((int) $this->report_month)
-            ->setYear((int) $this->report_year)
             ->startOfMonth()
-            ->format('F Y');
+            ->setMonth((int) $this->report_month)
+            ->setYear((int) $this->report_year);
     }
 }
