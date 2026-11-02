@@ -5,7 +5,9 @@ namespace Tests\Feature;
 use App\Models\ForumLike;
 use App\Models\ForumPost;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 class ForumFeedTest extends AutomationTestCase
 {
@@ -17,6 +19,8 @@ class ForumFeedTest extends AutomationTestCase
             $t->id();
             $t->unsignedBigInteger('user_id')->nullable();
             $t->text('content')->nullable();
+            $t->string('post_image')->nullable();
+            $t->longText('post_image_data')->nullable();
             $t->string('status')->default('active');
             $t->timestamps();
             $t->softDeletes();
@@ -110,6 +114,69 @@ class ForumFeedTest extends AutomationTestCase
         // Newest first, every post exactly once, nothing re-served after the
         // mid-scroll post arrived.
         $this->assertSame($expected, $seen, 'the scroll skipped, duplicated or reordered a post');
+    }
+
+    public function test_the_feed_is_one_full_width_column(): void
+    {
+        $this->seedPosts(3);
+
+        $html = $this->actingAs($this->patient())->get(route('forum.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('class="forum-feed-column"', $html);
+        $this->assertStringNotContainsString('col-lg-8', $html);
+        $this->assertStringNotContainsString('col-lg-4', $html);
+        $this->assertStringNotContainsString('Recent Discussions', $html);
+    }
+
+    public function test_the_composer_expands_on_a_draft_rather_than_on_focus(): void
+    {
+        // The OS file picker steals focus, so a :focus-within rule collapsed the
+        // bar with the photo already chosen and "Add Photo" looked broken.
+        $html = $this->actingAs($this->patient())->get(route('forum.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('.quick-composer-card.is-open .quick-inline-bar', $html);
+        $this->assertStringNotContainsString(':focus-within .quick-inline-bar', $html);
+    }
+
+    public function test_a_photo_posted_from_the_composer_reaches_the_card(): void
+    {
+        Storage::fake('public');
+        $viewer = $this->patient();
+
+        // Hand-built PNG bytes: UploadedFile::fake()->image() needs the GD
+        // extension, which this PHP build does not load.
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+
+        $this->actingAs($viewer)->post(route('forum.store'), [
+            'content' => 'An ultrasound attached from the inline composer.',
+            'post_image' => UploadedFile::fake()->createWithContent('ultrasound.png', $png),
+        ])->assertRedirect(route('forum.index'));
+
+        $post = ForumPost::latest('id')->firstOrFail();
+        $this->assertNotNull($post->post_image);
+        Storage::disk('public')->assertExists('uploads/forum/' . $post->post_image);
+
+        $html = $this->actingAs($viewer)->get(route('forum.index'))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('post-media-frame', $html);
+    }
+
+    public function test_a_photo_the_server_rejects_leaves_no_post_behind(): void
+    {
+        Storage::fake('public');
+
+        $this->actingAs($this->patient())->post(route('forum.store'), [
+            'content' => 'A file that is not a photo.',
+            'post_image' => UploadedFile::fake()->create('notes.pdf', 100),
+        ])->assertSessionHasErrors('post_image');
+
+        $this->assertSame(0, ForumPost::count());
     }
 
     public function test_like_reports_the_state_that_is_actually_stored(): void

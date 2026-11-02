@@ -229,13 +229,13 @@
                         <input type="file"
                                id="post_image"
                                name="post_image"
-                               accept="image/jpeg,image/jpg,image/png"
+                               accept="image/jpeg,image/jpg,image/png,image/webp"
                                onchange="previewForumImage(this)">
                         <i class="bi bi-cloud-arrow-up drop-zone-icon"></i>
                         <div class="drop-zone-text">
                             <strong>Click to upload</strong> or drag & drop an image
                         </div>
-                        <div class="drop-zone-sub">JPG, PNG up to 5MB</div>
+                        <div class="drop-zone-sub">JPG, PNG or WebP up to 5MB</div>
                     </div>
 
                     {{-- Error --}}

@@ -168,14 +168,14 @@
                     </label>
                     <div class="image-drop-zone" id="dropZone">
                         <input type="file" id="post_image" name="post_image"
-                               accept="image/jpeg,image/jpg,image/png"
+                               accept="image/jpeg,image/jpg,image/png,image/webp"
                                onchange="previewForumImage(this)">
                         <i class="bi bi-cloud-arrow-up" style="font-size:1.8rem;color:var(--text-muted);display:block;margin-bottom:0.4rem;"></i>
                         <div style="font-size:0.85rem;color:var(--text-muted);">
                             <strong>Click to upload</strong> or drag & drop
                         </div>
                         <div style="font-size:0.75rem;color:var(--text-muted);opacity:0.7;margin-top:0.2rem;">
-                            JPG, PNG up to 5MB
+                            JPG, PNG or WebP up to 5MB
                         </div>
                     </div>
                     @error('post_image')

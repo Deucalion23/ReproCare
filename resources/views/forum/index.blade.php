@@ -20,7 +20,6 @@
         'cho' => 'cho-content',
         default => 'user-content',
     };
-    $recentPosts = \App\Models\ForumPost::active()->latest()->take(5)->get();
 @endphp
 
 @extends($forumLayout)
@@ -169,26 +168,62 @@
         color:var(--color-text);
         border:none;
     }
-    .composer-preview-tag {
-        display:inline-flex;
+    /* The chosen photo, shown as a real thumbnail so the reader can see what
+       they are about to post instead of a bare filename. */
+    .composer-preview {
+        display:flex;
         align-items:center;
-        gap:0.4rem;
-        background:var(--color-primary-subtle);
-        color:var(--color-primary-text);
-        padding:0.35rem 0.75rem;
-        border-radius:8px;
-        font-size:0.78rem;
-        font-weight:600;
+        gap:0.5rem;
+        padding:0.3rem 0.5rem;
+        border-radius:10px;
+        background:var(--color-surface-soft);
+        max-width:260px;
+        min-width:0;
     }
-    .composer-preview-tag button {
+    .composer-preview img {
+        width:38px;
+        height:38px;
+        object-fit:cover;
+        border-radius:8px;
+        flex-shrink:0;
+        background:var(--color-bg);
+    }
+    .composer-preview-meta {
+        display:flex;
+        flex-direction:column;
+        min-width:0;
+        line-height:1.25;
+    }
+    .composer-preview-meta strong {
+        font-size:0.76rem;
+        font-weight:700;
+        color:var(--color-text);
+        overflow:hidden;
+        text-overflow:ellipsis;
+        white-space:nowrap;
+        max-width:150px;
+    }
+    .composer-preview-meta small { font-size:0.68rem; color:var(--color-text-muted); }
+    .composer-preview button {
         background:none;
         border:none;
-        color:inherit;
+        color:var(--color-text-muted);
         padding:0;
         cursor:pointer;
         display:flex;
         align-items:center;
+        font-size:1rem;
+        flex-shrink:0;
     }
+    .composer-preview button:hover { color:var(--color-danger-text); }
+    .composer-error {
+        width:100%;
+        margin:0.35rem 0 0;
+        font-size:0.76rem;
+        font-weight:700;
+        color:var(--color-danger-text);
+    }
+    .composer-error:empty { display:none; }
 
     /* ── Inline composer: pill at rest, expands in place on tap ── */
     .quick-inline-form { padding-top:0; }
@@ -204,14 +239,18 @@
         font-size:0.84rem;
         line-height:1.4 !important;
     }
-    .quick-composer-card:focus-within .quick-inline-input {
+    /* Expansion is a class the script owns, not :focus-within. The file picker
+       takes focus away, so a focus-only rule collapsed the bar with the photo
+       already chosen — the Post button vanished and the attach looked broken.
+       A draft (typed text or an attached file) keeps the composer open. */
+    .quick-composer-card.is-open .quick-inline-input {
         border-radius:14px !important;
         min-height:72px;
         white-space:normal !important;
         line-height:1.5 !important;
     }
     .quick-inline-bar { display:none; }
-    .quick-composer-card:focus-within .quick-inline-bar { display:flex; }
+    .quick-composer-card.is-open .quick-inline-bar { display:flex; }
 
     /* ── Post Feed Cards (Makes reading enjoyable) ── */
     .forum-post-card {
@@ -439,6 +478,13 @@
         flex-shrink:0;
         margin-top:2px;
     }
+    /* The guidelines strip sits inside the feed column, so it takes the same
+       rhythm as the post cards instead of the sidebar's heavier block. */
+    .forum-guide-strip {
+        padding:0.6rem 0.85rem;
+        margin-bottom:0.6rem;
+    }
+    .forum-guide-strip .side-card-title { margin:0; font-size:0.84rem; }
 
     @media (max-width: 575.98px) {
         /* Phones: compact hero — title + subtitle only. */
@@ -529,10 +575,9 @@
         </div>
     @endif
 
-    <div class="row g-3">
-
-        {{-- Left Column: Feed & Composer --}}
-        <div class="col-lg-8">
+    {{-- One full-width column: the timeline scrolls on its own, no sidebar to
+         compete with it. --}}
+    <div class="forum-feed-column">
 
             {{-- Quick Post Creation Card (type directly in the pill — expands in place) --}}
             @if($isLimited)
@@ -567,20 +612,61 @@
                     <div class="composer-bottom-bar quick-inline-bar">
                         <label class="btn-attach-photo" title="Attach a photo">
                             <i class="bi bi-image text-success"></i> Add Photo
-                            <input type="file" name="post_image" id="quickPostImageInput" accept="image/*" style="display:none;" onchange="handleImageSelected(this)">
+                            <input type="file" name="post_image" id="quickPostImageInput" accept="image/jpeg,image/png,image/webp" style="display:none;">
                         </label>
-                        <div id="quickImgPreviewTag" style="display:none;" class="composer-preview-tag">
-                            <i class="bi bi-file-earmark-image"></i>
-                            <span id="quickImgName">photo.jpg</span>
-                            <button type="button" onclick="clearQuickImage()"><i class="bi bi-x-circle-fill"></i></button>
+                        <div id="quickImgPreview" class="composer-preview" hidden>
+                            <img id="quickImgThumb" alt="Selected photo preview">
+                            <div class="composer-preview-meta">
+                                <strong id="quickImgName">photo.jpg</strong>
+                                <small id="quickImgSize"></small>
+                            </div>
+                            <button type="button" id="quickImgClear" aria-label="Remove photo">
+                                <i class="bi bi-x-circle-fill"></i>
+                            </button>
                         </div>
                         <button type="submit" class="btn btn-primary" style="border-radius:999px;padding:0.3rem 0.95rem;font-size:0.8rem;font-weight:800;">
                             <i class="bi bi-send-fill me-1"></i> Post
                         </button>
                     </div>
+                    {{-- Outside the bar on purpose: a rejected photo bounces the
+                         reader back with the composer collapsed, and an error
+                         hidden inside it would read as another silent failure. --}}
+                    @if ($errors->any())
+                        <p class="composer-error" id="quickComposerError" role="alert">
+                            {{ $errors->first('post_image', 'Post photo: :message') ?: $errors->first('content', ':message') }}
+                        </p>
+                    @else
+                        <p class="composer-error" id="quickComposerError" role="alert" hidden></p>
+                    @endif
                 </form>
             </div>
             @endif
+
+            {{-- Community values live on one collapsible line now that the feed
+                 owns the whole width; collapsed, it costs a single row. --}}
+            <div class="forum-side-card forum-guide-strip fade-in-card">
+                <div class="d-flex justify-content-between align-items-center" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#guidelinesCollapse" aria-expanded="false" aria-controls="guidelinesCollapse">
+                    <h4 class="side-card-title" style="margin:0; color:var(--color-text);">
+                        Community Guidelines
+                    </h4>
+                    <i class="bi bi-chevron-down" style="font-size:0.85rem; color:var(--color-text-muted);"></i>
+                </div>
+                <div class="collapse" id="guidelinesCollapse">
+                    <hr style="margin:0.75rem 0; border:none; border-top:1px solid var(--color-border);">
+                    <div class="guide-item">
+                        <i class="bi bi-check-circle-fill" style="color:var(--color-success-text);"></i>
+                        <span><strong>Supportive &amp; Respectful:</strong> Encourage every mother's journey without judgment.</span>
+                    </div>
+                    <div class="guide-item">
+                        <i class="bi bi-lock-fill" style="color:var(--color-secondary-text);"></i>
+                        <span><strong>Privacy First:</strong> Never share sensitive clinical IDs or private home addresses.</span>
+                    </div>
+                    <div class="guide-item">
+                        <i class="bi bi-hospital-fill" style="color:var(--color-peach-text);"></i>
+                        <span><strong>Seek Medical Care:</strong> Direct urgent labor or emergency complications to your RHU midwife.</span>
+                    </div>
+                </div>
+            </div>
 
             {{-- Feed Filters (All Posts vs My Posts) --}}
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2 forum-feed-head">
@@ -636,75 +722,12 @@
                 <span class="forum-feed-status-text">{{ $posts->hasMorePages() ? 'Loading more discussions...' : 'You are all caught up.' }}</span>
             </div>
             @endif
-        </div>
-
-        {{-- Right Column: Community Guidelines & Activity --}}
-        <div class="col-lg-4">
-
-            {{-- Community Values Card (Collapsible) --}}
-            <div class="forum-side-card fade-in-card">
-                <div class="d-flex justify-content-between align-items-center" style="cursor:pointer;" data-bs-toggle="collapse" data-bs-target="#guidelinesCollapse">
-                    <h4 class="side-card-title" style="margin:0; color:var(--color-text);">
-                        Community Guidelines
-                    </h4>
-                    <i class="bi bi-chevron-down" style="font-size:0.85rem; color:var(--color-text-muted);"></i>
-                </div>
-                <div class="collapse" id="guidelinesCollapse">
-                    <hr style="margin:0.75rem 0; border:none; border-top:1px solid var(--color-border);">
-                    <div class="guide-item">
-                        <i class="bi bi-check-circle-fill" style="color:var(--color-success-text);"></i>
-                        <span><strong>Supportive &amp; Respectful:</strong> Encourage every mother's journey without judgment.</span>
-                    </div>
-                    <div class="guide-item">
-                        <i class="bi bi-lock-fill" style="color:var(--color-secondary-text);"></i>
-                        <span><strong>Privacy First:</strong> Never share sensitive clinical IDs or private home addresses.</span>
-                    </div>
-                    <div class="guide-item">
-                        <i class="bi bi-hospital-fill" style="color:var(--color-peach-text);"></i>
-                        <span><strong>Seek Medical Care:</strong> Direct urgent labor or emergency complications to your RHU midwife.</span>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Recent Discussions --}}
-            <div class="forum-side-card fade-in-card">
-                <h4 class="side-card-title" style="color:var(--color-text);">
-                    Recent Discussions
-                </h4>
-                @forelse($recentPosts as $recent)
-                    <a href="{{ route('forum.show', $recent->id) }}" class="d-block text-decoration-none mb-1" style="background:var(--color-bg); background-color:var(--color-bg); border:none; border-radius:10px; transition:all 0.2s; padding:0.4rem 0.6rem;">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span style="font-weight:800; font-size:0.79rem; color:var(--color-text);">{{ optional($recent->user)->name }}</span>
-                            <small style="font-size:0.68rem; color:var(--color-text-muted);">{{ $recent->created_at->diffForHumans(null, true, true) }}</small>
-                        </div>
-                        <p class="text-truncate mb-0" style="font-size:0.75rem; color:var(--color-text-muted);">{{ $recent->content }}</p>
-                    </a>
-                @empty
-                    <p class="small mb-0" style="color:var(--color-text-muted);">No recent activity.</p>
-                @endforelse
-            </div>
-
-        </div>
-
     </div>
 
 </div>
 
 @push('scripts')
 <script>
-function handleImageSelected(input) {
-    if (input.files && input.files[0]) {
-        document.getElementById('quickImgName').textContent = input.files[0].name;
-        document.getElementById('quickImgPreviewTag').style.display = 'inline-flex';
-    }
-}
-
-function clearQuickImage() {
-    const input = document.getElementById('quickPostImageInput');
-    if (input) input.value = '';
-    document.getElementById('quickImgPreviewTag').style.display = 'none';
-}
-
 function focusQuickComposer() {
     var q = document.getElementById('quickInlineInput');
     if (!q) return;
@@ -712,18 +735,113 @@ function focusQuickComposer() {
     setTimeout(function () { q.focus({ preventScroll: true }); }, 350);
 }
 
+/* Inline composer. The bar used to hang on .quick-composer-card:focus-within,
+   and opening the OS file picker drops focus — so the card collapsed with the
+   photo already chosen, taking the Post button with it and making "Add Photo"
+   look broken. The script owns the open state instead and keeps it while there
+   is typed text or an attached file. */
 (function () {
-    var q = document.getElementById('quickInlineInput');
-    if (!q) return;
-    q.addEventListener('input', function () {
-        this.style.height = 'auto';
-        this.style.height = this.scrollHeight + 'px';
+    var card = document.querySelector('.quick-composer-card');
+    var ta = document.getElementById('quickInlineInput');
+    var input = document.getElementById('quickPostImageInput');
+    if (!card || !ta || !input) return;
+
+    var preview = document.getElementById('quickImgPreview');
+    var thumb = document.getElementById('quickImgThumb');
+    var nameEl = document.getElementById('quickImgName');
+    var sizeEl = document.getElementById('quickImgSize');
+    var clearBtn = document.getElementById('quickImgClear');
+    var errorEl = document.getElementById('quickComposerError');
+    var form = ta.closest('form');
+    var MAX_BYTES = 5 * 1024 * 1024;
+    var ALLOWED = ['image/jpeg', 'image/png', 'image/webp'];
+    var thumbUrl = null;
+
+    function isOpen() {
+        return card.contains(document.activeElement) || ta.value.trim() !== '' || input.files.length > 0;
+    }
+
+    function syncOpen() {
+        card.classList.toggle('is-open', isOpen());
+        if (!isOpen()) ta.style.height = '';
+    }
+
+    function grow() {
+        ta.style.height = 'auto';
+        ta.style.height = ta.scrollHeight + 'px';
+    }
+
+    function showError(message) {
+        if (!errorEl) return;
+        errorEl.textContent = message;
+        errorEl.hidden = message === '';
+    }
+
+    function clearImage() {
+        input.value = '';
+        if (thumbUrl) {
+            URL.revokeObjectURL(thumbUrl);
+            thumbUrl = null;
+        }
+        preview.hidden = true;
+    }
+
+    // Returns true when the picked file can actually be uploaded. The server
+    // accepts the same list, so a rejection here is the reader's only warning.
+    function showImage() {
+        var file = input.files[0];
+        if (!file) {
+            preview.hidden = true;
+            return true;
+        }
+        if (ALLOWED.indexOf(file.type) === -1) {
+            clearImage();
+            showError('That file type is not supported yet — pick a JPG, PNG or WebP photo.');
+            return false;
+        }
+        if (file.size > MAX_BYTES) {
+            clearImage();
+            showError('That photo is larger than 5 MB. Choose a smaller one.');
+            return false;
+        }
+        if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+        thumbUrl = URL.createObjectURL(file);
+        thumb.src = thumbUrl;
+        nameEl.textContent = file.name;
+        sizeEl.textContent = file.size >= 1024 * 1024
+            ? (file.size / (1024 * 1024)).toFixed(1) + ' MB'
+            : Math.max(1, Math.round(file.size / 1024)) + ' KB';
+        preview.hidden = false;
+        showError('');
+        return true;
+    }
+
+    ta.addEventListener('input', function () {
+        grow();
+        syncOpen();
     });
-    var card = q.closest('.quick-composer-card');
-    if (card) {
-        card.addEventListener('focusout', function () {
-            if (q.value.trim() === '') q.style.height = '';
-        });
+    input.addEventListener('change', function () {
+        showImage();
+        syncOpen();
+    });
+    clearBtn.addEventListener('click', function () {
+        clearImage();
+        syncOpen();
+    });
+    document.addEventListener('focusin', syncOpen);
+    // The blur that follows a file-dialog handoff lands before the picker's
+    // own focus change, so the state is re-read on the next tick.
+    document.addEventListener('focusout', function () {
+        setTimeout(syncOpen, 0);
+    });
+    form.addEventListener('submit', function (event) {
+        if (!showImage()) event.preventDefault();
+    });
+
+    // A post that bounced back on validation keeps its draft open.
+    if (ta.value.trim() !== '') {
+        card.classList.add('is-open');
+        grow();
     }
 })();
 

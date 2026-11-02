@@ -181,7 +181,7 @@ class ForumController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:2000',
-            'post_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'post_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         $postData = [
@@ -236,7 +236,7 @@ class ForumController extends Controller
 
         $request->validate([
             'content' => 'required|string|max:2000',
-            'post_image' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+            'post_image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
             'remove_post_image' => 'nullable|boolean',
         ]);
 
