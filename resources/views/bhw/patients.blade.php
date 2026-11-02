@@ -157,7 +157,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2">
+                <div class="wd-actions d-flex gap-2">
                     <button type="submit" class="btn btn-sm wd-apply-btn">
                         <i class="bi bi-funnel me-1"></i> Filter
                     </button>

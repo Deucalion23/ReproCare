@@ -24,6 +24,10 @@
        :focus input at (0,3,2)/(0,4,2), so the inner reset needs the same
        :root[data-theme][data-bs-theme] body prefix plus .wd-search to outrank it. */
     .wd-search { position:relative; box-sizing:border-box; background:var(--color-surface) !important; background-color:var(--color-surface) !important; border:1px solid var(--color-input-border) !important; border-radius:10px !important; max-width:320px; min-height:36px; }
+    /* list-toolbar.blade.php puts .wd-search on the <form> itself, where it is a
+       bare flex item, so the cap has to stay there. Inside a .wd-field the parent
+       already owns the width and the search box should fill it. */
+    .wd-filters .wd-search { width:100%; max-width:none; }
     .wd-search:focus-within { border-color:var(--color-primary-text) !important; box-shadow:0 0 0 3px var(--focus-ring) !important; }
     :root[data-theme][data-bs-theme] body .wd-search :is(.form-control,.form-select,input,textarea) {
         display:block; min-width:0; width:100%; min-height:34px; appearance:none;
@@ -35,14 +39,22 @@
     :root[data-theme][data-bs-theme] body .wd-search :is(.form-control,input,textarea):focus { border:0 !important; border-color:transparent !important; box-shadow:none !important; outline:0 !important; }
     .wd-search .btn { position:absolute; top:0; right:0; bottom:0; display:grid; place-items:center; border:0 !important; border-radius:0 10px 10px 0 !important; background:transparent !important; box-shadow:none !important; outline:0 !important; color:var(--color-text-muted) !important; width:2.5rem; padding:0; }
     .wd-search .btn:hover, .wd-search .btn:focus-visible { color:var(--color-primary-text) !important; background:transparent !important; box-shadow:none !important; outline:0 !important; }
-    .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; }
+    /* A .card-header is itself a flex container, so without grow the bar would
+       size to its own content and strand the trailing button on a row of its own.
+       Basis is auto, not 100%: the pages that pair this bar with .wd-tabs in the
+       same header would otherwise always push the bar onto a second row. */
+    .wd-filters { display:flex; flex-wrap:wrap; gap:0.5rem; align-items:flex-end; flex:1 1 auto; min-width:0; }
     .wd-filters .wd-field { display:flex; flex-direction:column; gap:0.25rem; }
     .wd-filters label { font-size:0.68rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted); }
     .wd-filters .wd-select-field .form-control, .wd-filters .wd-select-field .form-select,
     .wd-filters .wd-date-field .form-control, .wd-filters .wd-date-field .form-select { border-radius:10px !important; border-color:var(--color-input-border) !important; font-size:0.82rem; min-height:36px; }
-    .wd-filters .wd-search-field { flex:1 1 240px; max-width:320px; }
-    .wd-filters .wd-select-field { flex:0 1 150px; min-width:130px; }
-    .wd-filters .wd-date-field { flex:0 1 150px; min-width:130px; }
+    /* Every field grows, so the row is consumed instead of leaving a void before
+       the buttons. Search takes the largest share because it holds free text.
+       The caps keep a field that wraps onto a row of its own from stretching out. */
+    .wd-filters .wd-search-field { flex:2 1 190px; min-width:170px; max-width:460px; }
+    .wd-filters .wd-select-field { flex:1 1 138px; min-width:126px; max-width:240px; }
+    .wd-filters .wd-date-field { flex:1 1 138px; min-width:126px; max-width:240px; }
+    .wd-filters .wd-actions { flex:0 0 auto; margin-left:auto; }
     .wd-apply-btn { border:none !important; border-radius:999px !important; font-weight:800 !important; background:var(--color-primary) !important; background-color:var(--color-primary) !important; color:#ffffff !important; padding:0.45rem 1.15rem !important; font-size:0.8rem !important; }
     .wd-clear-btn { border:1px solid var(--color-border) !important; border-radius:999px !important; padding:0.45rem 0.9rem !important; font-size:0.8rem !important; font-weight:700; color:var(--color-text-muted) !important; background:transparent !important; }
     .wd-wrap table thead th { border:none !important; background:transparent !important; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-text-muted) !important; }
@@ -57,11 +69,13 @@
     .wd-pill-pregnant { background:var(--color-danger-soft); color:var(--color-danger-text); }
     .wd-count { font-size:0.78rem; font-weight:700; color:var(--color-text-muted); }
     @media (max-width: 991.98px) {
-        .wd-filters .wd-search-field { max-width:none; flex:1 1 100%; }
-        .wd-filters .wd-select-field, .wd-filters .wd-date-field { flex:1 1 calc(50% - 0.5rem); }
+        /* Two selects per row here, so the cap is half the row: without it an odd
+           trailing field stretches across the whole bar. */
+        .wd-filters .wd-search-field { flex:1 1 100%; max-width:none; }
+        .wd-filters .wd-select-field, .wd-filters .wd-date-field { flex:1 1 calc(50% - 0.5rem); max-width:calc(50% - 0.5rem); }
     }
     @media (max-width: 767.98px) {
-        .wd-filters .wd-select-field, .wd-filters .wd-date-field { flex:1 1 100%; }
+        .wd-filters .wd-select-field, .wd-filters .wd-date-field { flex:1 1 100%; max-width:none; }
         .wd-wrap .table { font-size:0.78rem; }
         .wd-wrap .table th, .wd-wrap .table td { padding:0.5rem; }
     }

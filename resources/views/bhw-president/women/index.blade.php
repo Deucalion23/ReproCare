@@ -12,8 +12,6 @@
         .wd-wrap .card-header { padding:0.65rem 0.7rem !important; gap:0.5rem !important; }
         .wd-wrap .card-header h5 { font-size:0.82rem !important; }
         .wd-wrap .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
-        .wd-filters { width:100%; }
-        .wd-filters .wd-search-field { max-width:none; flex:1 1 100%; }
         .wd-count { font-size:0.7rem; }
         .table { font-size:0.7rem !important; }
         .table th, .table td { padding:0.4rem 0.5rem !important; }
@@ -51,7 +49,7 @@
                     </div>
                 </div>
 
-                <div class="d-flex gap-2">
+                <div class="wd-actions d-flex gap-2">
                     <button type="submit" class="btn btn-sm wd-apply-btn">
                         <i class="bi bi-funnel me-1"></i> Filter
                     </button>
