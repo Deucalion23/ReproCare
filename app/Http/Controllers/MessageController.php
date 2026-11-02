@@ -141,7 +141,9 @@ class MessageController extends Controller
             ->where('is_read', false)
             ->count();
 
-        $contacts = $this->getContacts($search);
+        // The directory is filtered in-page, so it must not inherit the
+        // conversation search: a body keyword would empty the contact list.
+        $contacts = $this->getContacts();
 
         return view('messages.index', compact('messages', 'unreadCount', 'contacts', 'search'));
     }
@@ -455,7 +457,7 @@ class MessageController extends Controller
         $isPresident = $currentUser->role === 'bhw_president';
 
         $contacts = User::query()
-            ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status', 'barangay', 'assigned_barangay', 'catchment_barangays'])
+            ->select(['id', 'first_name', 'middle_initial', 'last_name', 'role', 'status', 'barangay', 'assigned_barangay', 'catchment_barangays', 'profile_image', 'profile_image_data'])
             ->where('id', '!=', $currentUser->id)
             // Patients only see BHW / BHW President staff; midwives only see
             // BHW Presidents; BHWs only see patients + BHW Presidents;
@@ -486,6 +488,9 @@ class MessageController extends Controller
                     'type' => $messagingRole,
                     'user_role' => $user->role,
                     'label' => $this->formatRoleLabel($user),
+                    // Resolved here so the views never have to re-fetch a user
+                    // per row just to paint an avatar.
+                    'photo' => $user->profile_image_url,
                 ];
             });
 

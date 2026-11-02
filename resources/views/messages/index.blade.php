@@ -4,101 +4,79 @@
 
 @push('styles')
 <style>
-    /* === Care Messaging — clean, borderless, dashboard-matched === */
-    .rc-msg-app { --chat-primary:var(--color-secondary-text); --chat-primary-dk:var(--color-secondary-text); --chat-ink:var(--color-surface-strong); --chat-muted:var(--color-text-muted); --chat-faint:var(--color-text-muted); --chat-soft:var(--color-bg); max-width:1200px; margin:0 auto; padding-bottom:2rem; }
-    .rc-msg-hero { position:relative; overflow:hidden; background:var(--color-surface); background-color:var(--color-surface); border:none; border-radius:24px; padding:1.5rem 1.75rem; margin-top:0; margin-bottom:1.5rem; box-shadow:0 18px 42px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 12%, transparent), 0 4px 14px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 4%, transparent); display:flex; justify-content:space-between; align-items:center; gap:1rem; flex-wrap:wrap; }
-    .rc-msg-hero::before { content:''; position:absolute; top:-40px; right:-30px; width:260px; height:260px; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--color-surface) 45%, transparent) 0%, transparent 70%); pointer-events:none; }
-    .rc-msg-hero::after { content:''; position:absolute; bottom:-50px; left:20%; width:180px; height:180px; border-radius:50%; background:radial-gradient(circle, color-mix(in srgb, var(--color-secondary-soft) 55%, transparent) 0%, transparent 70%); pointer-events:none; }
-    .rc-msg-hero > * { position:relative; z-index:1; }
-    .rc-msg-hero h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.1rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.6rem; letter-spacing:-0.01em; }
-    .rc-msg-hero h1 .rc-msg-ico { width:42px; height:42px; border-radius:12px; background:var(--color-surface-soft); background-color:var(--color-surface-soft); border:1px solid var(--color-border); color:var(--color-text); display:inline-flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; }
-    .rc-msg-hero p { margin:.25rem 0 0; font-size:.78rem; color:var(--chat-muted); }
-    .rc-msg-hero-actions { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
-    .rc-unread-pill { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; padding:.5rem .95rem; border-radius:999px; font-weight:800; font-size:.78rem; white-space:nowrap; }
-    .rc-btn-pink { display:inline-flex; align-items:center; justify-content:center; gap:.45rem; background:var(--color-surface-strong); background-color:var(--color-surface-strong); border:none; color:var(--color-on-solid); font-weight:800; font-size:.86rem; padding:.62rem 1.3rem; border-radius:999px; text-decoration:none; box-shadow:0 8px 20px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 22%, transparent); transition:all .2s; white-space:nowrap; }
-    .rc-btn-pink:hover { background:var(--color-surface-strong); background-color:var(--color-surface-strong); border:none; color:var(--color-on-solid); transform:translateY(-1px); }
-    .rc-btn-ghost { display:inline-flex; align-items:center; gap:.45rem; background:var(--color-surface-soft); border:none; color:var(--color-text); font-weight:800; font-size:.86rem; padding:.6rem 1.1rem; border-radius:999px; text-decoration:none; transition:all .2s; }
+    /* === Care Messaging — one slim bar, two content-sized panels === */
+    .rc-msg-app { --chat-ink:var(--color-surface-strong); --chat-muted:var(--color-text-muted); max-width:1180px; margin:0 auto; padding-bottom:1rem; }
+
+    .rc-msg-hero { display:flex; align-items:center; gap:.85rem; flex-wrap:wrap; background:var(--color-surface); background-color:var(--color-surface); border:1px solid var(--color-border); border-radius:14px; padding:.65rem .9rem; margin-bottom:.8rem; box-shadow:0 1px 2px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent); }
+    .rc-msg-hero h1 { font-family:'Plus Jakarta Sans',sans-serif; font-size:.95rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.5rem; letter-spacing:-0.01em; white-space:nowrap; }
+    .rc-msg-hero h1 i { color:var(--color-secondary-text); font-size:1.05rem; }
+    .rc-msg-hero p { margin:0; font-size:.74rem; color:var(--chat-muted); }
+    .rc-msg-hero-actions { display:flex; align-items:center; gap:.45rem; margin-left:auto; flex-wrap:wrap; }
+    .rc-unread-pill { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); border:none; padding:.3rem .7rem; border-radius:999px; font-weight:800; font-size:.72rem; white-space:nowrap; }
+    .rc-btn-pink { display:inline-flex; align-items:center; gap:.35rem; background:var(--color-surface-strong); background-color:var(--color-surface-strong); border:none; color:var(--color-on-solid); font-weight:800; font-size:.78rem; padding:.4rem .9rem; border-radius:999px; text-decoration:none; transition:all .18s; white-space:nowrap; }
+    .rc-btn-pink:hover { background:var(--color-surface-strong); background-color:var(--color-surface-strong); border:none; color:var(--color-on-solid); opacity:.9; }
+    .rc-btn-ghost { display:inline-flex; align-items:center; gap:.35rem; background:var(--color-surface-soft); border:none; color:var(--color-text); font-weight:800; font-size:.78rem; padding:.4rem .85rem; border-radius:999px; text-decoration:none; transition:all .18s; white-space:nowrap; }
     .rc-btn-ghost:hover { border:none; color:var(--color-text); background:var(--color-border); }
 
-    .rc-msg-shell { display:grid; grid-template-columns:370px 1fr; gap:1.25rem; min-height:640px; align-items:start; }
+    /* Panels size to their own content now — the old 640px floor left a wall of
+       empty card under a short chat list. */
+    .rc-msg-shell { display:grid; grid-template-columns:340px 1fr; gap:.8rem; align-items:start; }
     @media (max-width:991px){ .rc-msg-shell{ grid-template-columns:1fr; } }
-    .rc-panel { background:var(--color-surface); background-color:var(--color-surface); border:none; border-radius:20px; box-shadow:var(--wp-shadow-sm); display:flex; flex-direction:column; overflow:hidden; min-height:640px; }
-    .rc-panel-head { padding:1.15rem 1.3rem; border:none; }
-    .rc-panel-head-top { display:flex; justify-content:space-between; align-items:center; gap:.75rem; margin-bottom:.8rem; }
-    .rc-panel-head-top h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:1.02rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.5rem; letter-spacing:-0.01em; }
-    .rc-panel-head-top h3 i { color:var(--color-secondary-text); }
-    .rc-panel-sub { font-size:.8rem; color:var(--chat-muted); margin:.3rem 0 0; }
-    .rc-count { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); border:none; color:var(--color-secondary-text); border-radius:999px; font-size:.72rem; font-weight:800; padding:.25rem .75rem; }
-    .rc-search { position:relative; }
-    .rc-search i { position:absolute; left:.9rem; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-size:.88rem; }
-    .rc-search input { width:100%; padding:.65rem 1rem .65rem 2.5rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-soft); background-color:var(--color-surface-soft); font-size:.86rem; color:var(--color-text); outline:none; transition:all .2s; }
+    .rc-panel { background:var(--color-surface); background-color:var(--color-surface); border:1px solid var(--color-border); border-radius:16px; box-shadow:var(--wp-shadow-sm); display:flex; flex-direction:column; overflow:hidden; min-height:0; }
+    .rc-panel-head { padding:.7rem .85rem; border-bottom:1px solid var(--color-border); }
+    .rc-panel-head-top { display:flex; justify-content:space-between; align-items:center; gap:.6rem; }
+    .rc-panel-head-top h3 { font-family:'Plus Jakarta Sans',sans-serif; font-size:.88rem; font-weight:800; color:var(--chat-ink); margin:0; display:flex; align-items:center; gap:.45rem; letter-spacing:-0.01em; }
+    .rc-panel-head-top h3 i { color:var(--color-secondary-text); font-size:.95rem; }
+    .rc-panel-sub { font-size:.72rem; color:var(--chat-muted); margin:.3rem 0 0; }
+    .rc-count { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); border:none; color:var(--color-secondary-text); border-radius:999px; font-size:.68rem; font-weight:800; padding:.16rem .55rem; white-space:nowrap; }
+    .rc-search { position:relative; margin-top:.55rem; }
+    .rc-search i { position:absolute; left:.7rem; top:50%; transform:translateY(-50%); color:var(--color-text-muted); font-size:.8rem; }
+    .rc-search input { width:100%; padding:.4rem .8rem .4rem 2rem; border-radius:999px; border:1px solid var(--color-border); background:var(--color-surface-soft); background-color:var(--color-surface-soft); font-size:.8rem; color:var(--color-text); outline:none; transition:all .18s; }
     .rc-search input:focus { border-color:var(--color-primary); background:var(--color-surface); background-color:var(--color-surface); box-shadow:0 0 0 3px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 15%, transparent); }
 
-    .rc-chat-list { list-style:none; margin:0; padding:.7rem; overflow-y:auto; flex:1; max-height:620px; display:flex; flex-direction:column; gap:.3rem; }
-    .rc-chat-item { display:flex; align-items:center; gap:.8rem; padding:.8rem; border-radius:14px; text-decoration:none; color:inherit; border:none; transition:all .18s; }
+    .rc-chat-list { list-style:none; margin:0; padding:.35rem; overflow-y:auto; flex:1; max-height:520px; display:flex; flex-direction:column; gap:.15rem; }
+    .rc-chat-item { display:flex; align-items:center; gap:.6rem; padding:.5rem .55rem; border-radius:11px; text-decoration:none; color:inherit; border:none; transition:background .16s; }
     .rc-chat-item:hover { background:var(--color-bg); background-color:var(--color-bg); border:none; color:inherit; }
     .rc-chat-item.unread { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); border:none; }
-    .rc-avatar-wrap { position:relative; flex-shrink:0; }
-    .rc-avatar { width:48px; height:48px; border-radius:50%; object-fit:cover; border:none; background:var(--color-surface-soft); }
-    .rc-online { position:absolute; bottom:1px; right:1px; width:12px; height:12px; background:var(--color-success); border:2px solid var(--color-border); border-radius:50%; }
+    .rc-avatar { width:36px; height:36px; border-radius:50%; object-fit:cover; border:none; background:var(--color-surface-soft); flex-shrink:0; }
     .rc-chat-meta { flex:1; min-width:0; }
-    .rc-chat-top { display:flex; justify-content:space-between; align-items:baseline; gap:.5rem; }
-    .rc-chat-name { font-weight:800; font-size:.9rem; color:var(--color-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0; }
-    .rc-chat-time { font-size:.72rem; color:var(--color-text-muted); white-space:nowrap; flex-shrink:0; }
-    .rc-chat-bottom { display:flex; justify-content:space-between; align-items:center; gap:.5rem; margin-top:.15rem; }
-    .rc-chat-preview { font-size:.82rem; color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0; flex:1; }
-    .rc-new-badge { background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid); font-size:.64rem; font-weight:800; min-width:22px; height:20px; padding:0 6px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; letter-spacing:.4px; }
-    .rc-role-tag { display:inline-block; margin-top:.35rem; font-size:.66rem; font-weight:800; padding:.18rem .6rem; border-radius:999px; border:none; text-transform:uppercase; letter-spacing:.4px; }
-    .rc-role-midwife { background:var(--color-success-soft); background-color:var(--color-success-soft); color:var(--color-success-text); }
-    .rc-role-bhw { background:var(--color-peach-soft); background-color:var(--color-peach-soft); color:var(--color-warning-text); }
-    .rc-role-president { background:var(--color-primary-soft); background-color:var(--color-primary-soft); color:var(--color-primary-text); }
-    .rc-role-patient { background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:var(--color-secondary-text); }
-    .rc-role-member { background:var(--color-surface-soft); background-color:var(--color-surface-soft); color:var(--color-text); }
+    .rc-chat-top { display:flex; align-items:baseline; gap:.4rem; min-width:0; }
+    .rc-chat-name { font-weight:800; font-size:.83rem; color:var(--color-text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0; min-width:0; }
+    .rc-chat-time { font-size:.68rem; color:var(--color-text-muted); white-space:nowrap; margin-left:auto; flex-shrink:0; }
+    .rc-chat-bottom { display:flex; align-items:center; gap:.4rem; margin-top:.1rem; min-width:0; }
+    .rc-chat-preview { font-size:.76rem; color:var(--color-text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin:0; flex:1; min-width:0; }
+    .rc-new-badge { background:var(--color-surface-strong); background-color:var(--color-surface-strong); color:var(--color-on-solid); font-size:.6rem; font-weight:800; min-width:19px; height:17px; padding:0 5px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; letter-spacing:.4px; }
+    /* One line for who the person is, instead of a pill on a row of its own. */
+    .rc-role-tag { font-size:.66rem; font-weight:800; color:var(--color-text-muted); white-space:nowrap; flex-shrink:0; text-transform:uppercase; letter-spacing:.3px; }
 
-    .rc-contacts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(230px,1fr)); gap:.8rem; padding:1.25rem; overflow-y:auto; }
-    .rc-contact { display:flex; align-items:center; gap:.85rem; background:var(--color-bg); background-color:var(--color-bg); border:none; border-radius:16px; padding:.95rem 1rem; text-decoration:none; color:inherit; transition:all .2s; }
-    .rc-contact:hover { border:none; background:var(--color-surface); background-color:var(--color-surface); transform:translateY(-2px); box-shadow:var(--wp-shadow-sm); color:inherit; }
-    .rc-contact img { width:44px; height:44px; border-radius:50%; object-fit:cover; border:none; flex-shrink:0; background:var(--color-border); }
-    .rc-contact h6 { font-size:.88rem; font-weight:800; color:var(--color-text); margin:0 0 .2rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .rc-contact small { font-size:.72rem; color:var(--color-text-muted); font-weight:700; display:flex; align-items:center; gap:.3rem; }
-    .rc-contact small i { color:var(--color-secondary-text); }
-    .rc-contact-go { width:32px; height:32px; border-radius:50%; background:var(--color-surface); background-color:var(--color-surface); color:var(--color-text); display:flex; align-items:center; justify-content:center; font-size:.85rem; flex-shrink:0; }
-    .rc-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:3.5rem 1.5rem; color:var(--color-text-muted); }
-    .rc-empty i { font-size:2.8rem; color:var(--color-border); margin-bottom:.8rem; }
-    .rc-empty h6 { font-weight:800; color:var(--color-text); }
-    .rc-empty p { font-size:.84rem; }
+    /* Directory rows: two columns of short lines rather than three columns of
+       tall cards, so a long catchment reads as a list you scan, not a wall. */
+    .rc-contacts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:.3rem; padding:.45rem; overflow-y:auto; max-height:520px; align-content:start; }
+    .rc-contact { display:flex; align-items:center; gap:.6rem; background:transparent; border:none; border-radius:11px; padding:.4rem .5rem; text-decoration:none; color:inherit; transition:background .16s; min-width:0; }
+    .rc-contact:hover { border:none; background:var(--color-secondary-soft); background-color:var(--color-secondary-soft); color:inherit; }
+    .rc-contact img { width:32px; height:32px; border-radius:50%; object-fit:cover; border:none; flex-shrink:0; background:var(--color-border); }
+    .rc-contact-txt { flex:1; min-width:0; }
+    .rc-contact h6 { font-size:.82rem; font-weight:800; color:var(--color-text); margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .rc-contact small { font-size:.7rem; color:var(--color-text-muted); font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+    .rc-contact.is-hidden { display:none; }
+    .rc-no-match { grid-column:1 / -1; text-align:center; padding:1.2rem; font-size:.78rem; color:var(--color-text-muted); }
+    .rc-empty { display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:1.8rem 1.2rem; color:var(--color-text-muted); }
+    .rc-empty i { font-size:1.9rem; color:var(--color-border); margin-bottom:.5rem; }
+    .rc-empty h6 { font-weight:800; color:var(--color-text); font-size:.86rem; }
+    .rc-empty p { font-size:.76rem; margin:0; }
 
-    /* ── Mobile: smaller text, greeting-size top card, stacked chat layout ── */
     @media (max-width:600px) {
-        .rc-msg-app { padding-bottom:1rem; }
-        .rc-msg-hero { padding:1.4rem 1.1rem; border-radius:20px; margin-bottom:1.25rem; flex-direction:column; align-items:stretch; }
-        .rc-msg-hero h1 { font-size:0.95rem; line-height:1.3; }
-        .rc-msg-hero h1 .rc-msg-ico { width:34px; height:34px; font-size:1rem; border-radius:10px; }
-        .rc-msg-hero p { font-size:0.7rem; line-height:1.5; }
-        .rc-msg-hero-actions { display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; }
-        .rc-msg-hero-actions .rc-unread-pill { grid-column:1 / -1; justify-self:start; font-size:0.68rem; }
-        .rc-btn-pink, .rc-btn-ghost { font-size:0.76rem; padding:0.55rem 0.9rem; width:100%; }
-        .rc-msg-shell { grid-template-columns:1fr; gap:0.85rem; min-height:0; }
-        .rc-panel { min-height:0; border-radius:18px; }
-        .rc-panel-head { padding:0.9rem 1rem; }
-        .rc-panel-head-top h3 { font-size:0.88rem; }
-        .rc-panel-sub { font-size:0.7rem; }
-        .rc-count { font-size:0.64rem; }
-        .rc-search input { font-size:0.76rem; padding:0.55rem 1rem 0.55rem 2.3rem; }
-        .rc-chat-list { max-height:340px; padding:0.5rem; }
-        .rc-chat-item { padding:0.6rem; gap:0.6rem; }
-        .rc-avatar { width:40px; height:40px; }
-        .rc-chat-name { font-size:0.8rem; }
-        .rc-chat-time { font-size:0.64rem; }
-        .rc-chat-preview { font-size:0.72rem; }
-        .rc-role-tag { font-size:0.58rem; }
-        .rc-contacts-grid { grid-template-columns:1fr; gap:0.55rem; padding:0.85rem; }
-        .rc-contact { padding:0.7rem 0.8rem; gap:0.65rem; }
-        .rc-contact img { width:38px; height:38px; }
-        .rc-contact h6 { font-size:0.78rem; }
-        .rc-contact small { font-size:0.66rem; }
-        .rc-empty { padding:2rem 1rem; }
-        .rc-empty p { font-size:0.76rem; }
+        .rc-msg-hero { padding:.6rem .75rem; gap:.5rem; }
+        .rc-msg-hero h1 { font-size:.88rem; width:100%; }
+        .rc-msg-hero p { font-size:.68rem; }
+        .rc-msg-hero-actions { margin-left:0; width:100%; }
+        .rc-msg-hero-actions .rc-btn-pink, .rc-msg-hero-actions .rc-btn-ghost { flex:1; justify-content:center; }
+        .rc-msg-shell { gap:.65rem; }
+        .rc-chat-list { max-height:300px; }
+        .rc-contacts-grid { grid-template-columns:1fr; max-height:360px; }
+        .rc-avatar { width:32px; height:32px; }
+        .rc-chat-name { font-size:.78rem; }
+        .rc-chat-preview { font-size:.72rem; }
     }
 </style>
 @endpush
@@ -114,12 +92,8 @@
 @section($contentSection)
 <div class="rc-msg-app">
     <div class="rc-msg-hero">
-        <div class="d-flex align-items-center gap-3">
-            <div>
-                <h1>Care Messaging</h1>
-                <p>Secure maternal health consultation with your care team.</p>
-            </div>
-        </div>
+        <h1><i class="bi bi-chat-heart-fill"></i> Care Messaging</h1>
+        <p>Secure maternal health consultation with your care team.</p>
         <div class="rc-msg-hero-actions">
             @if($unreadCount > 0)
                 <span class="rc-unread-pill"><i class="bi bi-envelope-fill me-1"></i>{{ $unreadCount }} Unread</span>
@@ -133,8 +107,8 @@
         <section class="rc-panel">
             <div class="rc-panel-head">
                 <div class="rc-panel-head-top">
-                    <h3>Chats</h3>
-                    <span class="rc-count">{{ $messages->count() }} active</span>
+                    <h3><i class="bi bi-threads"></i> Chats</h3>
+                    <span class="rc-count">{{ $messages->count() }}</span>
                 </div>
                 <form method="GET" class="rc-search">
                     <i class="bi bi-search"></i>
@@ -149,32 +123,28 @@
                         $otherParty = $sentByCurrentUser ? $msg->receiver : $msg->sender;
                         $lastActivity = $msg->replies_max_created_at ? \Carbon\Carbon::parse($msg->replies_max_created_at) : $msg->created_at;
                         $previewPrefix = $msg->conversation_preview_prefix ?? ($sentByCurrentUser ? 'You: ' : '');
-                        $otherPhoto = $otherParty ? $otherParty->profile_image_url : '/images/avatars/avatar-female.svg';
+                        $otherPhoto = ($otherParty ? $otherParty->profile_image_url : null) ?: '/images/avatars/avatar-female.svg';
                         $otherRole = $otherParty?->staff_title ?? 'Member';
-                        $roleCls = match ($otherParty?->role) { 'midwife' => 'rc-role-midwife', 'bhw' => 'rc-role-bhw', 'bhw_president' => 'rc-role-president', 'user' => 'rc-role-patient', default => 'rc-role-member', };
                     @endphp
                     <a href="{{ route($messagesRouteBase . '.thread', $msg->id) }}" class="rc-chat-item {{ $unreadForCurrentUser ? 'unread' : '' }}">
-                        <div class="rc-avatar-wrap">
-                            <img src="{{ $otherPhoto }}" alt="{{ optional($otherParty)->name ?? 'User' }}" class="rc-avatar" onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
-                            <span class="rc-online"></span>
-                        </div>
+                        <img src="{{ $otherPhoto }}" alt="{{ optional($otherParty)->name ?? 'User' }}" class="rc-avatar" onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
                         <div class="rc-chat-meta">
                             <div class="rc-chat-top">
                                 <h5 class="rc-chat-name">{{ optional($otherParty)->name ?? 'Healthcare Provider' }}</h5>
+                                <span class="rc-role-tag">{{ $otherRole }}</span>
                                 <span class="rc-chat-time">{{ $lastActivity->diffForHumans(null, true, true) }}</span>
                             </div>
                             <div class="rc-chat-bottom">
                                 <p class="rc-chat-preview">{{ $previewPrefix }}{{ \Illuminate\Support\Str::limit($msg->conversation_preview ?? $msg->body, 55) }}</p>
                                 @if($unreadForCurrentUser)<span class="rc-new-badge">NEW</span>@endif
                             </div>
-                            <span class="rc-role-tag {{ $roleCls }}">{{ $otherRole }}</span>
                         </div>
                     </a>
                 @empty
                     <div class="rc-empty">
                         <i class="bi bi-chat-square-dots"></i>
                         <h6>No conversations yet</h6>
-                        <p>Pick a provider on the right to start a consultation.</p>
+                        <p>Pick a contact on the right to start a consultation.</p>
                     </div>
                 @endforelse
             </div>
@@ -182,10 +152,17 @@
 
         <section class="rc-panel">
             <div class="rc-panel-head">
-                <div class="rc-panel-head-top" style="margin-bottom:0;">
-                    <h3>Available Contacts</h3>
+                <div class="rc-panel-head-top">
+                    <h3><i class="bi bi-people-fill"></i> Available Contacts</h3>
+                    <span class="rc-count" id="rcContactCount">{{ $contacts->count() }}</span>
                 </div>
                 <p class="rc-panel-sub">@if($currentUserRole === 'user') BHW staff assigned to your barangay. @elseif($currentUserRole === 'midwife') BHW Presidents in your designated barangays. @elseif($currentUserRole === 'bhw') Patients and BHW Presidents in your barangay. @elseif($currentUserRole === 'bhw_president') Registered women living in your barangay. @else Staff &amp; patient directory. @endif</p>
+                @if($contacts->isNotEmpty())
+                    <div class="rc-search">
+                        <i class="bi bi-search"></i>
+                        <input type="search" id="rcContactFilter" placeholder="Filter by name or barangay..." autocomplete="off" aria-label="Filter contacts">
+                    </div>
+                @endif
             </div>
             @if($contacts->isEmpty())
                 <div class="rc-empty">
@@ -194,21 +171,50 @@
                     <p>@if($currentUserRole === 'user') No BHW is assigned to your barangay right now. @elseif($currentUserRole === 'midwife') No BHW President is assigned to your designated barangays yet. @elseif($currentUserRole === 'bhw') No patients or BHW Presidents are in your barangay yet. @elseif($currentUserRole === 'bhw_president') No registered women live in your barangay yet. @else No available contacts under your health center right now. @endif</p>
                 </div>
             @else
-                <div class="rc-contacts-grid">
+                <div class="rc-contacts-grid" id="rcContactGrid">
                     @foreach($contacts as $contact)
-                        @php $contactUser = \App\Models\User::find($contact->id); $contactPhoto = $contactUser ? $contactUser->profile_image_url : '/images/avatars/avatar-female.svg'; @endphp
-                        <a href="{{ route($messagesRouteBase . '.create', ['to' => $contact->id, 'role' => $contact->role]) }}" class="rc-contact">
+                        @php $contactPhoto = $contact->photo ?: '/images/avatars/avatar-female.svg'; @endphp
+                        <a href="{{ route($messagesRouteBase . '.create', ['to' => $contact->id, 'role' => $contact->role]) }}" class="rc-contact"
+                           data-search="{{ strtolower($contact->name.' '.$contact->label.' '.$contact->role) }}">
                             <img src="{{ $contactPhoto }}" alt="{{ $contact->name }}" onerror="this.onerror=null;this.src='/images/avatars/avatar-female.svg';">
-                            <div style="flex:1;min-width:0;">
+                            <span class="rc-contact-txt">
                                 <h6>{{ $contact->name }}</h6>
-                                <small><i class="bi bi-shield-check"></i> {{ $contact->label }}</small>
-                            </div>
-                            <span class="rc-contact-go"><i class="bi bi-chat-dots"></i></span>
+                                <small>{{ $contact->label }}</small>
+                            </span>
                         </a>
                     @endforeach
+                    <div class="rc-no-match" id="rcContactNoMatch" hidden>No contact matches that filter.</div>
                 </div>
             @endif
         </section>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    // The directory is already on the page, so filtering it should not cost a
+    // round trip — and it must not touch the conversation search above it.
+    (function () {
+        const input = document.getElementById('rcContactFilter');
+        const grid = document.getElementById('rcContactGrid');
+        if (!input || !grid) return;
+
+        const rows = Array.from(grid.querySelectorAll('.rc-contact'));
+        const count = document.getElementById('rcContactCount');
+        const noMatch = document.getElementById('rcContactNoMatch');
+
+        input.addEventListener('input', function () {
+            const needle = this.value.trim().toLowerCase();
+            let shown = 0;
+            rows.forEach(function (row) {
+                const hit = needle === '' || (row.dataset.search || '').includes(needle);
+                row.classList.toggle('is-hidden', !hit);
+                if (hit) shown++;
+            });
+            count.textContent = needle === '' ? rows.length : shown + '/' + rows.length;
+            noMatch.hidden = shown !== 0;
+        });
+    })();
+</script>
+@endpush

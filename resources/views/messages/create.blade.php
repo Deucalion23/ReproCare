@@ -87,7 +87,7 @@
             </div>
             <div class="rc-contact-list" id="contactList">
                 @forelse($contacts as $contact)
-                    @php $isActive = (string) $selectedReceiverId === (string) $contact->id && $selectedReceiverRole === $contact->role; $cUser = \App\Models\User::find($contact->id); $cPhoto = $cUser?->profile_image_url; @endphp
+                    @php $isActive = (string) $selectedReceiverId === (string) $contact->id && $selectedReceiverRole === $contact->role; $cPhoto = $contact->photo; @endphp
                     <button type="button" class="rc-contact-opt {{ $isActive ? 'active' : '' }}" data-id="{{ $contact->id }}" data-role="{{ $contact->role }}" data-name="{{ $contact->name }}" data-label="{{ $contact->label }}" data-search="{{ strtolower($contact->name . ' ' . $contact->label . ' ' . $contact->role) }}">
                         <span class="rc-av">@if($cPhoto)<img src="{{ $cPhoto }}" alt="" onerror="this.remove();">@else{{ strtoupper(substr($contact->name, 0, 1)) }}@endif</span>
                         <span style="min-width:0;">
