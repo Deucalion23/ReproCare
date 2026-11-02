@@ -668,15 +668,12 @@ function showSection(id, el, ev) {
     document.querySelectorAll('.settings-nav-item').forEach(n => n.classList.remove('active'));
     document.getElementById('section-' + id).classList.add('active');
     el.classList.add('active');
-    document.querySelectorAll('#section-' + id + ' .fade-in-card').forEach(c => {
-        c.classList.remove('visible');
-        setTimeout(() => c.classList.add('visible'), 30);
-    });
+    // The section was display:none when the layout first swept the page, so its
+    // cards were never observable and never got the reveal class.
+    window.ReproCareReveal(document.getElementById('section-' + id));
 }
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('#section-appearance .fade-in-card').forEach((c, i) => {
-        setTimeout(() => c.classList.add('visible'), i * 80);
-    });
+    window.ReproCareReveal(document.getElementById('section-appearance'));
         @include('includes.theme-toggle')
     document.querySelectorAll('.settings-nav-item').forEach(link => {
         link.addEventListener('click', function (ev) {

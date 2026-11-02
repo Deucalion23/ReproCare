@@ -11,6 +11,16 @@
     .rq-bar-subtitle { margin:0; font-size:0.74rem; color:var(--color-text-muted); line-height:1.35; }
     .rq-chips { display:flex; flex-wrap:wrap; gap:0.35rem; margin-left:auto; }
 
+    /* Primary action lives on the same bar. Only it (no chips) has to reach the
+       right edge on its own; with chips present they already carry the push. */
+    .rq-action { display:inline-flex; align-items:center; gap:0.35rem; padding:0.3rem 0.8rem; border-radius:999px; background:var(--color-surface-strong); font-size:0.76rem; font-weight:800; text-decoration:none; white-space:nowrap; }
+    /* !important because theme.css paints every content-area link with the
+       primary accent behind an eight-deep :not() chain that no plain selector
+       can outrank — purple text on a dark pill would be unreadable. */
+    body .main-content a.rq-action { color:var(--color-on-solid) !important; }
+    body .main-content a.rq-action:hover, body .main-content a.rq-action:focus-visible { color:var(--color-on-solid) !important; opacity:0.9; }
+    .rq-bar-id + .rq-action { margin-left:auto; }
+
     /* The queue sits under .main-content, so the framework's chip sizing needs
        body + the modifier class to be beaten. */
     body .main-content .summary-chip.rq-chip { padding:0.2rem 0.62rem !important; font-size:0.72rem !important; font-weight:700; gap:0.32rem; white-space:nowrap; }
@@ -61,7 +71,9 @@
         .rq-bar-title { font-size:0.86rem; }
         .rq-bar-subtitle { font-size:0.7rem; }
         /* One swipeable strip instead of four wrapped chips stacking into a block. */
-        .rq-chips { width:100%; flex-wrap:nowrap; overflow-x:auto; padding-bottom:0.15rem; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, #000 92%, transparent 100%); mask-image:linear-gradient(90deg, #000 92%, transparent 100%); }
+        .rq-chips { order:2; width:100%; flex-wrap:nowrap; overflow-x:auto; padding-bottom:0.15rem; scrollbar-width:none; -webkit-mask-image:linear-gradient(90deg, #000 92%, transparent 100%); mask-image:linear-gradient(90deg, #000 92%, transparent 100%); }
+        /* The button keeps the title's line; the count strip drops below both. */
+        .rq-action { order:1; margin-left:auto; padding:0.25rem 0.65rem; font-size:0.72rem; }
         .rq-chips::-webkit-scrollbar { display:none; }
         .rq-chip { flex:0 0 auto; }
         body .main-content .rq-wrap .table :is(thead th, tbody td) { padding:0.32rem 0.45rem !important; }

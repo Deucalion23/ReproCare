@@ -9,9 +9,15 @@
      * @param string $subtitle
      * @param string $icon   bootstrap-icons class
      * @param array  $chips  list of ['label' => string, 'value' => int, 'tone' => primary|warning|success|danger|info]
+     * @param string $action_href  optional primary button, e.g. the Create Report link
+     * @param string $action_label
+     * @param string $action_icon
      */
     $chips = $chips ?? [];
     $icon = $icon ?? 'bi-clipboard2-check-fill';
+    $actionHref = $action_href ?? null;
+    $actionLabel = $action_label ?? 'Create Report';
+    $actionIcon = $action_icon ?? 'bi-plus-circle-fill';
 @endphp
 
 <div class="rq-bar fade-in-card">
@@ -30,6 +36,10 @@
                 </span>
             @endforeach
         </div>
+    @endif
+
+    @if (!empty($actionHref))
+        <a href="{{ $actionHref }}" class="rq-action"><i class="bi {{ $actionIcon }}" aria-hidden="true"></i>{{ $actionLabel }}</a>
     @endif
 </div>
 

@@ -3,6 +3,7 @@
 @section('title', 'Monthly Reports - BHW Portal')
 
 @push('styles')
+@include('includes.report-queue-styles')
 <style>
     .report-actions-col {
         width:170px;
@@ -33,20 +34,8 @@
         }
     }
 
-    /* ── Small screens: slim hero, 4-across compressed metric cards, compact tables ── */
+    /* ── Small screens: compact panels and tables ── */
     @media (max-width: 767.98px) {
-        body .main-content .page-hero { border-radius:1rem !important; }
-        body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
-        body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
-        body .main-content .workspace-toolbar .btn-hero-primary { font-size:0.76rem !important; padding:0.55rem 1rem !important; }
-        body .main-content .metric-grid { grid-template-columns:repeat(4, minmax(0, 1fr)) !important; gap:0.5rem !important; }
-        body .main-content .metric-card { min-height:0 !important; border-radius:0.9rem !important; padding:0.65rem 0.55rem !important; }
-        body .main-content .metric-card::before { width:64px; height:64px; top:-26px; right:-14px; }
-        body .main-content .metric-card::after { display:none; }
-        body .main-content .metric-card-icon { font-size:1rem !important; top:0.55rem; right:0.55rem; }
-        body .main-content .metric-card-label { font-size:0.56rem !important; letter-spacing:0.05em; overflow-wrap:anywhere; }
-        body .main-content .metric-card-value { font-size:1.2rem !important; margin-top:0.5rem; }
-        body .main-content .metric-card-note { display:none; }
         body .main-content .workspace-panel { margin-bottom:0.75rem !important; }
         body .main-content .workspace-panel-header { padding:0.7rem 0.85rem !important; }
         body .main-content .workspace-panel-title { font-size:0.85rem !important; }
@@ -86,43 +75,19 @@
     $printedCount = $reports->getCollection()->whereNotNull('printed_at')->count();
 @endphp
 
-<div class="workspace-stack">
-    <div class="page-hero fade-in-card">
-        <div class="workspace-toolbar" style="position:relative;z-index:1;">
-            <div>
-                <div class="page-hero-title">Monthly Reports</div>
-                <p class="page-hero-subtitle">Create, track, and submit your health records and pregnancy reports for review.</p>
-            </div>
-            <a href="{{ route('bhw.reports.create') }}" class="btn-hero-primary"><i class="bi bi-plus-circle-fill"></i>Create Report</a>
-        </div>
-    </div>
-
-    <div class="metric-grid">
-        <div class="metric-card metric-card-primary fade-in-card">
-            <i class="bi bi-folder2-open metric-card-icon"></i>
-            <div class="metric-card-label">Total Reports</div>
-            <div class="metric-card-value">{{ $reports->total() }}</div>
-            <div class="metric-card-note">All reports inside the current filter set.</div>
-        </div>
-        <div class="metric-card metric-card-cyan fade-in-card">
-            <i class="bi bi-calendar-check-fill metric-card-icon"></i>
-            <div class="metric-card-label">This Month</div>
-            <div class="metric-card-value">{{ $thisMonthCount }}</div>
-            <div class="metric-card-note">Reports created for {{ now()->format('F Y') }}.</div>
-        </div>
-        <div class="metric-card metric-card-green fade-in-card">
-            <i class="bi bi-printer-fill metric-card-icon"></i>
-            <div class="metric-card-label">Printed</div>
-            <div class="metric-card-value">{{ $printedCount }}</div>
-            <div class="metric-card-note">Reports already opened for printable output.</div>
-        </div>
-        <div class="metric-card metric-card-amber fade-in-card">
-            <i class="bi bi-send-check-fill metric-card-icon"></i>
-            <div class="metric-card-label">Draft Queue</div>
-            <div class="metric-card-value">{{ $reports->getCollection()->where('submission_status', 'draft')->count() }}</div>
-            <div class="metric-card-note">Reports still waiting to be submitted to the president.</div>
-        </div>
-    </div>
+<div class="workspace-stack rq-stack">
+    @include('includes.report-queue-head', [
+        'title' => 'Monthly Reports',
+        'subtitle' => 'Create, track, and submit your health records and pregnancy reports for review.',
+        'icon' => 'bi-folder2-open',
+        'action_href' => route('bhw.reports.create'),
+        'chips' => [
+            ['label' => 'in view', 'value' => $reports->total(), 'tone' => 'primary'],
+            ['label' => 'this month', 'value' => $thisMonthCount, 'tone' => 'info'],
+            ['label' => 'printed', 'value' => $printedCount, 'tone' => 'success'],
+            ['label' => 'drafts', 'value' => $reports->getCollection()->where('submission_status', 'draft')->count(), 'tone' => 'warning'],
+        ],
+    ])
 
     <div class="workspace-panel fade-in-card">
         <div class="workspace-panel-header">

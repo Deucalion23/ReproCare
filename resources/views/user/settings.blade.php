@@ -848,10 +848,9 @@ function showSection(id, el) {
     if (target) target.classList.add('active');
     if (el) el.classList.add('active');
     if (target) {
-        target.querySelectorAll('.fade-in-card').forEach((c,i) => {
-            c.classList.remove('visible');
-            setTimeout(() => c.classList.add('visible'), i * 60 + 30);
-        });
+        // The section was display:none when the layout first swept the page, so
+        // its cards were never observable and never got the reveal class.
+        window.ReproCareReveal(target);
         // Bring the selected content into view (it sits below the nav on phones).
         try { target.scrollIntoView({ behavior:'smooth', block:'start' }); } catch (e) { target.scrollIntoView(); }
     }
@@ -966,9 +965,7 @@ function setupSettingsBrgyDropdown() {
 document.addEventListener('DOMContentLoaded', function () {
     setupSettingsBrgyDropdown();
 
-    document.querySelectorAll('#section-profile .fade-in-card').forEach((c,i) => {
-        setTimeout(() => c.classList.add('visible'), i * 80);
-    });
+    window.ReproCareReveal(document.getElementById('section-profile'));
         @include('includes.theme-toggle')
     // Device-level display preferences (notification + privacy toggles
     // without a server column persist per-device and restore on load).

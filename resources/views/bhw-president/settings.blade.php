@@ -445,19 +445,16 @@ function showSection(id, el) {
     const target = document.getElementById('section-' + id);
     if (target) target.classList.add('active');
     el.classList.add('active');
-    document.querySelectorAll('#section-' + id + ' .fade-in-card').forEach((c,i) => {
-        c.classList.remove('visible');
-        setTimeout(() => c.classList.add('visible'), i * 60 + 30);
-    });
+    // The section was display:none when the layout first swept the page, so its
+    // cards were never observable and never got the reveal class.
+    window.ReproCareReveal(target);
     // Bring the selected content into view (it sits below the nav on phones).
     if (target) {
         try { target.scrollIntoView({ behavior:'smooth', block:'start' }); } catch (e) { target.scrollIntoView(); }
     }
 }
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('#section-appearance .fade-in-card').forEach((c,i) => {
-        setTimeout(() => c.classList.add('visible'), i * 80);
-    });
+    window.ReproCareReveal(document.getElementById('section-appearance'));
         @include('includes.theme-toggle')
 });
 </script>

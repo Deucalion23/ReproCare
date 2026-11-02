@@ -5,6 +5,7 @@
 @section('title', 'Reports - BHW President Portal | ReproCare')
 
 @push('styles')
+@include('includes.report-queue-styles')
 <style>
     .report-actions-col {
         width:160px;
@@ -34,20 +35,8 @@
             min-width:146px;
         }
     }
-    /* ── Wide screens: all five metrics share one row ── */
-    @media (min-width: 1024px) {
-        .metric-grid { display:grid !important; grid-template-columns:repeat(5, minmax(0, 1fr)) !important; }
-    }
-    /* ── Phones: compact metrics, stacked filter, compressed tables ── */
+    /* ── Phones: stacked filter, compressed tables ── */
     @media (max-width: 600px) {
-        .metric-grid { display:flex !important; flex-wrap:nowrap !important; overflow-x:auto !important; gap:0.45rem; padding-bottom:0.25rem; scrollbar-width:none; scroll-snap-type:x mandatory; -webkit-mask-image:linear-gradient(90deg, #000 88%, transparent 100%); mask-image:linear-gradient(90deg, #000 88%, transparent 100%); }
-        .metric-grid::-webkit-scrollbar { display:none; }
-        .metric-grid > .metric-card { flex:0 0 148px !important; max-width:148px !important; scroll-snap-align:start; }
-        .metric-card { padding:0.55rem 0.6rem !important; border-radius:12px !important; display:flex !important; flex-direction:column !important; justify-content:center !important; min-height:0; }
-        .metric-card-icon { font-size:0.8rem !important; margin-bottom:0.25rem !important; }
-        .metric-card-label { font-size:0.52rem !important; }
-        .metric-card-value { font-size:0.95rem !important; line-height:1.1 !important; }
-        .metric-card-note { font-size:0.56rem !important; line-height:1.35 !important; }
         .workspace-panel-header { padding:0.85rem 1rem !important; }
         .workspace-panel-title { font-size:0.82rem !important; }
         .workspace-panel-subtitle { font-size:0.66rem !important; }
@@ -89,48 +78,19 @@
     $pregnancyReports = $reports->getCollection()->filter(fn($report) => $report->report_type === 'pregnancies');
 @endphp
 
-<div class="workspace-stack">
-    <div class="page-hero fade-in-card">
-        <div class="workspace-toolbar" style="position:relative;z-index:1;">
-            <div>
-                <div class="page-hero-title">BHW Reports</div>
-                <p class="page-hero-subtitle">Review submissions from BHWs, add notes, and forward approved reports to the midwife.</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="metric-grid">
-        <div class="metric-card metric-card-primary fade-in-card">
-            <i class="bi bi-folder2-open metric-card-icon"></i>
-            <div class="metric-card-label">Reports in View</div>
-            <div class="metric-card-value">{{ $reports->total() }}</div>
-            <div class="metric-card-note">Reports currently loaded in the moderation queue.</div>
-        </div>
-        <div class="metric-card metric-card-cyan fade-in-card">
-            <i class="bi bi-file-medical-fill metric-card-icon"></i>
-            <div class="metric-card-label">Health Reports</div>
-            <div class="metric-card-value">{{ $healthReports->count() }}</div>
-            <div class="metric-card-note">Submissions focused on health records.</div>
-        </div>
-        <div class="metric-card metric-card-rose fade-in-card">
-            <i class="bi bi-heart-fill metric-card-icon"></i>
-            <div class="metric-card-label">Pregnancy Reports</div>
-            <div class="metric-card-value">{{ $pregnancyReports->count() }}</div>
-            <div class="metric-card-note">Submissions focused on pregnancy monitoring.</div>
-        </div>
-        <div class="metric-card metric-card-amber fade-in-card">
-            <i class="bi bi-hourglass-split metric-card-icon"></i>
-            <div class="metric-card-label">Need Review</div>
-            <div class="metric-card-value">{{ $reports->getCollection()->where('submission_status', 'submitted_to_president')->count() }}</div>
-            <div class="metric-card-note">Reports waiting for your approval or rejection.</div>
-        </div>
-        <div class="metric-card metric-card-cyan fade-in-card">
-            <i class="bi bi-reply-fill metric-card-icon"></i>
-            <div class="metric-card-label">Returned by Midwife</div>
-            <div class="metric-card-value">{{ $reports->getCollection()->where('submission_status', 'returned_to_president')->count() }}</div>
-            <div class="metric-card-note">Re-check, then forward to the midwife again or send back to the BHW.</div>
-        </div>
-    </div>
+<div class="workspace-stack rq-stack">
+    @include('includes.report-queue-head', [
+        'title' => 'BHW Reports',
+        'subtitle' => 'Review submissions from BHWs, add notes, and forward approved reports to the midwife.',
+        'icon' => 'bi-folder2-open',
+        'chips' => [
+            ['label' => 'in queue', 'value' => $reports->total(), 'tone' => 'primary'],
+            ['label' => 'health', 'value' => $healthReports->count(), 'tone' => 'info'],
+            ['label' => 'pregnancy', 'value' => $pregnancyReports->count(), 'tone' => 'danger'],
+            ['label' => 'need review', 'value' => $reports->getCollection()->where('submission_status', 'submitted_to_president')->count(), 'tone' => 'warning'],
+            ['label' => 'returned', 'value' => $reports->getCollection()->where('submission_status', 'returned_to_president')->count(), 'tone' => 'success'],
+        ],
+    ])
 
     <div class="workspace-panel fade-in-card">
         <div class="workspace-panel-header">
