@@ -4,19 +4,25 @@
 
 @push('styles')
 <style>
-    .cctl-shell { display:grid; gap:1.25rem; }
-    .cctl-header, .cctl-card { background:var(--bg-card); border:1px solid var(--border); border-radius:22px; box-shadow:var(--shadow-sm); }
-    .cctl-header { padding:1.4rem 1.6rem; }
-    .cctl-title { font-family:'Plus Jakarta Sans', sans-serif; font-size:1.45rem; font-weight:800; color:var(--text); margin:0; }
-    .cctl-subtitle { color:var(--text-muted); margin:0.35rem 0 0; }
-    .cctl-stats { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:1rem; }
-    .cctl-stat { padding:1rem 1.1rem; border-radius:18px; border:1px solid var(--border); background:linear-gradient(135deg, color-mix(in srgb, var(--color-info) 8%, transparent), color-mix(in srgb, var(--color-primary) 7%, transparent)); }
-    .cctl-stat-label { font-size:0.78rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.08em; }
-    .cctl-stat-value { font-size:1.55rem; font-weight:800; color:var(--text); }
-    .cctl-card { padding:1.25rem; }
-    .cctl-toolbar { display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; margin-bottom:1rem; }
-    .cctl-tabs { display:flex; gap:0.6rem; flex-wrap:wrap; }
-    .cctl-tab { padding:0.65rem 1rem; border-radius:999px; border:1px solid var(--border); color:var(--text-muted); text-decoration:none; font-weight:700; font-size:0.85rem; background:var(--bg-card2); }
+    /* The hero repeats the sidebar label, so it only needs one slim line here. */
+    body .main-content .page-hero { padding:0.55rem 0.95rem !important; margin-bottom:0 !important; border-radius:16px !important; }
+    body .main-content .page-hero .page-hero-title { font-size:1rem !important; margin-bottom:0 !important; }
+    body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
+    .cctl-shell { display:grid; gap:0.7rem; }
+    .cctl-header, .cctl-card { background:var(--bg-card); border:1px solid var(--border); border-radius:16px; box-shadow:var(--shadow-sm); }
+    .cctl-header { padding:0.8rem 1rem; }
+    .cctl-title { font-family:'Plus Jakarta Sans', sans-serif; font-size:1.05rem; font-weight:800; color:var(--text); margin:0; }
+    .cctl-subtitle { font-size:0.76rem; color:var(--text-muted); margin:0.2rem 0 0; }
+    .cctl-stats { display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.5rem; margin-top:0.7rem; }
+    /* One line per count: label left, number right. The stacked version spent
+       90px of card on three numbers. */
+    .cctl-stat { display:flex; align-items:baseline; justify-content:space-between; gap:0.6rem; padding:0.34rem 0.65rem; border-radius:11px; border:1px solid var(--border); background:linear-gradient(135deg, color-mix(in srgb, var(--color-info) 8%, transparent), color-mix(in srgb, var(--color-primary) 7%, transparent)); }
+    .cctl-stat-label { font-size:0.66rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+    .cctl-stat-value { font-size:1rem; font-weight:800; color:var(--text); font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .cctl-card { padding:0.8rem; }
+    .cctl-toolbar { display:flex; align-items:center; justify-content:space-between; gap:0.5rem 0.8rem; flex-wrap:wrap; margin-bottom:0.6rem; }
+    .cctl-tabs { display:flex; gap:0.35rem; flex-wrap:wrap; }
+    .cctl-tab { padding:0.3rem 0.72rem; border-radius:999px; border:1px solid var(--border); color:var(--text-muted); text-decoration:none; font-weight:700; font-size:0.76rem; background:var(--bg-card2); }
     .cctl-tab.active { background:var(--primary-subtle); color:var(--primary-light); border-color:var(--border-glass); }
     .cctl-page-title {
         text-align:center;
@@ -153,7 +159,7 @@
                 <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i>Search</button>
             </form>
         </div>
-        <div class="cctl-stats mt-3">
+        <div class="cctl-stats">
             <div class="cctl-stat"><div class="cctl-stat-label">Children</div><div class="cctl-stat-value">{{ number_format($stats['totalChildren']) }}</div></div>
             <div class="cctl-stat"><div class="cctl-stat-label">Active Child Records</div><div class="cctl-stat-value">{{ number_format($stats['activeChildren']) }}</div></div>
             <div class="cctl-stat"><div class="cctl-stat-label">Completed Childcare Profiles</div><div class="cctl-stat-value">{{ number_format($stats['completedProfiles']) }}</div></div>
@@ -163,7 +169,7 @@
     <div class="cctl-card">
         <div class="cctl-toolbar">
             <div class="cctl-tabs">
-                @foreach(['page-1' => 'Page 1/4', 'page-2' => 'Page 2/4', 'page-3' => 'Page 3/4', 'page-4' => 'Page 4/4'] as $key => $label)
+                @foreach(['page-1' => '1/4', 'page-2' => '2/4', 'page-3' => '3/4', 'page-4' => '4/4'] as $key => $label)
                     <a href="{{ route('midwife.child-care-target-clients.index', ['tab' => $key, 'search' => $search]) }}" class="cctl-tab {{ $tab === $key ? 'active' : '' }}">{{ $label }}</a>
                 @endforeach
             </div>
