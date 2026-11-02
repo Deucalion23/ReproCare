@@ -8,6 +8,9 @@
     $isMidwife = request()->routeIs('midwife.postpartum.*');
     $railLimit = 5;
     $hasRail = $dangerVisits->count() > 0;
+    // A filtered list can empty the follow-up rail, and "show only that section" would
+    // then render a blank page — fall back to the combined view instead.
+    $view = ($view === 'followups' && !$hasRail) ? 'all' : $view;
 @endphp
 
 @section($contentSection)
@@ -36,25 +39,121 @@
 @push('styles')
 <style>
     /* Mirrors .wd-tab from the women directory; the app has no global tab style. */
-    .pp-filter { display:inline-flex; align-items:center; gap:0.4rem; border:1px solid var(--color-border) !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
+    .pp-filter { display:inline-flex; align-items:center; gap:0.4rem; border:1px solid var(--color-border) !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; text-decoration:none !important; }
     .pp-filter:hover { border-color:var(--color-primary) !important; color:var(--color-primary-text) !important; }
     .pp-filter.active { background:var(--color-text) !important; background-color:var(--color-text) !important; border-color:var(--color-text) !important; color:var(--color-bg) !important; }
     .pp-filter.active i, .pp-filter .count { color:inherit; }
     .pp-filter .count { opacity:0.7; font-weight:700; }
 
+    /* Segments left, search + filters right; the strip wraps onto its own line when narrow. */
+    .pp-toolbar { display:flex; align-items:center; gap:0.5rem 0.75rem; flex-wrap:wrap; margin-bottom:1rem; }
+    .pp-tabs { display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; }
+    .pp-filters { display:flex; align-items:center; gap:0.45rem; flex:1 1 320px; flex-wrap:wrap; justify-content:flex-end; }
+    .pp-search { position:relative; flex:1 1 150px; min-width:140px; max-width:230px; }
+    .pp-search i { position:absolute; left:0.6rem; top:50%; transform:translateY(-50%); font-size:0.8rem; color:var(--color-text-muted); pointer-events:none; }
+    .pp-search input { width:100% !important; border-radius:10px; padding:0 0.7rem 0 1.9rem; font-size:0.8rem; }
+    .pp-field { display:inline-flex; align-items:center; gap:0.35rem; }
+    .pp-word { font-size:0.66rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--color-text-muted); white-space:nowrap; }
+    /* portal-theme.blade.php:401 pins .main-content controls at min-height:42px and the global
+       input/select rule at width:100%, which would blow this strip apart — both need beating. */
+    body .main-content .pp-select { width:auto !important; min-height:38px !important; border-radius:10px; font-size:0.78rem; padding:0 1.7rem 0 0.6rem; }
+    .pp-clear { flex:0 0 auto; font-size:0.75rem; min-height:0; padding:0.3rem 0.6rem; }
+
     /* One section at a time has to beat Bootstrap's col-lg-* widths. */
     #postpartumSections.is-filtered > [data-section] { display:none; }
     #postpartumSections.is-filtered > [data-section].is-active { display:block; flex:0 0 100%; max-width:100%; }
+
+    /* The hero carried four full-size chips above the lists; shrink it so the tabs sit
+       near the top of the screen on a phone. */
+    body .main-content .page-hero { padding:0.7rem 1rem !important; }
+    body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
+    body .main-content .page-hero .page-hero-subtitle { font-size:0.78rem !important; }
+    body .main-content .summary-chip { font-size:0.72rem !important; padding:0.3rem 0.7rem !important; min-height:0; }
+
+    @media (max-width: 991.98px) {
+        .pp-filters { flex:1 1 100%; justify-content:flex-start; }
+        .pp-search { flex:1 1 160px; max-width:none; }
+        body .main-content .pp-select { width:100% !important; flex:1 1 150px; }
+        .pp-field { flex:1 1 150px; }
+    }
 </style>
 @endpush
 
-<div class="d-flex flex-wrap align-items-center gap-2 mb-4" id="postpartumFilters" role="group" aria-label="Choose which list to show">
-    <button type="button" class="pp-filter active" data-view="all" aria-pressed="true"><i class="bi bi-collection-fill"></i> All</button>
-    <button type="button" class="pp-filter" data-view="mothers" aria-pressed="false"><i class="bi bi-person-badge-fill"></i> Recently Delivered Mothers <span class="count">{{ $delivered->total() }}</span></button>
-    @if($hasRail)
-        <button type="button" class="pp-filter" data-view="followups" aria-pressed="false"><i class="bi bi-exclamation-triangle-fill"></i> Needs Follow-up <span class="count">{{ $dangerVisits->count() }}</span></button>
-    @endif
-    <button type="button" class="pp-filter" data-view="newborns" aria-pressed="false"><i class="bi bi-balloon-heart-fill"></i> Newborns <span class="count">{{ $newborns->total() }}</span></button>
+<div class="pp-toolbar">
+    @php
+        // One builder for tabs, selects and Clear: filters stack instead of replacing each
+        // other, and any change restarts both pagers. 'all'/'' never rides in the URL.
+        $ppUrl = function (array $changes = [], array $unset = []) use ($routeBase) {
+            $query = array_merge(request()->query(), $changes);
+            foreach ($unset as $key) { unset($query[$key]); }
+            unset($query['page'], $query['newborns_page']);
+            return route($routeBase . '.index', array_filter(
+                $query, fn ($value) => $value !== '' && $value !== null && $value !== 'all'
+            ));
+        };
+        $segments = [
+            'all' => ['label' => 'All', 'icon' => 'bi-collection-fill', 'count' => null],
+            'mothers' => ['label' => 'Recently Delivered Mothers', 'icon' => 'bi-person-badge-fill', 'count' => $delivered->total()],
+            'followups' => ['label' => 'Needs Follow-up', 'icon' => 'bi-exclamation-triangle-fill', 'count' => $dangerVisits->count()],
+            'newborns' => ['label' => 'Newborns', 'icon' => 'bi-balloon-heart-fill', 'count' => $newborns->total()],
+        ];
+        $windows = ['all' => 'Any time', '6w' => 'Up to 6 weeks', '12w' => '6–12 weeks', '6m' => '3–6 months', 'older' => 'Past 6 months'];
+        $attentions = ['all' => 'All cases', 'vaccines' => 'Vaccine doses due', 'danger' => 'Danger signs'];
+    @endphp
+
+    <nav class="pp-tabs" aria-label="Choose which list to show">
+        @foreach($segments as $segmentKey => $segment)
+            @if($segmentKey === 'followups' && !$hasRail)
+                @continue
+            @endif
+            <a href="{{ $ppUrl(['view' => $segmentKey]) }}"
+               class="pp-filter {{ $view === $segmentKey ? 'active' : '' }}"
+               @if($view === $segmentKey) aria-current="page" @endif>
+                <i class="bi {{ $segment['icon'] }}"></i> {{ $segment['label'] }}
+                @if($segment['count'] !== null)<span class="count">{{ $segment['count'] }}</span>@endif
+            </a>
+        @endforeach
+    </nav>
+
+    <form method="GET" action="{{ route($routeBase . '.index') }}" class="pp-filters">
+        {{-- the chosen segment rides along so filtering never throws the view back to "All" --}}
+        <input type="hidden" name="view" value="{{ $view }}">
+        <span class="pp-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input type="search" name="search" class="form-control" value="{{ $search }}"
+                   placeholder="Mother or baby name" aria-label="Search by mother or baby name, email or contact number">
+        </span>
+        <label class="pp-field">
+            <span class="pp-word">Delivery</span>
+            <select name="window" class="form-select pp-select" aria-label="Filter by time since delivery" onchange="this.form.submit()">
+                @foreach($windows as $windowKey => $windowLabel)
+                    <option value="{{ $windowKey }}" {{ $window === $windowKey ? 'selected' : '' }}>{{ $windowLabel }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label class="pp-field">
+            <span class="pp-word">Month</span>
+            <select name="month" class="form-select pp-select" aria-label="Filter by the calendar month of delivery" onchange="this.form.submit()">
+                <option value="">All months</option>
+                @foreach($monthList as $monthKey => $monthLabel)
+                    <option value="{{ $monthKey }}" {{ $month === $monthKey ? 'selected' : '' }}>{{ $monthLabel }}</option>
+                @endforeach
+            </select>
+        </label>
+        <label class="pp-field">
+            <span class="pp-word">Show</span>
+            <select name="attention" class="form-select pp-select" aria-label="Filter by what needs attention" onchange="this.form.submit()">
+                @foreach($attentions as $attentionKey => $attentionLabel)
+                    <option value="{{ $attentionKey }}" {{ $attention === $attentionKey ? 'selected' : '' }}>{{ $attentionLabel }}</option>
+                @endforeach
+            </select>
+        </label>
+        @if($filtering)
+            <a href="{{ $ppUrl([], ['search', 'window', 'month', 'attention']) }}" class="btn btn-sm btn-outline-secondary pp-clear">
+                <i class="bi bi-x-lg"></i> Clear
+            </a>
+        @endif
+    </form>
 </div>
 
 @if(session('success'))
@@ -70,8 +169,8 @@
     </div>
 @endif
 
-<div class="row g-4 align-items-start" id="postpartumSections">
-    <div class="col-12 col-lg-7" data-section="mothers">
+<div class="row g-4 align-items-start{{ $view !== 'all' ? ' is-filtered' : '' }}" id="postpartumSections">
+    <div class="col-12 col-lg-7{{ $view === 'mothers' ? ' is-active' : '' }}" data-section="mothers">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
@@ -92,9 +191,17 @@
                     </a>
                 @empty
                     <div class="empty-state text-center py-5">
-                        <i class="bi bi-balloon-heart" style="font-size:2.4rem;color:var(--color-secondary-text);"></i>
-                        <h6 class="fw-bold mt-2" style="color:var(--color-text);">No deliveries recorded yet</h6>
-                        <p class="text-muted small">Postpartum tracking activates once a delivery date is saved on a pregnancy.</p>
+                        <i class="bi bi-{{ $filtering ? 'search' : 'balloon-heart' }}" style="font-size:2.4rem;color:var(--color-secondary-text);"></i>
+                        <h6 class="fw-bold mt-2" style="color:var(--color-text);">{{ $filtering ? 'No mothers match these filters' : 'No deliveries recorded yet' }}</h6>
+                        @if($filtering)
+                            {{-- Saying "no deliveries" would be wrong: the records exist, the filter hid them. --}}
+                            <p class="text-muted small mb-2">Nothing in the delivered list fits the current search or filters.</p>
+                            <a href="{{ $ppUrl([], ['search', 'window', 'month', 'attention']) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-lg"></i> Clear filters
+                            </a>
+                        @else
+                            <p class="text-muted small">Postpartum tracking activates once a delivery date is saved on a pregnancy.</p>
+                        @endif
                     </div>
                 @endforelse
             </div>
@@ -105,7 +212,7 @@
     </div>
 
     @if($hasRail)
-    <div class="col-12 col-lg-5" data-section="followups">
+    <div class="col-12 col-lg-5{{ $view === 'followups' ? ' is-active' : '' }}" data-section="followups">
         <div class="card" id="postpartumFollowUps">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
@@ -135,7 +242,7 @@
     </div>
     @endif
 
-    <div class="col-12{{ $hasRail ? '' : ' col-lg-5' }}" data-section="newborns">
+    <div class="col-12{{ $hasRail ? '' : ' col-lg-5' }}{{ $view === 'newborns' ? ' is-active' : '' }}" data-section="newborns">
         <div class="card">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div>
@@ -163,9 +270,16 @@
                     </a>
                 @empty
                     <div class="empty-state text-center py-5">
-                        <i class="bi bi-emoji-smile" style="font-size:2.4rem;color:var(--color-secondary-text);"></i>
-                        <h6 class="fw-bold mt-2" style="color:var(--color-text);">No newborns logged yet</h6>
-                        @unless($isMidwife)<p class="text-muted small">Open a delivered mother and log the birth.</p>@endunless
+                        <i class="bi bi-{{ $filtering ? 'search' : 'emoji-smile' }}" style="font-size:2.4rem;color:var(--color-secondary-text);"></i>
+                        <h6 class="fw-bold mt-2" style="color:var(--color-text);">{{ $filtering ? 'No newborns match these filters' : 'No newborns logged yet' }}</h6>
+                        @if($filtering)
+                            <p class="text-muted small mb-2">Try widening the delivery window or clearing the search.</p>
+                            <a href="{{ $ppUrl([], ['search', 'window', 'month', 'attention']) }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-x-lg"></i> Clear filters
+                            </a>
+                        @else
+                            @unless($isMidwife)<p class="text-muted small">Open a delivered mother and log the birth.</p>@endunless
+                        @endif
                     </div>
                 @endforelse
             </div>
@@ -179,36 +293,10 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const bar = document.getElementById('postpartumFilters');
-    const grid = document.getElementById('postpartumSections');
     const toggle = document.getElementById('followUpToggle');
 
-    /* The pagers reload this page and Laravel drops unknown query params, so the
-       chosen section rides through the session instead of the URL. */
-    function applyView(view) {
-        const buttons = [...bar.querySelectorAll('.pp-filter')];
-        const btn = buttons.find(b => b.dataset.view === view) || buttons[0];
-        buttons.forEach(function (b) {
-            const on = b === btn;
-            b.classList.toggle('active', on);
-            b.setAttribute('aria-pressed', on ? 'true' : 'false');
-        });
-        const isAll = btn.dataset.view === 'all';
-        grid.classList.toggle('is-filtered', !isAll);
-        grid.querySelectorAll('[data-section]').forEach(function (col) {
-            col.classList.toggle('is-active', col.dataset.section === btn.dataset.view);
-        });
-        try { sessionStorage.setItem('postpartum_view', btn.dataset.view); } catch (e) {}
-    }
-
-    bar.addEventListener('click', function (e) {
-        if (e.target.closest('.pp-filter')) applyView(e.target.closest('.pp-filter').dataset.view);
-    });
-
-    let stored = null;
-    try { stored = sessionStorage.getItem('postpartum_view'); } catch (e) {}
-    if (stored && stored !== 'all' && bar.querySelector('[data-view="' + stored + '"]')) applyView(stored);
-
+    /* The segment tabs are plain links now: the view lives in the URL, so it survives
+       a pager click and a shared link instead of hiding in sessionStorage. */
     if (toggle) {
         const extras = document.querySelectorAll('.fu-extra');
         toggle.addEventListener('click', function () {
