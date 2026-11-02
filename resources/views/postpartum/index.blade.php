@@ -45,11 +45,12 @@
     .pp-filter.active i, .pp-filter .count { color:inherit; }
     .pp-filter .count { opacity:0.7; font-weight:700; }
 
-    /* Segments left, search + filters right; the strip wraps onto its own line when narrow. */
-    .pp-toolbar { display:flex; align-items:center; gap:0.5rem 0.75rem; flex-wrap:wrap; margin-bottom:1rem; }
+    /* Tabs and filters each get their own row. Kept beside the tabs the form was
+       squeezed into a narrow right column and the three selects stacked one per line. */
+    .pp-toolbar { display:grid; gap:0.5rem; margin-bottom:0.85rem; }
     .pp-tabs { display:flex; align-items:center; gap:0.4rem; flex-wrap:wrap; }
-    .pp-filters { display:flex; align-items:center; gap:0.45rem; flex:1 1 320px; flex-wrap:wrap; justify-content:flex-end; }
-    .pp-search { position:relative; flex:1 1 150px; min-width:140px; max-width:230px; }
+    .pp-filters { display:flex; align-items:center; gap:0.45rem 0.6rem; flex-wrap:wrap; }
+    .pp-search { position:relative; flex:1 1 170px; min-width:150px; max-width:260px; }
     .pp-search i { position:absolute; left:0.6rem; top:50%; transform:translateY(-50%); font-size:0.8rem; color:var(--color-text-muted); pointer-events:none; }
     .pp-search input { width:100% !important; border-radius:10px; padding:0 0.7rem 0 1.9rem; font-size:0.8rem; }
     .pp-field { display:inline-flex; align-items:center; gap:0.35rem; }
@@ -57,6 +58,7 @@
     /* portal-theme.blade.php:401 pins .main-content controls at min-height:42px and the global
        input/select rule at width:100%, which would blow this strip apart — both need beating. */
     body .main-content .pp-select { width:auto !important; min-height:38px !important; border-radius:10px; font-size:0.78rem; padding:0 1.7rem 0 0.6rem; }
+    body .main-content .pp-search input { min-height:38px !important; }
     .pp-clear { flex:0 0 auto; font-size:0.75rem; min-height:0; padding:0.3rem 0.6rem; }
 
     /* One section at a time has to beat Bootstrap's col-lg-* widths. */
@@ -71,9 +73,8 @@
     body .main-content .summary-chip { font-size:0.72rem !important; padding:0.3rem 0.7rem !important; min-height:0; }
 
     @media (max-width: 991.98px) {
-        .pp-filters { flex:1 1 100%; justify-content:flex-start; }
-        .pp-search { flex:1 1 160px; max-width:none; }
-        body .main-content .pp-select { width:100% !important; flex:1 1 150px; }
+        .pp-search { flex:1 1 100%; max-width:none; }
+        body .main-content .pp-select { width:100% !important; }
         .pp-field { flex:1 1 150px; }
     }
 </style>
