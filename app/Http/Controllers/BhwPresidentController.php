@@ -700,7 +700,7 @@ class BhwPresidentController extends Controller
         $me = auth()->user();
         $search = trim((string) $request->input('search', ''));
         $status = strtolower(trim((string) $request->input('status', 'all')));
-        if (! in_array($status, ['all', 'approved'], true)) {
+        if (! in_array($status, ['all', 'approved', 'pending'], true)) {
             $status = 'all';
         }
 
@@ -711,7 +711,7 @@ class BhwPresidentController extends Controller
 
         $women = User::where('role', 'user')
             ->where(function ($query) {
-                $query->whereNull('status')->orWhere('status', 'approved');
+                $query->whereNull('status')->orWhereIn('status', ['approved', 'pending']);
             })
             ->with(['purok'])
             ->orderBy('first_name')
@@ -740,8 +740,8 @@ class BhwPresidentController extends Controller
                 || str_contains(mb_strtolower($woman->email ?? ''), $needle)
                 || str_contains(mb_strtolower($woman->barangay ?? ''), $needle));
         }
-        if ($status === 'approved') {
-            $women = $women->filter(fn (User $woman) => in_array(strtolower((string) ($woman->status ?? 'approved')), ['', 'approved'], true));
+        if ($status !== 'all') {
+            $women = $women->filter(fn (User $woman) => strtolower((string) ($woman->status ?? 'approved')) === $status);
         }
         $women = $women->values();
 

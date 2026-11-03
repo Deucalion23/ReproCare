@@ -10,15 +10,17 @@
     .pw-directory-heading h2 { margin:0 0 0.2rem; color:var(--text); font-size:1.12rem; font-weight:800; }
     .pw-directory-heading p { margin:0; color:var(--text-muted); font-size:0.84rem; }
     .pw-total-chip { display:inline-flex; align-items:center; gap:0.4rem; flex:0 0 auto; padding:0.45rem 0.85rem; border-radius:999px; background:var(--color-surface-soft); color:var(--color-text); font-size:0.76rem; font-weight:800; }
-    .pw-search-bar { display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap; margin-top:1rem; }
+    .pw-search-bar { display:grid; grid-template-columns:minmax(280px, 1fr) 200px auto; align-items:center; gap:0.65rem; width:100%; margin-top:1rem; }
     .pw-search-field, .pw-filter-field { display:flex; align-items:center; gap:0.65rem; min-height:48px; padding:0.7rem 0.9rem; border:1px solid var(--color-border); border-radius:14px; background:var(--color-surface-soft); }
-    .pw-search-field { flex:1 1 280px; min-width:240px; }
-    .pw-filter-field { flex:0 0 200px; }
+    .pw-search-field, .pw-filter-field { width:100%; min-width:0; }
     .pw-search-field > i, .pw-filter-field > i { flex:0 0 auto; color:var(--color-text-muted); }
     .pw-search-field input, .pw-filter-field select { width:100%; min-width:0; border:0; outline:0; background:transparent; color:var(--color-text); font-size:0.9rem; }
     .pw-search-field input::placeholder { color:var(--color-text-muted); }
-    .pw-search-actions { display:flex; gap:0.65rem; flex-wrap:wrap; }
-    .pw-search-actions .btn { min-height:44px; }
+    .pw-search-actions { display:flex; justify-self:end; gap:0.65rem; flex-wrap:nowrap; }
+    .pw-search-actions .btn { min-width:96px; min-height:44px; white-space:nowrap; }
+    .pw-status { display:inline-block; padding:0.25rem 0.7rem; border-radius:999px; font-size:0.7rem; font-weight:800; white-space:nowrap; }
+    .pw-status-approved { background:var(--color-success-soft); color:var(--color-success-text); }
+    .pw-status-pending { background:var(--color-warning-soft, #fff7e6); color:var(--color-warning-text, #8a5a00); }
     @media (max-width: 767.98px) {
         .wd-wrap .card-header { padding:0.65rem 0.7rem !important; gap:0.5rem !important; }
         .pw-directory-toolbar { padding:0.65rem; }
@@ -26,10 +28,9 @@
         .pw-directory-heading h2 { font-size:0.95rem; }
         .pw-directory-heading p { font-size:0.72rem; }
         .pw-total-chip { padding:0.38rem 0.65rem; font-size:0.68rem; }
-        .pw-search-bar { gap:0.5rem; }
+        .pw-search-bar { grid-template-columns:minmax(0, 1fr); gap:0.5rem; }
         .pw-search-field, .pw-filter-field { min-height:44px; padding:0.6rem 0.75rem; border-radius:12px; }
-        .pw-search-field, .pw-filter-field { flex:1 1 100%; min-width:0; }
-        .pw-search-actions { width:100%; gap:0.5rem; }
+        .pw-search-actions { width:100%; justify-self:stretch; gap:0.5rem; }
         .pw-search-actions .btn { flex:1 1 0; min-height:40px; justify-content:center; }
         .wd-count { font-size:0.7rem; }
         .wd-wrap .table { font-size:0.7rem !important; }
@@ -61,6 +62,7 @@
                     <select name="status" aria-label="Account status">
                         <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All Status</option>
                         <option value="approved" {{ $status === 'approved' ? 'selected' : '' }}>Approved</option>
+                        <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Pending</option>
                     </select>
                 </div>
                 <div class="pw-search-actions">
@@ -111,7 +113,8 @@
                                 <td class="wd-cell-wrap" data-label="Barangay">{{ $woman->barangay ?? 'N/A' }}</td>
                                 <td data-label="Contact" style="white-space:nowrap;">{{ $woman->contact_number ?? '—' }}</td>
                                 <td data-label="Status">
-                                    <span class="pill-badge badge-success">{{ ucfirst($woman->status ?? 'approved') }}</span>
+                                    @php($womanStatus = strtolower($woman->status ?? 'approved'))
+                                    <span class="pw-status pw-status-{{ $womanStatus }}">{{ ucfirst($womanStatus) }}</span>
                                 </td>
                                 <td class="no-card-label text-center" data-label="Actions">
                                     <a href="{{ route('profile.view', $woman->id) }}" class="btn btn-sm btn-outline-primary" title="View patient" aria-label="View patient">
@@ -131,7 +134,7 @@
             <div class="empty-state py-4 text-center">
                 <i class="bi bi-people empty-state-icon" style="font-size:2.5rem;"></i>
                 <h6 class="mt-2 fw-bold">No women found</h6>
-                <p class="text-muted mb-2">{{ $search !== '' ? 'No registered women match your search in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
+                <p class="text-muted mb-2">{{ $search !== '' || $status !== 'all' ? 'No women match the selected filters in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
                 @if ($search !== '')
                     <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
