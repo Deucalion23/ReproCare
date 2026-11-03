@@ -5,24 +5,17 @@
 @push('styles')
 @include('includes.women-directory-styles')
 <style>
-    .pw-women-heading h5 {
-        margin:0;
-        color:var(--color-text);
-        font-family:'Plus Jakarta Sans',sans-serif;
-        font-size:1rem;
-        font-weight:800;
-    }
-    .pw-women-heading h5 i { color:var(--color-primary); }
-    .pw-women-heading p {
-        margin:0.2rem 0 0 1.35rem;
-        color:var(--color-text-muted);
-        font-size:0.7rem;
-    }
+    .pw-women-tools { display:flex; flex-direction:column; align-items:stretch; gap:0.7rem; }
+    .pw-women-tools .wd-tabs { gap:0.45rem; }
+    .pw-women-tools .wd-tab { padding:0.4rem 0.9rem !important; font-size:0.76rem !important; }
+    .pw-women-tools .wd-filters { width:100%; }
+    .pw-women-tools .wd-search-field { flex:0 1 320px; min-width:220px; max-width:320px; }
+    .pw-women-tools .wd-filters .wd-actions { margin-left:0; }
     @media (max-width: 767.98px) {
         .wd-wrap .card-header { padding:0.65rem 0.7rem !important; gap:0.5rem !important; }
-        .pw-women-heading h5 { font-size:0.82rem; }
         .wd-wrap .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
         .wd-count { font-size:0.7rem; }
+        .pw-women-tools .wd-search-field { flex:1 1 100%; min-width:0; max-width:none; }
         .wd-wrap .table { font-size:0.7rem !important; }
         .wd-wrap .table th, .wd-wrap .table td { padding:0.4rem 0.5rem !important; }
         .wd-wrap .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
@@ -32,14 +25,17 @@
 @endpush
 
 @section('bhw-president-content')
+<div class="page-hero fade-in-card">
+    <div class="page-hero-title">All Women</div>
+    <p class="page-hero-subtitle">Registered women living in your assigned barangay.</p>
+</div>
+
 <div class="card fade-in-card wd-wrap">
     <div class="card-header bg-transparent p-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <div class="pw-women-heading">
-                <h5><i class="bi bi-people-fill me-1" aria-hidden="true"></i>All Women <span class="wd-count">({{ $women->total() }})</span></h5>
-                <p>Registered women living in your assigned barangay.</p>
+        <div class="pw-women-tools">
+            <div class="wd-tabs" role="group" aria-label="Women directory category">
+                <span class="wd-tab active" aria-current="true"><i class="bi bi-people me-1" aria-hidden="true"></i>Registered ({{ $women->total() }})</span>
             </div>
-
             <form method="GET" action="{{ route('bhw-president.women.index') }}" class="wd-filters" role="search">
                 <div class="wd-field wd-search-field">
                     <label for="pwSearch">Search</label>
@@ -75,11 +71,6 @@
                     <span class="text-muted">· in your assigned barangay</span>
                 @endif
             </span>
-            @if ($search !== '')
-                <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
-                </a>
-            @endif
         </div>
 
         @if($women->count() > 0)
