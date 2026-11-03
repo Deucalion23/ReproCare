@@ -11,8 +11,8 @@
     .pw-directory-heading p { margin:0; color:var(--text-muted); font-size:0.84rem; }
     .pw-total-chip { display:inline-flex; align-items:center; gap:0.4rem; flex:0 0 auto; padding:0.45rem 0.85rem; border-radius:999px; background:var(--color-surface-soft); color:var(--color-text); font-size:0.76rem; font-weight:800; }
     .pw-search-bar { margin-top:0.85rem; gap:0.5rem; align-items:flex-end; }
-    .pw-search-bar .wd-search-field { flex:2 1 270px; min-width:220px; max-width:460px; }
-    .pw-search-bar .pw-status-field { flex:1 1 180px; min-width:150px; max-width:240px; }
+    .pw-search-bar .wd-search-field { flex:2 1 190px; min-width:170px; max-width:460px; }
+    .pw-search-bar .wd-select-field { flex:1 1 138px; min-width:126px; max-width:240px; }
     .pw-search-bar .wd-actions { flex:0 0 auto; margin-left:0; }
     .pw-search-bar .wd-apply-btn, .pw-search-bar .wd-clear-btn { min-height:36px; white-space:nowrap; }
     .pw-status { display:inline-block; padding:0.25rem 0.7rem; border-radius:999px; font-size:0.7rem; font-weight:800; white-space:nowrap; }
@@ -26,7 +26,7 @@
         .pw-directory-heading p { font-size:0.72rem; }
         .pw-total-chip { padding:0.38rem 0.65rem; font-size:0.68rem; }
         .pw-search-bar { gap:0.5rem; align-items:stretch; }
-        .pw-search-bar .wd-search-field, .pw-search-bar .pw-status-field { flex:1 1 100%; width:100%; min-width:0; max-width:none; }
+        .pw-search-bar .wd-search-field, .pw-search-bar .wd-select-field { flex:1 1 100%; width:100%; min-width:0; max-width:none; }
         .pw-search-bar .wd-actions { width:100%; gap:0.5rem !important; }
         .pw-search-bar .wd-actions .btn { flex:1 1 0; min-height:40px; justify-content:center; }
         .wd-count { font-size:0.7rem; }
@@ -57,7 +57,7 @@
                         <button class="btn" type="submit" title="Search" aria-label="Search"><i class="bi bi-search" aria-hidden="true"></i></button>
                     </div>
                 </div>
-                <div class="wd-field wd-select-field pw-status-field">
+                <div class="wd-field wd-select-field">
                     <label for="pwStatus">Status</label>
                     <select id="pwStatus" name="status" class="form-select" aria-label="Account status">
                         <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All Status</option>
@@ -65,9 +65,46 @@
                         <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Pending</option>
                     </select>
                 </div>
+                <div class="wd-field wd-select-field">
+                    <label for="pwRisk">Risk Tier</label>
+                    <select id="pwRisk" name="risk_level" class="form-select">
+                        <option value="all" @selected($riskLevel === 'all')>All risk tiers</option>
+                        <option value="high_risk_only" @selected($riskLevel === 'high_risk_only')>High risk only</option>
+                        <option value="critical" @selected($riskLevel === 'critical')>Critical</option>
+                        <option value="high" @selected($riskLevel === 'high')>High</option>
+                        <option value="medium" @selected($riskLevel === 'medium')>Medium</option>
+                        <option value="low" @selected($riskLevel === 'low')>Low</option>
+                    </select>
+                </div>
+                <div class="wd-field wd-select-field">
+                    <label for="pwAge">Age Tier</label>
+                    <select id="pwAge" name="age_range" class="form-select">
+                        <option value="all" @selected($ageRange === 'all')>All ages</option>
+                        <option value="teen" @selected($ageRange === 'teen')>Adolescent (&lt;19)</option>
+                        <option value="20_34" @selected($ageRange === '20_34')>20 to 34 yrs</option>
+                        <option value="35_plus" @selected($ageRange === '35_plus')>35+ yrs</option>
+                    </select>
+                </div>
+                <div class="wd-field wd-select-field">
+                    <label for="pwTrimester">Trimester</label>
+                    <select id="pwTrimester" name="trimester" class="form-select">
+                        <option value="all" @selected($trimester === 'all')>All trimesters</option>
+                        <option value="1" @selected($trimester === '1')>1st (Weeks 1–13)</option>
+                        <option value="2" @selected($trimester === '2')>2nd (Weeks 14–26)</option>
+                        <option value="3" @selected($trimester === '3')>3rd (Weeks 27+)</option>
+                    </select>
+                </div>
+                <div class="wd-field wd-select-field">
+                    <label for="pwPregnancy">Pregnancy</label>
+                    <select id="pwPregnancy" name="pregnancy_status" class="form-select">
+                        <option value="all" @selected($pregnancyStatus === 'all')>All status</option>
+                        <option value="pregnant" @selected($pregnancyStatus === 'pregnant')>Pregnant</option>
+                        <option value="not_pregnant" @selected($pregnancyStatus === 'not_pregnant')>Not pregnant</option>
+                    </select>
+                </div>
                 <div class="wd-actions d-flex gap-2">
                     <button type="submit" class="btn btn-sm wd-apply-btn"><i class="bi bi-funnel me-1" aria-hidden="true"></i>Filter</button>
-                    @if ($search !== '' || $status !== 'all')
+                    @if ($filtersActive)
                         <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm wd-clear-btn"><i class="bi bi-x-lg me-1" aria-hidden="true"></i>Clear</a>
                     @endif
                 </div>
@@ -136,8 +173,8 @@
             <div class="empty-state py-4 text-center">
                 <i class="bi bi-people empty-state-icon" style="font-size:2.5rem;"></i>
                 <h6 class="mt-2 fw-bold">No women found</h6>
-                <p class="text-muted mb-2">{{ $search !== '' || $status !== 'all' ? 'No women match the selected filters in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
-                @if ($search !== '')
+                <p class="text-muted mb-2">{{ $filtersActive ? 'No women match the selected filters in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
+                @if ($filtersActive)
                     <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
                     </a>

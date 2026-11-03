@@ -22,11 +22,11 @@
     .bhw-women-page .wd-wrap { border:1px solid var(--color-border) !important; border-radius:16px !important; }
     .bhw-women-page .wd-wrap .card-header { padding:0.7rem 0.85rem !important; }
     .bhw-women-toolbar { display:flex; align-items:flex-end; flex-wrap:wrap; gap:0.75rem; width:100%; }
-    .bhw-women-toolbar .wd-tabs { flex:0 0 auto; gap:0.4rem; }
+    .bhw-women-toolbar .wd-tabs { flex:1 1 100%; gap:0.4rem; }
     .bhw-women-toolbar .wd-tab { padding:0.4rem 0.85rem !important; }
-    .bhw-women-filters { flex:1 1 640px; flex-wrap:nowrap; gap:0.55rem; align-items:flex-end; }
+    .bhw-women-filters { flex:1 1 640px; flex-wrap:wrap; gap:0.55rem; align-items:flex-end; }
     .bhw-women-filters .wd-search-field { flex:2 1 190px; min-width:170px; max-width:460px; }
-    .bhw-women-filters .wd-status-field { flex:1 1 138px; min-width:126px; max-width:240px; }
+    .bhw-women-filters .wd-select-field { flex:1 1 138px; min-width:126px; max-width:240px; }
     .bhw-women-filters .wd-actions { margin-left:0; }
     .bhw-women-filters .wd-select-field .form-select { min-height:36px; }
     .bhw-women-filters .wd-apply-btn, .bhw-women-filters .wd-clear-btn { min-height:36px; white-space:nowrap; }
@@ -64,7 +64,7 @@
         .bhw-women-toolbar .wd-tabs { flex:1 1 100%; }
         .bhw-women-filters { flex:1 1 100%; gap:0.45rem; }
         .bhw-women-filters .wd-search-field { flex:1 1 100%; max-width:none; }
-        .bhw-women-filters .wd-status-field { flex:1 1 150px; max-width:none; }
+        .bhw-women-filters .wd-select-field { flex:1 1 100%; max-width:none; }
         .bhw-women-filters .wd-actions { flex:0 0 auto; }
         .page-hero .d-flex.justify-content-between { flex-direction:column; align-items:stretch !important; }
         .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.4rem; width:100%; align-items:stretch; }
@@ -122,7 +122,7 @@
     $scopeKeep = request()->except(['page', 'filter']);
     $scopeUrl = fn (string $value) => route('bhw.patients', array_merge($scopeKeep, ['filter' => $value]));
     $clearUrl = route('bhw.patients', ['filter' => $scope]);
-    $filtersActive = request()->filled('search') || $status !== 'all';
+    $filtersActive = request()->filled('search') || collect([$status, $riskLevel, $ageRange, $trimester, $pregnancyStatus])->contains(fn ($value) => $value !== 'all');
 @endphp
 
 {{-- Summary cards --}}
@@ -211,6 +211,47 @@
                         <option value="pending" @selected($status === 'pending')>Pending</option>
                         <option value="inactive" @selected($status === 'inactive')>Inactive</option>
                         <option value="unlinked" @selected($status === 'unlinked')>Unlinked</option>
+                    </select>
+                </div>
+
+                <div class="wd-field wd-select-field">
+                    <label for="bhwWomenRisk">Risk Tier</label>
+                    <select id="bhwWomenRisk" name="risk_level" class="form-select">
+                        <option value="all" @selected($riskLevel === 'all')>All risk tiers</option>
+                        <option value="high_risk_only" @selected($riskLevel === 'high_risk_only')>High risk only</option>
+                        <option value="critical" @selected($riskLevel === 'critical')>Critical</option>
+                        <option value="high" @selected($riskLevel === 'high')>High</option>
+                        <option value="medium" @selected($riskLevel === 'medium')>Medium</option>
+                        <option value="low" @selected($riskLevel === 'low')>Low</option>
+                    </select>
+                </div>
+
+                <div class="wd-field wd-select-field">
+                    <label for="bhwWomenAge">Age Tier</label>
+                    <select id="bhwWomenAge" name="age_range" class="form-select">
+                        <option value="all" @selected($ageRange === 'all')>All ages</option>
+                        <option value="teen" @selected($ageRange === 'teen')>Adolescent (&lt;19)</option>
+                        <option value="20_34" @selected($ageRange === '20_34')>20 to 34 yrs</option>
+                        <option value="35_plus" @selected($ageRange === '35_plus')>35+ yrs</option>
+                    </select>
+                </div>
+
+                <div class="wd-field wd-select-field">
+                    <label for="bhwWomenTrimester">Trimester</label>
+                    <select id="bhwWomenTrimester" name="trimester" class="form-select">
+                        <option value="all" @selected($trimester === 'all')>All trimesters</option>
+                        <option value="1" @selected($trimester === '1')>1st (Weeks 1–13)</option>
+                        <option value="2" @selected($trimester === '2')>2nd (Weeks 14–26)</option>
+                        <option value="3" @selected($trimester === '3')>3rd (Weeks 27+)</option>
+                    </select>
+                </div>
+
+                <div class="wd-field wd-select-field">
+                    <label for="bhwWomenPregnancy">Pregnancy</label>
+                    <select id="bhwWomenPregnancy" name="pregnancy_status" class="form-select">
+                        <option value="all" @selected($pregnancyStatus === 'all')>All status</option>
+                        <option value="pregnant" @selected($pregnancyStatus === 'pregnant')>Pregnant</option>
+                        <option value="not_pregnant" @selected($pregnancyStatus === 'not_pregnant')>Not pregnant</option>
                     </select>
                 </div>
 

@@ -703,6 +703,22 @@ class BhwPresidentController extends Controller
         if (! in_array($status, ['all', 'approved', 'pending'], true)) {
             $status = 'all';
         }
+        $riskLevel = strtolower(trim((string) $request->input('risk_level', 'all')));
+        if (! in_array($riskLevel, ['all', 'high_risk_only', 'critical', 'high', 'medium', 'low'], true)) {
+            $riskLevel = 'all';
+        }
+        $ageRange = (string) $request->input('age_range', 'all');
+        if (! in_array($ageRange, ['all', 'teen', '20_34', '35_plus'], true)) {
+            $ageRange = 'all';
+        }
+        $trimester = (string) $request->input('trimester', 'all');
+        if (! in_array($trimester, ['all', '1', '2', '3'], true)) {
+            $trimester = 'all';
+        }
+        $pregnancyStatus = (string) $request->input('pregnancy_status', 'all');
+        if (! in_array($pregnancyStatus, ['all', 'pregnant', 'not_pregnant'], true)) {
+            $pregnancyStatus = 'all';
+        }
 
         $mine = array_values(array_filter([
             \App\Services\BhwPresidentAssignmentService::normalizeBarangay($me->barangay ?? null),
@@ -713,7 +729,11 @@ class BhwPresidentController extends Controller
             ->where(function ($query) {
                 $query->whereNull('status')->orWhereIn('status', ['approved', 'pending']);
             })
-            ->with(['purok'])
+            ->with([
+                'purok',
+                'pregnancies' => fn ($query) => $query->active(),
+                'healthRecords' => fn ($query) => $query->latest(),
+            ])
             ->orderBy('first_name')
             ->orderBy('last_name')
             ->get()
@@ -743,6 +763,53 @@ class BhwPresidentController extends Controller
         if ($status !== 'all') {
             $women = $women->filter(fn (User $woman) => strtolower((string) ($woman->status ?? 'approved')) === $status);
         }
+
+        if ($pregnancyStatus === 'pregnant') {
+            $women = $women->filter(fn (User $woman) => $woman->pregnancies && $woman->pregnancies->count() > 0);
+        } elseif ($pregnancyStatus === 'not_pregnant') {
+            $women = $women->filter(fn (User $woman) => ! $woman->pregnancies || $woman->pregnancies->count() === 0);
+        }
+
+        if ($ageRange !== 'all') {
+            $women = $women->filter(function (User $woman) use ($ageRange) {
+                $age = $woman->age;
+                return match ($ageRange) {
+                    'teen' => $age !== null && $age < 20,
+                    '20_34' => $age !== null && $age >= 20 && $age <= 34,
+                    '35_plus' => $age !== null && $age >= 35,
+                    default => true,
+                };
+            });
+        }
+
+        if ($riskLevel !== 'all') {
+            $women = $women->filter(function (User $woman) use ($riskLevel) {
+                $activePregnancy = $woman->pregnancies?->first();
+                $latestRecord = $woman->healthRecords?->first();
+                $currentRisk = strtolower($activePregnancy?->risk_level ?? $latestRecord?->risk_level ?? 'low');
+
+                return $riskLevel === 'high_risk_only'
+                    ? in_array($currentRisk, ['high', 'critical'], true)
+                    : $currentRisk === $riskLevel;
+            });
+        }
+
+        if ($trimester !== 'all') {
+            $women = $women->filter(function (User $woman) use ($trimester) {
+                $activePregnancy = $woman->pregnancies?->first();
+                if (! $activePregnancy) {
+                    return false;
+                }
+
+                $weeks = (int) ($activePregnancy->aog_weeks ?? 0);
+                return match ($trimester) {
+                    '1' => $weeks <= 13,
+                    '2' => $weeks >= 14 && $weeks <= 26,
+                    '3' => $weeks >= 27,
+                    default => true,
+                };
+            });
+        }
         $women = $women->values();
 
         $page = (int) $request->input('page', 1);
@@ -755,7 +822,12 @@ class BhwPresidentController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('bhw-president.women.index', ['women' => $paged, 'search' => $search, 'status' => $status]);
+        $filtersActive = $search !== '' || collect([$status, $riskLevel, $ageRange, $trimester, $pregnancyStatus])
+            ->contains(fn ($value) => $value !== 'all');
+
+        return view('bhw-president.women.index', compact(
+            'search', 'status', 'riskLevel', 'ageRange', 'trimester', 'pregnancyStatus', 'filtersActive'
+        ) + ['women' => $paged]);
     }
 
     // Pregnancies Review Queue (missing method referenced by bhw-president.pregnancies.index)

@@ -344,6 +344,22 @@ class BhwController extends Controller
         if (! in_array($status, ['all', 'approved', 'pending', 'inactive', 'unlinked'], true)) {
             $status = 'all';
         }
+        $riskLevel = strtolower((string) request('risk_level', 'all'));
+        if (! in_array($riskLevel, ['all', 'high_risk_only', 'critical', 'high', 'medium', 'low'], true)) {
+            $riskLevel = 'all';
+        }
+        $ageRange = (string) request('age_range', 'all');
+        if (! in_array($ageRange, ['all', 'teen', '20_34', '35_plus'], true)) {
+            $ageRange = 'all';
+        }
+        $trimester = (string) request('trimester', 'all');
+        if (! in_array($trimester, ['all', '1', '2', '3'], true)) {
+            $trimester = 'all';
+        }
+        $pregnancyStatus = (string) request('pregnancy_status', 'all');
+        if (! in_array($pregnancyStatus, ['all', 'pregnant', 'not_pregnant'], true)) {
+            $pregnancyStatus = 'all';
+        }
 
         // BHWs see only women from their own barangay (shared jurisdiction
         // rule: legacy spellings like 'Burgos' and 'Barangay Burgos Padlan,
@@ -353,9 +369,11 @@ class BhwController extends Controller
 
         // Get registered patients
         $registeredQuery = User::where('role', 'user')
-            ->with(['pregnancies' => function($query) {
-                $query->active();
-            }, 'purok']);
+            ->with([
+                'pregnancies' => fn ($query) => $query->active(),
+                'purok',
+                'healthRecords' => fn ($query) => $query->latest(),
+            ]);
         $inArea($registeredQuery);
 
         if ($search) {
@@ -375,7 +393,11 @@ class BhwController extends Controller
         });
 
         // Get unlinked profiles (BHW-Managed field records, no portal account)
-        $unregisteredQuery = WalkInPatient::with(['recordedBy', 'purok', 'convertedToUser', 'user'])
+        $unregisteredQuery = WalkInPatient::with([
+            'recordedBy', 'purok', 'convertedToUser', 'user',
+            'pregnancies' => fn ($query) => $query->active(),
+            'healthRecords' => fn ($query) => $query->latest(),
+        ])
             ->whereNull('converted_to_user_id')
             ->whereNull('user_id');
         $inArea($unregisteredQuery);
@@ -417,6 +439,53 @@ class BhwController extends Controller
             });
         }
 
+        if ($pregnancyStatus === 'pregnant') {
+            $allPatients = $allPatients->filter(fn ($patient) => $patient->pregnancies && $patient->pregnancies->count() > 0);
+        } elseif ($pregnancyStatus === 'not_pregnant') {
+            $allPatients = $allPatients->filter(fn ($patient) => ! $patient->pregnancies || $patient->pregnancies->count() === 0);
+        }
+
+        if ($ageRange !== 'all') {
+            $allPatients = $allPatients->filter(function ($patient) use ($ageRange) {
+                $age = $patient->age;
+                return match ($ageRange) {
+                    'teen' => $age !== null && $age < 20,
+                    '20_34' => $age !== null && $age >= 20 && $age <= 34,
+                    '35_plus' => $age !== null && $age >= 35,
+                    default => true,
+                };
+            });
+        }
+
+        if ($riskLevel !== 'all') {
+            $allPatients = $allPatients->filter(function ($patient) use ($riskLevel) {
+                $activePregnancy = $patient->pregnancies?->first();
+                $latestRecord = $patient->healthRecords?->first();
+                $currentRisk = strtolower($activePregnancy?->risk_level ?? $latestRecord?->risk_level ?? 'low');
+
+                return $riskLevel === 'high_risk_only'
+                    ? in_array($currentRisk, ['high', 'critical'], true)
+                    : $currentRisk === $riskLevel;
+            });
+        }
+
+        if ($trimester !== 'all') {
+            $allPatients = $allPatients->filter(function ($patient) use ($trimester) {
+                $activePregnancy = $patient->pregnancies?->first();
+                if (! $activePregnancy) {
+                    return false;
+                }
+
+                $weeks = (int) ($activePregnancy->aog_weeks ?? 0);
+                return match ($trimester) {
+                    '1' => $weeks <= 13,
+                    '2' => $weeks >= 14 && $weeks <= 26,
+                    '3' => $weeks >= 27,
+                    default => true,
+                };
+            });
+        }
+
         // Paginate manually
         $page = request('page', 1);
         $perPage = 10;
@@ -445,7 +514,11 @@ class BhwController extends Controller
             'registeredCount',
             'unregisteredCount',
             'trashCount',
-            'status'
+            'status',
+            'riskLevel',
+            'ageRange',
+            'trimester',
+            'pregnancyStatus'
         ));
     }
 
