@@ -167,6 +167,28 @@ class ForumFeedTest extends AutomationTestCase
         $this->assertStringContainsString('post-media-frame', $html);
     }
 
+    public function test_a_compressed_upload_keeps_its_inline_copy(): void
+    {
+        Storage::fake('public');
+        $viewer = $this->patient();
+
+        // forum-photo.js caps a photo at roughly this size before posting, and
+        // the inline copy is what the feed renders from, because a deployment
+        // without the disk file (or without PHP GD) would otherwise show
+        // nothing. Padded PNG keeps the payload realistic without needing GD
+        // to fabricate an image of it.
+        $png = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==');
+        $png .= str_repeat('z', 380000);
+
+        $this->actingAs($viewer)->post(route('forum.store'), [
+            'content' => 'A photo the browser already shrank.',
+            'post_image' => UploadedFile::fake()->createWithContent('photo.jpg', $png),
+        ])->assertSessionHasNoErrors();
+
+        $post = ForumPost::latest('id')->firstOrFail();
+        $this->assertStringStartsWith('data:image/', (string) $post->post_image_url);
+    }
+
     public function test_a_photo_the_server_rejects_leaves_no_post_behind(): void
     {
         Storage::fake('public');

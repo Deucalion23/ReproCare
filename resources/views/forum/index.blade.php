@@ -727,6 +727,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('js/forum-photo.js') }}?v={{ filemtime(public_path('js/forum-photo.js')) }}" defer></script>
 <script>
 function focusQuickComposer() {
     var q = document.getElementById('quickInlineInput');
@@ -794,6 +795,18 @@ function focusQuickComposer() {
             preview.hidden = true;
             return true;
         }
+        if (input.dataset.photoPending) {
+            // forum-photo.js is shrinking this photo; a second change event
+            // arrives with the smaller file and runs the real checks.
+            if (thumbUrl) URL.revokeObjectURL(thumbUrl);
+            thumbUrl = URL.createObjectURL(file);
+            thumb.src = thumbUrl;
+            nameEl.textContent = file.name;
+            sizeEl.textContent = 'Optimising...';
+            preview.hidden = false;
+            showError('');
+            return true;
+        }
         if (ALLOWED.indexOf(file.type) === -1) {
             clearImage();
             showError('That file type is not supported yet — pick a JPG, PNG or WebP photo.');
@@ -801,7 +814,7 @@ function focusQuickComposer() {
         }
         if (file.size > MAX_BYTES) {
             clearImage();
-            showError('That photo is larger than 5 MB. Choose a smaller one.');
+            showError('That photo could not be shrunk enough to post. Choose a smaller one.');
             return false;
         }
         if (thumbUrl) URL.revokeObjectURL(thumbUrl);

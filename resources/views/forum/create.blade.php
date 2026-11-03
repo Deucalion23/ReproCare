@@ -281,6 +281,7 @@
 </div>
 
 @push('scripts')
+<script src="{{ asset('js/forum-photo.js') }}?v={{ filemtime(public_path('js/forum-photo.js')) }}" defer></script>
 <script>
 function updateCharCount(el) {
     const count   = el.value.length;
