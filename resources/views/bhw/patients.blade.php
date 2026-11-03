@@ -5,6 +5,41 @@
 @push('styles')
 @include('includes.women-directory-styles')
 <style>
+    /* Keep the BHW directory focused on the list: a slimmer title block,
+       compact metrics, and one aligned toolbar above the table. */
+    .bhw-women-page .page-hero {
+        padding:1rem 1.35rem !important;
+        margin-bottom:0.85rem !important;
+        border-radius:16px !important;
+    }
+    .bhw-women-page .page-hero-title { font-size:1.35rem !important; margin-bottom:0.15rem !important; }
+    .bhw-women-page .page-hero-subtitle { font-size:0.82rem !important; }
+    .bhw-women-page .page-hero .btn { padding:0.55rem 0.9rem; font-size:0.78rem; }
+    .bhw-women-page .wd-mini { --bs-gutter-x:0.65rem; --bs-gutter-y:0.65rem; margin-bottom:0.85rem !important; }
+    .bhw-women-page .wd-mini .card { min-height:102px; padding:0.7rem 0.55rem !important; border-radius:14px !important; }
+    .bhw-women-page .wd-mini .card > i { font-size:1.15rem !important; margin-bottom:0.15rem !important; }
+    .bhw-women-page .wd-mini h4 { font-size:1.3rem; margin-top:0.15rem !important; }
+    .bhw-women-page .wd-wrap { border:1px solid var(--color-border) !important; border-radius:16px !important; }
+    .bhw-women-page .wd-wrap .card-header { padding:0.7rem 0.85rem !important; }
+    .bhw-women-toolbar { display:flex; align-items:flex-end; flex-wrap:wrap; gap:0.75rem; width:100%; }
+    .bhw-women-toolbar .wd-tabs { flex:0 0 auto; gap:0.4rem; }
+    .bhw-women-toolbar .wd-tab { padding:0.4rem 0.85rem !important; }
+    .bhw-women-filters { flex:1 1 640px; flex-wrap:nowrap; gap:0.55rem; align-items:flex-end; }
+    .bhw-women-filters .wd-search-field { flex:0 1 290px; min-width:220px; max-width:330px; }
+    .bhw-women-filters .wd-status-field { flex:0 1 170px; min-width:150px; max-width:190px; }
+    .bhw-women-filters .wd-actions { margin-left:0; }
+    .bhw-women-filters .wd-select-field .form-select { min-height:36px; }
+    .bhw-women-filters .wd-apply-btn, .bhw-women-filters .wd-clear-btn { min-height:36px; padding:0.4rem 0.85rem !important; white-space:nowrap; }
+    .bhw-women-page .wd-pill-pending { background:var(--color-warning-soft, #fff7e6); color:var(--color-warning-text, #8a5a00); }
+    .bhw-women-page .wd-pill-inactive { background:var(--color-danger-soft); color:var(--color-danger-text); }
+    .bhw-women-page .wd-count-row { padding:0.35rem 0.9rem !important; }
+    .bhw-women-page .wd-wrap table thead th { padding-top:0.4rem !important; padding-bottom:0.4rem !important; }
+
+    @media (max-width: 1199.98px) {
+        .bhw-women-toolbar .wd-tabs { flex:1 1 100%; }
+        .bhw-women-filters { flex:1 1 100%; }
+    }
+
     /* Field workers tap these rows on phones, so the row actions stay 30px squares
        even though the shared directory shell is denser. */
     .wd-wrap .table .btn-action {
@@ -22,6 +57,15 @@
     .wd-wrap .table .btn-action-add:hover { background:var(--color-success-soft); border-color:var(--color-success); color:var(--color-success-text); }
 
     @media (max-width: 600px) {
+        .bhw-women-page .page-hero { padding:0.85rem 0.9rem !important; margin-bottom:0.65rem !important; }
+        .bhw-women-page .wd-mini { margin-bottom:0.65rem !important; }
+        .bhw-women-page .wd-mini .card { min-height:88px; }
+        .bhw-women-toolbar { align-items:stretch; gap:0.55rem; }
+        .bhw-women-toolbar .wd-tabs { flex:1 1 100%; }
+        .bhw-women-filters { flex:1 1 100%; gap:0.45rem; }
+        .bhw-women-filters .wd-search-field { flex:1 1 100%; max-width:none; }
+        .bhw-women-filters .wd-status-field { flex:1 1 150px; max-width:none; }
+        .bhw-women-filters .wd-actions { flex:0 0 auto; }
         .page-hero .d-flex.justify-content-between { flex-direction:column; align-items:stretch !important; }
         .page-hero .d-flex.gap-2 { display:grid !important; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:0.4rem; width:100%; align-items:stretch; }
         .page-hero .d-flex.gap-2 .btn {
@@ -44,6 +88,7 @@
 @endpush
 
 @section('bhw-content')
+<div class="bhw-women-page">
 <div class="page-hero fade-in-card">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
@@ -125,8 +170,8 @@
 </div>
 
 <div class="card fade-in-card wd-wrap">
-    <div class="card-header bg-transparent p-3">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="card-header bg-transparent">
+        <div class="bhw-women-toolbar">
             <ul class="wd-tabs" role="tablist">
                 <li>
                     <a class="wd-tab {{ $scope === 'all' ? 'active' : '' }}" href="{{ $scopeUrl('all') }}">
@@ -145,7 +190,7 @@
                 </li>
             </ul>
 
-            <form method="GET" action="{{ route('bhw.patients') }}" class="wd-filters">
+            <form method="GET" action="{{ route('bhw.patients') }}" class="wd-filters bhw-women-filters">
                 <input type="hidden" name="filter" value="{{ $scope }}">
 
                 <div class="wd-field wd-search-field">
@@ -157,35 +202,42 @@
                     </div>
                 </div>
 
+                <div class="wd-field wd-select-field wd-status-field">
+                    <label for="bhwWomenStatus">Status</label>
+                    <select id="bhwWomenStatus" name="status" class="form-select">
+                        <option value="all" @selected($status === 'all')>All statuses</option>
+                        <option value="approved" @selected($status === 'approved')>Approved</option>
+                        <option value="pending" @selected($status === 'pending')>Pending</option>
+                        <option value="inactive" @selected($status === 'inactive')>Inactive</option>
+                        <option value="unlinked" @selected($status === 'unlinked')>Unlinked</option>
+                    </select>
+                </div>
+
                 <div class="wd-actions d-flex gap-2">
                     <button type="submit" class="btn btn-sm wd-apply-btn">
-                        <i class="bi bi-funnel me-1"></i> Filter
+                        <i class="bi bi-funnel me-1"></i> Apply
                     </button>
-                    @if (request('search'))
-                        <a href="{{ $clearUrl }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
-                            <i class="bi bi-x-lg me-1"></i> Clear
-                        </a>
-                    @endif
+                    <a href="{{ $clearUrl }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
     <div class="card-body p-0">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3 py-2 border-bottom">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 px-3 py-2 border-bottom wd-count-row">
             <span class="wd-count">
                 Showing <strong>{{ $patients->count() }}</strong> of <strong>{{ $patients->total() }}</strong>
                 {{ Str::plural('woman', $patients->total()) }}
                 <span class="text-muted">· your barangay</span>
+                @if ($status !== 'all')
+                    <span class="text-muted">· {{ ucfirst($status) }}</span>
+                @endif
                 @if (request('search'))
                     <span class="text-muted">· results for "{{ request('search') }}"</span>
                 @endif
             </span>
-            @if (request('search'))
-                <a href="{{ $clearUrl }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
-                </a>
-            @endif
         </div>
 
         @if($patients->count() > 0)
@@ -196,7 +248,7 @@
                             <th class="px-3 py-3">Woman</th>
                             <th class="py-3">Contact Number</th>
                             <th class="py-3">Barangay</th>
-                            <th class="py-3">Account Type</th>
+                            <th class="py-3">Status</th>
                             <th class="py-3">Pregnancy</th>
                             <th class="py-3 text-center">Actions</th>
                         </tr>
@@ -206,6 +258,7 @@
                             @php
                                 $isWalkIn = $patient->type === 'unregistered';
                                 $contact = $isWalkIn ? ($patient->contact_number ?? null) : ($patient->contact_number ?? $patient->phone ?? null);
+                                $accountStatus = $isWalkIn ? 'unlinked' : ($patient->status ?? 'approved');
                             @endphp
                             <tr>
                                 <td class="no-card-label px-3" data-label="Woman">
@@ -227,15 +280,21 @@
                                         <span class="wd-sub">—</span>
                                     @endif
                                 </td>
-                                <td data-label="Account Type">
+                                <td data-label="Status">
                                     @if($isWalkIn)
-                                        <span class="wd-pill wd-pill-unregistered" title="Managed Beneficiary · Field Record Only · no portal login">
-                                            <i class="bi bi-person-plus"></i> Unlinked · BHW-Managed
+                                        <span class="wd-pill wd-pill-unregistered" title="BHW-managed profile without a portal account">
+                                            <i class="bi bi-person-plus"></i> Unlinked
+                                        </span>
+                                    @elseif($accountStatus === 'pending')
+                                        <span class="wd-pill wd-pill-pending"><i class="bi bi-hourglass-split"></i> Pending review</span>
+                                    @elseif($accountStatus === 'inactive')
+                                        <span class="wd-pill wd-pill-inactive"><i class="bi bi-pause-circle"></i> Inactive</span>
+                                    @elseif($accountStatus === 'approved')
+                                        <span class="wd-pill wd-pill-registered" title="Portal account approved">
+                                            <i class="bi bi-person-check"></i> Approved
                                         </span>
                                     @else
-                                        <span class="wd-pill wd-pill-registered" title="Authenticated Patient · Direct Access · portal login active">
-                                            <i class="bi bi-person-check"></i> Enrolled · Portal-Active
-                                        </span>
+                                        <span class="wd-pill wd-pill-muted">{{ Str::headline($accountStatus) }}</span>
                                     @endif
                                 </td>
                                 <td data-label="Pregnancy">
@@ -302,5 +361,6 @@
             </div>
         @endif
     </div>
+</div>
 </div>
 @endsection

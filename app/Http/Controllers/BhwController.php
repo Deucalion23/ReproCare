@@ -340,6 +340,10 @@ class BhwController extends Controller
     {
         $search = request('search');
         $filter = request('filter', 'all');
+        $status = request('status', 'all');
+        if (! in_array($status, ['all', 'approved', 'pending', 'inactive', 'unlinked'], true)) {
+            $status = 'all';
+        }
 
         // BHWs see only women from their own barangay (shared jurisdiction
         // rule: legacy spellings like 'Burgos' and 'Barangay Burgos Padlan,
@@ -402,6 +406,17 @@ class BhwController extends Controller
             $allPatients = $allPatients->where('type', 'unregistered');
         }
 
+        // Account status is independent of the enrolled/unlinked directory tabs.
+        // Legacy patient accounts without an explicit status are treated as approved.
+        if ($status === 'unlinked') {
+            $allPatients = $allPatients->where('type', 'unregistered');
+        } elseif ($status !== 'all') {
+            $allPatients = $allPatients->filter(function ($patient) use ($status) {
+                return $patient->type === 'registered'
+                    && ($patient->status ?? 'approved') === $status;
+            });
+        }
+
         // Paginate manually
         $page = request('page', 1);
         $perPage = 10;
@@ -429,7 +444,8 @@ class BhwController extends Controller
             'missedCheckups',
             'registeredCount',
             'unregisteredCount',
-            'trashCount'
+            'trashCount',
+            'status'
         ));
     }
 
