@@ -10,14 +10,14 @@
     .pw-directory-heading h2 { margin:0 0 0.2rem; color:var(--text); font-size:1.12rem; font-weight:800; }
     .pw-directory-heading p { margin:0; color:var(--text-muted); font-size:0.84rem; }
     .pw-total-chip { display:inline-flex; align-items:center; gap:0.4rem; flex:0 0 auto; padding:0.45rem 0.85rem; border-radius:999px; background:var(--color-surface-soft); color:var(--color-text); font-size:0.76rem; font-weight:800; }
-    .pw-search-bar { display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-top:0.85rem; }
+    .pw-search-bar { display:flex; align-items:center; gap:0.45rem; flex-wrap:wrap; margin-top:0.85rem; }
     .pw-search-field, .pw-filter-field { display:flex; align-items:center; gap:0.55rem; min-height:40px; padding:0.5rem 0.8rem; border:1px solid var(--color-border); border-radius:12px; background:var(--color-surface-soft); }
-    .pw-search-field { flex:0 1 250px; width:250px; min-width:220px; }
-    .pw-filter-field { flex:0 0 170px; width:170px; min-width:0; }
+    .pw-search-field { flex:0 0 220px; width:220px; min-width:200px; }
+    .pw-filter-field { flex:0 0 145px; width:145px; min-width:0; }
     .pw-search-field > i, .pw-filter-field > i { flex:0 0 auto; color:var(--color-text-muted); }
     .pw-search-field input, .pw-filter-field select { width:100%; min-width:0; border:0; outline:0; background:transparent; color:var(--color-text); font-size:0.82rem; }
     .pw-search-field input::placeholder { color:var(--color-text-muted); }
-    .pw-search-actions { display:flex; gap:0.5rem; flex-wrap:nowrap; }
+    .pw-search-actions { display:flex; gap:0.45rem; flex-wrap:nowrap; }
     .pw-search-actions .btn { min-width:86px; min-height:38px; padding:0.38rem 0.75rem !important; font-size:0.76rem !important; white-space:nowrap; }
     .pw-status { display:inline-block; padding:0.25rem 0.7rem; border-radius:999px; font-size:0.7rem; font-weight:800; white-space:nowrap; }
     .pw-status-approved { background:var(--color-success-soft); color:var(--color-success-text); }
