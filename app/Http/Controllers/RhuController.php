@@ -1056,13 +1056,10 @@ class RhuController extends Controller
         $search = $request->input('search');
         $riskLevel = $request->input('risk_level', 'all');
         $barangay = $request->input('barangay');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
 
-        $records = HealthRecord::with([
-                'woman:id,first_name,middle_initial,last_name,barangay',
-                'walkInPatient:id,first_name,last_name,barangay',
-                'pregnancy:id,user_id,walk_in_patient_id,lmp,edd,risk_level',
-                'recordedBy:id,first_name,last_name,role',
-            ])
+        $baseQuery = HealthRecord::query()
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($inner) use ($search) {
                     $inner->whereHas('woman', fn ($w) => $w
@@ -1081,13 +1078,31 @@ class RhuController extends Controller
                         ->orWhereHas('walkInPatient', fn ($w) => $w->where('barangay', $barangay));
                 });
             })
+            ->when($dateFrom, fn ($query) => $query->whereDate('created_at', '>=', $dateFrom))
+            ->when($dateTo, fn ($query) => $query->whereDate('created_at', '<=', $dateTo));
+
+        $totalCount = (clone $baseQuery)->count();
+        $lowCount = (clone $baseQuery)->where('risk_level', 'Low')->count();
+        $mediumCount = (clone $baseQuery)->where('risk_level', 'Medium')->count();
+        $highCount = (clone $baseQuery)->whereIn('risk_level', ['High', 'Critical'])->count();
+
+        $records = (clone $baseQuery)
+            ->with([
+                'woman:id,first_name,middle_initial,last_name,barangay',
+                'walkInPatient:id,first_name,last_name,barangay',
+                'pregnancy:id,user_id,walk_in_patient_id,lmp,edd,risk_level',
+                'recordedBy:id,first_name,last_name,role',
+            ])
             ->latest('created_at')
             ->paginate(15)
             ->withQueryString();
 
         $barangays = Barangay::catchmentOptionNames($barangay);
 
-        return view('rhu.health-records.index', compact('records', 'search', 'riskLevel', 'barangay', 'barangays'));
+        return view('rhu.health-records.index', compact(
+            'records', 'search', 'riskLevel', 'barangay', 'barangays',
+            'dateFrom', 'dateTo', 'totalCount', 'lowCount', 'mediumCount', 'highCount'
+        ));
     }
 
     public function showHealthRecord($id)
