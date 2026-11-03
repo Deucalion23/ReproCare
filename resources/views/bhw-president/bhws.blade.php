@@ -3,48 +3,9 @@
 @section('title', 'BHW Management - BHW President Portal | ReproCare')
 
 @push('styles')
+{{-- Shared compact toolbar (labeled fields, right-side magnifier, purple Filter button). --}}
+@include('includes.women-directory-styles')
 <style>
-    .bhw-search-bar {
-        display:flex;
-        gap:0.65rem;
-        align-items:center;
-        flex-wrap:wrap;
-    }
-    .bhw-search-field,
-    .bhw-filter-field {
-        display:flex;
-        align-items:center;
-        gap:0.55rem;
-        background:var(--bg-card2);
-        border:1px solid var(--border);
-        border-radius:14px;
-        padding:0.75rem 0.95rem;
-        min-height:48px;
-    }
-    .bhw-search-field {
-        flex:1 1 280px;
-        min-width:240px;
-    }
-    .bhw-filter-field {
-        flex:0 0 190px;
-    }
-    .bhw-search-field input,
-    .bhw-filter-field select {
-        border:none;
-        background:transparent;
-        color:var(--text);
-        outline:none;
-        width:100%;
-        font-size:0.9rem;
-    }
-    .bhw-search-field input::placeholder {
-        color:var(--placeholder);
-    }
-    .bhw-search-actions {
-        display:flex;
-        gap:0.65rem;
-        flex-wrap:wrap;
-    }
     .bhw-avatar {
         width:44px;
         height:44px;
@@ -195,15 +156,6 @@
         vertical-align:middle;
     }
     @media (max-width: 768px) {
-        .bhw-search-actions {
-            width:100%;
-        }
-        .bhw-search-actions .btn {
-            flex:1 1 auto;
-        }
-        .bhw-filter-field {
-            flex:1 1 100%;
-        }
         .bhw-actions {
             justify-content:center;
         }
@@ -215,12 +167,7 @@
     @media (max-width: 600px) {
         .table-card .table-toolbar h2 { font-size:0.9rem !important; }
         .table-card .table-toolbar p { font-size:0.7rem !important; }
-        .bhw-search-bar { gap:0.5rem; }
-        .bhw-search-field, .bhw-filter-field { min-height:44px; padding:0.6rem 0.75rem; border-radius:12px; }
-        .bhw-search-field { flex:1 1 100%; min-width:0; }
-        .bhw-search-field input, .bhw-filter-field select { font-size:0.76rem; }
-        .bhw-search-actions { display:grid !important; grid-template-columns:1fr 1fr; gap:0.5rem; }
-        .bhw-search-actions .btn { font-size:0.72rem; display:flex !important; align-items:center !important; justify-content:center !important; text-align:center !important; }
+        .wd-filters .wd-apply-btn, .wd-filters .wd-clear-btn { font-size:0.72rem !important; }
         .bhw-avatar { width:36px; height:36px; font-size:0.78rem; border-radius:12px; }
         .main-content table.table-cards-mobile td { font-size:0.72rem !important; }
         .main-content table.table-cards-mobile tbody tr { margin-bottom:0.6rem; border-radius:14px; padding:0.15rem 0; }
@@ -315,31 +262,33 @@
             </span>
         </div>
 
-        <form method="GET" action="{{ route('bhw-president.bhws.index') }}" class="mt-3">
-            <div class="bhw-search-bar">
-                <div class="bhw-search-field">
-                    <i class="bi bi-search" style="color:var(--text-muted);"></i>
-                    <input type="text" name="search" placeholder="Search by name, email, or barangay..." value="{{ request('search') }}">
+        <form method="GET" action="{{ route('bhw-president.bhws.index') }}" class="wd-filters mt-3" role="search">
+            <div class="wd-field wd-search-field">
+                <label for="bhwsSearch">Search</label>
+                <div class="wd-search">
+                    <input type="search" id="bhwsSearch" name="search" class="form-control"
+                           placeholder="Search by name, email, or barangay..." value="{{ request('search') }}" autocomplete="off">
+                    <button class="btn" type="submit" title="Search" aria-label="Search"><i class="bi bi-search"></i></button>
                 </div>
-                <div class="bhw-filter-field">
-                    <i class="bi bi-funnel" style="color:var(--text-muted);"></i>
-                    <select name="status">
-                        <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Status</option>
-                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                        <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                        <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived</option>
-                        <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Suspended</option>
-                    </select>
-                </div>
-                <div class="bhw-search-actions">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-funnel-fill me-1"></i> Apply
-                    </button>
-                    <a href="{{ route('bhw-president.bhws.index') }}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </a>
-                </div>
+            </div>
+            <div class="wd-field wd-select-field">
+                <label for="bhwsStatus">Status</label>
+                <select id="bhwsStatus" name="status" class="form-select">
+                    <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Status</option>
+                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                    <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactive</option>
+                    <option value="archived" {{ request('status') === 'archived' ? 'selected' : '' }}>Archived</option>
+                    <option value="suspended" {{ request('status') === 'suspended' ? 'selected' : '' }}>Suspended</option>
+                </select>
+            </div>
+            <div class="wd-actions d-flex gap-2">
+                <button type="submit" class="btn btn-sm wd-apply-btn">
+                    <i class="bi bi-funnel me-1"></i> Filter
+                </button>
+                <a href="{{ route('bhw-president.bhws.index') }}" class="btn btn-sm wd-clear-btn">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                </a>
             </div>
         </form>
     </div>

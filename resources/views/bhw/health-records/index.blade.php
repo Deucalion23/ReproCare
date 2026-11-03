@@ -158,7 +158,7 @@
                 </div>
                 <div class="wd-actions d-flex gap-2">
                     <button type="submit" class="btn btn-sm wd-apply-btn">
-                        <i class="bi bi-funnel me-1"></i> Apply
+                        <i class="bi bi-funnel me-1"></i> Filter
                     </button>
                     <a href="{{ route('bhw.health-records.index') }}" class="btn btn-sm wd-clear-btn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
