@@ -136,13 +136,6 @@
                     <span>Pregnancies</span>
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('cho.handover*') ? 'active' : '' }}"
-                   href="{{ route('cho.handover.index') }}">
-                    <i class="bi bi-arrow-left-right"></i>
-                    <span>Succession Handover</span>
-                </a>
-            </li>
         </ul>
 
         <div class="sidebar-section-label">System</div>
@@ -152,13 +145,6 @@
                    href="{{ route('cho.sms.index') }}">
                     <i class="bi bi-chat-text-fill"></i>
                     <span>SMS Monitor</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('cho.database*') ? 'active' : '' }}"
-                   href="{{ route('cho.database.index') }}">
-                    <i class="bi bi-database-fill"></i>
-                    <span>Backup</span>
                 </a>
             </li>
             <li class="nav-item">
@@ -176,7 +162,10 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('cho.settings') ? 'active' : '' }}"
+                {{-- Backup and Succession Handover now live under Settings, so those
+                     pages keep the Settings row highlighted instead of leaving the
+                     whole nav unmarked. --}}
+                <a class="nav-link {{ request()->routeIs('cho.settings', 'cho.database*', 'cho.handover*') ? 'active' : '' }}"
                    href="{{ route('cho.settings') }}">
                     <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>
@@ -337,7 +326,9 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('rhu.settings') ? 'active' : '' }}"
+                {{-- Same reach-through highlight as CHO: the staff-handover desk and
+                     the backup manager are only entry-pointed from Settings. --}}
+                <a class="nav-link {{ request()->routeIs('rhu.settings', 'rhu.database*', 'rhu.staff-transitions*') ? 'active' : '' }}"
                    href="{{ route('rhu.settings') }}">
                     <i class="bi bi-gear-fill"></i>
                     <span>Settings</span>

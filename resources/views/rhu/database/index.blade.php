@@ -1,6 +1,11 @@
+@php
+    // One view serves both desks, so the form targets follow whoever is looking:
+    // the rhu.database.* routes are role-gated, and a CHO submit to them 403s.
+    $routePrefix = request()->routeIs('cho.*') ? 'cho' : 'rhu';
+@endphp
 @extends('rhu.layout')
 
-@section('title', 'Database Backup & Restore - RHU Portal | ReproCare')
+@section('title', 'Database Backup & Restore - ' . ($routePrefix === 'cho' ? 'CHO' : 'RHU') . ' Portal | ReproCare')
 
 @section('rhu-content')
 
@@ -82,7 +87,7 @@
                         <h6 class="fw-700 mb-1">Create System Backup</h6>
                         <p class="text-muted text-xs mb-0">Generate and download an archive file containing all current database contents.</p>
                     </div>
-                    <form action="{{ route('rhu.database.export') }}" method="POST">
+                    <form action="{{ route($routePrefix.'.database.export') }}" method="POST">
                         @csrf
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-download me-2"></i>Download Backup
@@ -120,11 +125,11 @@
                                         <td style="font-size:0.8rem; color:var(--text-muted);">{{ $backup['date'] }}</td>
                                         <td class="text-end px-4">
                                             <div class="d-flex justify-content-end gap-2 tbl-actions">
-                                                <a href="{{ route('rhu.database.download', $backup['name']) }}" 
+                                                <a href="{{ route($routePrefix.'.database.download', $backup['name']) }}" 
                                                    class="btn btn-sm btn-icon btn-primary" title="Download">
                                                     <i class="bi bi-download"></i>
                                                 </a>
-                                                <form action="{{ route('rhu.database.delete', $backup['name']) }}" 
+                                                <form action="{{ route($routePrefix.'.database.delete', $backup['name']) }}" 
                                                       method="POST" class="d-inline"
                                                       onsubmit="return confirm('Are you sure you want to delete this backup file permanentely?')">
                                                     @csrf
@@ -169,7 +174,7 @@
                     </div>
                 </div>
 
-                <form action="{{ route('rhu.database.import') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route($routePrefix.'.database.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-4">
                         <label for="backup_file" class="form-label fw-600 text-dark">Select Backup File</label>

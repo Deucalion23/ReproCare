@@ -159,9 +159,16 @@
                 <i class="bi bi-shield-lock-fill" style="color:var(--warning);"></i>
                 Security
             </a>
+            {{-- The two desks the CHO sidebar used to carry. Settings is now their
+                 only entry point, the same way the RHU menu reaches them; the
+                 label follows the name staff already read in the nav. --}}
             <a class="settings-nav-item" href="{{ route('cho.handover.index') }}">
                 <i class="bi bi-arrow-left-right" style="color:var(--color-danger-text);"></i>
-                Role Handover
+                Succession Handover
+            </a>
+            <a class="settings-nav-item" href="{{ route('cho.database.index') }}">
+                <i class="bi bi-database-fill-gear" style="color:var(--warning);"></i>
+                Database Backup
             </a>
         </div>
     </div>
