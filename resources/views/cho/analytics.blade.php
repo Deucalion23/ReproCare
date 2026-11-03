@@ -127,7 +127,7 @@
                     <span class="an-icon"><i class="bi bi-stars" aria-hidden="true"></i></span>
                     <div>
                         <h2 id="analytics-assistant-title">Ask the assistant</h2>
-                        <p class="an-subtitle mb-0">Report answers pair verified local data with AI context. You can also ask general questions.</p>
+                        <p class="an-subtitle mb-0">Answers use privacy-safe report summaries. Named-record requests also include verified local details.</p>
                     </div>
                 </div>
             </div>

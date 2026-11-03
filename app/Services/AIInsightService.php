@@ -106,7 +106,11 @@ class AIInsightService
             return $monthAnswer;
         }
         $fallback = $monthAnswer['answer'] ?? $this->localAnswer($question, $report);
-        $includeLocalData = $monthAnswer !== null || $this->isReportQuestion($question);
+        // The model already receives a privacy-safe aggregate of every report.
+        // Keep the locally generated answer separate unless it contains named
+        // records or another fact the model cannot receive. This prevents two
+        // near-identical report summaries from being shown for routine queries.
+        $includeLocalData = false;
         if (config('services.analytics_ai.provider', 'rules') === 'openrouter') {
             return $this->openRouterAnswer($question, $report, $fallback, $includeLocalData);
         }
@@ -122,7 +126,7 @@ class AIInsightService
     {
         return match (config('services.analytics_ai.provider', 'openrouter')) {
             'openrouter' => app(OpenRouterAnalyticsService::class)->configured()
-                ? ['label' => 'Online AI · OpenRouter', 'description' => 'Custom questions are answered by OpenRouter. Report questions combine its context with verified local data.']
+                ? ['label' => 'Online AI · OpenRouter', 'description' => 'Custom questions are answered by OpenRouter. Named-record requests retain verified local details; other answers use the AI’s privacy-safe report summary.']
                 : ['label' => 'OpenRouter needs setup', 'description' => 'Online AI is connected in the app but needs your server API key. Answers currently use local rules.'],
             default => ['label' => 'Local rules · AI off', 'description' => 'Answers currently use programmed rules. Your administrator can enable OpenRouter online AI.'],
         };
