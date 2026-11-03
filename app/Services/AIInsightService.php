@@ -964,8 +964,7 @@ class AIInsightService
             $more = $cases->count() > $shown->count()
                 ? "\n".($cases->count() - $shown->count()).' more record(s) match — narrow by barangay or open the Pregnancy review queue for the rest.'
                 : '';
-            return $scope."\n{$title} (".$cases->count()."):\n".$lines->implode("\n").$more
-                ."\nFor authorized staff review only. Do not paste names into an external tool. Recommendations support staff review and do not replace clinician assessment.";
+            return $scope."\n{$title} (".$cases->count()."):\n".$lines->implode("\n").$more;
         }
 
         // Area lines already carry their own counts, so a counting question

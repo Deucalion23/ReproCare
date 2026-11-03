@@ -55,7 +55,7 @@ An API key is required to complete this live check. Automated tests use fake Gro
 
 1. Sign in as CHO and open **Analytics**.
 2. Apply the desired date and barangay filters.
-3. Under **Ask about this report**, the status should show **Online AI · Groq**. This means credentials are configured; it does not itself verify the connection.
+3. Under **Ask the assistant**, the panel no longer shows a provider badge — run the connection check above to confirm credentials are configured.
 4. Select **Priorities**, **Maternal deaths**, **Trends** or **Areas**, then click **Ask assistant**.
 5. A successful generated answer is labelled **Online AI draft (Groq)**. An unavailable AI answer is explicitly labelled as the **local rules answer**, with a specific reason.
 

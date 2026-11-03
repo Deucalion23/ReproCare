@@ -134,18 +134,14 @@
         };
 
         /** Safely render untrusted AI text into structured DOM (no innerHTML). */
-        const renderAnswer = (container, htmlSafeText, source, combined = false) => {
+        const renderAnswer = (container, htmlSafeText) => {
             container.innerHTML = '';
             const wrap = document.createElement('div');
             wrap.className = 'an-answer-wrap';
 
             const header = document.createElement('div');
             header.className = 'an-answer-header';
-            header.innerHTML = source === 'rules'
-                ? '<i class="bi bi-database-check" aria-hidden="true"></i>Local report answer'
-                : combined
-                    ? '<i class="bi bi-stars" aria-hidden="true"></i>Local data + AI answer'
-                    : '<i class="bi bi-robot" aria-hidden="true"></i>AI answer';
+            header.innerHTML = '<i class="bi bi-stars" aria-hidden="true"></i>Answer';
             wrap.appendChild(header);
 
             const body = document.createElement('div');
@@ -195,12 +191,52 @@
             flushText();
         };
 
-        const sourceBadge = (source, model, cached) => {
-            const label = { groq: 'Groq', openrouter: 'OpenRouter', ollama: 'Ollama', rules: 'Local rules' }[source] || 'Assistant';
-            const span = document.createElement('span');
-            span.className = `an-answer-source ${source}${cached ? ' cached' : ''}`;
-            span.innerHTML = `<span class="dot"></span>${label}${model ? ' · ' + model : ''}${cached ? ' · cached' : ''}`;
-            return span;
+        /**
+         * The scope note under an AI answer, kept as separate lines instead of
+         * one run-on sentence: what the answer focused on, which barangay each
+         * Area alias stands for, and how to read the counts.
+         */
+        const renderContext = (container, data) => {
+            container.innerHTML = '';
+            const meta = document.createElement('div');
+            meta.className = 'an-chat-meta';
+
+            const topic = (data.topic || '').trim();
+            if (/^focus area:/iu.test(topic)) {
+                const row = document.createElement('div');
+                row.className = 'an-chat-meta-row';
+                row.innerHTML = '<i class="bi bi-bullseye" aria-hidden="true"></i>';
+                const label = document.createElement('strong');
+                label.textContent = 'Focus area';
+                const value = document.createElement('span');
+                value.textContent = topic.replace(/^focus area:\s*/iu, '').replace(/\.$/, '');
+                row.append(label, value);
+                meta.appendChild(row);
+            }
+
+            const areas = Array.isArray(data.area_legend) ? data.area_legend : [];
+            if (areas.length) {
+                const legend = document.createElement('div');
+                legend.className = 'an-chat-legend';
+                areas.forEach(area => {
+                    const chip = document.createElement('span');
+                    chip.className = 'an-chat-legend-item';
+                    const alias = document.createElement('strong');
+                    alias.textContent = area.alias;
+                    const name = document.createElement('span');
+                    name.textContent = area.label;
+                    chip.append(alias, name);
+                    legend.appendChild(chip);
+                });
+                meta.appendChild(legend);
+            }
+
+            const note = document.createElement('p');
+            note.className = 'an-chat-note';
+            note.textContent = 'Counts shown are exact recorded numbers for the applied filters.';
+            meta.appendChild(note);
+
+            container.appendChild(meta);
         };
 
         const copyAnswer = (text) => {
@@ -248,8 +284,7 @@
                 notice.textContent = data.error_code && typeof data.notice === 'string'
                     ? data.notice
                     : '';
-                renderAnswer(answer, data.answer, data.source, data.combined);
-                answer.appendChild(sourceBadge(data.source, data.model, data.cached, data.combined));
+                renderAnswer(answer, data.answer);
                 const actions = document.createElement('div');
                 actions.className = 'an-answer-actions';
                 const copyBtn = document.createElement('button');
@@ -273,21 +308,12 @@
                 });
                 actions.appendChild(regenBtn);
                 answer.appendChild(actions);
-                const ts = document.createElement('div');
-                ts.className = 'an-answer-timestamp';
-                answer.appendChild(ts);
                 if (data.combined && (data.source === 'groq' || data.source === 'openrouter')) {
-                    const lines = [data.topic || 'Report summary'];
-                    if (Array.isArray(data.area_legend) && data.area_legend.length) {
-                        lines.push(data.area_legend.map(area => `${area.alias}: ${area.label}`).join('; '));
-                    }
-                    lines.push(`Counts shown are exact recorded numbers for the applied filters.`);
-                    context.textContent = lines.join(' ');
+                    renderContext(context, data);
                 }
             } catch (error) {
                 notice.textContent = 'Answer unavailable';
                 answer.innerHTML = '';
-                answer.appendChild(sourceBadge('rules', null, false));
                 const p = document.createElement('p');
                 p.textContent = error.name === 'AbortError'
                     ? 'The request took too long. Try again; the suggested next steps remain available above.'

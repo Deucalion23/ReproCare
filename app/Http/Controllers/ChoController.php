@@ -923,7 +923,6 @@ class ChoController extends Controller
         $analytics = app(\App\Services\MaternalAnalyticsService::class);
         $report = $analytics->report($request->validated());
         $suggestions = app(AIInsightService::class)->suggestions($report);
-        $aiStatus = app(AIInsightService::class)->status();
         $areaOptions = $analytics->areaOptions();
         $queue = new \Illuminate\Pagination\LengthAwarePaginator(
             $report['queue']->forPage(max(1, $request->integer('page', 1)), 15)->values(),
@@ -933,7 +932,7 @@ class ChoController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('cho.analytics', compact('report', 'suggestions', 'areaOptions', 'queue', 'aiStatus'));
+        return view('cho.analytics', compact('report', 'suggestions', 'areaOptions', 'queue'));
     }
 
     public function analyticsChat(\App\Http\Requests\AnalyticsRequest $request)

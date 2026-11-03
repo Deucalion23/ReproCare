@@ -18,7 +18,6 @@ class AnalyticsController extends Controller
         $analytics = app(MaternalAnalyticsService::class);
         $report = $analytics->report($filters);
         $suggestions = app(AIInsightService::class)->suggestions($report);
-        $aiStatus = app(AIInsightService::class)->status();
         $areaOptions = $analytics->areaOptions($filters['rhu'] ?? null);
         $portal = $request->user()->role;
         $rhuOptions = AnalyticsScope::RHUS;
@@ -31,7 +30,7 @@ class AnalyticsController extends Controller
             $report['queue']->count(), 15, max(1, $request->integer('page', 1)),
             ['path' => $request->url(), 'query' => $request->query()]
         );
-        return view('cho.analytics', compact('report', 'suggestions', 'aiStatus', 'areaOptions', 'portal', 'rhuOptions', 'mapData', 'queue', 'rhuAreaChart', 'rhuAreaDefault'));
+        return view('cho.analytics', compact('report', 'suggestions', 'areaOptions', 'portal', 'rhuOptions', 'mapData', 'queue', 'rhuAreaChart', 'rhuAreaDefault'));
     }
 
     public function chat(AnalyticsRequest $request)
