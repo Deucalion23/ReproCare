@@ -205,7 +205,7 @@ class AIInsightService
             return $aiAnswer;
         }
 
-        return "Verified local report data and guidance:\n{$localAnswer}\n\nAI context:\n{$aiAnswer}";
+        return "Verified local report data:\n{$localAnswer}\n\nClinical and operational interpretation:\n{$aiAnswer}";
     }
 
     private function isReportQuestion(string $question): bool

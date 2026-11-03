@@ -1,13 +1,16 @@
 @php
-    // One view serves both desks, so the form targets follow whoever is looking:
-    // the rhu.database.* routes are role-gated, and a CHO submit to them 403s.
-    $routePrefix = request()->routeIs('cho.*') ? 'cho' : 'rhu';
+    // One view serves both desks, so the layout, the form targets and the copy
+    // all follow whoever is looking: the rhu.database.* routes are role-gated,
+    // and a CHO submit to them 403s.
+    $isCho = request()->routeIs('cho.*');
+    $routePrefix = $isCho ? 'cho' : 'rhu';
+    $portalLabel = $isCho ? 'CHO' : 'RHU';
 @endphp
-@extends('rhu.layout')
+@extends($isCho ? 'cho.layout' : 'rhu.layout')
 
-@section('title', 'Database Backup & Restore - ' . ($routePrefix === 'cho' ? 'CHO' : 'RHU') . ' Portal | ReproCare')
+@section('title', 'Database Backup & Restore - ' . $portalLabel . ' Portal | ReproCare')
 
-@section('rhu-content')
+@section($isCho ? 'cho-content' : 'rhu-content')
 
 <div class="page-hero fade-in-card mb-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -146,10 +149,20 @@
                         </table>
                     </div>
                 @else
-                    <div class="text-center py-5">
+                    <div class="text-center py-5 px-4">
                         <i class="bi bi-server" style="font-size:2.5rem; color:var(--text-muted);"></i>
-                        <h6 class="mt-3 mb-1 fw-700">No Backups Found</h6>
-                        <p class="text-muted text-xs px-4">There are currently no stored backup files in storage/app/backups. Create one using the download option above.</p>
+                        <h6 class="mt-3 mb-1 fw-700">No backups stored yet</h6>
+                        <p class="text-muted text-xs mb-3">
+                            Every snapshot you download is kept here too, so the newest one is on hand when a restore is needed.
+                        </p>
+                        {{-- Export writes the file into this folder as well as sending
+                             it, so the empty panel can start the first snapshot. --}}
+                        <form action="{{ route($routePrefix.'.database.export') }}" method="POST" class="d-inline">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-download me-1"></i>Download Backup
+                            </button>
+                        </form>
                     </div>
                 @endif
             </div>
@@ -214,7 +227,7 @@
                 <ol class="ps-3 mb-4 text-muted">
                     <li class="mb-1">Click <strong>Download Backup</strong> on the source computer.</li>
                     <li class="mb-1">Copy the downloaded file onto a USB drive or cloud storage.</li>
-                    <li class="mb-1">Log in to the ReproCare RHU Portal on the destination computer.</li>
+                    <li class="mb-1">Log in to the ReproCare {{ $portalLabel }} portal on the destination computer.</li>
                     <li>Use the <strong>Import / Restore</strong> panel to upload and activate the database file.</li>
                 </ol>
 
