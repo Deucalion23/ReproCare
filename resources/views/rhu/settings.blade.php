@@ -135,6 +135,14 @@
                 <i class="bi bi-shield-lock-fill" style="color:var(--warning);"></i>
                 Security
             </a>
+            <a class="settings-nav-item" href="{{ route('rhu.staff-transitions.index') }}">
+                <i class="bi bi-person-gear" style="color:var(--primary-light);"></i>
+                Staff Handover
+            </a>
+            <a class="settings-nav-item" href="{{ route('rhu.database.index') }}">
+                <i class="bi bi-database-fill-gear" style="color:var(--warning);"></i>
+                Database Backup
+            </a>
         </div>
     </div>
 
@@ -911,7 +919,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.settings-nav-item').forEach(link => {
         link.addEventListener('click', function (ev) {
-            ev.preventDefault();
+            if (link.hasAttribute('onclick')) {
+                ev.preventDefault();
+            }
         });
     });
 });

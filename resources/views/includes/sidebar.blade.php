@@ -316,20 +316,6 @@
         <div class="sidebar-section-label">System</div>
         <ul class="nav flex-column">
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('rhu.staff-transitions*') ? 'active' : '' }}"
-                   href="{{ route('rhu.staff-transitions.index') }}">
-                    <i class="bi bi-person-gear"></i>
-                    <span>Staff Handover</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('rhu.database*') ? 'active' : '' }}"
-                   href="{{ route('rhu.database.index') }}">
-                    <i class="bi bi-database-fill-gear"></i>
-                    <span>Database Backup</span>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('rhu.archived*') ? 'active' : '' }}"
                    href="{{ route('rhu.archived.index') }}">
                     <i class="bi bi-archive-fill"></i>
