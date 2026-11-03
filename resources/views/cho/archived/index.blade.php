@@ -3,580 +3,510 @@
 @section('title', $archiveTitle ?? 'Archived Records Hub - CHO Admin | ReproCare')
 
 @push('styles')
+@include('includes.women-directory-styles')
+@include('includes.report-queue-styles')
 <style>
-    .arch-mini .card { border:none !important; border-radius:18px !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent) !important; transition:transform .2s ease, box-shadow .2s ease; }
-    .arch-mini .card:hover { transform:translateY(-3px); box-shadow:0 10px 26px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 10%, transparent) !important; }
-    .arch-mini .card.border-primary { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; }
-    .arch-mini .card.border-primary i, .arch-mini .card.border-primary div, .arch-mini .card.border-primary h4 { color:var(--color-on-solid) !important; }
-    .arch-wrap { border:none !important; border-radius:20px !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent) !important; overflow:hidden; }
-    .arch-wrap .card-header { border:none !important; }
-    .arch-tabs .nav-link { border:none !important; border-radius:999px !important; font-weight:800 !important; font-size:0.8rem !important; padding:0.5rem 1.05rem !important; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
-    .arch-tabs .nav-link.active { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
-    .arch-search { background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; border:none !important; border-radius:999px !important; overflow:hidden; }
-    .arch-search .form-control { background:transparent !important; border:none !important; box-shadow:none !important; }
-    .arch-search .btn { border:none !important; color:var(--color-text) !important; }
-    .arch-wrap table thead th { border:none !important; background:transparent !important; font-size:0.7rem; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; color:var(--color-text-muted) !important; }
-    .arch-wrap table tbody td { border:none !important; }
-    .arch-wrap table tbody tr:hover { background:var(--color-bg); }
-    .arch-restore-btn { border:none !important; border-radius:999px !important; padding:0.4rem 1rem !important; font-weight:800 !important; font-size:0.78rem !important; background:var(--color-success-soft) !important; background-color:var(--color-success-soft) !important; color:var(--color-success-text) !important; }
-    .arch-restore-btn:hover { background:var(--color-surface-strong) !important; background-color:var(--color-surface-strong) !important; color:var(--color-on-solid) !important; }
+    /* The archive hub is one queue with six groups, so the group switcher and
+       the date filter both live in the single card header. Six metric cards
+       above it used to repeat exactly what the tabs already say. */
+    .arch-head { display:grid; gap:0.55rem; }
+    .arch-head .wd-tab { padding:0.34rem 0.8rem !important; font-size:0.74rem !important; }
+    body .main-content .arch-store .table :is(thead th, tbody td) { white-space:normal; }
+    .arch-bulk { display:flex; flex-wrap:wrap; align-items:center; gap:0.45rem 0.7rem; padding:0.4rem 0.8rem; border-bottom:1px solid var(--color-border); font-size:0.74rem; }
+    .arch-bulk .arch-count { font-weight:800; color:var(--color-text); white-space:nowrap; }
+    .arch-bulk .btn { border-radius:999px; font-weight:800; font-size:0.72rem; }
+    .arch-restore { display:inline-flex; align-items:center; justify-content:center; width:30px; height:29px; padding:0 !important; border-radius:9px; background:var(--color-success-soft); color:var(--color-success-text); border:1px solid transparent; }
+    .arch-restore:hover { background:var(--color-success); color:var(--color-on-solid); }
+    .arch-check { width:34px; }
+    .arch-note { font-size:0.7rem; color:var(--color-text-muted); line-height:1.4; }
+    /* The shield is a state, not a count, so it keeps the chip shape without
+       the number the shared chip markup expects. */
+    .arch-shield { display:inline-flex; align-items:center; gap:0.32rem; padding:0.2rem 0.62rem; border-radius:999px; background:var(--color-success-soft); color:var(--color-success-text); font-size:0.72rem; font-weight:700; white-space:nowrap; }
 </style>
 @endpush
 
 @section($archiveSection ?? 'cho-content')
 
-<div class="page-hero fade-in-card mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="page-hero-title">Archived Records & Data Integrity
-            </div>
-            <p class="page-hero-subtitle" style="font-weight:600;">Comprehensive data retention hub. Review and restore soft-deleted records across all system modules.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <span class="badge bg-secondary p-2 d-flex align-items-center">
-                <i class="bi bi-shield-lock-fill me-1"></i> Zero Hard Deletes Active
-            </span>
-        </div>
+@php
+    $filtersActive = filled($search) || filled($dateFrom) || filled($dateTo);
+    // An unknown ?tab= still lists patients, so the highlighted tab, the bulk
+    // form's type and the Clear link can never disagree with the rows.
+    $activeTab = match ($activeTab) {
+        'staff', 'health_records', 'materials', 'pregnancies', 'supplies' => $activeTab,
+        default => 'patients',
+    };
+    $isChoArchive = str_starts_with($archiveRestoreRoute ?? '', 'cho.');
+    $bulkType = match($activeTab) {
+        'patients' => 'patient',
+        'staff' => 'staff',
+        'health_records' => 'health-record',
+        'materials' => 'learning-material',
+        'pregnancies' => 'pregnancy',
+        'supplies' => 'supply-request',
+        default => 'patient',
+    };
+    // Group switcher keeps the active search and dates, the filter form keeps
+    // the active group — neither control can silently reset the other.
+    $keepQuery = array_filter(['search' => $search, 'date_from' => $dateFrom, 'date_to' => $dateTo], fn ($value) => filled($value));
+    $tabUrl = fn (string $tab) => '?' . http_build_query($keepQuery + ['tab' => $tab]);
+    $groups = [
+        'patients' => ['label' => 'Patients', 'icon' => 'bi-people', 'count' => $stats['patients']],
+        'staff' => ['label' => 'Staff', 'icon' => 'bi-person-badge', 'count' => $stats['staff']],
+        'health_records' => ['label' => 'Medical records', 'icon' => 'bi-file-earmark-medical', 'count' => $stats['health_records']],
+        'materials' => ['label' => 'Videos & learning', 'icon' => 'bi-play-circle', 'count' => $stats['learning_materials']],
+        'pregnancies' => ['label' => 'Pregnancies', 'icon' => 'bi-heart-pulse', 'count' => $stats['pregnancies']],
+        'supplies' => ['label' => 'Supplies', 'icon' => 'bi-box-seam', 'count' => $stats['supply_requests']],
+    ];
+    $totalArchived = array_sum(array_column($groups, 'count'));
+    // Only the file-backed groups add anything the tabs do not already count.
+    $fileGroups = array_values(array_filter($storageStats, fn ($row) => ($row['bytes'] ?? null) !== null));
+    $rowOnlyGroups = array_values(array_filter($storageStats, fn ($row) => ($row['bytes'] ?? null) === null));
+    $rows = match($activeTab) {
+        'staff' => $staff,
+        'health_records' => $healthRecords,
+        'materials' => $learningMaterials,
+        'pregnancies' => $pregnancies,
+        'supplies' => $supplyRequests,
+        default => $patients,
+    };
+    $emptyCopy = match($activeTab) {
+        'staff' => ['bi-person-x', 'No archived staff accounts', 'Archived midwives, BHW presidents and BHWs appear here.'],
+        'health_records' => ['bi-file-earmark-medical', 'No archived health records', 'Records deleted from a patient file appear here.'],
+        'materials' => ['bi-camera-video-off', 'No archived videos or materials', 'Retired learning materials appear here.'],
+        'pregnancies' => ['bi-heartbreak', 'No archived pregnancies', 'Closed or withdrawn pregnancy records appear here.'],
+        'supplies' => ['bi-box', 'No archived supply requests', 'Deleted supply requests appear here.'],
+        default => ['bi-archive', 'No archived patients', 'Soft-deleted patient accounts appear here.'],
+    };
+    $hint = $filtersActive ? 'Nothing in this group matches the current search or date range.' : $emptyCopy[2];
+@endphp
+
+<div class="rq-bar fade-in-card mb-2">
+    <div class="rq-bar-id">
+        <div class="rq-bar-title"><i class="bi bi-archive" aria-hidden="true"></i>Archived Records &amp; Data Integrity</div>
+        <p class="rq-bar-subtitle">Every soft-deleted record in one place. Restore from here; nothing is deleted automatically.</p>
+    </div>
+    <div class="rq-chips">
+        <span class="summary-chip chip-primary rq-chip"><b>{{ number_format($totalArchived) }}</b>archived</span>
+        <span class="arch-shield"><i class="bi bi-shield-lock-fill" aria-hidden="true"></i>Zero hard deletes</span>
     </div>
 </div>
 
-{{-- Flash messages --}}
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+@if (session('success'))
+    <div class="alert alert-success alert-dismissible fade show mb-2">
         <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
-@if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+@if (session('error'))
+    <div class="alert alert-danger alert-dismissible fade show mb-2">
         <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ session('error') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 @endif
 
-{{-- Summary Metric Cards --}}
-<div class="row g-3 mb-4 arch-mini">
-    <div class="col-6 col-md-4 col-lg-2">
-        <a href="?tab=patients" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $activeTab === 'patients' ? 'border-primary shadow-sm' : '' }}" style="border-radius:14px;">
-                <i class="bi bi-people text-primary mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Archived Patients</div>
-                <h4 class="fw-800 text-primary mb-0 mt-1">{{ $stats['patients'] }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-        <a href="?tab=staff" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $activeTab === 'staff' ? 'border-primary shadow-sm' : '' }}" style="border-radius:14px;">
-                <i class="bi bi-person-badge text-info mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Archived Staff</div>
-                <h4 class="fw-800 text-info mb-0 mt-1">{{ $stats['staff'] }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-        <a href="?tab=health_records" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $activeTab === 'health_records' ? 'border-primary shadow-sm' : '' }}" style="border-radius:14px;">
-                <i class="bi bi-file-earmark-medical text-warning mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Health Records</div>
-                <h4 class="fw-800 text-warning mb-0 mt-1">{{ $stats['health_records'] }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-        <a href="?tab=materials" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $activeTab === 'materials' ? 'border-primary shadow-sm' : '' }}" style="border-radius:14px;">
-                <i class="bi bi-play-circle text-danger mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Videos / Materials</div>
-                <h4 class="fw-800 text-danger mb-0 mt-1">{{ $stats['learning_materials'] }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-        <a href="?tab=pregnancies" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $activeTab === 'pregnancies' ? 'border-primary shadow-sm' : '' }}" style="border-radius:14px;">
-                <i class="bi bi-heart-pulse text-success mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Pregnancies</div>
-                <h4 class="fw-800 text-success mb-0 mt-1">{{ $stats['pregnancies'] }}</h4>
-            </div>
-        </a>
-    </div>
-    <div class="col-6 col-md-4 col-lg-2">
-        <a href="?tab=supplies" class="text-decoration-none">
-            <div class="card fade-in-card p-3 text-center h-100 {{ $activeTab === 'supplies' ? 'border-primary shadow-sm' : '' }}" style="border-radius:14px;">
-                <i class="bi bi-box-seam text-secondary mb-1" style="font-size:1.4rem;"></i>
-                <div class="text-muted" style="font-size:0.75rem;">Supply Requests</div>
-                <h4 class="fw-800 text-secondary mb-0 mt-1">{{ $stats['supply_requests'] }}</h4>
-            </div>
-        </a>
-    </div>
-</div>
+<div class="card rq-wrap fade-in-card">
+    <div class="card-header bg-transparent arch-head">
+        <ul class="wd-tabs" role="tablist" aria-label="Archived record groups">
+            @foreach ($groups as $key => $group)
+                <li>
+                    <a class="wd-tab {{ $activeTab === $key ? 'active' : '' }}" href="{{ $tabUrl((string) $key) }}"
+                       role="tab" @if ($activeTab === $key) aria-current="true" @endif>
+                        <i class="bi {{ $group['icon'] }}" aria-hidden="true"></i>{{ $group['label'] }} ({{ number_format($group['count']) }})
+                    </a>
+                </li>
+            @endforeach
+        </ul>
 
-{{-- Main Tabbed Container --}}
-<div class="card fade-in-card arch-wrap" style="border-radius:20px;">
-    <div class="card-header bg-transparent p-3" style="border:none;">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            {{-- Navigation Tabs --}}
-            <ul class="nav nav-pills arch-tabs gap-2 flex-wrap" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link {{ $activeTab === 'patients' ? 'active' : '' }}" href="?tab=patients">
-                        <i class="bi bi-people me-1"></i> Patients ({{ $stats['patients'] }})
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ $activeTab === 'staff' ? 'active' : '' }}" href="?tab=staff">
-                        <i class="bi bi-person-badge me-1"></i> Staff ({{ $stats['staff'] }})
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ $activeTab === 'health_records' ? 'active' : '' }}" href="?tab=health_records">
-                        <i class="bi bi-file-earmark-medical me-1"></i> Medical Records ({{ $stats['health_records'] }})
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ $activeTab === 'materials' ? 'active' : '' }}" href="?tab=materials">
-                        <i class="bi bi-play-circle me-1"></i> Videos & Learning ({{ $stats['learning_materials'] }})
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ $activeTab === 'pregnancies' ? 'active' : '' }}" href="?tab=pregnancies">
-                        <i class="bi bi-heart-pulse me-1"></i> Pregnancies ({{ $stats['pregnancies'] }})
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link {{ $activeTab === 'supplies' ? 'active' : '' }}" href="?tab=supplies">
-                        <i class="bi bi-box-seam me-1"></i> Supplies ({{ $stats['supply_requests'] }})
-                    </a>
-                </li>
-            </ul>
-
-            {{-- Tab Search + Archived-Date Filter --}}
-            <form method="GET" class="d-flex gap-2 flex-wrap align-items-end">
-                <input type="hidden" name="tab" value="{{ $activeTab }}">
-                <div class="input-group input-group-sm arch-search" style="max-width:220px;">
-                    <input type="text" name="search" class="form-control" placeholder="Search in this tab..." value="{{ $search }}">
-                    <button class="btn" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
+        <form method="GET" class="wd-filters" role="search">
+            <input type="hidden" name="tab" value="{{ $activeTab }}">
+            <div class="wd-field wd-search-field">
+                <label for="arch-search">Search this group</label>
+                <div class="wd-search">
+                    <input type="search" id="arch-search" name="search" class="form-control" autocomplete="off"
+                           value="{{ $search }}" placeholder="Name, ID, barangay...">
+                    <button class="btn" type="submit" title="Search"><i class="bi bi-search"></i></button>
                 </div>
-                <div>
-                    <label class="form-label mb-0" style="font-size:0.7rem;font-weight:800;">Archived from</label>
-                    <input type="date" name="date_from" class="form-control form-control-sm" value="{{ $dateFrom ?? '' }}" max="{{ date('Y-m-d') }}">
-                </div>
-                <div>
-                    <label class="form-label mb-0" style="font-size:0.7rem;font-weight:800;">Archived to</label>
-                    <input type="date" name="date_to" class="form-control form-control-sm" value="{{ $dateTo ?? '' }}" max="{{ date('Y-m-d') }}">
-                </div>
-                <div class="d-flex gap-1">
-                    <button class="btn btn-sm btn-primary" type="submit" style="border-radius:999px;font-weight:800;">Filter</button>
-                    <a class="btn btn-sm btn-outline-secondary" style="border-radius:999px;" href="?tab={{ $activeTab }}">Clear</a>
-                </div>
-            </form>
-        </div>
+            </div>
+            <div class="wd-field wd-date-field">
+                <label for="arch-from">Archived from</label>
+                <input type="date" id="arch-from" name="date_from" class="form-control form-control-sm"
+                       value="{{ $dateFrom ?? '' }}" max="{{ date('Y-m-d') }}">
+            </div>
+            <div class="wd-field wd-date-field">
+                <label for="arch-to">to</label>
+                <input type="date" id="arch-to" name="date_to" class="form-control form-control-sm"
+                       value="{{ $dateTo ?? '' }}" max="{{ date('Y-m-d') }}">
+            </div>
+            <div class="wd-actions d-flex gap-2">
+                <button type="submit" class="btn btn-sm wd-apply-btn"><i class="bi bi-funnel me-1"></i>Filter</button>
+                <a href="{{ '?tab=' . $activeTab }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                    <i class="bi bi-x-lg me-1"></i>Clear
+                </a>
+            </div>
+        </form>
     </div>
 
     <div class="card-body p-0">
-
-        {{-- Bulk selection bar (applies to the visible tab) --}}
-        @php
-            $bulkType = match($activeTab) {
-                'patients' => 'patient',
-                'staff' => 'staff',
-                'health_records' => 'health-record',
-                'materials' => 'learning-material',
-                'pregnancies' => 'pregnancy',
-                'supplies' => 'supply-request',
-                default => 'patient',
-            };
-            $isChoArchive = str_starts_with($archiveRestoreRoute ?? '', 'cho.');
-        @endphp
-        <form method="POST" action="{{ $isChoArchive ? route('cho.archived.bulk-restore') : route('rhu.archived.bulk-restore') }}" id="archive-bulk-form" class="d-flex gap-2 align-items-center flex-wrap px-3 py-2 border-bottom">
-            @csrf
-            <input type="hidden" name="type" value="{{ $bulkType }}">
-            <span class="text-muted" style="font-size:0.78rem;font-weight:700;"><span id="archive-selected-count">0</span> selected</span>
-            <button type="submit" class="btn btn-sm arch-restore-btn" onclick="return confirmBulkRestore()">
-                <i class="bi bi-arrow-counterclockwise me-1"></i> Restore selected
-            </button>
-            @if($isChoArchive)
-            <button type="submit" class="btn btn-sm btn-danger" style="border-radius:999px;font-weight:800;" formaction="{{ route('cho.archived.bulk-delete') }}" onclick="return confirmBulkDelete()">
-                <i class="bi bi-trash3 me-1"></i> Delete permanently
-            </button>
-            @endif
-            <small class="text-muted" style="font-size:0.72rem;">Patient, pregnancy and health records are always retained — permanent delete never applies to them.</small>
-        </form>
+        @if ($rows->isNotEmpty())
+            <form method="POST" action="{{ $isChoArchive ? route('cho.archived.bulk-restore') : route('rhu.archived.bulk-restore') }}"
+                 id="archive-bulk-form" class="arch-bulk">
+                @csrf
+                <input type="hidden" name="type" value="{{ $bulkType }}">
+                <span class="arch-count"><span id="archive-selected-count">0</span> selected</span>
+                <button type="submit" class="btn btn-sm btn-outline-success" onclick="return confirmBulkRestore()">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i>Restore selected
+                </button>
+                @if ($isChoArchive)
+                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                            formaction="{{ route('cho.archived.bulk-delete') }}" onclick="return confirmBulkDelete()">
+                        <i class="bi bi-trash3 me-1"></i>Delete permanently
+                    </button>
+                @endif
+                <span class="arch-note ms-auto">Permanent delete skips patient, pregnancy and health records.</span>
+            </form>
+        @endif
 
         {{-- TAB 1: ARCHIVED PATIENTS --}}
-        @if($activeTab === 'patients')
+        @if ($activeTab === 'patients')
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="px-3 py-3"><input type="checkbox" id="archive-select-all" title="Select all on this page"></th>
-                            <th class="py-3">Patient Name</th>
-                            <th class="py-3">Contact / Email</th>
-                            <th class="py-3">Barangay</th>
-                            <th class="py-3">Archived On</th>
-                            <th class="py-3 text-end px-3">Action</th>
+                            <th class="arch-check"><input type="checkbox" class="archive-select-all" title="Select all on this page" aria-label="Select all patients on this page"></th>
+                            <th>Patient</th>
+                            <th>Contact</th>
+                            <th>Barangay</th>
+                            <th>Archived on</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($patients as $patient)
+                        @foreach ($patients as $patient)
                             <tr>
-                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $patient->id }}" form="archive-bulk-form"></td>
+                                <td><input type="checkbox" class="archive-select" name="ids[]" value="{{ $patient->id }}" form="archive-bulk-form" aria-label="Select {{ $patient->name }}"></td>
                                 <td>
-                                    <div class="fw-700">{{ $patient->first_name }} {{ $patient->last_name }}</div>
-                                    <small class="text-muted">ID: #{{ $patient->id }}</small>
+                                    <div class="rq-truncate rq-title" title="{{ $patient->name }}">{{ $patient->name }}</div>
+                                    <div class="rq-soft">#{{ $patient->id }}</div>
                                 </td>
                                 <td>
-                                    <div>{{ $patient->contact_number ?? 'N/A' }}</div>
-                                    <small class="text-muted">{{ $patient->email }}</small>
+                                    <div>{{ $patient->contact_number ?? '—' }}</div>
+                                    <div class="rq-soft">{{ $patient->email }}</div>
                                 </td>
-                                <td>{{ $patient->barangay ?? 'N/A' }}</td>
+                                <td><span class="rq-truncate" title="{{ $patient->barangay }}">{{ $patient->barangay ?? '—' }}</span></td>
                                 <td>
-                                    <span class="text-muted">{{ $patient->deleted_at ? $patient->deleted_at->format('M d, Y h:i A') : 'N/A' }}</span>
+                                    <div>{{ $patient->deleted_at?->format('M j, Y') ?? '—' }}</div>
+                                    <div class="rq-soft">{{ $patient->deleted_at?->format('g:i A') }}</div>
                                 </td>
-                                <td class="text-end px-3">
-                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'patient', 'id' => $patient->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Restore patient record for {{ $patient->name }}?');">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm arch-restore-btn">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                        </button>
-                                    </form>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <form method="POST" action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'patient', 'id' => $patient->id]) }}"
+                                              data-confirm="Restore patient record for {{ $patient->name }}?">
+                                            @csrf
+                                            <button type="submit" class="btn arch-restore" title="Restore this patient" aria-label="Restore {{ $patient->name }}">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-archive" style="font-size:2rem;"></i>
-                                    <p class="mt-2 mb-0">No archived patients found.</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            @if($patients->hasPages())
-                <div class="p-3">{{ $patients->links() }}</div>
+            @if ($patients->hasPages())
+                <div class="rq-foot">{{ $patients->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @endif
 
         {{-- TAB 2: ARCHIVED STAFF --}}
-        @if($activeTab === 'staff')
+        @if ($activeTab === 'staff')
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
-                            <th class="py-3">Staff Name</th>
-                            <th class="py-3">Role</th>
-                            <th class="py-3">Email / Contact</th>
-                            <th class="py-3">Archived On</th>
-                            <th class="py-3 text-end px-3">Action</th>
+                            <th class="arch-check"><input type="checkbox" class="archive-select-all" title="Select all on this page" aria-label="Select all staff on this page"></th>
+                            <th>Staff</th>
+                            <th>Role</th>
+                            <th>Email / contact</th>
+                            <th>Archived on</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($staff as $member)
+                        @foreach ($staff as $member)
                             <tr>
-                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $member->id }}" form="archive-bulk-form"></td>
+                                <td><input type="checkbox" class="archive-select" name="ids[]" value="{{ $member->id }}" form="archive-bulk-form" aria-label="Select {{ $member->name }}"></td>
                                 <td>
-                                    <div class="fw-700">{{ $member->first_name }} {{ $member->last_name }}</div>
-                                    <small class="text-muted">ID: #{{ $member->id }}</small>
+                                    <div class="rq-truncate rq-title" title="{{ $member->name }}">{{ $member->name }}</div>
+                                    <div class="rq-soft">#{{ $member->id }}</div>
+                                </td>
+                                <td><span class="summary-chip chip-primary rq-status">{{ str_replace('_', ' ', ucfirst($member->role)) }}</span></td>
+                                <td>
+                                    <div class="rq-truncate" title="{{ $member->email }}">{{ $member->email }}</div>
+                                    <div class="rq-soft">{{ $member->contact_number ?? '—' }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-primary-subtle text-primary fw-600 text-uppercase" style="font-size:0.75rem;">
-                                        {{ str_replace('_', ' ', $member->role) }}
-                                    </span>
+                                    <div>{{ $member->deleted_at?->format('M j, Y') ?? '—' }}</div>
+                                    <div class="rq-soft">{{ $member->deleted_at?->format('g:i A') }}</div>
                                 </td>
-                                <td>
-                                    <div>{{ $member->email }}</div>
-                                    <small class="text-muted">{{ $member->contact_number ?? 'N/A' }}</small>
-                                </td>
-                                <td>
-                                    <span class="text-muted">{{ $member->deleted_at ? $member->deleted_at->format('M d, Y h:i A') : 'N/A' }}</span>
-                                </td>
-                                <td class="text-end px-3">
-                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'staff', 'id' => $member->id]) }}" method="POST" class="d-inline" onsubmit="return confirm('Restore staff account for {{ $member->name }}?');">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm arch-restore-btn">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                        </button>
-                                    </form>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <form method="POST" action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'staff', 'id' => $member->id]) }}"
+                                              data-confirm="Restore staff account for {{ $member->name }}?">
+                                            @csrf
+                                            <button type="submit" class="btn arch-restore" title="Restore this account" aria-label="Restore {{ $member->name }}">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-person-x" style="font-size:2rem;"></i>
-                                    <p class="mt-2 mb-0">No archived staff accounts found.</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            @if($staff->hasPages())
-                <div class="p-3">{{ $staff->links() }}</div>
+            @if ($staff->hasPages())
+                <div class="rq-foot">{{ $staff->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @endif
 
         {{-- TAB 3: HEALTH RECORDS --}}
-        @if($activeTab === 'health_records')
+        @if ($activeTab === 'health_records')
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
-                            <th class="py-3">Record ID & Patient</th>
-                            <th class="py-3">Vital Signs / Vitals</th>
-                            <th class="py-3">Risk Level</th>
-                            <th class="py-3">Archived Date</th>
-                            <th class="py-3 text-end px-3">Action</th>
+                            <th class="arch-check"><input type="checkbox" class="archive-select-all" title="Select all on this page" aria-label="Select all records on this page"></th>
+                            <th>Record / patient</th>
+                            <th>Vitals</th>
+                            <th>Risk</th>
+                            <th>Archived on</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($healthRecords as $record)
+                        @foreach ($healthRecords as $record)
+                            @php $riskTone = match (strtolower($record->risk_level ?? 'low')) {
+                                'critical', 'high' => 'danger',
+                                'medium' => 'warning',
+                                default => 'success',
+                            }; @endphp
                             <tr>
-                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $record->id }}" form="archive-bulk-form"></td>
+                                <td><input type="checkbox" class="archive-select" name="ids[]" value="{{ $record->id }}" form="archive-bulk-form" aria-label="Select record {{ $record->id }}"></td>
                                 <td>
-                                    <div class="fw-700">Record #{{ $record->id }}</div>
-                                    <small class="text-muted">{{ $record->user?->name ?? 'Patient' }}</small>
+                                    <div class="rq-truncate rq-title" title="{{ $record->user?->name ?? 'Patient' }}">#{{ $record->id }} · {{ $record->user?->name ?? 'Patient' }}</div>
                                 </td>
                                 <td>
-                                    <div>BP: <strong>{{ $record->bp ?? 'N/A' }}</strong> | Hb: <strong>{{ $record->hemoglobin ?? 'N/A' }}</strong></div>
-                                    <small class="text-muted">Weight: {{ $record->weight ?? 'N/A' }} kg</small>
+                                    <div>BP {{ $record->bp ?? '—' }} · Hb {{ $record->hemoglobin ?? '—' }}</div>
+                                    <div class="rq-soft">{{ $record->weight ? $record->weight.' kg' : 'Weight unrecorded' }}</div>
                                 </td>
-                                <td>
-                                    @php
-                                        $badgeColor = match(strtolower($record->risk_level ?? 'low')) {
-                                            'critical', 'high' => 'danger',
-                                            'medium' => 'warning',
-                                            default => 'success',
-                                        };
-                                    @endphp
-                                    <span class="badge bg-{{ $badgeColor }}">{{ ucfirst($record->risk_level ?? 'Low') }}</span>
-                                </td>
-                                <td>
-                                    <span class="text-muted">{{ $record->deleted_at ? $record->deleted_at->format('M d, Y') : 'N/A' }}</span>
-                                </td>
-                                <td class="text-end px-3">
-                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'health-record', 'id' => $record->id]) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm arch-restore-btn">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                        </button>
-                                    </form>
+                                <td><span class="summary-chip chip-{{ $riskTone }} rq-status">{{ ucfirst($record->risk_level ?? 'Low') }}</span></td>
+                                <td>{{ $record->deleted_at?->format('M j, Y') ?? '—' }}</td>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <form method="POST" action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'health-record', 'id' => $record->id]) }}"
+                                              data-confirm="Restore health record #{{ $record->id }}?">
+                                            @csrf
+                                            <button type="submit" class="btn arch-restore" title="Restore this record" aria-label="Restore health record {{ $record->id }}">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-file-earmark-medical" style="font-size:2rem;"></i>
-                                    <p class="mt-2 mb-0">No archived health records.</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            @if($healthRecords->hasPages())
-                <div class="p-3">{{ $healthRecords->links() }}</div>
+            @if ($healthRecords->hasPages())
+                <div class="rq-foot">{{ $healthRecords->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @endif
 
         {{-- TAB 4: VIDEOS / LEARNING MATERIALS --}}
-        @if($activeTab === 'materials')
+        @if ($activeTab === 'materials')
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
-                            <th class="py-3">Material Title</th>
-                            <th class="py-3">Type & Category</th>
-                            <th class="py-3">Media Source</th>
-                            <th class="py-3">Archived On</th>
-                            <th class="py-3 text-end px-3">Action</th>
+                            <th class="arch-check"><input type="checkbox" class="archive-select-all" title="Select all on this page" aria-label="Select all materials on this page"></th>
+                            <th>Material</th>
+                            <th>Type</th>
+                            <th>Media source</th>
+                            <th>Archived on</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($learningMaterials as $mat)
+                        @foreach ($learningMaterials as $mat)
                             <tr>
-                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $mat->id }}" form="archive-bulk-form"></td>
+                                <td><input type="checkbox" class="archive-select" name="ids[]" value="{{ $mat->id }}" form="archive-bulk-form" aria-label="Select {{ $mat->title }}"></td>
                                 <td>
-                                    <div class="fw-700">{{ $mat->title }}</div>
-                                    <small class="text-muted">{{ Str::limit($mat->content, 60) }}</small>
+                                    <div class="rq-truncate rq-title" title="{{ $mat->title }}">{{ $mat->title }}</div>
+                                    <div class="rq-soft">{{ Str::limit($mat->content, 60) }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary me-1">{{ ucfirst($mat->material_type) }}</span>
-                                    <span class="badge bg-light text-dark border">{{ ucfirst($mat->category ?? 'General') }}</span>
+                                    <span class="summary-chip chip-primary rq-status">{{ ucfirst($mat->material_type) }}</span>
+                                    <span class="summary-chip chip-info rq-status">{{ ucfirst($mat->category ?? 'General') }}</span>
                                 </td>
                                 <td>
-                                    @if($mat->video_url)
-                                        <span class="text-truncate d-inline-block" style="max-width:200px;"><i class="bi bi-camera-video me-1 text-danger"></i>{{ $mat->video_url }}</span>
-                                    @elseif($mat->file)
-                                        <span class="text-truncate d-inline-block" style="max-width:200px;"><i class="bi bi-file-earmark-arrow-down me-1 text-primary"></i>{{ basename($mat->file) }}</span>
+                                    @if ($mat->video_url)
+                                        <span class="rq-truncate" title="{{ $mat->video_url }}"><i class="bi bi-camera-video me-1 text-danger" aria-hidden="true"></i>{{ $mat->video_url }}</span>
+                                    @elseif ($mat->file)
+                                        <span class="rq-truncate" title="{{ basename($mat->file) }}"><i class="bi bi-file-earmark-arrow-down me-1 text-primary" aria-hidden="true"></i>{{ basename($mat->file) }}</span>
                                     @else
-                                        <span class="text-muted">Article/Text</span>
+                                        <span class="rq-soft">Article / text</span>
                                     @endif
                                 </td>
-                                <td>
-                                    <span class="text-muted">{{ $mat->deleted_at ? $mat->deleted_at->format('M d, Y') : 'N/A' }}</span>
-                                </td>
-                                <td class="text-end px-3">
-                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'learning-material', 'id' => $mat->id]) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm arch-restore-btn">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-camera-video-off" style="font-size:2rem;"></i>
-                                    <p class="mt-2 mb-0">No archived videos or learning materials found.</p>
+                                <td>{{ $mat->deleted_at?->format('M j, Y') ?? '—' }}</td>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <form method="POST" action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'learning-material', 'id' => $mat->id]) }}"
+                                              data-confirm="Restore “{{ $mat->title }}”?">
+                                            @csrf
+                                            <button type="submit" class="btn arch-restore" title="Restore this material" aria-label="Restore {{ $mat->title }}">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            @if($learningMaterials->hasPages())
-                <div class="p-3">{{ $learningMaterials->links() }}</div>
+            @if ($learningMaterials->hasPages())
+                <div class="rq-foot">{{ $learningMaterials->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @endif
 
         {{-- TAB 5: PREGNANCIES --}}
-        @if($activeTab === 'pregnancies')
+        @if ($activeTab === 'pregnancies')
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
-                            <th class="py-3">Pregnancy ID & Patient</th>
-                            <th class="py-3">EDD / AOG</th>
-                            <th class="py-3">Status</th>
-                            <th class="py-3">Archived On</th>
-                            <th class="py-3 text-end px-3">Action</th>
+                            <th class="arch-check"><input type="checkbox" class="archive-select-all" title="Select all on this page" aria-label="Select all pregnancies on this page"></th>
+                            <th>Pregnancy / patient</th>
+                            <th>EDD / AOG</th>
+                            <th>Status</th>
+                            <th>Archived on</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($pregnancies as $preg)
+                        @foreach ($pregnancies as $preg)
                             <tr>
-                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $preg->id }}" form="archive-bulk-form"></td>
+                                <td><input type="checkbox" class="archive-select" name="ids[]" value="{{ $preg->id }}" form="archive-bulk-form" aria-label="Select pregnancy {{ $preg->id }}"></td>
                                 <td>
-                                    <div class="fw-700">Pregnancy #{{ $preg->id }}</div>
-                                    <small class="text-muted">{{ $preg->user?->name ?? 'Patient' }}</small>
+                                    <div class="rq-truncate rq-title" title="{{ $preg->user?->name ?? 'Patient' }}">#{{ $preg->id }} · {{ $preg->user?->name ?? 'Patient' }}</div>
                                 </td>
                                 <td>
-                                    <div>EDD: {{ $preg->expected_delivery_date ? \Carbon\Carbon::parse($preg->expected_delivery_date)->format('M d, Y') : 'N/A' }}</div>
-                                    <small class="text-muted">AOG: {{ $preg->aog_weeks ?? 'N/A' }} weeks</small>
+                                    <div>{{ $preg->expected_delivery_date ? \Carbon\Carbon::parse($preg->expected_delivery_date)->format('M j, Y') : 'EDD unrecorded' }}</div>
+                                    <div class="rq-soft">{{ $preg->aog_weeks ? $preg->aog_weeks.' weeks' : 'AOG unrecorded' }}</div>
                                 </td>
-                                <td>
-                                    <span class="badge bg-secondary">{{ ucfirst($preg->status ?? 'archived') }}</span>
-                                </td>
-                                <td>
-                                    <span class="text-muted">{{ $preg->deleted_at ? $preg->deleted_at->format('M d, Y') : 'N/A' }}</span>
-                                </td>
-                                <td class="text-end px-3">
-                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'pregnancy', 'id' => $preg->id]) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm arch-restore-btn">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                        </button>
-                                    </form>
+                                <td><span class="summary-chip chip-warning rq-status">{{ ucfirst($preg->status ?? 'archived') }}</span></td>
+                                <td>{{ $preg->deleted_at?->format('M j, Y') ?? '—' }}</td>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <form method="POST" action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'pregnancy', 'id' => $preg->id]) }}"
+                                              data-confirm="Restore pregnancy record #{{ $preg->id }}?">
+                                            @csrf
+                                            <button type="submit" class="btn arch-restore" title="Restore this pregnancy" aria-label="Restore pregnancy {{ $preg->id }}">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-heartbreak" style="font-size:2rem;"></i>
-                                    <p class="mt-2 mb-0">No archived pregnancies found.</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            @if($pregnancies->hasPages())
-                <div class="p-3">{{ $pregnancies->links() }}</div>
+            @if ($pregnancies->hasPages())
+                <div class="rq-foot">{{ $pregnancies->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @endif
 
         {{-- TAB 6: SUPPLIES --}}
-        @if($activeTab === 'supplies')
+        @if ($activeTab === 'supplies')
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0" style="font-size:0.875rem;">
-                    <thead class="table-light">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
                         <tr>
-                            <th class="px-3 py-3"><input type="checkbox" class="archive-select-all" title="Select all on this page"></th>
-                            <th class="py-3">Supply Item</th>
-                            <th class="py-3">Requested By</th>
-                            <th class="py-3">Quantity</th>
-                            <th class="py-3">Archived On</th>
-                            <th class="py-3 text-end px-3">Action</th>
+                            <th class="arch-check"><input type="checkbox" class="archive-select-all" title="Select all on this page" aria-label="Select all requests on this page"></th>
+                            <th>Supply item</th>
+                            <th>Requested by</th>
+                            <th class="text-end">Qty</th>
+                            <th>Archived on</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($supplyRequests as $sup)
+                        @foreach ($supplyRequests as $sup)
                             <tr>
-                                <td class="px-3"><input type="checkbox" class="archive-select" name="ids[]" value="{{ $sup->id }}" form="archive-bulk-form"></td>
+                                <td><input type="checkbox" class="archive-select" name="ids[]" value="{{ $sup->id }}" form="archive-bulk-form" aria-label="Select {{ $sup->supply_name }}"></td>
                                 <td>
-                                    <div class="fw-700">{{ $sup->supply_name }}</div>
-                                    <small class="text-muted">{{ ucfirst($sup->supply_category ?? 'General') }}</small>
+                                    <div class="rq-truncate rq-title" title="{{ $sup->supply_name }}">{{ $sup->supply_name }}</div>
+                                    <div class="rq-soft">{{ ucfirst($sup->supply_category ?? 'General') }}</div>
                                 </td>
-                                <td>{{ $sup->requestedBy?->name ?? 'Staff' }}</td>
-                                <td>{{ $sup->quantity_requested ?? 0 }} {{ $sup->unit ?? 'units' }}</td>
-                                <td>
-                                    <span class="text-muted">{{ $sup->deleted_at ? $sup->deleted_at->format('M d, Y') : 'N/A' }}</span>
-                                </td>
-                                <td class="text-end px-3">
-                                    <form action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'supply-request', 'id' => $sup->id]) }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <button type="submit" class="btn btn-sm arch-restore-btn">
-                                            <i class="bi bi-arrow-counterclockwise me-1"></i> Restore
-                                        </button>
-                                    </form>
+                                <td><span class="rq-truncate" title="{{ $sup->requestedBy?->name ?? 'Staff' }}">{{ $sup->requestedBy?->name ?? 'Staff' }}</span></td>
+                                <td class="text-end rq-num fw-700">{{ number_format($sup->quantity_requested ?? 0) }} {{ $sup->unit ?? 'units' }}</td>
+                                <td>{{ $sup->deleted_at?->format('M j, Y') ?? '—' }}</td>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <form method="POST" action="{{ route($archiveRestoreRoute ?? 'cho.archived.restore', ['type' => 'supply-request', 'id' => $sup->id]) }}"
+                                              data-confirm="Restore supply request “{{ $sup->supply_name }}”?">
+                                            @csrf
+                                            <button type="submit" class="btn arch-restore" title="Restore this request" aria-label="Restore {{ $sup->supply_name }}">
+                                                <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center py-5 text-muted">
-                                    <i class="bi bi-box" style="font-size:2rem;"></i>
-                                    <p class="mt-2 mb-0">No archived supply requests found.</p>
-                                </td>
-                            </tr>
-                        @endforelse
+                        @endforeach
                     </tbody>
                 </table>
             </div>
-            @if($supplyRequests->hasPages())
-                <div class="p-3">{{ $supplyRequests->links() }}</div>
+            @if ($supplyRequests->hasPages())
+                <div class="rq-foot">{{ $supplyRequests->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @endif
 
+        @if ($rows->isEmpty())
+            <div class="rq-empty">
+                <i class="bi {{ $emptyCopy[0] }} text-muted"></i>
+                <h6 class="mt-2 mb-1 fw-700">{{ $emptyCopy[1] }}</h6>
+                <p class="rq-soft mb-0">{{ $hint }}</p>
+            </div>
+        @endif
     </div>
 </div>
 
-{{-- Storage overview: which archived groups use the most space --}}
-<div class="card fade-in-card arch-wrap mt-3" style="border-radius:20px;">
-    <div class="card-header bg-transparent p-3" style="border:none;">
-        <strong><i class="bi bi-hdd me-1"></i> Archive storage overview</strong>
-        <div class="text-muted" style="font-size:0.78rem;">Read-only. Nothing is deleted automatically — permanent deletion requires CHO confirmation per record.</div>
+{{-- File storage is the one thing the group tabs cannot show: rows are already
+     counted above, so only disk usage keeps its own table. --}}
+<div class="card rq-wrap fade-in-card arch-store mt-2">
+    <div class="card-header bg-transparent d-flex flex-wrap align-items-center gap-2">
+        <span class="rq-bar-title"><i class="bi bi-hdd" aria-hidden="true"></i>File storage</span>
+        <span class="arch-note ms-auto">
+            {{ count($rowOnlyGroups) }} groups hold database rows only and are never auto-deleted.
+            Permanent deletion needs CHO confirmation per record.
+        </span>
     </div>
     <div class="table-responsive">
-        <table class="table table-sm align-middle mb-0" style="font-size:0.82rem;">
-            <thead class="table-light">
-                <tr><th class="px-3">Group</th><th>Archived rows</th><th>Files size</th><th>Note</th></tr>
+        <table class="table align-middle mb-0">
+            <thead>
+                <tr><th>Group</th><th class="text-end">Archived rows</th><th class="text-end">Files size</th><th>Note</th></tr>
             </thead>
             <tbody>
-                @foreach($storageStats as $row)
-                <tr>
-                    <td class="px-3 fw-700">{{ $row['label'] }}</td>
-                    <td>{{ number_format($row['rows']) }}</td>
-                    <td>{{ $row['bytes'] ?? '—' }}</td>
-                    <td class="text-muted">{{ $row['note'] }}</td>
-                </tr>
+                @foreach ($fileGroups as $row)
+                    <tr>
+                        <td class="fw-700">{{ $row['label'] }}</td>
+                        <td class="text-end rq-num">{{ number_format($row['rows']) }}</td>
+                        <td class="text-end rq-num">{{ $row['bytes'] }}</td>
+                        <td class="rq-soft">{{ $row['note'] }}</td>
+                    </tr>
                 @endforeach
             </tbody>
         </table>
@@ -596,18 +526,18 @@
     document.querySelectorAll('.archive-select').forEach(function (box) {
         box.addEventListener('change', updateCount);
     });
-    var master = document.getElementById('archive-select-all');
-    if (master) {
-        master.addEventListener('change', function () {
-            document.querySelectorAll('.archive-select').forEach(function (box) { box.checked = master.checked; });
-            updateCount();
-        });
-    }
+    // One strip of checkboxes per tab: the header box mirrors them both ways.
     document.querySelectorAll('.archive-select-all').forEach(function (all) {
         all.addEventListener('change', function () {
             document.querySelectorAll('.archive-select').forEach(function (box) { box.checked = all.checked; });
-            if (master) master.checked = all.checked;
             updateCount();
+        });
+    });
+    // Confirmation text lives in an attribute so a name containing a quote can
+    // never break out of an inline onsubmit handler.
+    document.querySelectorAll('form[data-confirm]').forEach(function (form) {
+        form.addEventListener('submit', function (event) {
+            if (!window.confirm(form.dataset.confirm)) event.preventDefault();
         });
     });
     updateCount();
@@ -626,7 +556,7 @@
         var reasonInput = document.createElement('input');
         reasonInput.type = 'hidden'; reasonInput.name = 'reason'; reasonInput.value = reason.trim();
         form.appendChild(reasonInput);
-        return confirm('Type OK is not needed — click OK to PERMANENTLY delete ' + selected().length + ' record(s). Patient, pregnancy and health records will be skipped and retained.');
+        return confirm('Click OK to PERMANENTLY delete ' + selected().length + ' record(s). Patient, pregnancy and health records will be skipped and retained.');
     };
 })();
 </script>
