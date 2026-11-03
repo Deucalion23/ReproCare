@@ -78,4 +78,75 @@ class MaternalDeath extends Model
         }
         return 'Unknown';
     }
+
+    public static function placeLabels(): array
+    {
+        return [
+            'home' => 'Home',
+            'barangay_health_station' => 'Barangay Health Station',
+            'rhu' => 'RHU',
+            'city_hospital' => 'City Hospital',
+            'provincial_hospital' => 'Provincial Hospital',
+            'private_hospital' => 'Private Hospital',
+            'in_transit' => 'In Transit',
+            'other' => 'Other',
+        ];
+    }
+
+    public static function causeLabels(): array
+    {
+        return [
+            'hemorrhage' => 'Obstetric Hemorrhage',
+            'hypertension_eclampsia' => 'Hypertension / Eclampsia',
+            'sepsis' => 'Sepsis / Infection',
+            'obstructed_labor' => 'Obstructed / Prolonged Labor',
+            'unsafe_abortion' => 'Complications of Abortion',
+            'embolism' => 'Embolism',
+            'other_direct' => 'Other Direct Cause',
+            'indirect_cause' => 'Indirect Cause',
+            'unknown' => 'Undetermined',
+        ];
+    }
+
+    public static function timingLabels(): array
+    {
+        return [
+            'during_pregnancy' => 'During Pregnancy',
+            'during_delivery' => 'During Delivery',
+            'within_24_hours_postpartum' => 'Within 24 Hours Postpartum',
+            'within_7_days_postpartum' => 'Within 7 Days Postpartum',
+            'within_42_days_postpartum' => 'Within 42 Days Postpartum',
+            'unknown' => 'Undetermined',
+        ];
+    }
+
+    public static function placeLabel(?string $place): string
+    {
+        return static::placeLabels()[$place] ?? ucwords(str_replace('_', ' ', (string) $place));
+    }
+
+    public static function causeLabel(?string $cause): string
+    {
+        return static::causeLabels()[$cause] ?? ucwords(str_replace('_', ' ', (string) $cause));
+    }
+
+    public static function timingLabel(?string $timing): string
+    {
+        return static::timingLabels()[$timing] ?? ucwords(str_replace('_', ' ', (string) $timing));
+    }
+
+    public function getPlaceOfDeathLabelAttribute(): string
+    {
+        return static::placeLabel($this->place_of_death);
+    }
+
+    public function getCauseCategoryLabelAttribute(): string
+    {
+        return static::causeLabel($this->cause_category);
+    }
+
+    public function getDeathTimingLabelAttribute(): string
+    {
+        return static::timingLabel($this->death_timing);
+    }
 }

@@ -86,4 +86,47 @@ class MaternalMorbidity extends Model
         }
         return 'Unknown';
     }
+
+    public function getPlaceOfEventLabelAttribute(): string
+    {
+        return MaternalDeath::placeLabel($this->place_of_event);
+    }
+
+    public static function complicationLabels(): array
+    {
+        return [
+            'severe_hemorrhage' => 'Severe Obstetric Hemorrhage',
+            'eclampsia' => 'Eclampsia',
+            'severe_preeclampsia' => 'Severe Pre-eclampsia',
+            'sepsis' => 'Sepsis / Severe Infection',
+            'ruptured_uterus' => 'Ruptured Uterus',
+            'severe_anemia' => 'Severe Anemia',
+            'obstructed_labor' => 'Obstructed / Prolonged Labor',
+            'placenta_previa' => 'Placenta Previa',
+            'placental_abruption' => 'Placental Abruption',
+            'other' => 'Other Severe Complication',
+        ];
+    }
+
+    public static function outcomeLabels(): array
+    {
+        return [
+            'survived_no_intervention' => 'Survived, no major intervention',
+            'survived_with_intervention' => 'Survived, with intervention',
+            'transferred_to_higher_facility' => 'Transferred to higher facility',
+            'died' => 'Died',
+        ];
+    }
+
+    public function getComplicationTypeLabelAttribute(): string
+    {
+        return static::complicationLabels()[$this->complication_type]
+            ?? ucwords(str_replace('_', ' ', (string) $this->complication_type));
+    }
+
+    public function getOutcomeLabelAttribute(): string
+    {
+        return static::outcomeLabels()[$this->outcome]
+            ?? ucwords(str_replace('_', ' ', (string) $this->outcome));
+    }
 }

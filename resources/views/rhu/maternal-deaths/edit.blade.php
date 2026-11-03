@@ -114,13 +114,14 @@
 
                 <div class="col-md-4">
                     <label class="form-label required-label">Place of Death</label>
+                    @php($currentPlace = old('place_of_death', $death->place_of_death))
                     <select name="place_of_death" class="form-select" required>
-                        <option value="" disabled>Select Place</option>
-                        <option value="hospital" {{ old('place_of_death', $death->place_of_death) === 'hospital' ? 'selected' : '' }}>Hospital</option>
-                        <option value="rhu_clinic" {{ old('place_of_death', $death->place_of_death) === 'rhu_clinic' ? 'selected' : '' }}>RHU Clinic / Lying-in</option>
-                        <option value="home" {{ old('place_of_death', $death->place_of_death) === 'home' ? 'selected' : '' }}>Home</option>
-                        <option value="transit" {{ old('place_of_death', $death->place_of_death) === 'transit' ? 'selected' : '' }}>In Transit (On the way to hospital)</option>
-                        <option value="others" {{ old('place_of_death', $death->place_of_death) === 'others' ? 'selected' : '' }}>Others</option>
+                        @if(!array_key_exists((string) $currentPlace, \App\Models\MaternalDeath::placeLabels()))
+                            <option value="{{ $currentPlace }}" selected>{{ $currentPlace }} (legacy)</option>
+                        @endif
+                        @foreach(\App\Models\MaternalDeath::placeLabels() as $value => $label)
+                            <option value="{{ $value }}" {{ $currentPlace === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -128,26 +129,27 @@
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
                     <label class="form-label required-label">Timing of Death</label>
+                    @php($currentTiming = old('death_timing', $death->death_timing))
                     <select name="death_timing" class="form-select" required>
-                        <option value="" disabled>Select Timing</option>
-                        <option value="pregnancy" {{ old('death_timing', $death->death_timing) === 'pregnancy' ? 'selected' : '' }}>During Pregnancy</option>
-                        <option value="delivery" {{ old('death_timing', $death->death_timing) === 'delivery' ? 'selected' : '' }}>During Delivery</option>
-                        <option value="postpartum_24h" {{ old('death_timing', $death->death_timing) === 'postpartum_24h' ? 'selected' : '' }}>Within 24 Hours Postpartum</option>
-                        <option value="postpartum_42d" {{ old('death_timing', $death->death_timing) === 'postpartum_42d' ? 'selected' : '' }}>Within 42 Days Postpartum</option>
+                        @if(!array_key_exists((string) $currentTiming, \App\Models\MaternalDeath::timingLabels()))
+                            <option value="{{ $currentTiming }}" selected>{{ $currentTiming }} (legacy)</option>
+                        @endif
+                        @foreach(\App\Models\MaternalDeath::timingLabels() as $value => $label)
+                            <option value="{{ $value }}" {{ $currentTiming === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div class="col-md-6">
                     <label class="form-label required-label">Primary Cause Category</label>
+                    @php($currentCause = old('cause_category', $death->cause_category))
                     <select name="cause_category" class="form-select" required>
-                        <option value="" disabled>Select Cause Category</option>
-                        <option value="hemorrhage" {{ old('cause_category', $death->cause_category) === 'hemorrhage' ? 'selected' : '' }}>Obstetric Hemorrhage</option>
-                        <option value="hypertension_pre_eclampsia" {{ old('cause_category', $death->cause_category) === 'hypertension_pre_eclampsia' ? 'selected' : '' }}>Hypertension / Eclampsia</option>
-                        <option value="sepsis_infection" {{ old('cause_category', $death->cause_category) === 'sepsis_infection' ? 'selected' : '' }}>Pregnancy Sepsis / Infection</option>
-                        <option value="obstructed_labor" {{ old('cause_category', $death->cause_category) === 'obstructed_labor' ? 'selected' : '' }}>Obstructed / Prolonged Labor</option>
-                        <option value="abortion_complications" {{ old('cause_category', $death->cause_category) === 'abortion_complications' ? 'selected' : '' }}>Complications of Abortion</option>
-                        <option value="indirect_causes_heart_diabetes" {{ old('cause_category', $death->cause_category) === 'indirect_causes_heart_diabetes' ? 'selected' : '' }}>Indirect Causes (Cardiac, Diabetes, etc.)</option>
-                        <option value="others" {{ old('cause_category', $death->cause_category) === 'others' ? 'selected' : '' }}>Others</option>
+                        @if(!array_key_exists((string) $currentCause, \App\Models\MaternalDeath::causeLabels()))
+                            <option value="{{ $currentCause }}" selected>{{ $currentCause }} (legacy)</option>
+                        @endif
+                        @foreach(\App\Models\MaternalDeath::causeLabels() as $value => $label)
+                            <option value="{{ $value }}" {{ $currentCause === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>

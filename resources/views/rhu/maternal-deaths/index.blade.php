@@ -4,113 +4,102 @@
 
 @push('styles')
 @include('includes.women-directory-styles')
+@include('includes.report-queue-styles')
 @endpush
 
 @section('rhu-content')
 
-<div class="page-hero fade-in-card mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="page-hero-title">Maternal Death Records
-            </div>
-            <p class="page-hero-subtitle">
-                Log and monitor maternal mortality cases for clinic reviews.
-            </p>
-        </div>
-        <a href="{{ route('rhu.maternal-deaths.create') }}" class="btn btn-danger">
-            <i class="bi bi-plus-lg me-1"></i> Record Maternal Death
-        </a>
-    </div>
-</div>
+<div class="workspace-stack rq-stack">
 
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius:12px;">
-        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+    @include('includes.report-queue-head', [
+        'title' => 'Maternal Death Records',
+        'subtitle' => 'Log and monitor maternal mortality cases for clinic reviews.',
+        'icon' => 'bi-journal-x',
+        'action_href' => route('rhu.maternal-deaths.create'),
+        'action_label' => 'Record Maternal Death',
+        'action_icon' => 'bi-plus-lg',
+    ])
 
-@include('includes.list-toolbar', [
-    'action' => route('rhu.maternal-deaths.index'),
-    'tabs' => $tabs,
-    'active' => $status,
-    'search' => $search,
-    'placeholder' => 'Patient, barangay or cause...',
-    'label' => 'Audit status',
-])
+    @include('includes.list-toolbar', [
+        'action' => route('rhu.maternal-deaths.index'),
+        'tabs' => $tabs,
+        'active' => $status,
+        'search' => $search,
+        'placeholder' => 'Patient, barangay or cause...',
+        'label' => 'Audit status',
+    ])
 
-<div class="card fade-in-card">
-    <div class="card-body p-0">
-        @if($deaths->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead>
-                        <tr>
-                            <th class="ps-4">Patient Name</th>
-                            <th>Age</th>
-                            <th>Date of Death</th>
-                            <th>Place of Death</th>
-                            <th>Cause Category</th>
-                            <th>Audit Status</th>
-                            <th class="pe-4 text-end">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($deaths as $death)
+    <div class="card rq-wrap fade-in-card">
+        <div class="card-body p-0">
+            @if($deaths->isNotEmpty())
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead>
                             <tr>
-                                <td class="ps-4">
-                                    <span class="fw-700" style="color:var(--text);">{{ $death->patient_name }}</span>
-                                    <div style="font-size:0.75rem; color:var(--text-muted);">{{ $death->barangay }}</div>
-                                </td>
-                                <td>
-                                    <span style="font-size:0.875rem;">{{ $death->age_at_death ?? 'N/A' }}</span>
-                                </td>
-                                <td style="font-size:0.875rem;">
-                                    {{ $death->death_date->format('M j, Y') }}
-                                </td>
-                                <td>
-                                    {{ str_replace('_', ' ', ucfirst($death->place_of_death)) }}
-                                </td>
-                                <td>
-                                    <span class="badge bg-danger text-white text-xs">
-                                        {{ str_replace('_', ' ', ucfirst($death->cause_category)) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span class="badge bg-{{ $death->audit_status === 'closed' ? 'success' : ($death->audit_status === 'reviewed' ? 'info' : 'warning') }} text-white text-xs">
-                                        {{ ucfirst($death->audit_status) }}
-                                    </span>
-                                </td>
-                                <td class="pe-4 text-end">
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <a href="{{ route('rhu.maternal-deaths.show', $death->id) }}" class="btn btn-xs btn-outline-primary" style="font-size:0.75rem;">
-                                            <i class="bi bi-eye"></i> Details
-                                        </a>
-                                        @if($death->audit_status !== 'closed')
-                                            <a href="{{ route('rhu.maternal-deaths.edit', $death->id) }}" class="btn btn-xs btn-outline-warning" style="font-size:0.75rem;">
-                                                <i class="bi bi-pencil"></i> Edit
-                                            </a>
-                                        @endif
-                                    </div>
-                                </td>
+                                <th>Patient</th>
+                                <th>Age</th>
+                                <th>Date of death</th>
+                                <th>Place</th>
+                                <th>Cause</th>
+                                <th>Audit</th>
+                                <th class="text-end">Actions</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            @foreach($deaths as $death)
+                                <tr>
+                                    <td>
+                                        <div class="rq-truncate rq-title" title="{{ $death->patient_name }}">{{ $death->patient_name }}</div>
+                                        <div class="rq-soft">{{ $death->barangay ?: '—' }}</div>
+                                    </td>
+                                    <td class="rq-num">{{ $death->age_at_death ?? '—' }}</td>
+                                    <td class="rq-num">{{ $death->death_date->format('M j, Y') }}</td>
+                                    <td>
+                                        <span class="rq-truncate" style="max-width:130px;" title="{{ $death->place_of_death_label }}">
+                                            {{ $death->place_of_death_label }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="summary-chip chip-danger rq-status">{{ $death->cause_category_label }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="summary-chip chip-{{ $death->audit_status === 'closed' ? 'success' : ($death->audit_status === 'reviewed' ? 'info' : 'warning') }} rq-status">
+                                            {{ ucwords(str_replace('_', ' ', $death->audit_status)) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="rq-actions">
+                                            <a href="{{ route('rhu.maternal-deaths.show', $death->id) }}" class="btn btn-sm btn-outline-primary"
+                                               title="View case" aria-label="View case for {{ $death->patient_name }}">
+                                                <i class="bi bi-eye" aria-hidden="true"></i>
+                                            </a>
+                                            @if($death->audit_status !== 'closed')
+                                                <a href="{{ route('rhu.maternal-deaths.edit', $death->id) }}" class="btn btn-sm btn-outline-warning"
+                                                   title="Edit case" aria-label="Edit case for {{ $death->patient_name }}">
+                                                    <i class="bi bi-pencil" aria-hidden="true"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
 
-            @if($deaths->hasPages())
-                <div class="card-footer bg-transparent border-top">
-                    {{ $deaths->links() }}
+                @if($deaths->hasPages())
+                    <div class="rq-foot">{{ $deaths->links('vendor.pagination.arrows-only') }}</div>
+                @endif
+            @else
+                <div class="rq-empty">
+                    <i class="bi bi-journal-x" style="color:var(--color-text-muted);" aria-hidden="true"></i>
+                    <h6 class="fw-bold mt-2 mb-1" style="color:var(--color-text);">No maternal death records</h6>
+                    <p class="text-muted mb-0" style="font-size:0.82rem;">
+                        {{ $search !== '' ? 'No case matched your search.' : 'No maternal mortality events have been logged for this health unit.' }}
+                    </p>
                 </div>
             @endif
-        @else
-            <div class="text-center py-5">
-                <i class="bi bi-journal-x" style="font-size:3rem; color:var(--text-muted);"></i>
-                <h5 class="mt-3">No Maternal Death Records</h5>
-                <p class="text-muted text-xs">No maternal mortality events have been logged for this health unit.</p>
-            </div>
-        @endif
+        </div>
     </div>
 </div>
 

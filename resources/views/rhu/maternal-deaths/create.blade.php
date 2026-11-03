@@ -40,49 +40,50 @@
             </h5>
 
             <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label">Link Enrolled Patient (Optional)</label>
-                    <select name="user_id" id="patientSelect" class="form-select">
-                        <option value="" selected>None (Unlinked / External Patient)</option>
-                        @foreach($patients as $patient)
-                            <option value="{{ $patient->id }}"
-                                    data-name="{{ $patient->name }}"
-                                    data-dob="{{ $patient->date_of_birth ? $patient->date_of_birth->format('Y-m-d') : '' }}"
-                                    data-barangay="{{ $patient->barangay }}">
-                                {{ $patient->name }} ({{ $patient->email }})
+                <div class="col-md-4">
+                    <label class="form-label required-label">Patient Type</label>
+                    <select name="patient_type" id="patientTypeSelect" class="form-select" required>
+                        <option value="registered" {{ old('patient_type', 'registered') === 'registered' ? 'selected' : '' }}>Enrolled Patient</option>
+                        <option value="walk_in" {{ old('patient_type') === 'walk_in' ? 'selected' : '' }}>Unlinked / External Patient</option>
+                    </select>
+                </div>
+
+                <div class="col-md-8" id="registeredPatientCol">
+                    <label class="form-label required-label">Select Enrolled Woman</label>
+                    <select name="user_id" id="userSelect" class="form-select">
+                        <option value="" disabled selected>-- Select Patient --</option>
+                        @foreach($users as $user)
+                            <option value="{{ $user->id }}"
+                                    data-purok="{{ $user->purok_id }}"
+                                    data-dob="{{ $user->date_of_birth ? $user->date_of_birth->format('Y-m-d') : '' }}">
+                                {{ $user->name }} ({{ $user->email }})
                             </option>
                         @endforeach
                     </select>
                 </div>
 
-                <div class="col-md-6">
-                    <label class="form-label required-label">Patient Name</label>
-                    <input type="text" name="patient_name" id="patientNameInput" class="form-control" value="{{ old('patient_name') }}" placeholder="Full Name" required>
+                <div class="col-md-8 d-none" id="walkInPatientCol">
+                    <label class="form-label required-label">Select Unlinked Patient</label>
+                    <select name="walk_in_patient_id" id="walkInSelect" class="form-select">
+                        <option value="" disabled selected>-- Select Unlinked Patient --</option>
+                        @foreach($walkIns as $walkIn)
+                            <option value="{{ $walkIn->id }}" data-purok="{{ $walkIn->purok_id }}" data-age="{{ $walkIn->age }}">
+                                {{ $walkIn->name }} (Age: {{ $walkIn->age }})
+                            </option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
             <div class="row g-3 mb-4">
                 <div class="col-md-4">
                     <label class="form-label required-label">Age at Death</label>
-                    <input type="number" name="age_at_death" id="ageInput" class="form-control" value="{{ old('age_at_death') }}" min="1" max="120" required>
+                    <input type="number" name="age_at_death" id="ageInput" class="form-control" value="{{ old('age_at_death') }}" min="10" max="60" required>
                 </div>
 
-                <div class="col-md-4">
-                    <label class="form-label required-label">Barangay</label>
-                    <select name="barangay" id="barangaySelect" class="form-select" required>
-                        <option value="" disabled selected>Select Barangay</option>
-                        @forelse(($barangays ?? collect()) as $brgy)
-                            <option value="{{ $brgy->name }}" {{ old('barangay') === $brgy->name ? 'selected' : '' }}>Barangay {{ $brgy->name }}</option>
-                        @empty
-                            <option value="Burgos" {{ old('barangay') === 'Burgos' ? 'selected' : '' }}>Barangay Burgos</option>
-                            <option value="Padlan" {{ old('barangay') === 'Padlan' ? 'selected' : '' }}>Barangay Padlan</option>
-                        @endforelse
-                    </select>
-                </div>
-
-                <div class="col-md-4">
+                <div class="col-md-8">
                     <label class="form-label required-label">Purok</label>
-                    <select name="purok_id" class="form-select" required>
+                    <select name="purok_id" id="purokSelect" class="form-select" required>
                         <option value="" disabled selected>Select Purok</option>
                         @foreach($puroks as $purok)
                             <option value="{{ $purok->id }}" {{ old('purok_id') == $purok->id ? 'selected' : '' }}>
@@ -111,11 +112,9 @@
                     <label class="form-label required-label">Place of Death</label>
                     <select name="place_of_death" class="form-select" required>
                         <option value="" disabled selected>Select Place</option>
-                        <option value="hospital" {{ old('place_of_death') === 'hospital' ? 'selected' : '' }}>Hospital</option>
-                        <option value="rhu_clinic" {{ old('place_of_death') === 'rhu_clinic' ? 'selected' : '' }}>RHU Clinic / Lying-in</option>
-                        <option value="home" {{ old('place_of_death') === 'home' ? 'selected' : '' }}>Home</option>
-                        <option value="transit" {{ old('place_of_death') === 'transit' ? 'selected' : '' }}>In Transit (On the way to hospital)</option>
-                        <option value="others" {{ old('place_of_death') === 'others' ? 'selected' : '' }}>Others</option>
+                        @foreach(\App\Models\MaternalDeath::placeLabels() as $value => $label)
+                            <option value="{{ $value }}" {{ old('place_of_death') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -125,10 +124,9 @@
                     <label class="form-label required-label">Timing of Death</label>
                     <select name="death_timing" class="form-select" required>
                         <option value="" disabled selected>Select Timing</option>
-                        <option value="pregnancy" {{ old('death_timing') === 'pregnancy' ? 'selected' : '' }}>During Pregnancy</option>
-                        <option value="delivery" {{ old('death_timing') === 'delivery' ? 'selected' : '' }}>During Delivery</option>
-                        <option value="postpartum_24h" {{ old('death_timing') === 'postpartum_24h' ? 'selected' : '' }}>Within 24 Hours Postpartum</option>
-                        <option value="postpartum_42d" {{ old('death_timing') === 'postpartum_42d' ? 'selected' : '' }}>Within 42 Days Postpartum</option>
+                        @foreach(\App\Models\MaternalDeath::timingLabels() as $value => $label)
+                            <option value="{{ $value }}" {{ old('death_timing') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
 
@@ -136,13 +134,9 @@
                     <label class="form-label required-label">Primary Cause Category</label>
                     <select name="cause_category" class="form-select" required>
                         <option value="" disabled selected>Select Cause Category</option>
-                        <option value="hemorrhage" {{ old('cause_category') === 'hemorrhage' ? 'selected' : '' }}>Obstetric Hemorrhage</option>
-                        <option value="hypertension_pre_eclampsia" {{ old('cause_category') === 'hypertension_pre_eclampsia' ? 'selected' : '' }}>Hypertension / Eclampsia</option>
-                        <option value="sepsis_infection" {{ old('cause_category') === 'sepsis_infection' ? 'selected' : '' }}>Pregnancy Sepsis / Infection</option>
-                        <option value="obstructed_labor" {{ old('cause_category') === 'obstructed_labor' ? 'selected' : '' }}>Obstructed / Prolonged Labor</option>
-                        <option value="abortion_complications" {{ old('cause_category') === 'abortion_complications' ? 'selected' : '' }}>Complications of Abortion</option>
-                        <option value="indirect_causes_heart_diabetes" {{ old('cause_category') === 'indirect_causes_heart_diabetes' ? 'selected' : '' }}>Indirect Causes (Cardiac, Diabetes, etc.)</option>
-                        <option value="others" {{ old('cause_category') === 'others' ? 'selected' : '' }}>Others</option>
+                        @foreach(\App\Models\MaternalDeath::causeLabels() as $value => $label)
+                            <option value="{{ $value }}" {{ old('cause_category') === $value ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
                     </select>
                 </div>
             </div>
@@ -173,37 +167,43 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const patientSelect = document.getElementById('patientSelect');
-    const nameInput = document.getElementById('patientNameInput');
-    const dobInput = document.getElementById('ageInput');
-    const barangaySelect = document.getElementById('barangaySelect');
+    const patientTypeSelect = document.getElementById('patientTypeSelect');
+    const registeredCol = document.getElementById('registeredPatientCol');
+    const walkInCol = document.getElementById('walkInPatientCol');
+    const userSelect = document.getElementById('userSelect');
+    const walkInSelect = document.getElementById('walkInSelect');
+    const purokSelect = document.getElementById('purokSelect');
+    const ageInput = document.getElementById('ageInput');
 
-    patientSelect.addEventListener('change', function() {
-        const option = this.options[this.selectedIndex];
-        if (option.value) {
-            nameInput.value = option.dataset.name;
-            barangaySelect.value = option.dataset.barangay;
-            
-            // Calculate age from DOB if available
+    patientTypeSelect.addEventListener('change', function() {
+        const registered = this.value === 'registered';
+        registeredCol.classList.toggle('d-none', !registered);
+        walkInCol.classList.toggle('d-none', registered);
+        userSelect.required = registered;
+        walkInSelect.required = !registered;
+        if (registered) { walkInSelect.value = ''; } else { userSelect.value = ''; }
+    });
+
+    // A patient already carries their address, so the purok and age follow the pick.
+    [userSelect, walkInSelect].forEach(function (select) {
+        select.addEventListener('change', function() {
+            const option = this.options[this.selectedIndex];
+            if (option.dataset.purok) { purokSelect.value = option.dataset.purok; }
             const dob = option.dataset.dob;
             if (dob) {
-                const birthDate = new Date(dob);
+                const birth = new Date(dob);
                 const today = new Date();
-                let age = today.getFullYear() - birthDate.getFullYear();
-                const m = today.getMonth() - birthDate.getMonth();
-                if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                    age--;
-                }
-                dobInput.value = age > 0 ? age : '';
-            } else {
-                dobInput.value = '';
+                let age = today.getFullYear() - birth.getFullYear();
+                const months = today.getMonth() - birth.getMonth();
+                if (months < 0 || (months === 0 && today.getDate() < birth.getDate())) { age--; }
+                ageInput.value = age > 0 ? age : '';
+            } else if (option.dataset.age) {
+                ageInput.value = option.dataset.age;
             }
-        } else {
-            nameInput.value = '';
-            dobInput.value = '';
-            barangaySelect.value = '';
-        }
+        });
     });
+
+    patientTypeSelect.dispatchEvent(new Event('change'));
 });
 </script>
 @endpush

@@ -15,7 +15,7 @@
        :root[data-theme][data-bs-theme] body .nav-pills .nav-link.active to a tinted
        pill with an inset sidebar bar, which outranks anything page-level. */
     .wd-tabs { display:flex; gap:0.5rem; flex-wrap:wrap; margin:0; padding:0; list-style:none; }
-    .wd-tab { display:inline-flex; align-items:center; gap:0.4rem; border:1px solid var(--color-border) !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; text-decoration:none; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; }
+    .wd-tab { display:inline-flex; align-items:center; gap:0.4rem; border:1px solid var(--color-border) !important; border-radius:999px !important; font-weight:800 !important; font-size:0.78rem !important; padding:0.42rem 1rem !important; text-decoration:none; color:var(--color-text) !important; background:var(--color-surface-soft) !important; background-color:var(--color-surface-soft) !important; white-space:nowrap; }
     .wd-tab:hover { border-color:var(--color-primary) !important; color:var(--color-primary-text) !important; }
     .wd-tab.active { background:var(--color-text) !important; background-color:var(--color-text) !important; border-color:var(--color-text) !important; color:var(--color-bg) !important; box-shadow:0 6px 16px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 25%, transparent); }
     .wd-tab.active i { color:var(--color-bg) !important; }
@@ -73,6 +73,11 @@
            trailing field stretches across the whole bar. */
         .wd-filters .wd-search-field { flex:1 1 100%; max-width:none; }
         .wd-filters .wd-select-field, .wd-filters .wd-date-field { flex:1 1 calc(50% - 0.5rem); max-width:calc(50% - 0.5rem); }
+        /* Five counted tabs need roughly 600px. Wrapping them stacked three blank
+           lines under the bar, so scroll the row sideways instead. */
+        .wd-toolbar .wd-tabs { flex-wrap:nowrap; overflow-x:auto; scrollbar-width:none; }
+        .wd-toolbar .wd-tabs::-webkit-scrollbar { display:none; }
+        .wd-toolbar .wd-tab { flex:0 0 auto; }
     }
     @media (max-width: 767.98px) {
         .wd-filters .wd-select-field, .wd-filters .wd-date-field { flex:1 1 100%; max-width:none; }

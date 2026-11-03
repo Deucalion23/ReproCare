@@ -220,7 +220,7 @@
                                             <div style="font-size:0.75rem; color:var(--text-muted);">{{ $morb->barangay }}</div>
                                         </td>
                                         <td style="font-size:0.875rem;">
-                                            {{ str_replace('_', ' ', ucfirst($morb->complication_type)) }}
+                                            {{ $morb->complication_type_label }}
                                         </td>
                                         <td style="font-size:0.8rem; color:var(--text-muted);">
                                             {{ $morb->event_date->format('M j, Y') }}
