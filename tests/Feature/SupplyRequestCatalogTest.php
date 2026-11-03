@@ -39,6 +39,26 @@ class SupplyRequestCatalogTest extends AutomationTestCase
         $this->assertDatabaseCount('supply_requests', 0);
     }
 
+    public function test_both_supply_desks_open_on_the_slim_queue_head(): void
+    {
+        // The tall page-hero and the filter card that squeezed Go/Clear into one
+        // grid column are gone: both desks lead with the shared head bar, carry the
+        // whole-scope counts as chips, and keep every filter in one header row.
+        $this->get(route('rhu.supply-requests.index'))->assertOk()
+            ->assertSee('class="rq-bar', false)->assertSee('awaiting CHO', false)
+            ->assertSee('wd-filters', false);
+
+        $this->actingAs($this->patient(['role' => 'cho']))
+            ->get(route('cho.supply-requests.index'))->assertOk()
+            ->assertSee('class="rq-bar', false)->assertSee('awaiting review', false);
+
+        foreach ([['rhu', 'rhu.supply-requests.index'], ['cho', 'cho.supply-requests.index']] as [$role, $route]) {
+            $html = $this->actingAs($this->patient(['role' => $role]))->get(route($route))->assertOk()->getContent();
+            $this->assertStringNotContainsString('page-hero fade-in-card', $html, $role . ' still leads with the tall hero');
+            $this->assertStringNotContainsString('col-md-1 d-flex', $html, $role . ' still squeezes the filter buttons');
+        }
+    }
+
     public function test_other_item_requires_name_and_saves_the_actual_name(): void
     {
         $data = array_replace($this->payload(), ['supply_category' => 'other', 'supply_name' => '__other__', 'unit' => 'pieces']);

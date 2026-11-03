@@ -580,7 +580,14 @@ class ChoController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('cho.supply-requests.index', compact('requests', 'search', 'dateFrom', 'dateTo'));
+        // The slim head bar states how big the queue is, so the chips need the
+        // whole-queue split rather than the filtered page: one grouped query,
+        // not a count per status.
+        $statusCounts = SupplyRequest::selectRaw('status, count(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return view('cho.supply-requests.index', compact('requests', 'search', 'dateFrom', 'dateTo', 'statusCounts'));
     }
 
     public function showSupplyRequest($id)

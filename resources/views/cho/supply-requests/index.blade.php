@@ -2,130 +2,152 @@
 
 @section('title', 'Supply Requests - CHO Portal | ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@include('includes.report-queue-styles')
+@endpush
+
 @section('cho-content')
 
-<div class="page-hero fade-in-card mb-4">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="page-hero-title">Supply Requests
-            </div>
-            <p class="page-hero-subtitle" style="font-weight:600;">Review and approve supply replenishment requests submitted by Rural Health Units.</p>
-        </div>
-    </div>
-</div>
+@php
+    $status = request('status', 'all');
+    $urgency = request('urgency', 'all');
+    $filtersActive = filled($search ?? request('search')) || $status !== 'all' || $urgency !== 'all'
+        || filled($dateFrom ?? '') || filled($dateTo ?? '');
+    // One label and one tone per state, shared by the head chips and the row pills.
+    $statusMeta = [
+        'draft' => ['Draft', 'primary'],
+        'submitted' => ['Submitted', 'warning'],
+        'under_review' => ['Under review', 'warning'],
+        'approved' => ['Approved', 'success'],
+        'declined' => ['Declined', 'danger'],
+        'delivered' => ['Delivered', 'info'],
+    ];
+    $urgencyMeta = [
+        'routine' => ['Routine', 'info'],
+        'urgent' => ['Urgent', 'warning'],
+        'emergency' => ['Emergency', 'danger'],
+    ];
+    $awaitingCount = ($statusCounts['submitted'] ?? 0) + ($statusCounts['under_review'] ?? 0);
+@endphp
 
-@if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show mb-4" role="alert" style="border-radius:12px;">
-        <i class="bi bi-check-circle-fill me-2"></i>{{ session('success') }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-@endif
+@include('includes.report-queue-head', [
+    'title' => 'Supply Requests',
+    'subtitle' => 'Replenishment requests from the Rural Health Units, newest first.',
+    'icon' => 'bi-box-seam',
+    'bar_class' => 'mb-2',
+    'chips' => [
+        ['label' => 'awaiting review', 'value' => $awaitingCount, 'tone' => 'warning'],
+        ['label' => 'approved', 'value' => $statusCounts['approved'] ?? 0, 'tone' => 'success'],
+        ['label' => 'delivered', 'value' => $statusCounts['delivered'] ?? 0, 'tone' => 'info'],
+        ['label' => 'declined', 'value' => $statusCounts['declined'] ?? 0, 'tone' => 'danger'],
+    ],
+])
 
-<div class="card fade-in-card mb-3">
-    <div class="card-body">
-        <form method="GET" class="row g-2 align-items-end">
-            <div class="col-md-3">
-                <label class="form-label">Search</label>
-                <input type="text" name="search" class="form-control" placeholder="ID, item, RHU, date, status..." value="{{ $search ?? request('search') }}">
+<div class="card rq-wrap fade-in-card">
+    <div class="card-header bg-transparent">
+        {{-- One card header carries every filter, so the queue list starts one
+             strip below the head bar instead of under a second full-size card. --}}
+        <form method="GET" action="{{ route('cho.supply-requests.index') }}" class="wd-filters">
+            <div class="wd-field wd-search-field">
+                <label for="sr-search">Search</label>
+                <div class="wd-search">
+                    <input type="search" id="sr-search" name="search" class="form-control" autocomplete="off"
+                           value="{{ $search ?? request('search') }}" placeholder="ID, item, RHU, date, status...">
+                    <button class="btn" type="submit" title="Search"><i class="bi bi-search"></i></button>
+                </div>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Status</label>
-                <select name="status" class="form-select">
-                    @foreach(['all', 'draft', 'submitted', 'under_review', 'approved', 'declined', 'delivered'] as $s)
-                        <option value="{{ $s }}" @selected(request('status', 'all') === $s)>{{ $s === 'all' ? 'All statuses' : ucfirst(str_replace('_', ' ', $s)) }}</option>
+
+            <div class="wd-field wd-select-field">
+                <label for="sr-status">Status</label>
+                <select id="sr-status" name="status" class="form-select form-select-sm">
+                    <option value="all" @selected($status === 'all')>All statuses</option>
+                    @foreach ($statusMeta as $key => [$label])
+                        <option value="{{ $key }}" @selected($status === $key)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">Urgency</label>
-                <select name="urgency" class="form-select">
-                    @foreach(['all', 'routine', 'urgent', 'emergency'] as $u)
-                        <option value="{{ $u }}" @selected(request('urgency', 'all') === $u)>{{ $u === 'all' ? 'All urgencies' : ucfirst($u) }}</option>
+
+            <div class="wd-field wd-select-field">
+                <label for="sr-urgency">Urgency</label>
+                <select id="sr-urgency" name="urgency" class="form-select form-select-sm">
+                    <option value="all" @selected($urgency === 'all')>All urgencies</option>
+                    @foreach ($urgencyMeta as $key => [$label])
+                        <option value="{{ $key }}" @selected($urgency === $key)>{{ $label }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label">From</label>
-                <input type="date" name="date_from" class="form-control" value="{{ $dateFrom ?? request('date_from') }}" max="{{ date('Y-m-d') }}">
+
+            <div class="wd-field wd-date-field">
+                <label for="sr-date-from">Submitted from</label>
+                <input type="date" id="sr-date-from" name="date_from" class="form-control form-control-sm"
+                       value="{{ $dateFrom ?? '' }}" max="{{ date('Y-m-d') }}">
             </div>
-            <div class="col-md-2">
-                <label class="form-label">To</label>
-                <input type="date" name="date_to" class="form-control" value="{{ $dateTo ?? request('date_to') }}" max="{{ date('Y-m-d') }}">
+
+            <div class="wd-field wd-date-field">
+                <label for="sr-date-to">to</label>
+                <input type="date" id="sr-date-to" name="date_to" class="form-control form-control-sm"
+                       value="{{ $dateTo ?? '' }}" max="{{ date('Y-m-d') }}">
             </div>
-            <div class="col-md-1 d-flex gap-1">
-                <button class="btn btn-primary" type="submit">Go</button>
-                <a class="btn btn-outline-secondary" href="{{ route('cho.supply-requests.index') }}">Clear</a>
+
+            <div class="wd-actions d-flex gap-2">
+                <button type="submit" class="btn btn-sm wd-apply-btn"><i class="bi bi-funnel me-1"></i>Filter</button>
+                <a href="{{ route('cho.supply-requests.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                    <i class="bi bi-x-lg me-1"></i>Clear
+                </a>
             </div>
         </form>
     </div>
-</div>
 
-<div class="card fade-in-card">
     <div class="card-body p-0">
         @if($requests->count() > 0)
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
                     <thead>
                         <tr>
-                            <th class="ps-4">Item Name</th>
-                            <th>Category</th>
+                            <th>Item</th>
                             <th>Requested By</th>
-                            <th>Quantity</th>
+                            <th class="text-end">Qty</th>
                             <th>Urgency</th>
                             <th>Status</th>
-                            <th>Submitted Date</th>
-                            <th class="pe-4 text-end">Action</th>
+                            <th>Submitted</th>
+                            <th class="text-end">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($requests as $req)
+                            @php
+                                [$statusLabel, $statusTone] = $statusMeta[$req->status] ?? [ucfirst($req->status), 'primary'];
+                                [$urgencyLabel, $urgencyTone] = $urgencyMeta[$req->urgency] ?? [ucfirst($req->urgency), 'primary'];
+                            @endphp
                             <tr>
-                                <td class="ps-4">
-                                    <span class="fw-700" style="color:var(--text);">{{ $req->supply_name }}</span>
+                                <td>
+                                    <div class="rq-truncate rq-title" title="{{ $req->supply_name }}">{{ $req->supply_name }}</div>
+                                    <div class="rq-soft">{{ str_replace('_', ' ', ucfirst($req->supply_category)) }}</div>
                                 </td>
                                 <td>
-                                    <span style="font-size:0.875rem;">{{ str_replace('_', ' ', ucfirst($req->supply_category)) }}</span>
+                                    <div class="rq-truncate rq-w-name" title="{{ $req->requestedBy->name ?? 'Unknown' }}">{{ $req->requestedBy->name ?? 'Unknown' }}</div>
+                                    <div class="rq-soft">{{ $req->requestedBy->rhu_assignment ?? 'RHU Unit' }}</div>
                                 </td>
+                                <td class="text-end rq-num">
+                                    <span class="fw-700">{{ number_format($req->quantity_requested) }}</span>
+                                    <span class="rq-soft">{{ $req->unit ?? 'pcs' }}</span>
+                                </td>
+                                <td><span class="summary-chip chip-{{ $urgencyTone }} rq-status">{{ $urgencyLabel }}</span></td>
+                                <td><span class="summary-chip chip-{{ $statusTone }} rq-status">{{ $statusLabel }}</span></td>
                                 <td>
-                                    <span style="font-size:0.875rem;">{{ $req->requestedBy->name ?? 'Unknown' }}</span>
-                                    <div style="font-size:0.75rem; color:var(--text-muted);">{{ $req->requestedBy->rhu_assignment ?? 'RHU Unit' }}</div>
+                                    @if($req->submitted_at)
+                                        <div title="{{ $req->submitted_at->format('M j, Y \a\t g:i A') }}">{{ $req->submitted_at->format('M j, Y') }}</div>
+                                        <div class="rq-soft">{{ $req->submitted_at->format('g:i A') }}</div>
+                                    @else
+                                        <span class="rq-soft">Not submitted</span>
+                                    @endif
                                 </td>
-                                <td>
-                                    <span style="font-weight:600;">{{ $req->quantity_requested }} {{ $req->unit ?? 'pcs' }}</span>
-                                </td>
-                                <td>
-                                    @php
-                                        $urgBadge = match($req->urgency) {
-                                            'emergency' => 'danger',
-                                            'urgent' => 'warning',
-                                            'routine' => 'info',
-                                            default => 'secondary'
-                                        };
-                                    @endphp
-                                    <span class="badge bg-{{ $urgBadge }} text-white text-xs">
-                                        {{ ucfirst($req->urgency) }}
-                                    </span>
-                                </td>
-                                <td>
-                                    @php
-                                        $statusBadge = match($req->status) {
-                                            'approved' => 'success',
-                                            'declined' => 'danger',
-                                            'submitted' => 'warning',
-                                            default => 'secondary'
-                                        };
-                                    @endphp
-                                    <span class="badge bg-{{ $statusBadge }} text-white text-xs">
-                                        {{ ucfirst($req->status) }}
-                                    </span>
-                                </td>
-                                <td style="font-size:0.8rem; color:var(--text-muted);">
-                                    {{ $req->submitted_at ? $req->submitted_at->format('M j, Y \a\t g:i A') : 'N/A' }}
-                                </td>
-                                <td class="pe-4 text-end">
-                                    <a href="{{ route('cho.supply-requests.show', $req->id) }}" class="btn btn-xs btn-view text-white py-1 px-3" style="font-size:0.75rem; border-radius:8px;">
-                                        Review Request
-                                    </a>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <a href="{{ route('cho.supply-requests.show', $req->id) }}" class="btn btn-sm btn-outline-primary"
+                                           title="Review this request" aria-label="Review this request"><i class="bi bi-eye"></i></a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
@@ -134,15 +156,19 @@
             </div>
 
             @if($requests->hasPages())
-                <div class="card-footer bg-transparent border-top">
-                    {{ $requests->links() }}
-                </div>
+                <div class="rq-foot">{{ $requests->links('vendor.pagination.arrows-only') }}</div>
             @endif
         @else
-            <div class="text-center py-5">
-                <i class="bi bi-box-seam" style="font-size:3rem; color:var(--text-muted);"></i>
-                <h5 class="mt-3">No Supply Requests Found</h5>
-                <p class="text-muted text-xs">No supply requests have been registered in the system.</p>
+            <div class="rq-empty">
+                <i class="bi bi-box-seam text-muted"></i>
+                <h6 class="mt-2 mb-1 fw-700">No supply requests found</h6>
+                <p class="rq-soft mb-0">
+                    @if($filtersActive)
+                        No request matches the current filters.
+                    @else
+                        Requests submitted by the Rural Health Units appear here.
+                    @endif
+                </p>
             </div>
         @endif
     </div>

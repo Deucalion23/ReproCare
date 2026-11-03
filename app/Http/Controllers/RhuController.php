@@ -980,7 +980,14 @@ class RhuController extends Controller
             ->paginate(15)
             ->withQueryString();
 
-        return view('rhu.supply-requests.index', compact('requests', 'search', 'status', 'scope', 'dateFrom', 'dateTo'));
+        // The slim head bar states how big the queue is: one grouped query, kept
+        // inside the same scope as the list above it.
+        $statusCounts = SupplyRequest::selectRaw('status, count(*) as total')
+            ->when($scope === 'mine', fn ($query) => $query->where('requested_by_id', auth()->id()))
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        return view('rhu.supply-requests.index', compact('requests', 'search', 'status', 'scope', 'dateFrom', 'dateTo', 'statusCounts'));
     }
 
     public function createSupplyRequest()

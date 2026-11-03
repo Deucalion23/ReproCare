@@ -32,11 +32,27 @@
     /* ── Queue table shell ── */
     .rq-wrap { border:none !important; border-radius:16px !important; box-shadow:0 2px 12px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 6%, transparent) !important; overflow:hidden; }
     .rq-wrap .card-body { padding:0 !important; }
+    /* Pages that keep their filter row in this header (the supply-request desks)
+       need the slim padding .wd-wrap gives its own toolbar header. portal-theme
+       pins `.main-content .card-header` at (0,2,1) with 1.15rem !important, so the
+       override needs body + the wrapper class. */
+    body .main-content .rq-wrap .card-header { padding:0.5rem 0.8rem !important; }
     .rq-wrap .table { font-size:0.78rem; line-height:1.2; margin-bottom:0; }
+    /* portal-theme lands after this partial and paints `.main-content .table` with
+       0.9rem at (0,2,0), which outranks the same-specificity rule above — the queue
+       tables need body + the wrapper to actually stay compact. */
+    body .main-content .rq-wrap .table { font-size:0.78rem; }
     /* portal-theme pins cells at `.main-content .table tbody td` / `thead th`
        (0,2,2) with 0.9rem/1.25rem !important padding, so the compact values need
        body + .rq-wrap to outrank it. */
     body .main-content .rq-wrap .table :is(thead th, tbody td) { padding:0.4rem 0.55rem !important; white-space:nowrap; }
+    /* The table-level size above only reaches cells that inherit: portal-theme's
+       `.main-content .table thead th` (0,2,2) and the app shell's `.table td`
+       (0,1,1) both paint the cells directly, which always beats an inherited
+       size. Setting the cell sizes on the cells is what actually makes a queue
+       row shorter than the framework's 0.875rem default. */
+    body .main-content .rq-wrap .table tbody td { font-size:0.78rem; }
+    body .main-content .rq-wrap .table thead th { font-size:0.63rem; }
     .rq-wrap table thead th { background:transparent !important; border-bottom:1px solid var(--color-border) !important; font-size:0.63rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted) !important; }
     .rq-wrap table tbody tr:last-child td { border-bottom:none !important; }
     body .main-content .summary-chip.rq-status { padding:0.15rem 0.55rem !important; font-size:0.68rem !important; font-weight:700; }
