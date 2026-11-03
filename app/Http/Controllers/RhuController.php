@@ -502,9 +502,15 @@ class RhuController extends Controller
             $bhw->checkups_count = Checkup::where('scheduled_by_id', $bhw->id)->count();
         }
 
+        $statusCounts = [
+            'total' => User::where('role', 'bhw')->count(),
+            'approved' => User::where('role', 'bhw')->where('status', 'approved')->count(),
+            'inactive' => User::where('role', 'bhw')->whereIn('status', ['inactive', 'archived', 'suspended'])->count(),
+        ];
+
         $barangays = Barangay::catchmentOptions($barangay);
 
-        return view('rhu.bhws.index', compact('bhws', 'search', 'status', 'barangay', 'barangays'));
+        return view('rhu.bhws.index', compact('bhws', 'search', 'status', 'barangay', 'barangays', 'statusCounts'));
     }
 
     public function createBhw()

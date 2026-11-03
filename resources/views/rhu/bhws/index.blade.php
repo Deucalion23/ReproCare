@@ -2,140 +2,176 @@
 
 @section('title', 'BHW Management - RHU Portal | ReproCare')
 
+@push('styles')
+@include('includes.women-directory-styles')
+@include('includes.report-queue-styles')
+@endpush
+
 @section('rhu-content')
-<div class="py-4">
-<div class="page-hero fade-in-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3" style="position:relative;z-index:1;">
-        <div>
-            <div class="page-hero-title">Barangay Health Workers</div>
-            <p class="page-hero-subtitle">Manage all BHWs under RHU supervision.</p>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ route('rhu.staff-transitions.index', ['type' => 'bhw_transfer']) }}" class="btn btn-filter">
-                <i class="bi bi-arrow-left-right me-1"></i> Transfer Roster
-            </a>
-            <a href="{{ route('rhu.bhws.create') }}" class="btn btn-primary">
-                <i class="bi bi-plus-circle me-1"></i> Register BHW
-            </a>
-        </div>
-    </div>
-</div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
+@php
+    $filtersActive = filled($search) || filled($status) || filled($barangay);
+    // Soft-token tones, not Bootstrap bg-*: the solid badges stay light-on-dark
+    // in dark mode.
+    $statusMeta = [
+        'approved' => ['Approved', 'success'],
+        'inactive' => ['Inactive', 'warning'],
+        'suspended' => ['Suspended', 'danger'],
+        'archived' => ['Archived', 'info'],
+    ];
+@endphp
 
-    <div class="card fade-in-card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('rhu.bhws.index') }}" class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">Search</label>
-                    <input type="text" name="search" class="form-control" placeholder="Name or email..." value="{{ $search }}">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Status</label>
-                    <select name="status" class="form-select">
-                        <option value="">All statuses</option>
-                        @foreach(['approved', 'inactive', 'archived', 'suspended'] as $s)
-                            <option value="{{ $s }}" {{ $status === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">Barangay</label>
-                    <select name="barangay" class="form-select">
-                        <option value="">All barangays</option>
-                        @foreach($barangays as $brgy)
-                            <option value="{{ $brgy->name }}" {{ $barangay === $brgy->name ? 'selected' : '' }}>Barangay {{ $brgy->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-12 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Apply</button>
-                    <a href="{{ route('rhu.bhws.index') }}" class="btn btn-outline-secondary">Reset</a>
-                </div>
-            </form>
-        </div>
-    </div>
+@include('includes.report-queue-head', [
+    'title' => 'Barangay Health Workers',
+    'subtitle' => 'Manage all BHWs under RHU supervision.',
+    'icon' => 'bi-people',
+    'bar_class' => 'mb-2',
+    'chips' => [
+        ['label' => ' on roster', 'value' => $statusCounts['total'], 'tone' => 'primary'],
+        ['label' => ' approved', 'value' => $statusCounts['approved'], 'tone' => 'success'],
+        ['label' => ' inactive', 'value' => $statusCounts['inactive'], 'tone' => 'warning'],
+    ],
+    'actions' => [
+        [
+            'href' => route('rhu.staff-transitions.index', ['type' => 'bhw_transfer']),
+            'label' => 'Transfer Roster',
+            'icon' => 'bi-arrow-left-right',
+        ],
+    ],
+    'action_href' => route('rhu.bhws.create'),
+    'action_label' => 'Register BHW',
+    'action_icon' => 'bi-plus-lg',
+])
 
-    <div class="card fade-in-card">
-        <div class="card-body p-0">
-            @if($bhws->count())
-                <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Barangay</th>
-                                <th>Purok</th>
-                                <th>Status</th>
-                                <th>Records</th>
-                                <th class="text-end">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($bhws as $bhw)
-                                <tr>
-                                    <td class="fw-semibold">{{ $bhw->name }}</td>
-                                    <td>{{ $bhw->email }}</td>
-                                    <td>{{ $bhw->barangay ?? '—' }}</td>
-                                    <td>{{ $bhw->purok?->name ?? $bhw->activeBhwAssignment?->purok?->name ?? '—' }}</td>
-                                    <td><span class="badge bg-{{ ($bhw->status ?? 'approved') === 'approved' ? 'success' : 'secondary' }}">{{ ucfirst($bhw->status ?? 'approved') }}</span></td>
-                                    <td class="text-muted small">{{ $bhw->records_count }} records · {{ $bhw->checkups_count }} checkups</td>
-                                    <td class="text-end">
-                                        <div class="d-inline-flex gap-1 tbl-actions">
-                                            <a href="{{ route('rhu.bhws.edit', $bhw->id) }}" class="btn btn-sm btn-outline-primary" title="Edit BHW">
-                                                <i class="bi bi-pencil"></i>
-                                            </a>
-                                            @if(($bhw->status ?? 'approved') === 'approved')
-                                                <form method="POST" action="{{ route('rhu.bhws.archive', $bhw->id) }}" onsubmit="return ppPromptArchiveReason(this);">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-warning" title="Archive BHW">
-                                                        <i class="bi bi-archive"></i>
-                                                    </button>
-                                                </form>
-                                            @else
-                                                <form method="POST" action="{{ route('rhu.bhws.activate', $bhw->id) }}" onsubmit="return confirm('Re-activate this BHW account?');">
-                                                    @csrf
-                                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Re-activate BHW">
-                                                        <i class="bi bi-arrow-counterclockwise"></i>
-                                                    </button>
-                                                </form>
-                                                <span class="badge bg-secondary" title="Archived accounts are retained for audit and can be restored from the Archives Hub">
-                                                    <i class="bi bi-archive"></i> Archived
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
+<div class="card rq-wrap fade-in-card">
+    <div class="card-header bg-transparent">
+        {{-- Every filter lives in the card header, so the roster starts one strip
+             below the head bar instead of under a separate filter card. --}}
+        <form method="GET" action="{{ route('rhu.bhws.index') }}" class="wd-filters">
+            <div class="wd-field wd-search-field">
+                <label for="bhw-search">Search</label>
+                <div class="wd-search">
+                    <input type="search" id="bhw-search" name="search" class="form-control" autocomplete="off"
+                           value="{{ $search }}" placeholder="Name or email...">
+                    <button class="btn" type="submit" title="Search" aria-label="Search"><i class="bi bi-search"></i></button>
                 </div>
-                <div class="card-footer">{{ $bhws->links() }}</div>
-            @else
-                <div class="empty-state">
-                    <i class="bi bi-people empty-state-icon"></i>
-                    <h6>No BHWs found</h6>
-                    <p>Try a different filter or register a new BHW.</p>
-                    <a href="{{ route('rhu.bhws.create') }}" class="btn btn-primary">
-                        <i class="bi bi-plus-circle me-2"></i>Register BHW
+            </div>
+
+            <div class="wd-field wd-select-field">
+                <label for="bhw-status">Status</label>
+                <select id="bhw-status" name="status" class="form-select form-select-sm">
+                    <option value="">All statuses</option>
+                    @foreach (array_keys($statusMeta) as $key)
+                        <option value="{{ $key }}" @selected($status === $key)>{{ ucfirst($key) }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="wd-field wd-select-field">
+                <label for="bhw-barangay">Barangay</label>
+                <select id="bhw-barangay" name="barangay" class="form-select form-select-sm">
+                    <option value="">All barangays</option>
+                    @foreach($barangays as $brgy)
+                        <option value="{{ $brgy->name }}" @selected($barangay === $brgy->name)>Barangay {{ $brgy->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="wd-actions d-flex gap-2">
+                <button type="submit" class="btn btn-sm wd-apply-btn"><i class="bi bi-funnel me-1"></i>Filter</button>
+                @if($filtersActive)
+                    <a href="{{ route('rhu.bhws.index') }}" class="btn btn-sm wd-clear-btn">
+                        <i class="bi bi-x-lg me-1"></i>Clear
                     </a>
-                </div>
+                @endif
+            </div>
+        </form>
+    </div>
+
+    <div class="card-body p-0">
+        @if($bhws->count())
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th>BHW</th>
+                            <th>Barangay / Purok</th>
+                            <th>Status</th>
+                            <th>Output</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach($bhws as $bhw)
+                            @php
+                                $statusKey = $bhw->status ?? 'approved';
+                                [$statusLabel, $statusTone] = $statusMeta[$statusKey] ?? [ucfirst($statusKey) ?: 'Unknown', 'primary'];
+                                $purok = $bhw->purok?->name ?? $bhw->activeBhwAssignment?->purok?->name;
+                            @endphp
+                            <tr>
+                                <td>
+                                    <div class="rq-truncate rq-title" title="{{ $bhw->name }}">{{ $bhw->name }}</div>
+                                    <div class="rq-soft">{{ $bhw->email ?: '—' }}</div>
+                                </td>
+                                <td>
+                                    <div class="rq-truncate" style="max-width:150px;" title="{{ $bhw->barangay }}">{{ $bhw->barangay ?: '—' }}</div>
+                                    {{-- Registry purok names already read "Purok 1", so prefixing one gave "Purok Purok 1". --}}
+                                    <div class="rq-soft">{{ $purok ?: 'No purok' }}</div>
+                                </td>
+                                <td><span class="summary-chip chip-{{ $statusTone }} rq-status">{{ $statusLabel }}</span></td>
+                                <td class="rq-num">
+                                    <span class="fw-700">{{ $bhw->records_count }}</span><span class="rq-soft"> records · {{ $bhw->checkups_count }} checkups</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="rq-actions">
+                                        <a href="{{ route('rhu.bhws.edit', $bhw->id) }}" class="btn btn-sm btn-outline-primary"
+                                           title="Edit BHW" aria-label="Edit {{ $bhw->name }}">
+                                            <i class="bi bi-pencil" aria-hidden="true"></i>
+                                        </a>
+                                        @if($statusKey === 'approved')
+                                            <form method="POST" action="{{ route('rhu.bhws.archive', $bhw->id) }}" onsubmit="return ppPromptArchiveReason(this);">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-warning"
+                                                        title="Archive BHW" aria-label="Archive {{ $bhw->name }}">
+                                                    <i class="bi bi-archive" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form method="POST" action="{{ route('rhu.bhws.activate', $bhw->id) }}" onsubmit="return confirm('Re-activate this BHW account?');">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-success"
+                                                        title="Re-activate BHW" aria-label="Re-activate {{ $bhw->name }}">
+                                                    <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            @if($bhws->hasPages())
+                <div class="rq-foot">{{ $bhws->links('vendor.pagination.arrows-only') }}</div>
             @endif
-        </div>
+        @else
+            <div class="rq-empty">
+                <i class="bi bi-people text-muted" aria-hidden="true"></i>
+                <h6 class="mt-2 mb-1 fw-700">No BHWs found</h6>
+                <p class="rq-soft mb-0">
+                    @if($filtersActive)
+                        No BHW matches the current filters.
+                    @else
+                        Register a BHW to add them to the supervision roster.
+                    @endif
+                </p>
+            </div>
+        @endif
     </div>
 </div>
+
 @push('scripts')
 <script>
     // Archive guardrail: require a reason so the audit trail records who / when / why.

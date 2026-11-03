@@ -77,6 +77,18 @@
     .rq-actions { display:flex; align-items:center; justify-content:flex-end; gap:0.3rem; }
     .rq-actions form { margin:0; }
     .rq-actions .btn { display:inline-flex; align-items:center; justify-content:center; width:30px; height:29px; padding:0 !important; border-radius:9px; font-size:0.78rem; }
+    /* On phones two framework rules outrank the sizing above and crushed every
+       row action into a 16x44 sliver: portal-theme's mobile block sets
+       `.main-content .btn-outline-primary { width:100% }` (equal specificity,
+       later in the cascade) and the app CSS sets `.btn { min-height:44px }`
+       under 576px. !important on the width, and a longer selector than the bare
+       `.btn`, are both required. */
+    @media (max-width: 767.98px) {
+        .rq-actions .btn { width:30px !important; }
+    }
+    @media (max-width: 575.98px) {
+        .rq-actions .btn { min-height:0; }
+    }
 
     .rq-foot { display:flex; justify-content:center; padding:0.5rem; border-top:1px solid var(--color-border); }
     .rq-empty { padding:1.6rem 1rem; text-align:center; }
