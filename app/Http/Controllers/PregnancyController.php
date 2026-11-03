@@ -366,7 +366,10 @@ class PregnancyController extends Controller
         $originalWalkInId = $pregnancy->walk_in_patient_id;
         $requestedUserId = $request->patient_type === 'registered' ? (int) $request->user_id : null;
         $requestedWalkInId = $request->patient_type === 'walk_in' ? (int) $request->walk_in_patient_id : null;
-        if ($requestedUserId !== (int) $originalUserId || $requestedWalkInId !== (int) $originalWalkInId) {
+        // Many-to-one guard: cast both sides so an absent link (null) matches
+        // the stored null as 0 instead of failing the strict comparison.
+        if ((int) $requestedUserId !== (int) $originalUserId
+            || (int) $requestedWalkInId !== (int) $originalWalkInId) {
             return back()
                 ->withErrors(['patient_link' => 'This pregnancy is linked to its registered woman and cannot be moved to another patient. End this record and start a new pregnancy for the other patient instead.'])
                 ->withInput();

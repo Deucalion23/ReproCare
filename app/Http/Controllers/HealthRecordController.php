@@ -219,6 +219,7 @@ class HealthRecordController extends Controller
             'alcohol_use' => 'nullable|in:none,former,current',
             'drug_use' => 'nullable|in:none,former,current',
             'lifestyle_notes' => 'nullable|string|max:1000',
+            'obstetric_history' => 'nullable|string|max:2000',
             'risk_assessment_mode' => 'nullable|in:automatic,manual',
             'risk_level' => 'nullable|in:Low,Medium,High',
             'risk_notes' => 'nullable|string|max:1000',
@@ -233,7 +234,11 @@ class HealthRecordController extends Controller
         // Guard: a health record belongs to exactly one woman. Moving it to a
         // different patient would misattribute vitals/risk and detach it from
         // its pregnancy — reject the re-link instead of orphaning history.
-        if ($womanId !== (int) $healthRecord->user_id || $walkInPatientId !== (int) $healthRecord->walk_in_patient_id) {
+        // Cast both sides: an absent link is null, and (int) null is 0, so the
+        // comparison must be made on normalized integers or every save is
+        // rejected for whichever patient type is not in use.
+        if ((int) $womanId !== (int) $healthRecord->user_id
+            || (int) $walkInPatientId !== (int) $healthRecord->walk_in_patient_id) {
             return back()
                 ->withErrors(['patient_link' => 'This health record is linked to its patient and cannot be moved to another patient. Create a new record for the other patient instead.'])
                 ->withInput();
@@ -253,6 +258,7 @@ class HealthRecordController extends Controller
             'alcohol_use',
             'drug_use',
             'lifestyle_notes',
+            'obstetric_history',
             'notes',
             'recommendations',
         ]) + [
