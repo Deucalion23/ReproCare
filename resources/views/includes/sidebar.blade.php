@@ -230,13 +230,6 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('rhu.patients.create') ? 'active' : '' }}"
-                   href="{{ route('rhu.patients.create') }}">
-                    <i class="bi bi-person-plus-fill"></i>
-                    <span>Register Woman</span>
-                </a>
-            </li>
-            <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('rhu.midwives*') ? 'active' : '' }}"
                    href="{{ route('rhu.midwives.index') }}">
                     <i class="bi bi-people-fill"></i>

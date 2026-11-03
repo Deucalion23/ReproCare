@@ -67,6 +67,12 @@
         </a>
         <span class="wd-pill wd-pill-muted"><i class="bi bi-geo-alt-fill me-1"></i>{{ $scopeLabel }}</span>
     </div>
+
+    @if (! empty($addWomanRoute))
+        <a href="{{ route($addWomanRoute) }}" class="btn btn-sm wd-apply-btn">
+            <i class="bi bi-person-plus-fill me-1"></i> {{ $addWomanLabel ?? 'Add Woman' }}
+        </a>
+    @endif
 </div>
 
 <div class="card fade-in-card wd-wrap">

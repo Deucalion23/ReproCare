@@ -1693,7 +1693,7 @@ class RhuController extends Controller
 
         ActivityLog::log('create', "Registered woman patient: {$woman->name}", $woman);
 
-        return redirect()->route('rhu.pending-patients')
+        return redirect()->route('rhu.women.index')
             ->with('success', 'Woman ' . $woman->name . ' has been successfully registered.');
     }
 

@@ -144,7 +144,7 @@ class WomenDirectoryScopeTest extends AutomationTestCase
         $payload['first_name'] = 'In'; $payload['last_name'] = 'Sider';
         $payload['email'] = 'inside@example.com'; $payload['barangay'] = 'Padlan';
         $this->actingAs($rhu)->post(route('rhu.patients.store'), $payload)
-            ->assertRedirect(route('rhu.pending-patients'));
+            ->assertRedirect(route('rhu.women.index'));
         $this->assertDatabaseHas('users', ['email' => 'inside@example.com', 'barangay' => 'Padlan']);
     }
 
