@@ -167,6 +167,32 @@ class ForumFeedTest extends AutomationTestCase
         $this->assertStringContainsString('post-media-frame', $html);
     }
 
+    public function test_the_post_page_builds_its_title_from_escaped_text(): void
+    {
+        // A @section argument is plain PHP, so the '{{ … }}' this page used to
+        // carry was never compiled and printed its own source into the browser
+        // tab. startSection() escapes the finished value, so post text lands in
+        // <title> as entities rather than as live markup.
+        $author = $this->patient();
+        $post = ForumPost::create([
+            'user_id' => $author->id,
+            'content' => '<script>alert(1)</script> prenatal vitamins',
+        ]);
+
+        $html = $this->actingAs($author)->get(route('forum.show', $post->id))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertSame(1, preg_match('#<title>(.*?)</title>#s', $html, $title), 'no title element was rendered');
+        // Counts rather than strings: the test printer re-escapes its own output,
+        // so only these settle whether the title is escaped once or twice.
+        $this->assertSame(0, substr_count($title[1], '<?'), 'the title still carries literal PHP source');
+        $this->assertSame(0, substr_count($title[1], '<script>alert'), 'the title echoes raw post text');
+        $this->assertSame(1, substr_count($title[1], '&lt;script&gt;'), 'post text is not escaped into the title');
+        $this->assertSame(0, substr_count($title[1], '&amp;lt;'), 'post text is escaped twice');
+        $this->assertStringContainsString(' - ReproCare Forum', $title[1]);
+    }
+
     public function test_a_compressed_upload_keeps_its_inline_copy(): void
     {
         Storage::fake('public');

@@ -1,6 +1,6 @@
 @extends('user.layout')
 
-@section('title', '{{ $material->title }} - Quiz | ReproCare')
+@section('title', $material->title . ' - Quiz | ReproCare')
 
 @push('styles')
 <style>

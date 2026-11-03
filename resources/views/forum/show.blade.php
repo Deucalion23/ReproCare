@@ -22,7 +22,10 @@
 
 @extends($forumLayout)
 
-@section('title', '{{ Illuminate\Support\Str::limit($post->content, 50) }} - ReproCare Forum')
+{{-- Section arguments are plain PHP: the '{{ … }}' this used to carry was never
+     compiled, so the tab title printed its own source. startSection() already
+     runs e() on the value, so the excerpt must not be escaped a second time. --}}
+@section('title', \Illuminate\Support\Str::limit($post->content, 50) . ' - ReproCare Forum')
 
 @section($forumSection)
 
