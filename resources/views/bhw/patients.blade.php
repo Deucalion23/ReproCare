@@ -25,11 +25,11 @@
     .bhw-women-toolbar .wd-tabs { flex:0 0 auto; gap:0.4rem; }
     .bhw-women-toolbar .wd-tab { padding:0.4rem 0.85rem !important; }
     .bhw-women-filters { flex:1 1 640px; flex-wrap:nowrap; gap:0.55rem; align-items:flex-end; }
-    .bhw-women-filters .wd-search-field { flex:0 1 290px; min-width:220px; max-width:330px; }
-    .bhw-women-filters .wd-status-field { flex:0 1 170px; min-width:150px; max-width:190px; }
+    .bhw-women-filters .wd-search-field { flex:2 1 190px; min-width:170px; max-width:460px; }
+    .bhw-women-filters .wd-status-field { flex:1 1 138px; min-width:126px; max-width:240px; }
     .bhw-women-filters .wd-actions { margin-left:0; }
     .bhw-women-filters .wd-select-field .form-select { min-height:36px; }
-    .bhw-women-filters .wd-apply-btn, .bhw-women-filters .wd-clear-btn { min-height:36px; padding:0.4rem 0.85rem !important; white-space:nowrap; }
+    .bhw-women-filters .wd-apply-btn, .bhw-women-filters .wd-clear-btn { min-height:36px; white-space:nowrap; }
     .bhw-women-page .wd-pill-pending { background:var(--color-warning-soft, #fff7e6); color:var(--color-warning-text, #8a5a00); }
     .bhw-women-page .wd-pill-inactive { background:var(--color-danger-soft); color:var(--color-danger-text); }
     .bhw-women-page .wd-count-row { padding:0.35rem 0.9rem !important; }
@@ -122,6 +122,7 @@
     $scopeKeep = request()->except(['page', 'filter']);
     $scopeUrl = fn (string $value) => route('bhw.patients', array_merge($scopeKeep, ['filter' => $value]));
     $clearUrl = route('bhw.patients', ['filter' => $scope]);
+    $filtersActive = request()->filled('search') || $status !== 'all';
 @endphp
 
 {{-- Summary cards --}}
@@ -215,11 +216,13 @@
 
                 <div class="wd-actions d-flex gap-2">
                     <button type="submit" class="btn btn-sm wd-apply-btn">
-                        <i class="bi bi-funnel me-1"></i> Apply
+                        <i class="bi bi-funnel me-1"></i> Filter
                     </button>
-                    <a href="{{ $clearUrl }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
-                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
-                    </a>
+                    @if ($filtersActive)
+                        <a href="{{ $clearUrl }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                            <i class="bi bi-x-lg me-1"></i> Clear
+                        </a>
+                    @endif
                 </div>
             </form>
         </div>
