@@ -5,17 +5,33 @@
 @push('styles')
 @include('includes.women-directory-styles')
 <style>
-    .pw-women-tools { display:flex; flex-direction:column; align-items:stretch; gap:0.7rem; }
-    .pw-women-tools .wd-tabs { gap:0.45rem; }
-    .pw-women-tools .wd-tab { padding:0.4rem 0.9rem !important; font-size:0.76rem !important; }
-    .pw-women-tools .wd-filters { width:100%; }
-    .pw-women-tools .wd-search-field { flex:0 1 320px; min-width:220px; max-width:320px; }
-    .pw-women-tools .wd-filters .wd-actions { margin-left:0; }
+    .pw-directory-toolbar { padding:0.75rem 0.85rem; }
+    .pw-directory-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+    .pw-directory-heading h2 { margin:0 0 0.2rem; color:var(--text); font-size:1.12rem; font-weight:800; }
+    .pw-directory-heading p { margin:0; color:var(--text-muted); font-size:0.84rem; }
+    .pw-total-chip { display:inline-flex; align-items:center; gap:0.4rem; flex:0 0 auto; padding:0.45rem 0.85rem; border-radius:999px; background:var(--color-surface-soft); color:var(--color-text); font-size:0.76rem; font-weight:800; }
+    .pw-search-bar { display:flex; align-items:center; gap:0.65rem; flex-wrap:wrap; margin-top:1rem; }
+    .pw-search-field, .pw-filter-field { display:flex; align-items:center; gap:0.65rem; min-height:48px; padding:0.7rem 0.9rem; border:1px solid var(--color-border); border-radius:14px; background:var(--color-surface-soft); }
+    .pw-search-field { flex:1 1 280px; min-width:240px; }
+    .pw-filter-field { flex:0 0 200px; }
+    .pw-search-field > i, .pw-filter-field > i { flex:0 0 auto; color:var(--color-text-muted); }
+    .pw-search-field input, .pw-filter-field select { width:100%; min-width:0; border:0; outline:0; background:transparent; color:var(--color-text); font-size:0.9rem; }
+    .pw-search-field input::placeholder { color:var(--color-text-muted); }
+    .pw-search-actions { display:flex; gap:0.65rem; flex-wrap:wrap; }
+    .pw-search-actions .btn { min-height:44px; }
     @media (max-width: 767.98px) {
         .wd-wrap .card-header { padding:0.65rem 0.7rem !important; gap:0.5rem !important; }
-        .wd-wrap .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
+        .pw-directory-toolbar { padding:0.65rem; }
+        .pw-directory-heading { align-items:flex-start; }
+        .pw-directory-heading h2 { font-size:0.95rem; }
+        .pw-directory-heading p { font-size:0.72rem; }
+        .pw-total-chip { padding:0.38rem 0.65rem; font-size:0.68rem; }
+        .pw-search-bar { gap:0.5rem; }
+        .pw-search-field, .pw-filter-field { min-height:44px; padding:0.6rem 0.75rem; border-radius:12px; }
+        .pw-search-field, .pw-filter-field { flex:1 1 100%; min-width:0; }
+        .pw-search-actions { width:100%; gap:0.5rem; }
+        .pw-search-actions .btn { flex:1 1 0; min-height:40px; justify-content:center; }
         .wd-count { font-size:0.7rem; }
-        .pw-women-tools .wd-search-field { flex:1 1 100%; min-width:0; max-width:none; }
         .wd-wrap .table { font-size:0.7rem !important; }
         .wd-wrap .table th, .wd-wrap .table td { padding:0.4rem 0.5rem !important; }
         .wd-wrap .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
@@ -25,36 +41,31 @@
 @endpush
 
 @section('bhw-president-content')
-<div class="page-hero fade-in-card">
-    <div class="page-hero-title">All Women</div>
-    <p class="page-hero-subtitle">Registered women living in your assigned barangay.</p>
-</div>
-
 <div class="card fade-in-card wd-wrap">
     <div class="card-header bg-transparent p-3">
-        <div class="pw-women-tools">
-            <div class="wd-tabs" role="group" aria-label="Women directory category">
-                <span class="wd-tab active" aria-current="true"><i class="bi bi-people me-1" aria-hidden="true"></i>Registered ({{ $women->total() }})</span>
-            </div>
-            <form method="GET" action="{{ route('bhw-president.women.index') }}" class="wd-filters" role="search">
-                <div class="wd-field wd-search-field">
-                    <label for="pwSearch">Search</label>
-                    <div class="wd-search">
-                        <input type="search" id="pwSearch" name="search" class="form-control"
-                               value="{{ $search }}" placeholder="Name, email, or barangay">
-                        <button class="btn" type="submit" title="Search"><i class="bi bi-search"></i></button>
-                    </div>
+        <div class="pw-directory-toolbar">
+            <div class="pw-directory-heading">
+                <div>
+                    <h2>All Women</h2>
+                    <p>Registered women living in your assigned barangay.</p>
                 </div>
-
-                <div class="wd-actions d-flex gap-2">
-                    <button type="submit" class="btn btn-sm wd-apply-btn">
-                        <i class="bi bi-funnel me-1"></i> Filter
-                    </button>
-                    @if ($search !== '')
-                        <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
-                            <i class="bi bi-x-lg me-1"></i> Clear
-                        </a>
-                    @endif
+                <span class="pw-total-chip"><i class="bi bi-people-fill" aria-hidden="true"></i>{{ $women->total() }} total</span>
+            </div>
+            <form method="GET" action="{{ route('bhw-president.women.index') }}" class="pw-search-bar" role="search">
+                <div class="pw-search-field">
+                    <i class="bi bi-search" aria-hidden="true"></i>
+                    <input type="search" id="pwSearch" name="search" value="{{ $search }}" placeholder="Search by name, email, or barangay..." aria-label="Search by name, email, or barangay">
+                </div>
+                <div class="pw-filter-field">
+                    <i class="bi bi-funnel" aria-hidden="true"></i>
+                    <select name="status" aria-label="Account status">
+                        <option value="all" {{ $status === 'all' ? 'selected' : '' }}>All Status</option>
+                        <option value="approved" {{ $status === 'approved' ? 'selected' : '' }}>Approved</option>
+                    </select>
+                </div>
+                <div class="pw-search-actions">
+                    <button type="submit" class="btn wd-apply-btn"><i class="bi bi-funnel-fill me-1" aria-hidden="true"></i>Apply</button>
+                    <a href="{{ route('bhw-president.women.index') }}" class="btn wd-clear-btn"><i class="bi bi-arrow-counterclockwise me-1" aria-hidden="true"></i>Reset</a>
                 </div>
             </form>
         </div>

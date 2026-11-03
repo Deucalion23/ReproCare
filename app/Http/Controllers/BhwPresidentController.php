@@ -699,6 +699,10 @@ class BhwPresidentController extends Controller
     {
         $me = auth()->user();
         $search = trim((string) $request->input('search', ''));
+        $status = strtolower(trim((string) $request->input('status', 'all')));
+        if (! in_array($status, ['all', 'approved'], true)) {
+            $status = 'all';
+        }
 
         $mine = array_values(array_filter([
             \App\Services\BhwPresidentAssignmentService::normalizeBarangay($me->barangay ?? null),
@@ -736,6 +740,9 @@ class BhwPresidentController extends Controller
                 || str_contains(mb_strtolower($woman->email ?? ''), $needle)
                 || str_contains(mb_strtolower($woman->barangay ?? ''), $needle));
         }
+        if ($status === 'approved') {
+            $women = $women->filter(fn (User $woman) => in_array(strtolower((string) ($woman->status ?? 'approved')), ['', 'approved'], true));
+        }
         $women = $women->values();
 
         $page = (int) $request->input('page', 1);
@@ -748,7 +755,7 @@ class BhwPresidentController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        return view('bhw-president.women.index', ['women' => $paged, 'search' => $search]);
+        return view('bhw-president.women.index', ['women' => $paged, 'search' => $search, 'status' => $status]);
     }
 
     // Pregnancies Review Queue (missing method referenced by bhw-president.pregnancies.index)
