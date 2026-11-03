@@ -5,46 +5,47 @@
 @push('styles')
 @include('includes.women-directory-styles')
 <style>
+    .pw-women-heading h5 {
+        margin:0;
+        color:var(--color-text);
+        font-family:'Plus Jakarta Sans',sans-serif;
+        font-size:1rem;
+        font-weight:800;
+    }
+    .pw-women-heading h5 i { color:var(--color-primary); }
+    .pw-women-heading p {
+        margin:0.2rem 0 0 1.35rem;
+        color:var(--color-text-muted);
+        font-size:0.7rem;
+    }
     @media (max-width: 767.98px) {
-        .page-hero { padding:0.8rem 0.9rem !important; border-radius:14px !important; margin-bottom:0.8rem !important; }
-        .page-hero .page-hero-title { font-size:0.95rem !important; }
-        .page-hero .page-hero-subtitle { font-size:0.7rem !important; }
         .wd-wrap .card-header { padding:0.65rem 0.7rem !important; gap:0.5rem !important; }
-        .wd-wrap .card-header h5 { font-size:0.82rem !important; }
+        .pw-women-heading h5 { font-size:0.82rem; }
         .wd-wrap .card-header .btn { font-size:0.7rem !important; padding:0.4rem 0.75rem !important; }
         .wd-count { font-size:0.7rem; }
-        .table { font-size:0.7rem !important; }
-        .table th, .table td { padding:0.4rem 0.5rem !important; }
-        .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
-        .card-footer { font-size:0.7rem !important; padding:0.6rem !important; }
+        .wd-wrap .table { font-size:0.7rem !important; }
+        .wd-wrap .table th, .wd-wrap .table td { padding:0.4rem 0.5rem !important; }
+        .wd-wrap .table .badge { font-size:0.6rem !important; white-space:nowrap !important; }
+        .wd-wrap .card-footer { font-size:0.7rem !important; padding:0.6rem !important; }
     }
 </style>
 @endpush
 
 @section('bhw-president-content')
-
-<div class="page-hero fade-in-card">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <div class="page-hero-title">All Women</div>
-            <p class="page-hero-subtitle">Registered women living in your assigned barangay.</p>
-        </div>
-    </div>
-</div>
-
 <div class="card fade-in-card wd-wrap">
     <div class="card-header bg-transparent p-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-            <h5 class="mb-0">
-                <i class="bi bi-people-fill me-1"></i> Women in Your Barangay ({{ $women->total() }})
-            </h5>
+            <div class="pw-women-heading">
+                <h5><i class="bi bi-people-fill me-1" aria-hidden="true"></i>All Women <span class="wd-count">({{ $women->total() }})</span></h5>
+                <p>Registered women living in your assigned barangay.</p>
+            </div>
 
-            <form method="GET" action="{{ route('bhw-president.women.index') }}" class="wd-filters">
+            <form method="GET" action="{{ route('bhw-president.women.index') }}" class="wd-filters" role="search">
                 <div class="wd-field wd-search-field">
                     <label for="pwSearch">Search</label>
                     <div class="wd-search">
                         <input type="search" id="pwSearch" name="search" class="form-control"
-                               value="{{ $search }}" placeholder="Name, email, or barangay...">
+                               value="{{ $search }}" placeholder="Name, email, or barangay">
                         <button class="btn" type="submit" title="Search"><i class="bi bi-search"></i></button>
                     </div>
                 </div>
@@ -121,12 +122,14 @@
                 </table>
             </div>
 
-            <div class="p-3">{{ $women->links('vendor.pagination.arrows-only') }}</div>
+            @if($women->hasPages())
+                <div class="p-3">{{ $women->links('vendor.pagination.arrows-only') }}</div>
+            @endif
         @else
-            <div class="empty-state p-5 text-center">
+            <div class="empty-state py-4 text-center">
                 <i class="bi bi-people empty-state-icon" style="font-size:2.5rem;"></i>
                 <h6 class="mt-2 fw-bold">No women found</h6>
-                <p class="text-muted">{{ $search !== '' ? 'No registered women match your search in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
+                <p class="text-muted mb-2">{{ $search !== '' ? 'No registered women match your search in your barangay.' : 'No registered women live in your assigned barangay yet.' }}</p>
                 @if ($search !== '')
                     <a href="{{ route('bhw-president.women.index') }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
                         <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
