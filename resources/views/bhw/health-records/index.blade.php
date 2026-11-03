@@ -3,7 +3,20 @@
 @section('title', 'Health Records - ReproCare')
 
 @push('styles')
+@include('includes.women-directory-styles')
 <style>
+    /* Reuse the compact BHW Women search treatment in the records header. */
+    .hr-records-header {
+        display:flex;
+        align-items:flex-end !important;
+        flex-wrap:wrap;
+        gap:0.8rem;
+    }
+    .hr-records-header h5 { flex:0 0 auto; margin:0 0 0.1rem; }
+    .hr-records-search { flex:1 1 520px; flex-wrap:nowrap; gap:0.55rem; }
+    .hr-records-search .wd-search-field { flex:1 1 280px; min-width:220px; max-width:340px; }
+    .hr-records-search .wd-actions { margin-left:0; }
+
     /* Compact fit-no-scroll table: tighter cells, no wrapping vitals/dates. */
     #bhw-hr-table > :not(caption) > * > * {
         padding:0.55rem 0.5rem;
@@ -36,6 +49,11 @@
 
     /* ── Small screens: slim hero, 3-across compact stats, compact table ── */
     @media (max-width: 767.98px) {
+        .hr-records-header { align-items:stretch !important; gap:0.55rem; }
+        .hr-records-header h5 { width:100%; margin:0; }
+        .hr-records-search { flex:1 1 100%; flex-wrap:wrap; gap:0.45rem; }
+        .hr-records-search .wd-search-field { flex:1 1 100%; min-width:0; max-width:none; }
+        .hr-records-search .wd-actions { margin-left:0; }
         body .main-content .page-hero { border-radius:1rem !important; }
         body .main-content .page-hero .page-hero-title { font-size:1.05rem !important; }
         body .main-content .page-hero .page-hero-subtitle { font-size:0.74rem !important; }
@@ -119,23 +137,6 @@
         </div>
     </div>
 
-    <div class="card fade-in-card mb-4">
-        <div class="card-body">
-            <form method="GET" action="{{ route('bhw.health-records.index') }}" class="row g-3 align-items-end">
-                <div class="col-md-6">
-                    <label class="form-label">Search Patient</label>
-                    <input type="text" class="form-control" name="search" placeholder="Search enrolled or unlinked patient..." value="{{ request('search') }}">
-                </div>
-                <div class="col-md-6 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-search me-1"></i> Search</button>
-                    @if(request('search'))
-                        <a href="{{ route('bhw.health-records.index') }}" class="btn btn-outline-secondary">Clear</a>
-                    @endif
-                </div>
-            </form>
-        </div>
-    </div>
-
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
@@ -144,8 +145,26 @@
     @endif
 
     <div class="card fade-in-card">
-        <div class="card-header">
+        <div class="card-header hr-records-header">
             <h5 class="mb-0">Records Added by Me</h5>
+            <form method="GET" action="{{ route('bhw.health-records.index') }}" class="wd-filters hr-records-search">
+                <div class="wd-field wd-search-field">
+                    <label for="bhwHealthRecordSearch">Search</label>
+                    <div class="wd-search">
+                        <input type="search" id="bhwHealthRecordSearch" name="search" class="form-control"
+                               placeholder="Search enrolled or unlinked patient..." value="{{ request('search') }}">
+                        <button class="btn" type="submit" title="Search" aria-label="Search"><i class="bi bi-search"></i></button>
+                    </div>
+                </div>
+                <div class="wd-actions d-flex gap-2">
+                    <button type="submit" class="btn btn-sm wd-apply-btn">
+                        <i class="bi bi-funnel me-1"></i> Filter
+                    </button>
+                    <a href="{{ route('bhw.health-records.index') }}" class="btn btn-sm wd-clear-btn">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                    </a>
+                </div>
+            </form>
         </div>
         <div class="card-body p-0">
             @if($healthRecords->count() > 0)
