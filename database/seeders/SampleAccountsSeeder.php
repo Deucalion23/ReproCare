@@ -198,7 +198,7 @@ class SampleAccountsSeeder extends Seeder
                     'purok_id' => $assignedPurok->id,
                     'contact_number' => '09' . fake()->numerify('#########'),
                     'reason_for_visit' => $patient['pregnant'] ? 'Prenatal consultation' : 'General maternal health check',
-                    'notes' => 'Sample walk-in patient generated for testing.',
+                    'notes' => 'Walk-in patient registered during the barangay health day.',
                 ]
             );
 

@@ -49,7 +49,7 @@ class MariaClaraPregnancySeeder extends Seeder
         $pregnancy->para = 0;
         $pregnancy->risk_level = 'Low';
         $pregnancy->risk_assessment_mode = 'manual';
-        $pregnancy->risk_notes = 'Initial low-risk assessment created for local testing.';
+        $pregnancy->risk_notes = 'Initial low-risk assessment; routine antenatal follow-up planned.';
         $pregnancy->is_high_risk = false;
         $pregnancy->notes = 'Local demonstration patient record.';
         $pregnancy->workflow_status = 'draft';

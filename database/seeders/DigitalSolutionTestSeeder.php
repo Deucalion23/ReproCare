@@ -31,17 +31,17 @@ class DigitalSolutionTestSeeder extends Seeder
     {
         $password = Hash::make(self::PASSWORD);
 
-        // Resolve or create a purok in Cacaritan for test data
+        // Resolve or create a purok in Cacaritan for the demo caseload
         $purok = Purok::firstOrCreate(
             ['name' => 'Purok 1', 'barangay' => 'Cacaritan'],
-            ['description' => 'Digital solution test catchment']
+            ['description' => 'Residential area for Cacaritan, San Carlos City']
         );
 
         // ─── Staff accounts (midwife + BHW) ────────────────────────────
         $midwife = $this->ensureUser([
-            'first_name'      => 'Test',
+            'first_name'      => 'Marisol',
             'middle_initial'  => 'M',
-            'last_name'       => 'Midwife',
+            'last_name'       => 'Domingo',
             'email'           => 'test.midwife@reprocare.test',
             'password'        => $password,
             'role'            => 'midwife',
@@ -57,9 +57,9 @@ class DigitalSolutionTestSeeder extends Seeder
         ]);
 
         $bhw = $this->ensureUser([
-            'first_name'      => 'Test',
+            'first_name'      => 'Josephine',
             'middle_initial'  => 'B',
-            'last_name'       => 'BHW',
+            'last_name'       => 'Navarro',
             'email'           => 'test.bhw@reprocare.test',
             'password'        => $password,
             'role'            => 'bhw',
@@ -257,8 +257,8 @@ class DigitalSolutionTestSeeder extends Seeder
                 'risk_level'          => $highRisk ? 'High' : 'Low',
                 'risk_assessment_mode'=> 'manual',
                 'is_high_risk'        => $highRisk,
-                'risk_notes'          => $highRisk ? '[TEST] Age > 35, history of gestational hypertension' : null,
-                'notes'               => '[TEST] ' . ($highRisk ? 'High-risk' : 'Normal') . " pregnancy at {$weeks} weeks",
+                'risk_notes'          => $highRisk ? 'Age over 35, history of gestational hypertension' : null,
+                'notes'               => ($highRisk ? 'High-risk' : 'Normal') . " pregnancy at {$weeks} weeks",
                 'workflow_status'     => 'draft',
             ]
         );
@@ -271,7 +271,7 @@ class DigitalSolutionTestSeeder extends Seeder
         ];
         foreach ($checkupDates as $i => $date) {
             Checkup::firstOrCreate(
-                ['user_id' => $user->id, 'scheduled_date' => $date->toDateString(), 'purpose' => '[TEST] Prenatal visit ' . ($i + 1)],
+                ['user_id' => $user->id, 'scheduled_date' => $date->toDateString(), 'purpose' => 'Prenatal visit ' . ($i + 1)],
                 [
                     'midwife_id'    => $midwife->id,
                     'scheduled_by_id' => $bhw->id,
@@ -283,7 +283,7 @@ class DigitalSolutionTestSeeder extends Seeder
 
         // One completed past checkup
         Checkup::firstOrCreate(
-            ['user_id' => $user->id, 'purpose' => '[TEST] Initial prenatal checkup'],
+            ['user_id' => $user->id, 'purpose' => 'Initial prenatal checkup'],
             [
                 'midwife_id'     => $midwife->id,
                 'scheduled_by_id' => $bhw->id,
@@ -307,7 +307,7 @@ class DigitalSolutionTestSeeder extends Seeder
                 [
                     'period_end_date' => $periodEnd->toDateString(),
                     'pain_score'      => rand(1, 5),
-                    'notes'           => '[TEST] Cycle logged for digital menstrual tracker testing',
+                    'notes'           => 'Cycle logged in the menstrual tracker.',
                 ]
             );
             $start->addDays($length);
@@ -328,7 +328,7 @@ class DigitalSolutionTestSeeder extends Seeder
             'temperature'         => $isRisk ? 37.8 : 36.6,
             'risk_level'          => $isRisk ? 'High' : 'Low',
             'risk_assessment_mode'=> 'manual',
-            'notes'               => $notes ?? ('[TEST] Health record for ' . $scenario),
+            'notes'               => $notes ?? DemoFixtureText::note($scenario),
             'recorded_by_id'      => $bhw->id,
             'workflow_status'     => 'accepted_by_midwife',
         ]);
@@ -354,7 +354,7 @@ class DigitalSolutionTestSeeder extends Seeder
                 'counseling_date'          => today()->subMonths(2)->toDateString(),
                 'start_date'              => today()->subMonths(2)->toDateString(),
                 'next_follow_up'          => today()->addDays(14)->toDateString(),
-                'notes'                    => '[TEST] Active oral contraceptive user — follow-up due in 2 weeks',
+                'notes'                    => 'Active oral contraceptive user — follow-up due in 2 weeks',
                 'informed_choice_confirmed'=> true,
             ]
         );
@@ -371,7 +371,7 @@ class DigitalSolutionTestSeeder extends Seeder
                 'start_date'              => today()->subMonths(8)->toDateString(),
                 'stop_date'               => today()->subMonths(3)->toDateString(),
                 'side_effects'            => 'Weight gain, irregular spotting',
-                'notes'                    => '[TEST] Switched from injectable to pill due to side effects',
+                'notes'                    => 'Switched from injectable to pill due to side effects',
                 'informed_choice_confirmed'=> true,
             ]
         );
@@ -392,7 +392,7 @@ class DigitalSolutionTestSeeder extends Seeder
                 'counseling_date'          => today()->subMonths(1)->toDateString(),
                 'start_date'              => today()->subMonths(1)->toDateString(),
                 'next_follow_up'          => today()->addDays(30)->toDateString(),
-                'notes'                    => '[TEST] Using natural family planning (calendar method) — tracking cycles for fertility awareness',
+                'notes'                    => 'Using natural family planning (calendar method) — tracking cycles for fertility awareness',
                 'informed_choice_confirmed'=> true,
                 'status'                   => 'active',
             ]
@@ -418,7 +418,7 @@ class DigitalSolutionTestSeeder extends Seeder
                 'temperature'          => $riskLevels[$i] === 'High' ? 37.9 : 36.5,
                 'risk_level'           => $riskLevels[$i],
                 'risk_assessment_mode' => 'manual',
-                'notes'                => "[TEST] Monthly health check #{$i} for analytics dashboard",
+                'notes'                => "Monthly health check #{$i} for analytics dashboard",
                 'recorded_by_id'       => $bhw->id,
                 'workflow_status'      => 'accepted_by_midwife',
                 'created_at'           => $createdDate,
@@ -434,7 +434,7 @@ class DigitalSolutionTestSeeder extends Seeder
 
         // A past pregnancy (completed) for historical reports
         Pregnancy::firstOrCreate(
-            ['user_id' => $user->id, 'notes' => '[TEST] Completed pregnancy for analytics'],
+            ['user_id' => $user->id, 'notes' => 'Completed pregnancy for analytics'],
             [
                 'lmp'                  => today()->subMonths(12)->toDateString(),
                 'gravida'              => 2,
@@ -459,14 +459,14 @@ class DigitalSolutionTestSeeder extends Seeder
                 'risk_level'           => 'Medium',
                 'risk_assessment_mode' => 'manual',
                 'is_high_risk'         => false,
-                'notes'                => '[TEST] Current pregnancy with extensive health record history',
+                'notes'                => 'Current pregnancy with extensive health record history',
                 'workflow_status'      => 'draft',
             ]
         );
 
         // Schedule checkups at different statuses
         Checkup::firstOrCreate(
-            ['user_id' => $user->id, 'purpose' => '[TEST] Completed monthly checkup'],
+            ['user_id' => $user->id, 'purpose' => 'Completed monthly checkup'],
             [
                 'midwife_id'     => $midwife->id,
                 'scheduled_by_id'=> $bhw->id,
@@ -477,7 +477,7 @@ class DigitalSolutionTestSeeder extends Seeder
             ]
         );
         Checkup::firstOrCreate(
-            ['user_id' => $user->id, 'purpose' => '[TEST] Missed checkup for analytics'],
+            ['user_id' => $user->id, 'purpose' => 'Missed checkup for analytics'],
             [
                 'midwife_id'     => $midwife->id,
                 'scheduled_by_id'=> $bhw->id,
@@ -487,7 +487,7 @@ class DigitalSolutionTestSeeder extends Seeder
             ]
         );
         Checkup::firstOrCreate(
-            ['user_id' => $user->id, 'purpose' => '[TEST] Upcoming prenatal visit'],
+            ['user_id' => $user->id, 'purpose' => 'Upcoming prenatal visit'],
             [
                 'midwife_id'     => $midwife->id,
                 'scheduled_by_id'=> $bhw->id,

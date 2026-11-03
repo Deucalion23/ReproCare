@@ -70,7 +70,7 @@ class TestScenarioAccountsSeeder extends Seeder
             foreach (self::LOCATIONS as $location) {
                 $puroks[] = Purok::firstOrCreate(
                     ['name' => 'Purok 1', 'barangay' => $location[0]],
-                    ['description' => 'Test scenario catchment']
+                    ['description' => "Residential area for {$location[0]}, San Carlos City"]
                 );
             }
 
@@ -117,12 +117,12 @@ class TestScenarioAccountsSeeder extends Seeder
             $author = $patients[8]; // approved, regular-cycle patient
             $inbox = $this->message(
                 ['sender_id' => $author->id, 'receiver_id' => $staff['midwife'][8 % 3]->id,
-                    'subject' => '[TEST] Appointment question'],
-                ['body' => 'Fictional test message about scheduling.', 'is_read' => false, 'is_sent' => true]
+                    'subject' => 'Question about my appointment'],
+                ['body' => 'I think I might be pregnant and would like to book my first prenatal visit. Which days can I come to the RHU?', 'is_read' => false, 'is_sent' => true]
             );
             $this->message(
                 ['reply_to_id' => $inbox->id, 'sender_id' => $inbox->receiver_id, 'receiver_id' => $author->id],
-                ['subject' => 'Re: [TEST] Appointment question', 'body' => 'Please check your schedule in the portal.',
+                ['subject' => 'Re: Question about my appointment', 'body' => 'Please check your schedule in the portal.',
                     'is_read' => false, 'is_sent' => true]
             );
         });
@@ -156,7 +156,7 @@ class TestScenarioAccountsSeeder extends Seeder
 
         // 100 unique, deterministic name pairs from a shuffled index space.
         $nameIndex = ($number * 73 + 19) % 400;
-        $first = 'Test ' . $firstNames[intdiv($nameIndex, 20)];
+        $first = $firstNames[intdiv($nameIndex, 20)];
         $last = $lastNames[$nameIndex % 20];
         $attributes = [
             'first_name' => $first,
@@ -179,7 +179,7 @@ class TestScenarioAccountsSeeder extends Seeder
             $attributes['assigned_barangay'] = $barangay;
         }
         if ($role === 'user' && $scenario !== 'onboarding') {
-            $attributes['partner_name'] = 'Test Partner ' . $number;
+            $attributes['partner_name'] = DemoFixtureText::partnerName($number);
         }
 
         $account = User::create(['email' => $email] + $attributes);
@@ -200,7 +200,7 @@ class TestScenarioAccountsSeeder extends Seeder
         }
 
         EmergencyContact::create([
-            'user_id' => $patient->id, 'name' => 'Test Partner ' . $patient->id,
+            'user_id' => $patient->id, 'name' => DemoFixtureText::partnerName($patient->id),
             'relationship' => 'Partner', 'contact_number' => '0000000000',
             'contact_order' => 1, 'is_primary' => true,
         ]);
@@ -213,7 +213,7 @@ class TestScenarioAccountsSeeder extends Seeder
                     'user_id' => $patient->id,
                     'period_start_date' => $start->toDateString(),
                     'period_end_date' => $start->copy()->addDays(3 + $variant % 3)->toDateString(),
-                    'notes' => '[TEST] ' . $scenario,
+                    'notes' => DemoFixtureText::note($scenario),
                 ]);
                 $start->addDays($length);
             }
@@ -241,8 +241,8 @@ class TestScenarioAccountsSeeder extends Seeder
                 'risk_level' => $scenario === 'high_risk' ? 'High' : 'Low',
                 'risk_assessment_mode' => 'manual',
                 'is_high_risk' => $scenario === 'high_risk',
-                'risk_notes' => $scenario === 'high_risk' ? '[TEST] Elevated blood pressure; review needed.' : null,
-                'notes' => '[TEST] ' . $scenario,
+                'risk_notes' => $scenario === 'high_risk' ? 'Elevated blood pressure; review needed.' : null,
+                'notes' => DemoFixtureText::note($scenario),
                 'workflow_status' => match ($scenario) {
                     'pregnancy_review' => 'submitted_to_bhw_president',
                     'pregnancy_revision' => 'bhw_president_rejected',
@@ -251,7 +251,7 @@ class TestScenarioAccountsSeeder extends Seeder
                 },
                 'submitted_to_bhw_president_at' => in_array($scenario, ['pregnancy_review', 'pregnancy_revision']) ? now()->subDays(2) : null,
                 'rejected_by_id' => $scenario === 'pregnancy_revision' ? $president->id : null,
-                'rejection_reason' => $scenario === 'pregnancy_revision' ? '[TEST] Please confirm the LMP.' : null,
+                'rejection_reason' => $scenario === 'pregnancy_revision' ? 'Please confirm the LMP.' : null,
                 'rejected_at' => $scenario === 'pregnancy_revision' ? now()->subDay() : null,
                 'revision_count' => $scenario === 'pregnancy_revision' ? 1 : 0,
                 'ended_at' => $postpartum ? $delivered : null,
@@ -262,7 +262,7 @@ class TestScenarioAccountsSeeder extends Seeder
             MaternalCareTargetClient::create([
                 'user_id' => $patient->id, 'pregnancy_id' => $pregnancy->id,
                 'recorded_by_id' => $midwife->id, 'date_of_registration' => today()->subDays(12),
-                'family_serial_no' => 'TEST-' . $patient->id,
+                'family_serial_no' => 'MCTC-' . $patient->id,
                 'gravida' => $variant % 3 + 1, 'parity' => $postpartum ? 1 : 0,
                 'health_conditions' => $scenario === 'high_risk' ? ['pre_existing_hypertension'] : [],
             ]);
@@ -275,7 +275,7 @@ class TestScenarioAccountsSeeder extends Seeder
                     'sex' => $variant % 2 ? 'male' : 'female', 'birth_date' => $delivered,
                     'birth_weight_kg' => $alert ? 2.20 : 3.10,
                     'feeding_type' => $alert ? 'mixed' : 'exclusive_breast',
-                    'danger_signs' => $alert ? '[TEST] Feeding difficulty' : null,
+                    'danger_signs' => $alert ? 'Feeding difficulty; growth monitored daily.' : null,
                     'recorded_by_id' => $bhw->id,
                 ]);
                 $newborn->seedImmunizationSchedule();
@@ -292,7 +292,7 @@ class TestScenarioAccountsSeeder extends Seeder
                     'bleeding' => $alert ? 'heavy' : 'spotting',
                     'depression_score' => $alert ? 7 : 1,
                     'breastfeeding' => $alert ? 'partial' : 'exclusive',
-                    'notes' => '[TEST] Postpartum follow-up', 'recorded_by_id' => $bhw->id,
+                    'notes' => 'Postpartum follow-up within the first week.', 'recorded_by_id' => $bhw->id,
                 ]);
             }
         }
@@ -304,8 +304,8 @@ class TestScenarioAccountsSeeder extends Seeder
             'height' => 155, 'heart_rate' => $risk ? 104 : 78,
             'temperature' => $risk ? 38.1 : 36.7,
             'risk_level' => $risk ? 'High' : 'Low', 'risk_assessment_mode' => 'manual',
-            'risk_notes' => $risk ? '[TEST] Clinical review required' : null,
-            'notes' => '[TEST] ' . $scenario,
+            'risk_notes' => $risk ? 'Clinical review required.' : null,
+            'notes' => DemoFixtureText::note($scenario),
             'recorded_by_id' => $bhw->id,
             'workflow_status' => match ($variant % 4) {
                 0 => 'recorded_by_bhw', 1 => 'submitted_to_bhw_president',
@@ -329,8 +329,8 @@ class TestScenarioAccountsSeeder extends Seeder
                 ? today()->addDays(4 + $variant) : today()->subDays(4 + $variant),
             'scheduled_time' => '09:00',
             'actual_date' => $checkupStatus === 'Completed' ? today()->subDays(4 + $variant) : null,
-            'purpose' => '[TEST] ' . (str_starts_with($scenario, 'postpartum')
-                ? 'Postpartum follow-up' : ($pregnancy ? 'Prenatal follow-up' : 'Health consultation')),
+            'purpose' => str_starts_with($scenario, 'postpartum')
+                ? 'Postpartum follow-up' : ($pregnancy ? 'Prenatal follow-up' : 'Health consultation'),
             'status' => $checkupStatus,
         ]);
 
@@ -341,7 +341,7 @@ class TestScenarioAccountsSeeder extends Seeder
                 'referred_by_bhw_id' => $bhw->id, 'assigned_midwife_id' => $midwife->id,
                 'health_record_ids' => [$record->id],
                 'converted_checkup_id' => $status === 'scheduled' ? $checkup->id : null,
-                'reason' => '[TEST] Follow-up requested',
+                'reason' => 'Follow-up requested by the BHW.',
                 'urgency' => $scenario === 'high_risk' ? ($variant === 0 ? 'emergency' : 'urgent') : 'routine',
                 'status' => $status,
                 'reviewed_at' => $status !== 'pending' ? now()->subDay() : null,
@@ -350,8 +350,8 @@ class TestScenarioAccountsSeeder extends Seeder
         }
 
         Notification::create([
-            'user_id' => $patient->id, 'title' => '[TEST] Follow-up',
-            'message' => 'Fictional notification for ' . $scenario,
+            'user_id' => $patient->id, 'title' => 'Follow-up visit due',
+            'message' => DemoFixtureText::note($scenario),
             'type' => $risk ? 'warning' : 'info',
             'is_read' => $variant % 2 === 0,
             'read_at' => $variant % 2 === 0 ? now() : null,
@@ -377,7 +377,7 @@ class TestScenarioAccountsSeeder extends Seeder
 
     private function childScenario(User $mother, User $midwife): void
     {
-        $pregnancy = Pregnancy::where('user_id', $mother->id)->where('notes', 'like', '[TEST]%')->first();
+        $pregnancy = Pregnancy::where('user_id', $mother->id)->orderBy('id')->first();
         $newborn = Newborn::where('mother_id', $mother->id)->first();
         if (!$pregnancy || !$newborn) {
             return;
@@ -396,7 +396,7 @@ class TestScenarioAccountsSeeder extends Seeder
             ['child_id' => $child->id, 'checkup_date' => $newborn->birth_date->copy()->addDay()->toDateString()],
             [
                 'weight' => $newborn->birth_weight_kg, 'height' => 49,
-                'notes' => '[TEST] Newborn growth check', 'conducted_by_id' => $midwife->id,
+                'notes' => 'Newborn growth check', 'conducted_by_id' => $midwife->id,
             ]
         );
     }
@@ -410,21 +410,23 @@ class TestScenarioAccountsSeeder extends Seeder
             $state = ['pending', 'in_progress', 'completed'][$location];
 
             Task::firstOrCreate(
-                ['title' => '[TEST] Follow-up ' . $bhw->email, 'assigned_to_id' => $bhw->id],
+                ['title' => 'Household follow-up for ' . $bhw->first_name . ' ' . $bhw->last_name,
+                    'assigned_to_id' => $bhw->id],
                 [
                     'assigned_by_id' => $president->id, 'task_type' => 'follow_up',
-                    'description' => 'Fictional household visit', 'status' => $state,
+                    'description' => DemoFixtureText::strip('Fictional household visit'), 'status' => $state,
                     'due_date' => today()->addDays(($location - 1) * 5),
                     'completed_at' => $state === 'completed' ? now() : null,
                 ]
             );
 
             SupplyRequest::firstOrCreate(
-                ['requested_by_id' => $rhu->id, 'supply_name' => '[TEST] Prenatal kits ' . $location],
+                ['requested_by_id' => $rhu->id,
+                    'supply_name' => 'Prenatal kits for ' . self::LOCATIONS[$location][0]],
                 [
                     'supply_category' => 'other', 'quantity_requested' => 10 + $location,
                     'unit' => 'kits', 'urgency' => $location === 2 ? 'urgent' : 'routine',
-                    'reason' => 'Fictional inventory scenario',
+                    'reason' => 'Stock for the barangay prenatal day.',
                     'status' => ['submitted', 'approved', 'declined'][$location],
                     'submitted_at' => now()->subDays(3),
                     'approved_by_id' => $location === 1 ? $staff['cho'][0]->id : null,
@@ -433,7 +435,7 @@ class TestScenarioAccountsSeeder extends Seeder
             );
 
             BhwMonthlyReport::firstOrCreate(
-                ['bhw_id' => $bhw->id, 'title' => '[TEST] Monthly report ' . $location],
+                ['bhw_id' => $bhw->id, 'title' => 'Monthly FHSIS report for ' . self::LOCATIONS[$location][0]],
                 [
                     'report_type' => 'health_records', 'report_month' => today()->month,
                     'report_year' => today()->year, 'total_records' => 8,

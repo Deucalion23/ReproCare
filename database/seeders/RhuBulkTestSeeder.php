@@ -252,9 +252,9 @@ class RhuBulkTestSeeder extends Seeder
                 'risk_assessment_mode' => 'manual',
                 'is_high_risk'         => $highRisk,
                 'risk_notes'           => $highRisk
-                    ? '[TEST] Age >35, gestational hypertension history'
+                    ? 'Age >35, gestational hypertension history'
                     : null,
-                'notes'                => '[TEST] ' . ($highRisk ? 'High-risk' : 'Normal')
+                'notes'                => ($highRisk ? 'High-risk' : 'Normal')
                     . " pregnancy at {$weeks} weeks",
                 'workflow_status'      => 'draft',
             ]
@@ -266,7 +266,7 @@ class RhuBulkTestSeeder extends Seeder
                 [
                     'user_id'        => $user->id,
                     'scheduled_date' => today()->addDays($days)->toDateString(),
-                    'purpose'        => '[TEST] Prenatal visit ' . ($daysAhead + 1),
+                    'purpose'        => 'Prenatal visit ' . ($daysAhead + 1),
                 ],
                 [
                     'midwife_id'      => $midwife->id,
@@ -279,7 +279,7 @@ class RhuBulkTestSeeder extends Seeder
 
         // One completed past checkup
         Checkup::firstOrCreate(
-            ['user_id' => $user->id, 'purpose' => '[TEST] Initial prenatal checkup'],
+            ['user_id' => $user->id, 'purpose' => 'Initial prenatal checkup'],
             [
                 'midwife_id'      => $midwife->id,
                 'scheduled_by_id' => $bhw->id,
@@ -302,7 +302,7 @@ class RhuBulkTestSeeder extends Seeder
                 [
                     'period_end_date' => $periodEnd->toDateString(),
                     'pain_score'      => rand(1, 5),
-                    'notes'           => '[TEST] Cycle logged for menstrual tracker testing',
+                    'notes'           => 'Cycle logged in the menstrual tracker.',
                 ]
             );
             $start->addDays($length);
@@ -323,7 +323,7 @@ class RhuBulkTestSeeder extends Seeder
             'temperature'          => $isRisk ? 37.8 : 36.6,
             'risk_level'           => $isRisk ? 'High' : 'Low',
             'risk_assessment_mode' => 'manual',
-            'notes'                => "[TEST] Health record for {$scenario}",
+            'notes'                => DemoFixtureText::note($scenario),
             'recorded_by_id'       => $bhw->id,
             'workflow_status'      => 'accepted_by_midwife',
         ]);
@@ -348,7 +348,7 @@ class RhuBulkTestSeeder extends Seeder
                 'counseling_date'           => today()->subMonths(2)->toDateString(),
                 'start_date'                => today()->subMonths(2)->toDateString(),
                 'next_follow_up'            => today()->addDays(14)->toDateString(),
-                'notes'                     => '[TEST] Active oral contraceptive — follow-up in 2 weeks',
+                'notes'                     => 'Active oral contraceptive — follow-up in 2 weeks',
                 'informed_choice_confirmed' => true,
             ]
         );
@@ -365,7 +365,7 @@ class RhuBulkTestSeeder extends Seeder
                 'start_date'                => today()->subMonths(8)->toDateString(),
                 'stop_date'                 => today()->subMonths(3)->toDateString(),
                 'side_effects'              => 'Weight gain, irregular spotting',
-                'notes'                     => '[TEST] Switched from injectable to pill due to side effects',
+                'notes'                     => 'Switched from injectable to pill due to side effects',
                 'informed_choice_confirmed' => true,
             ]
         );
@@ -385,7 +385,7 @@ class RhuBulkTestSeeder extends Seeder
                 'counseling_date'           => today()->subMonths(1)->toDateString(),
                 'start_date'                => today()->subMonths(1)->toDateString(),
                 'next_follow_up'            => today()->addDays(30)->toDateString(),
-                'notes'                     => '[TEST] Natural family planning (calendar method) — cycle tracking active',
+                'notes'                     => 'Natural family planning (calendar method) — cycle tracking active',
                 'informed_choice_confirmed' => true,
                 'status'                    => 'active',
             ]
@@ -409,7 +409,7 @@ class RhuBulkTestSeeder extends Seeder
                 'temperature'          => $riskLevels[$i] === 'High' ? 37.9 : 36.5,
                 'risk_level'           => $riskLevels[$i],
                 'risk_assessment_mode' => 'manual',
-                'notes'                => "[TEST] Monthly health check #{$i} for analytics dashboard",
+                'notes'                => "Monthly health check #{$i} for analytics dashboard",
                 'recorded_by_id'       => $bhw->id,
                 'workflow_status'      => 'accepted_by_midwife',
                 'created_at'           => $createdDate,
@@ -425,7 +425,7 @@ class RhuBulkTestSeeder extends Seeder
 
         // Completed past pregnancy
         Pregnancy::firstOrCreate(
-            ['user_id' => $user->id, 'notes' => '[TEST] Completed pregnancy for analytics'],
+            ['user_id' => $user->id, 'notes' => 'Completed pregnancy for analytics'],
             [
                 'lmp'                  => today()->subMonths(12)->toDateString(),
                 'gravida'              => 2,
@@ -450,16 +450,16 @@ class RhuBulkTestSeeder extends Seeder
                 'risk_level'           => 'Medium',
                 'risk_assessment_mode' => 'manual',
                 'is_high_risk'         => false,
-                'notes'                => '[TEST] Current pregnancy with extensive health history',
+                'notes'                => 'Current pregnancy with extensive health history',
                 'workflow_status'      => 'draft',
             ]
         );
 
         // Checkups at different statuses (completed / missed / upcoming)
         foreach ([
-            ['[TEST] Completed monthly checkup', today()->subDays(30), 'Completed', true],
-            ['[TEST] Missed checkup for analytics', today()->subDays(7),  'Missed',    false],
-            ['[TEST] Upcoming prenatal visit',     today()->addDays(5),   'Scheduled', false],
+            ['Completed monthly checkup', today()->subDays(30), 'Completed', true],
+            ['Missed checkup for analytics', today()->subDays(7),  'Missed',    false],
+            ['Upcoming prenatal visit',     today()->addDays(5),   'Scheduled', false],
         ] as [$purpose, $date, $status, $hasActual]) {
             Checkup::firstOrCreate(
                 ['user_id' => $user->id, 'purpose' => $purpose],
