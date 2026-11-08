@@ -1130,7 +1130,6 @@ class RhuController extends Controller
             })
             ->with('recordedBy:id,first_name,last_name,role')
             ->latest('created_at')
-            ->take(20)
             ->get();
 
         return view('rhu.health-records.show', compact('record', 'history'));

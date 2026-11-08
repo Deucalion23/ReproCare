@@ -52,7 +52,7 @@
     </div>
     <div class="col-md-6">
         <div class="card fade-in-card h-100">
-            <div class="card-header"><strong>Visit history for this woman (latest 20)</strong></div>
+            <div class="card-header"><strong>Visit history for this woman (all records)</strong></div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-sm align-middle mb-0" style="font-size:0.82rem;">
