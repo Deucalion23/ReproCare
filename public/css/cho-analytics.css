@@ -134,18 +134,18 @@
 .analytics .an-suggestion-action p { margin:0; }
 .analytics .an-suggestion-action i { color:var(--an-flag); font-size:.85rem; }
 .analytics .an-badge { display:inline-flex; align-items:center; gap:5px; padding:5px 9px; border-radius:7px; background:var(--an-soft); color:var(--an-muted); font-size:.67rem; font-weight:700; line-height:1.5; }
-.analytics .an-badge.Critical, .analytics .an-badge.High { background:var(--color-danger-soft); color:var(--color-danger-text); }
-.analytics .an-badge.Medium { background:var(--color-warning-soft); color:var(--color-warning-text); }
-.analytics .an-badge.Low { background:var(--color-success-soft); color:var(--color-success-text); }
+.analytics .an-badge.Critical, .analytics .an-badge.High, .analytics .an-badge.critical, .analytics .an-badge.high { background:#dc3545; color:#fff; border:1px solid #b02a37; }
+.analytics .an-badge.Medium, .analytics .an-badge.medium { background:#fff3cd; color:#856404; border:1px solid #e2c080; }
+.analytics .an-badge.Low, .analytics .an-badge.low { background:#198754; color:#fff; border:1px solid #145c3d; }
 .analytics .an-risk-list { display:grid; gap:9px; margin:12px 0 0; }
 .analytics .an-risk-row { display:grid; grid-template-columns:95px minmax(0, 1fr) 30px; gap:12px; align-items:center; font-size:.76rem; }
 .analytics .an-risk-label { display:flex; align-items:center; gap:7px; }
 .analytics .an-risk-row strong { text-align:right; font-variant-numeric:tabular-nums; }
 .analytics .an-risk-color { --an-risk:var(--color-text-muted); }
-.analytics .an-risk-color.Critical { --an-risk:var(--color-danger); }
-.analytics .an-risk-color.High { --an-risk:var(--color-danger); }
-.analytics .an-risk-color.Medium { --an-risk:var(--color-warning); }
-.analytics .an-risk-color.Low { --an-risk:var(--color-success); }
+.analytics .an-risk-color.Critical { --an-risk:#dc3545; }
+.analytics .an-risk-color.High, .analytics .an-risk-color.high { --an-risk:#dc3545; }
+.analytics .an-risk-color.Medium, .analytics .an-risk-color.medium { --an-risk:#fbbf24; }
+.analytics .an-risk-color.Low, .analytics .an-risk-color.low { --an-risk:#198754; }
 .analytics .an-risk-dot { width:7px; height:7px; background:var(--an-risk); border-radius:50%; }
 .analytics .an-meter { height:6px; border-radius:6px; background:var(--an-soft); overflow:hidden; }
 .analytics .an-meter span { display:block; height:100%; border-radius:inherit; background:var(--an-risk); }
