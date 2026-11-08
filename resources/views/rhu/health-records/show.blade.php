@@ -10,9 +10,27 @@
             <div class="page-hero-title">Health Record #{{ $record->id }}</div>
             <p class="page-hero-subtitle">{{ $record->patient_name }} · {{ $record->woman?->barangay ?? $record->walkInPatient?->barangay ?? 'N/A' }}</p>
         </div>
-        <a href="{{ route('rhu.health-records.index') }}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left me-1"></i> Back to tracking</a>
+        <a href="{{ route('rhu.health-records.index') }}" class="btn btn-outline-secondary no-print"><i class="bi bi-arrow-left me-1"></i> Back to tracking</a>
+        <button onclick="window.print()" class="btn btn-outline-primary no-print"><i class="bi bi-printer me-1"></i> Print Record</button>
     </div>
 </div>
+
+@push('styles')
+<style>
+    @media print {
+        .navbar, .sidebar, .no-print { display:none !important; }
+        .layout-wrapper { display:block !important; }
+        .main-content { margin-left:0 !important; padding-left:0 !important; }
+        .mw-container { max-width:100% !important; padding:0 !important; }
+        .page-hero { background:#fff !important; box-shadow:none !important; border:0 !important; margin-bottom:0.5rem !important; }
+        .card { border:1px solid #ccc !important; box-shadow:none !important; break-inside:avoid; }
+        .card-header { background:#f5f5f5 !important; color:#000 !important; border-bottom:1px solid #ccc !important; }
+        body { background:#fff !important; color:#000 !important; font-size:11pt; }
+        a { color:#000 !important; text-decoration:none !important; }
+        .badge { border:1px solid #000 !important; }
+    }
+</style>
+@endpush
 
 <div class="row g-3">
     <div class="col-md-6">
