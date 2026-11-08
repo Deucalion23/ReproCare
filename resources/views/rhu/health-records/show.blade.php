@@ -6,7 +6,7 @@
 
 <div class="page-hero fade-in-card mb-4">
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
+        <div class="flex-1">
             <div class="page-hero-title">Health Record #{{ $record->id }}</div>
             <p class="page-hero-subtitle">{{ $record->patient_name }} · {{ $record->woman?->barangay ?? $record->walkInPatient?->barangay ?? 'N/A' }}</p>
         </div>
