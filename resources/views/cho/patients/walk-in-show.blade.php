@@ -16,6 +16,8 @@
     .rec-value { font-size:0.78rem; font-weight:500; color:var(--color-text); line-height:1.3; }
     .rec-back { display:inline-flex; align-items:center; gap:0.4rem; border-radius:999px; font-weight:700; font-size:0.82rem; padding:0.45rem 1.05rem; background:var(--color-surface); border:1px solid var(--color-border); color:var(--color-text); text-decoration:none; box-shadow:0 2px 8px color-mix(in srgb, rgb(var(--color-shadow-rgb)) 8%, transparent); }
     .rec-back:hover { border-color:var(--color-primary); color:var(--color-primary-text); background:var(--color-surface); }
+    .rec-print { background:var(--color-primary) !important; border-color:var(--color-primary) !important; color:#ffffff !important; }
+    .rec-print:hover { background:var(--color-primary-hover) !important; border-color:var(--color-primary-hover) !important; color:#ffffff !important; }
     .rec-table table { font-size:0.72rem; }
     .rec-table table thead th { border:none !important; background:transparent !important; font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.06em; color:var(--color-text-muted) !important; padding:0.4rem 0.65rem !important; }
     .rec-table table tbody td { border:none !important; padding:0.4rem 0.65rem !important; }
@@ -49,9 +51,14 @@
                 </p>
             </div>
         </div>
-        <a href="{{ route('cho.patients.index') }}" class="rec-back">
-            <i class="bi bi-arrow-left"></i> All Women
-        </a>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a href="{{ route('cho.patients.print', ['unregistered', $woman->id]) }}" target="_blank" rel="noopener" class="rec-back rec-print">
+                <i class="bi bi-printer"></i> Print Record
+            </a>
+            <a href="{{ route('cho.patients.index') }}" class="rec-back">
+                <i class="bi bi-arrow-left"></i> All Women
+            </a>
+        </div>
     </div>
 </div>
 

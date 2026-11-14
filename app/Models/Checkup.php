@@ -27,6 +27,7 @@ class Checkup extends Model
 
     protected $casts = [
         'scheduled_date' => 'date',
+        'actual_date' => 'date',
     ];
 
     // Relationships

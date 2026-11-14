@@ -6,5 +6,6 @@
     @include('includes.women-directory', [
         'womenRoute' => 'cho.patients.index',
         'subtitle' => 'City-wide directory of registered and unregistered women. Read-only oversight — verification and archiving stay with RHU.',
+        'printBulkRoute' => 'cho.patients.print-bulk',
     ])
 @endsection

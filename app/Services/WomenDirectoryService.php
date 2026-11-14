@@ -6,10 +6,13 @@ use App\Models\Barangay;
 use App\Models\Checkup;
 use App\Models\CheckupReferral;
 use App\Models\HealthRecord;
+use App\Models\PatientCondition;
 use App\Models\Pregnancy;
 use App\Models\User;
 use App\Models\WalkInPatient;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * Combined registered + unregistered women directory.
@@ -70,7 +73,7 @@ class WomenDirectoryService
     /**
      * @return array{women: LengthAwarePaginator, registeredCount: int,
      *     unregisteredCount: int, totalCount: int, pregnantCount: int,
-     *     pendingCount: int, resultCount: int,
+     *     pendingCount: int, resultCount: int, allIds: array<int, string>,
      *     barangays: \Illuminate\Support\Collection,
      *     statuses: array, scopeLabel: string, catchment: ?array,
      *     sort: string, sorts: array, search: string, type: string,
@@ -155,6 +158,10 @@ class WomenDirectoryService
 
         $resultCount = $all->count();
 
+        // Every matching "type:id" key, so the directory can offer
+        // select-all-across-pages for bulk printing without re-querying.
+        $allIds = $all->map(fn ($woman) => $woman->type . ':' . $woman->id)->values()->all();
+
         $page = max(1, (int) request()->input('page', 1));
         $perPage = 15;
         $pageRows = $all->forPage($page, $perPage)->values();
@@ -206,6 +213,7 @@ class WomenDirectoryService
             'pregnantCount' => $pregnantTotal,
             'pendingCount' => $pendingTotal,
             'resultCount' => $resultCount,
+            'allIds' => $allIds,
             'barangays' => $barangays,
             'statuses' => ['approved', 'pending', 'rejected', 'suspended', 'inactive', 'archived'],
             'scopeLabel' => $this->scopeLabel($user),
@@ -374,9 +382,65 @@ class WomenDirectoryService
      */
     public function findForUser(User $user, string $type, int $id): array
     {
+        return $this->loadRecord($user, $type, $id, 50);
+    }
+
+    /**
+     * Complete record file for printing: every checkup and health record
+     * (no 50-row screen cap), plus medical conditions and referrals.
+     */
+    public function findForPrint(User $user, string $type, int $id): array
+    {
+        $record = $this->loadRecord($user, $type, $id, null);
+
+        if ($type === 'registered') {
+            $record['medicalConditions'] = PatientCondition::where('user_id', $record['woman']->id)
+                ->with(['recordedBy:id,first_name,middle_initial,last_name'])
+                ->latest()
+                ->get();
+            $record['referrals'] = CheckupReferral::where('user_id', $record['woman']->id)->latest()->get();
+        } else {
+            $record['medicalConditions'] = collect();
+        }
+
+        return $record;
+    }
+
+    /**
+     * Bulk print: resolve each selected "type:id" key. Keys that no longer
+     * resolve (archived, converted, out of catchment) are skipped and counted
+     * so a stale browser selection never aborts the whole print job.
+     *
+     * @return array{records: array<int, array>, skipped: int}
+     */
+    public function findManyForPrint(User $user, array $keys): array
+    {
+        $records = [];
+        $skipped = 0;
+
+        foreach (array_unique($keys) as $key) {
+            [$type, $id] = explode(':', (string) $key, 2);
+
+            try {
+                $record = $this->findForPrint($user, $type, (int) $id);
+            } catch (ModelNotFoundException | NotFoundHttpException) {
+                $skipped++;
+                continue;
+            }
+
+            $record['type'] = $type;
+            $records[] = $record;
+        }
+
+        return ['records' => $records, 'skipped' => $skipped];
+    }
+
+    private function loadRecord(User $user, string $type, int $id, ?int $limit): array
+    {
         abort_unless(in_array($type, self::TYPES, true), 404);
 
         $catchment = $this->catchmentFor($user);
+        $cap = fn ($query) => $limit === null ? $query : $query->limit($limit);
 
         if ($type === 'registered') {
             $woman = User::query()
@@ -389,15 +453,13 @@ class WomenDirectoryService
             return [
                 'woman' => $woman,
                 'pregnancies' => Pregnancy::where('user_id', $id)->latest()->get(),
-                'checkups' => Checkup::where('user_id', $id)
+                'checkups' => $cap(Checkup::where('user_id', $id)
                     ->with('midwife:id,first_name,middle_initial,last_name')
-                    ->latest()
-                    ->limit(50)
+                    ->latest())
                     ->get(),
-                'healthRecords' => HealthRecord::where('user_id', $id)
+                'healthRecords' => $cap(HealthRecord::where('user_id', $id)
                     ->with('recordedBy:id,first_name,middle_initial,last_name')
-                    ->latest()
-                    ->limit(50)
+                    ->latest())
                     ->get(),
                 'referrals' => collect(),
             ];
@@ -414,15 +476,13 @@ class WomenDirectoryService
         return [
             'woman' => $woman,
             'pregnancies' => Pregnancy::where('walk_in_patient_id', $id)->latest()->get(),
-            'checkups' => Checkup::where('walk_in_patient_id', $id)
+            'checkups' => $cap(Checkup::where('walk_in_patient_id', $id)
                 ->with('midwife:id,first_name,middle_initial,last_name')
-                ->latest()
-                ->limit(50)
+                ->latest())
                 ->get(),
-            'healthRecords' => HealthRecord::where('walk_in_patient_id', $id)
+            'healthRecords' => $cap(HealthRecord::where('walk_in_patient_id', $id)
                 ->with('recordedBy:id,first_name,middle_initial,last_name')
-                ->latest()
-                ->limit(50)
+                ->latest())
                 ->get(),
             'referrals' => CheckupReferral::where('walk_in_patient_id', $id)->latest()->get(),
         ];

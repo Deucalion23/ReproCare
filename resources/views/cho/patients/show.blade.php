@@ -69,6 +69,9 @@
                     </button>
                 </form>
             @endif
+            <a href="{{ route('cho.patients.print', ['registered', $woman->id]) }}" target="_blank" rel="noopener" class="btn btn-outline-primary btn-sm" style="padding:0.3rem 0.7rem;font-size:0.75rem;">
+                <i class="bi bi-printer me-1"></i> Print Record
+            </a>
             <a href="{{ route('cho.patients.index') }}" class="btn btn-outline-primary btn-sm" style="padding:0.3rem 0.7rem;font-size:0.75rem;">Back to directory</a>
         </div>
     </div>

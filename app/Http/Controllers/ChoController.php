@@ -519,6 +519,44 @@ class ChoController extends Controller
         ]);
     }
 
+    /** Print-ready complete record file for one woman (city-wide oversight). */
+    public function patientPrint($type, $id)
+    {
+        $service = app(WomenDirectoryService::class);
+        $record = $service->findForPrint(auth()->user(), (string) $type, (int) $id);
+
+        return view('women.print', $record + [
+            'type' => (string) $type,
+            'portal' => 'CHO',
+            'scopeLabel' => $service->scopeLabel(auth()->user()),
+            'backUrl' => $type === 'unregistered'
+                ? route('cho.patients.walk-in', $id)
+                : route('cho.patients.show', $id),
+        ]);
+    }
+
+    /** Bulk print: the women selected in the directory, one record file per page. */
+    public function patientsPrintBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'women' => ['required', 'array', 'min:1', 'max:100'],
+            'women.*' => ['string', 'regex:/^(registered|unregistered):\d+$/'],
+        ], [
+            'women.max' => 'Print up to 100 women at a time. Narrow the selection and try again.',
+        ]);
+
+        $service = app(WomenDirectoryService::class);
+        $result = $service->findManyForPrint(auth()->user(), $validated['women']);
+
+        return view('women.print-bulk', [
+            'records' => $result['records'],
+            'skipped' => $result['skipped'],
+            'portal' => 'CHO',
+            'scopeLabel' => $service->scopeLabel(auth()->user()),
+            'backUrl' => route('cho.patients.index'),
+        ]);
+    }
+
     /**
      * Archive a registered woman's account from her record file (reason
      * required, sessions revoked). Retained for audit and restorable from

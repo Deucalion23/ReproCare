@@ -9,6 +9,9 @@
       $search, $type, $status, $barangay, $sort, $dateFrom, $dateTo (string)
       $pregnant (bool), $sorts, $statuses, $barangays
       $women (LengthAwarePaginator), $detailUrl (callable)
+      $allIds (array of "type:id" keys matching the filters)
+      $printBulkRoute (string|null) POST route for bulk printing; when set,
+                      the table gains selection checkboxes + a print toolbar
 --}}
 @push('styles')
 @include('includes.women-directory-styles')
@@ -16,6 +19,7 @@
 @endpush
 
 @php
+    $canBulkPrint = ! empty($printBulkRoute);
     $filtersActive = $search !== '' || $barangay !== '' || $status !== 'all' || $dateFrom !== '' || $dateTo !== '' || $pregnant;
     $keep = array_filter([
         'search' => $search !== '' ? $search : null,
@@ -75,7 +79,14 @@
     @endif
 </div>
 
-<div class="card fade-in-card wd-wrap">
+<div class="card fade-in-card wd-wrap"
+     @if ($canBulkPrint)
+         data-wd-directory
+         data-wd-bulk-url="{{ route($printBulkRoute) }}"
+         data-wd-csrf="{{ csrf_token() }}"
+         data-wd-storage-key="wd-print:{{ $womenRoute }}:{{ auth()->id() }}"
+         data-wd-all-ids='@json($allIds ?? [])'
+     @endif>
     <div class="card-header bg-transparent p-3">
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
             <ul class="wd-tabs" role="tablist">
@@ -177,17 +188,41 @@
                     <span class="text-muted">in {{ $scopeLabel }}</span>
                 @endif
             </span>
-            @if ($filtersActive)
-                <a href="{{ route($womenRoute) }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
-                    <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
-                </a>
-            @endif
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                @if ($filtersActive)
+                    <a href="{{ route($womenRoute) }}" class="btn btn-sm btn-outline-secondary wd-clear-btn">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i> Reset filters
+                    </a>
+                @endif
+                @if ($canBulkPrint)
+                    <div class="wd-selection" data-wd-selection hidden>
+                        <span class="wd-selection-count">
+                            <i class="bi bi-check2-square me-1"></i><strong data-wd-count>0</strong> selected
+                        </span>
+                        <button type="button" class="wd-link-btn" data-wd-select-all hidden>
+                            Select all {{ $resultCount }}
+                        </button>
+                        <button type="button" class="btn btn-sm wd-apply-btn" data-wd-print>
+                            <i class="bi bi-printer me-1"></i> Print selected
+                        </button>
+                        <button type="button" class="btn btn-sm wd-clear-btn" data-wd-clear>
+                            Clear
+                        </button>
+                    </div>
+                @endif
+            </div>
         </div>
 
         <div class="table-responsive" style="overflow:visible;">
             <table class="table table-hover align-middle mb-0" style="font-size:0.78rem;">
                 <thead>
                     <tr>
+                        @if ($canBulkPrint)
+                            <th class="wd-check-col py-3">
+                                <input type="checkbox" class="wd-check-input" data-wd-check-page
+                                       title="Select all women on this page" aria-label="Select all women on this page">
+                            </th>
+                        @endif
                         <th class="px-3 py-3">Woman</th>
                         <th class="py-3">Type / Status</th>
                         <th class="py-3">Age / DOB</th>
@@ -206,6 +241,13 @@
                             $pregnancy = $woman->pregnancies->first();
                         @endphp
                         <tr>
+                            @if ($canBulkPrint)
+                                <td class="wd-check-col">
+                                    <input type="checkbox" class="wd-check-input" data-wd-check
+                                           value="{{ $woman->type }}:{{ $woman->id }}"
+                                           aria-label="Select {{ $displayName ?: 'this woman' }} for bulk print">
+                                </td>
+                            @endif
                             <td class="px-3">
                                 <div class="d-flex align-items-center gap-2">
                                     <x-patient-avatar :patient="$woman" :name="$displayName" :size="34" />
@@ -255,7 +297,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8" class="text-center py-5 text-muted">
+                            <td colspan="{{ $canBulkPrint ? 9 : 8 }}" class="text-center py-5 text-muted">
                                 <i class="bi bi-people" style="font-size:2rem;"></i>
                                 <p class="mt-2 mb-0">
                                     {{ $filtersActive ? 'No women match the current filters.' : 'No women found in your scope area.' }}
@@ -277,3 +319,99 @@
         @endif
     </div>
 </div>
+
+@if ($canBulkPrint)
+    @push('scripts')
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const root = document.querySelector('[data-wd-directory]');
+            if (!root) return;
+
+            const bulkUrl = root.dataset.wdBulkUrl;
+            const csrf = root.dataset.wdCsrf;
+            const storageKey = root.dataset.wdStorageKey;
+            const allIds = JSON.parse(root.dataset.wdAllIds || '[]');
+            const pageChecks = [...root.querySelectorAll('[data-wd-check]')];
+            const headCheck = root.querySelector('[data-wd-check-page]');
+            const bar = root.querySelector('[data-wd-selection]');
+            const countEl = root.querySelector('[data-wd-count]');
+            const selectAllBtn = root.querySelector('[data-wd-select-all]');
+            const printBtn = root.querySelector('[data-wd-print]');
+            const clearBtn = root.querySelector('[data-wd-clear]');
+            const MAX_BATCH = 100;
+
+            // Selections survive paging / filtering (and a trip to a record
+            // view) via sessionStorage, keyed per portal and staff account.
+            let selected = new Set();
+            try { selected = new Set(JSON.parse(sessionStorage.getItem(storageKey) || '[]')); } catch (e) { /* fresh start */ }
+
+            const persist = () => {
+                try { sessionStorage.setItem(storageKey, JSON.stringify([...selected])); } catch (e) { /* storage full/blocked */ }
+            };
+
+            const sync = () => {
+                pageChecks.forEach(cb => {
+                    cb.checked = selected.has(cb.value);
+                    cb.closest('tr').classList.toggle('wd-row-selected', cb.checked);
+                });
+                const onPage = pageChecks.filter(cb => cb.checked).length;
+                if (headCheck) {
+                    headCheck.checked = pageChecks.length > 0 && onPage === pageChecks.length;
+                    headCheck.indeterminate = onPage > 0 && onPage < pageChecks.length;
+                }
+                countEl.textContent = selected.size;
+                bar.hidden = selected.size === 0;
+                selectAllBtn.hidden = allIds.length === 0 || allIds.every(id => selected.has(id));
+                printBtn.disabled = selected.size === 0;
+            };
+
+            pageChecks.forEach(cb => cb.addEventListener('change', () => {
+                cb.checked ? selected.add(cb.value) : selected.delete(cb.value);
+                persist(); sync();
+            }));
+
+            headCheck?.addEventListener('change', () => {
+                pageChecks.forEach(cb => headCheck.checked ? selected.add(cb.value) : selected.delete(cb.value));
+                persist(); sync();
+            });
+
+            selectAllBtn.addEventListener('click', () => {
+                allIds.forEach(id => selected.add(id));
+                persist(); sync();
+            });
+
+            clearBtn.addEventListener('click', () => {
+                selected.clear();
+                persist(); sync();
+            });
+
+            printBtn.addEventListener('click', () => {
+                if (selected.size === 0) return;
+                if (selected.size > MAX_BATCH) {
+                    alert(`Print up to ${MAX_BATCH} women at a time. Narrow the selection and try again.`);
+                    return;
+                }
+                // POST keeps long selections out of the URL; the print document
+                // opens in a new tab so the directory (and selection) stays put.
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = bulkUrl;
+                form.target = '_blank';
+                const token = document.createElement('input');
+                token.type = 'hidden'; token.name = '_token'; token.value = csrf;
+                form.appendChild(token);
+                [...selected].forEach(key => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden'; input.name = 'women[]'; input.value = key;
+                    form.appendChild(input);
+                });
+                document.body.appendChild(form);
+                form.submit();
+                form.remove();
+            });
+
+            sync();
+        });
+    </script>
+    @endpush
+@endif

@@ -1756,6 +1756,42 @@ class RhuController extends Controller
         ]);
     }
 
+    /** Print-ready complete record file for one woman (opens the print dialog). */
+    public function womanPrint($type, $id)
+    {
+        $service = app(WomenDirectoryService::class);
+        $record = $service->findForPrint(auth()->user(), (string) $type, (int) $id);
+
+        return view('women.print', $record + [
+            'type' => (string) $type,
+            'portal' => 'RHU',
+            'scopeLabel' => $service->scopeLabel(auth()->user()),
+            'backUrl' => route('rhu.women.show', [$type, $id]),
+        ]);
+    }
+
+    /** Bulk print: the women selected in the directory, one record file per page. */
+    public function womenPrintBulk(Request $request)
+    {
+        $validated = $request->validate([
+            'women' => ['required', 'array', 'min:1', 'max:100'],
+            'women.*' => ['string', 'regex:/^(registered|unregistered):\d+$/'],
+        ], [
+            'women.max' => 'Print up to 100 women at a time. Narrow the selection and try again.',
+        ]);
+
+        $service = app(WomenDirectoryService::class);
+        $result = $service->findManyForPrint(auth()->user(), $validated['women']);
+
+        return view('women.print-bulk', [
+            'records' => $result['records'],
+            'skipped' => $result['skipped'],
+            'portal' => 'RHU',
+            'scopeLabel' => $service->scopeLabel(auth()->user()),
+            'backUrl' => route('rhu.women.index'),
+        ]);
+    }
+
     public function pendingPatients()
     {
         $search = request('search');

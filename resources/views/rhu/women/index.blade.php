@@ -7,5 +7,6 @@
         'womenRoute' => 'rhu.women.index',
         'addWomanRoute' => 'rhu.patients.create',
         'addWomanLabel' => 'Add Woman',
+        'printBulkRoute' => 'rhu.women.print-bulk',
     ])
 @endsection

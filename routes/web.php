@@ -755,6 +755,11 @@ Route::prefix('cho')->name('cho.')->middleware(['web', 'absolute.logout', 'auth'
     // Account lifecycle actions stay in RHU verification / the archive hub.
     Route::prefix('patients')->name('patients.')->group(function () {
         Route::get('/', [ChoController::class, 'patients'])->name('index');
+        Route::get('/print/{type}/{id}', [ChoController::class, 'patientPrint'])
+            ->whereIn('type', \App\Services\WomenDirectoryService::TYPES)
+            ->whereNumber('id')
+            ->name('print');
+        Route::post('/print', [ChoController::class, 'patientsPrintBulk'])->name('print-bulk');
         Route::get('/walk-in/{id}', [ChoController::class, 'walkInPatientDetails'])
             ->whereNumber('id')->name('walk-in');
         Route::get('/{id}', [ChoController::class, 'patientDetails'])->whereNumber('id')->name('show');
@@ -816,6 +821,11 @@ Route::prefix('rhu')->name('rhu.')->middleware(['web', 'absolute.logout', 'auth'
         ->whereIn('type', WomenDirectoryService::TYPES)
         ->whereNumber('id')
         ->name('women.show');
+    Route::get('/women/{type}/{id}/print', [RhuController::class, 'womanPrint'])
+        ->whereIn('type', WomenDirectoryService::TYPES)
+        ->whereNumber('id')
+        ->name('women.print');
+    Route::post('/women/print', [RhuController::class, 'womenPrintBulk'])->name('women.print-bulk');
     Route::post('/women/registered/{womanId}/conditions', [PatientConditionController::class, 'store'])
         ->whereNumber('womanId')
         ->name('women.conditions.store');

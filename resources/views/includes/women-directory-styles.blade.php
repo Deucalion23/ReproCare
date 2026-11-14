@@ -117,4 +117,18 @@
     .wd-wrap .table-responsive { border:none; }
     .wd-wrap .p-3 { padding:0.3rem !important; }
     .wd-wrap .py-2 { padding-top:0.2rem !important; padding-bottom:0.2rem !important; }
+
+    /* Bulk-print selection: checkbox column, selected-row tint, and the
+       toolbar pill that appears once at least one woman is checked. */
+    .wd-check-col { width:30px; text-align:center; }
+    .wd-check-input { width:15px; height:15px; margin:0; vertical-align:middle; accent-color:var(--color-primary); cursor:pointer; }
+    .wd-wrap table tbody tr.wd-row-selected { background:var(--color-primary-soft) !important; }
+    .wd-selection { display:inline-flex; align-items:center; gap:0.45rem; flex-wrap:wrap; background:var(--color-primary-soft); border:1px solid var(--color-primary); border-radius:999px; padding:0.2rem 0.35rem 0.2rem 0.8rem; }
+    .wd-selection[hidden] { display:none; }
+    .wd-selection-count { font-size:0.74rem; font-weight:800; color:var(--color-primary-text); white-space:nowrap; }
+    .wd-link-btn { border:0; background:transparent; color:var(--color-primary-text); font-size:0.72rem; font-weight:800; text-decoration:underline; cursor:pointer; padding:0.2rem 0.3rem; white-space:nowrap; }
+    .wd-link-btn[hidden] { display:none; }
+    .wd-link-btn:hover { color:var(--color-primary); }
+    .wd-selection .wd-apply-btn { padding:0.28rem 0.85rem !important; font-size:0.72rem !important; }
+    .wd-selection .wd-clear-btn { padding:0.28rem 0.7rem !important; font-size:0.72rem !important; background:var(--color-surface) !important; }
 </style>
